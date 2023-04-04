@@ -7,7 +7,8 @@ import "@biconomy-sdk-dev/web3-auth/dist/src/style.css";
 import Button from "./button";
 
 export default function Login() {
-  const [provider, setProvider] = useState<any>();
+  const [provider, setProvider] =
+    useState<ethers.providers.Web3Provider | null>();
   const [account, setAccount] = useState<string>();
   const [smartAccount, setSmartAccount] = useState<SmartAccount | null>(null);
   const [scwAddress, setScwAddress] = useState("");
@@ -96,6 +97,19 @@ export default function Login() {
     }
   }, [account, provider]);
 
+  useEffect(() => {
+    async function getInfo() {
+      const info = await socialLoginSDK?.getUserInfo();
+      console.log(info);
+      const signer = provider!.getSigner();
+      const signed = await signer.signMessage("hello there how are you?");
+      console.log("signed message:", signed);
+    }
+    if (!!provider && !!account) {
+      getInfo();
+    }
+  }, [provider, account, socialLoginSDK]);
+
   let dispAddr = "";
   if (!!scwAddress) {
     dispAddr = scwAddress.slice(0, 4) + "..." + scwAddress.slice(-4);
@@ -103,7 +117,7 @@ export default function Login() {
 
   return (
     <div className="flex items-center space gap-4">
-      {scwLoading && <h2>Loading Smart Account...</h2>}
+      {scwLoading && <p>Loading Smart Account...</p>}
       {scwAddress && <p>{dispAddr}</p>}
       <Button onClick={!account ? connectWeb3 : disconnectWeb3}>
         {!account ? "Log In" : "Log Out"}
