@@ -1,6 +1,7 @@
 import Login from "@/components/login";
 import "./globals.css";
 import Button from "@/components/button";
+import LoginDynamic from "@/components/login-dynamic";
 
 export const metadata = {
   title: "Tableland Studio",
@@ -19,7 +20,7 @@ export default function RootLayout({
         <header className="p-5 flex justify-between items-center">
           <h1>Tableland Studio</h1>
           <nav></nav>
-          <Login />
+          <LoginDynamic />
         </header>
         <main className="flex flex-col flex-1 justify-between items-center p-24">
           {children}
