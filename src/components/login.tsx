@@ -7,8 +7,7 @@ import "@biconomy-sdk-dev/web3-auth/dist/src/style.css";
 import Button from "./button";
 
 export default function Login() {
-  const [provider, setProvider] =
-    useState<ethers.providers.Web3Provider | null>();
+  const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
   const [account, setAccount] = useState<string>();
   const [smartAccount, setSmartAccount] = useState<SmartAccount | null>(null);
   const [scwAddress, setScwAddress] = useState("");
@@ -79,6 +78,9 @@ export default function Login() {
 
   useEffect(() => {
     async function setupSmartAccount() {
+      if (!provider) {
+        return;
+      }
       setScwAddress("");
       setScwLoading(true);
       const smartAccount = new SmartAccount(provider, {
