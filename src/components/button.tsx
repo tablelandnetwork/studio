@@ -4,7 +4,7 @@ const button = cva(
   [
     "font-semibold",
     "border",
-    "hover:bg-indigo-700",
+    "hover:bg-fuchsia-800",
     "hover:border-transparent",
     "uppercase",
   ],
