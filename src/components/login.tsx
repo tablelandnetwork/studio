@@ -64,13 +64,20 @@ export default function Login() {
     async function initSdk() {
       setLoadingSdk(true);
       const sdk = new SocialLogin();
-      try {
-        await sdk.init({
-          chainId: ethers.utils.hexValue(80001),
-        });
-      } catch (e) {
-        console.log("error initing sdk:", e);
+      const url =
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        (process.env.NEXT_PUBLIC_VERCEL_URL
+          ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+          : undefined);
+      let whitelistUrls: { [x: string]: string } | undefined;
+      if (!!url) {
+        const sig = await sdk.whitelistUrl(url);
+        whitelistUrls = { url: sig };
       }
+      await sdk.init({
+        chainId: ethers.utils.hexValue(80001),
+        whitelistUrls,
+      });
       setSocialLoginSDK(sdk);
       setLoadingSdk(false);
     }
