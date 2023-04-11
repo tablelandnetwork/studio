@@ -36,7 +36,7 @@ async function signInWithEthereum(signer: ethers.Signer) {
   }
   const message = await createSiweMessage(
     toChecksumAddress(await signer.getAddress()),
-    "Sign in to Studio with you wallet address. This only requires a signature, no transaction will be sent.",
+    "Sign in to Studio with your wallet address. This only requires a signature, no transaction will be sent.",
     await signer.getChainId()
   );
   const signature = await signer.signMessage(message);
@@ -64,9 +64,13 @@ export default function Login() {
     async function initSdk() {
       setLoadingSdk(true);
       const sdk = new SocialLogin();
-      await sdk.init({
-        chainId: ethers.utils.hexValue(80001),
-      });
+      try {
+        await sdk.init({
+          chainId: ethers.utils.hexValue(80001),
+        });
+      } catch (e) {
+        console.log("error initing sdk:", e);
+      }
       setSocialLoginSDK(sdk);
       setLoadingSdk(false);
     }
@@ -162,13 +166,13 @@ export default function Login() {
 
   let dispAddr = "";
   if (!!scwAddress) {
-    dispAddr = scwAddress.slice(0, 4) + "..." + scwAddress.slice(-4);
+    dispAddr = scwAddress.slice(0, 6) + "..." + scwAddress.slice(-6);
   }
 
   return (
     <div className="flex items-center space gap-4">
       {scwLoading && <p>Loading Smart Account...</p>}
-      {scwAddress && <p>{dispAddr}</p>}
+      {!scwLoading && !!scwAddress && <p>{dispAddr}</p>}
       <Button
         onClick={!account ? showWallet : disconnectWeb3}
         intent={account ? "secondary" : "primary"}
