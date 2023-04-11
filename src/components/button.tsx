@@ -7,6 +7,8 @@ const button = cva(
     "hover:bg-fuchsia-800",
     "hover:border-transparent",
     "uppercase",
+    "disabled:opacity-20",
+    "disabled:pointer-events-none",
   ],
   {
     variants: {
