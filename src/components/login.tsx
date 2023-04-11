@@ -71,9 +71,11 @@ export default function Login() {
           : undefined);
       let whitelistUrls: { [x: string]: string } | undefined;
       if (!!url) {
+        console.log("generating sig for url:", url);
         const sig = await sdk.whitelistUrl(url);
         whitelistUrls = { url: sig };
       }
+      console.log("whitelistUrls:", whitelistUrls);
       await sdk.init({
         chainId: ethers.utils.hexValue(80001),
         whitelistUrls,
