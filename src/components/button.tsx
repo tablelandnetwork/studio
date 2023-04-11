@@ -2,7 +2,7 @@ import { cva, VariantProps } from "class-variance-authority";
 
 const button = cva(
   [
-    "font-semibold",
+    "font-medium",
     "border",
     "hover:bg-fuchsia-800",
     "hover:border-transparent",

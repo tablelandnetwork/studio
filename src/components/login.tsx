@@ -74,11 +74,7 @@ export default function Login() {
         const sig = await sdk.whitelistUrl(url);
         whitelistUrls[url] = sig;
       }
-      console.log("whitelistUrls:", whitelistUrls);
-      await sdk.init({
-        chainId: ethers.utils.hexValue(80001),
-        whitelistUrls,
-      });
+      await sdk.init({ whitelistUrls });
       setSocialLoginSDK(sdk);
       setLoadingSdk(false);
     }
