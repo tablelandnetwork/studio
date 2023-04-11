@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { SiweMessage } from "siwe";
 import { Web3Provider } from "@ethersproject/providers";
