@@ -73,7 +73,7 @@ export default function Login() {
       if (!!url) {
         console.log("generating sig for url:", url);
         const sig = await sdk.whitelistUrl(url);
-        whitelistUrls = { url: sig };
+        whitelistUrls = { [url]: sig };
       }
       console.log("whitelistUrls:", whitelistUrls);
       await sdk.init({
