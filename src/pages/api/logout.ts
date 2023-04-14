@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { withSessionRoute } from "@/lib/with-session";
+import { withSessionRoute } from "@/lib/withSession";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method } = req;

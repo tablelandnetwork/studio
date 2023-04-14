@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { SiweErrorType, SiweMessage } from "siwe";
-import { sessionOptions, withSessionRoute } from "@/lib/with-session";
+import { sessionOptions, withSessionRoute } from "@/lib/withSession";
 import { getIronSession, IronSessionOptions } from "iron-session";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

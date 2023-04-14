@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { generateNonce } from "siwe";
-import { withSessionRoute } from "@/lib/with-session";
+import { withSessionRoute } from "@/lib/withSession";
 
 export default withSessionRoute(handler);
 
