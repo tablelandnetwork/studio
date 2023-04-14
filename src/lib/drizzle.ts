@@ -1,4 +1,9 @@
-import { sqliteTableCreator, SQLiteTableFn } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTableCreator,
+  SQLiteTableExtraConfig,
+} from "drizzle-orm/sqlite-core";
+import { AnySQLiteColumnBuilder } from "drizzle-orm/sqlite-core/columns/common";
+import { BuildColumns } from "drizzle-orm/column-builder";
 import { resolve } from "path";
 import { readFileSync } from "fs";
 
@@ -17,12 +22,15 @@ export const tablesJson = (chain?: string) =>
     chain === "local-tableland" ? "tables_local.json" : "tables.json"
   );
 
-type SQLiteTableFnParams = Parameters<SQLiteTableFn>;
-
-export function tablelandTable(
-  name: SQLiteTableFnParams[0],
-  columns: SQLiteTableFnParams[1],
-  extraConfig?: SQLiteTableFnParams[2]
+export function tablelandTable<
+  TTableName extends string,
+  TColumnsMap extends Record<string, AnySQLiteColumnBuilder>
+>(
+  name: TTableName,
+  columns: TColumnsMap,
+  extraConfig?: (
+    self: BuildColumns<TTableName, TColumnsMap>
+  ) => SQLiteTableExtraConfig
 ) {
   return (chain?: string) => {
     const sqliteTable = sqliteTableCreator((name) => {

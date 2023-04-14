@@ -9,8 +9,9 @@ export const teams = tablelandTable("teams", {
 
 export const users = tablelandTable("users", {
   id: integer("id").primaryKey(),
-  namex: text("name").notNull(),
-  emailx: text("email").notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  age: integer("age").default(40),
 });
 
 export type User = InferModel<ReturnType<typeof users>>;

@@ -90,9 +90,11 @@ function createStmt(config: ReturnType<typeof getTableConfig>) {
       column.default !== undefined &&
       column.default !== null
     ) {
-      // TODO: Check if default values are supported in Tableland.
-      // TODO: Quotes if needed.
-      create += ` default ${column.default}`;
+      let val = column.default;
+      if (column.getSQLType().toLowerCase() === "text") {
+        val = `"${val}"`;
+      }
+      create += ` default ${val}`;
     }
     if (column.primary) {
       create += " primary key";
