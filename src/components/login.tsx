@@ -7,7 +7,7 @@ import SocialLogin from "@biconomy-sdk-dev/web3-auth";
 import SmartAccount from "@biconomy-sdk-dev/smart-account";
 import "@biconomy-sdk-dev/web3-auth/dist/src/style.css";
 import Button from "./button";
-import toChecksumAddress from "@/lib/to-checksum-addr";
+import toChecksumAddress from "@/lib/toChecksumAddr";
 
 async function createSiweMessage(
   address: string,

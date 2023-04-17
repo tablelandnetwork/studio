@@ -12,6 +12,7 @@ export type Tables = {
     [key: string]: {
       table: string;
       hash: string;
+      createStmt: string;
     };
   };
 };

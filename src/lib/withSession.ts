@@ -11,6 +11,8 @@ declare module "iron-session" {
   interface IronSessionData {
     nonce: string | null;
     siweMessage: SiweMessage | null;
+    userId: string | null;
+    personalTeamId: string | null;
   }
 }
 

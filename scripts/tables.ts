@@ -35,10 +35,9 @@ async function tables(chain: string) {
   for (const value of values) {
     const config = getTableConfig(value());
     const create = createStmt(config);
-    const normalized = await helpers.normalize(create);
-    const hash = createHash("sha256")
-      .update(normalized.statements[0])
-      .digest("hex");
+    const normalizedStatement = await helpers.normalize(create);
+    const normalized = normalizedStatement.statements[0];
+    const hash = createHash("sha256").update(normalized).digest("hex");
     if (!tables[config.name]) {
       tables[config.name] = {};
     }
@@ -66,11 +65,14 @@ async function tables(chain: string) {
     tables[config.name][chain] = {
       table: res.meta.txn?.name,
       hash,
+      createStmt: normalized,
     };
   }
 
   const tableNames = Object.keys(tables);
-  const schemaNames = Object.keys(schema);
+  const schemaNames = Object.values(schema)
+    .map((s) => s())
+    .map((i) => getTableConfig(i).name);
   for (const tableName of tableNames) {
     if (!schemaNames.includes(tableName)) {
       delete tables[tableName];
@@ -81,6 +83,7 @@ async function tables(chain: string) {
 }
 
 function createStmt(config: ReturnType<typeof getTableConfig>) {
+  const uniqueIndexes = config.indexes.filter((index) => index.config.unique);
   let create = `create table ${config.name} (`;
   for (let i = 0; i < config.columns.length; i++) {
     const column = config.columns[i];
@@ -102,8 +105,24 @@ function createStmt(config: ReturnType<typeof getTableConfig>) {
     if (column.notNull) {
       create += " not null";
     }
-    if (i < config.columns.length - 1) {
+    if (i < config.columns.length - 1 || uniqueIndexes.length > 0) {
       create += ", ";
+    }
+  }
+  for (let i = 0; i < uniqueIndexes.length; i++) {
+    const uniqueIndex = uniqueIndexes[i];
+    let body = "unique(";
+    for (let j = 0; j < uniqueIndex.config.columns.length; j++) {
+      const column = uniqueIndex.config.columns[j] as any;
+      body += column.name;
+      if (j < uniqueIndex.config.columns.length - 1) {
+        body += " ,";
+      }
+    }
+    body += ")";
+    create += body;
+    if (i < uniqueIndexes.length - 1) {
+      create += " ,";
     }
   }
   create += ");";

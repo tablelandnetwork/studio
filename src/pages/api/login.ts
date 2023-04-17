@@ -1,12 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { SiweErrorType, SiweMessage } from "siwe";
+import { SiweErrorType, SiweMessage, SiweResponse } from "siwe";
 import { sessionOptions, withSessionRoute } from "@/lib/withSession";
 import { getIronSession, IronSessionOptions } from "iron-session";
+import {
+  createUserAndPersonalTeam,
+  userAndPersonalTeamByAddress,
+} from "@/db/api";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method } = req;
   switch (method) {
     case "POST":
+      let fields: SiweResponse;
       try {
         const { message, signature } = req.body;
         if (!message) {
@@ -16,25 +21,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           break;
         }
         const siweMessage = new SiweMessage(message);
-        const fields = await siweMessage.verify({
+        fields = await siweMessage.verify({
           signature,
           nonce: req.session.nonce || undefined,
           // TODO: do we want to verify domain and time here?
         });
-        const finalOptions: IronSessionOptions = {
-          ...sessionOptions,
-          cookieOptions: {
-            ...sessionOptions.cookieOptions,
-            expires: fields.data.expirationTime
-              ? new Date(fields.data.expirationTime)
-              : sessionOptions.cookieOptions?.expires,
-          },
-        };
-        const session = await getIronSession(req, res, finalOptions);
-        session.siweMessage = fields.data;
-        await session.save();
-        res.status(200).end();
-        break;
       } catch (e: any) {
         const session = await getIronSession(req, res, sessionOptions);
         session.siweMessage = null;
@@ -68,6 +59,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         res.status(status).json({ error: e.message });
         break;
       }
+      const finalOptions: IronSessionOptions = {
+        ...sessionOptions,
+        cookieOptions: {
+          ...sessionOptions.cookieOptions,
+          expires: fields.data.expirationTime
+            ? new Date(fields.data.expirationTime)
+            : sessionOptions.cookieOptions?.expires,
+        },
+      };
+      const session = await getIronSession(req, res, finalOptions);
+      session.siweMessage = fields.data;
+
+      let info = await userAndPersonalTeamByAddress(fields.data.address);
+      if (!info) {
+        info = await createUserAndPersonalTeam(fields.data.address);
+      }
+      session.userId = info.user.id;
+      session.personalTeamId = info.personalTeam.id;
+
+      await session.save();
+      res.status(200).end();
+      break;
     default:
       res.setHeader("Allow", ["POST"]);
       res.status(405).json({ error: `Method ${method} Not Allowed` });

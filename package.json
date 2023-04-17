@@ -13,6 +13,7 @@
     "@biconomy-sdk-dev/core-types": "^1.0.21",
     "@biconomy-sdk-dev/smart-account": "^1.0.21",
     "@biconomy-sdk-dev/web3-auth": "^1.0.21",
+    "@ethersproject/experimental": "^5.7.0",
     "@tableland/sdk": "^4.1.0",
     "@types/node": "18.15.11",
     "@types/react": "18.0.33",
