@@ -41,6 +41,28 @@ export const resolveUserTeams = tablelandTable(
   }
 );
 
+export const resolveProjects = tablelandTable("projects", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+});
+
+export const resolveTeamProjects = tablelandTable(
+  "team_projects",
+  {
+    teamId: text("team_id").notNull(),
+    projectId: text("project_id").notNull(),
+    isOwner: integer("is_owner").notNull(),
+  },
+  (teamProjects) => {
+    return {
+      teamProjectIdx: uniqueIndex("teamProjectIdx").on(
+        teamProjects.teamId,
+        teamProjects.projectId
+      ),
+    };
+  }
+);
+
 export type User = InferModel<ReturnType<typeof resolveUsers>>;
 export type NewUser = InferModel<ReturnType<typeof resolveUsers>, "insert">;
 
