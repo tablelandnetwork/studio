@@ -6,16 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "tables": "tsx scripts/tables.ts"
   },
   "dependencies": {
     "@biconomy-sdk-dev/core-types": "^1.0.21",
     "@biconomy-sdk-dev/smart-account": "^1.0.21",
     "@biconomy-sdk-dev/web3-auth": "^1.0.21",
+    "@ethersproject/experimental": "^5.7.0",
+    "@tableland/sdk": "^4.1.0",
     "@types/node": "18.15.11",
     "@types/react": "18.0.33",
     "@types/react-dom": "18.0.11",
     "class-variance-authority": "^0.5.1",
+    "drizzle-orm": "^0.23.11",
     "eslint": "8.37.0",
     "eslint-config-next": "13.3.0",
     "iron-session": "^6.3.1",
@@ -26,9 +30,12 @@
     "typescript": "5.0.3"
   },
   "devDependencies": {
+    "@tableland/local": "^1.1.0",
     "@types/keccak": "^3.0.1",
     "autoprefixer": "^10.4.14",
+    "dotenv": "^16.0.3",
     "postcss": "^8.4.21",
-    "tailwindcss": "^3.3.1"
+    "tailwindcss": "^3.3.1",
+    "tsx": "^3.12.6"
   }
 }
