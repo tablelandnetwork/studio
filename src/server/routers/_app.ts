@@ -9,10 +9,11 @@ import {
   createUserAndPersonalTeam,
   userAndPersonalTeamByAddress,
 } from "@/db/api";
+import { IronSessionData } from "iron-session";
 
 export const appRouter = router({
   authenticated: publicProcedure.query(({ ctx }) => {
-    return !!ctx.session.siweMessage;
+    return ctx.session.siweMessage ? (ctx.session as IronSessionData) : false;
   }),
   nonce: publicProcedure.query(async ({ ctx }) => {
     ctx.session.nonce = generateNonce();
@@ -38,7 +39,7 @@ export const appRouter = router({
         switch (e) {
           case SiweErrorType.EXPIRED_MESSAGE:
           case SiweErrorType.NOT_YET_VALID_MESSAGE: {
-            code = "UNAUTHORIZED";
+            code = "PRECONDITION_FAILED";
             break;
           }
           case SiweErrorType.INVALID_SIGNATURE:
@@ -83,6 +84,7 @@ export const appRouter = router({
       session.userId = info.user.id;
       session.personalTeamId = info.personalTeam.id;
       await session.save();
+      return session as IronSessionData;
     }),
   logout: protectedProcedure.mutation(({ ctx }) => {
     ctx.session.destroy();
