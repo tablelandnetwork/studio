@@ -1,41 +1,45 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { SiweErrorType, SiweMessage, SiweResponse } from "siwe";
-import { sessionOptions, withSessionRoute } from "@/lib/withSession";
+import { z } from "zod";
+import { TRPCError } from "@trpc/server";
+import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";
+import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
+import { generateNonce, SiweErrorType, SiweMessage, SiweResponse } from "siwe";
 import { getIronSession, IronSessionOptions } from "iron-session";
+import { sessionOptions } from "@/lib/withSession";
 import {
   createUserAndPersonalTeam,
   userAndPersonalTeamByAddress,
 } from "@/db/api";
+import { IronSessionData } from "iron-session";
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { method } = req;
-  switch (method) {
-    case "POST":
+export const appRouter = router({
+  authenticated: publicProcedure.query(({ ctx }) => {
+    return ctx.session.siweMessage ? (ctx.session as IronSessionData) : false;
+  }),
+  nonce: publicProcedure.query(async ({ ctx }) => {
+    ctx.session.nonce = generateNonce();
+    await ctx.session.save();
+    return ctx.session.nonce;
+  }),
+  login: publicProcedure
+    .input(z.object({ message: z.string(), signature: z.string() }))
+    .mutation(async ({ ctx, input: { message, signature } }) => {
       let fields: SiweResponse;
       try {
-        const { message, signature } = req.body;
-        if (!message) {
-          res
-            .status(422)
-            .json({ error: "Expected prepareMessage object as body." });
-          break;
-        }
         const siweMessage = new SiweMessage(message);
         fields = await siweMessage.verify({
           signature,
-          nonce: req.session.nonce || undefined,
+          nonce: ctx.session.nonce || undefined,
           // TODO: do we want to verify domain and time here?
         });
       } catch (e: any) {
-        const session = await getIronSession(req, res, sessionOptions);
-        session.siweMessage = null;
-        session.nonce = null;
-        await session.save();
-        let status: number;
+        ctx.session.siweMessage = null;
+        ctx.session.nonce = null;
+        await ctx.session.save();
+        let code: TRPC_ERROR_CODE_KEY;
         switch (e) {
           case SiweErrorType.EXPIRED_MESSAGE:
           case SiweErrorType.NOT_YET_VALID_MESSAGE: {
-            status = 440;
+            code = "PRECONDITION_FAILED";
             break;
           }
           case SiweErrorType.INVALID_SIGNATURE:
@@ -48,16 +52,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           case SiweErrorType.INVALID_URI:
           case SiweErrorType.NONCE_MISMATCH:
           case SiweErrorType.UNABLE_TO_PARSE: {
-            status = 422;
+            code = "UNPROCESSABLE_CONTENT";
             break;
           }
           default: {
-            status = 500;
+            code = "INTERNAL_SERVER_ERROR";
             break;
           }
         }
-        res.status(status).json({ error: e.message });
-        break;
+        throw new TRPCError({
+          code,
+          cause: e,
+          message: e.message,
+        });
       }
       const finalOptions: IronSessionOptions = {
         ...sessionOptions,
@@ -68,23 +75,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             : sessionOptions.cookieOptions?.expires,
         },
       };
-      const session = await getIronSession(req, res, finalOptions);
+      const session = await getIronSession(ctx.req, ctx.res, finalOptions);
       session.siweMessage = fields.data;
-
       let info = await userAndPersonalTeamByAddress(fields.data.address);
       if (!info) {
         info = await createUserAndPersonalTeam(fields.data.address);
       }
       session.userId = info.user.id;
       session.personalTeamId = info.personalTeam.id;
-
       await session.save();
-      res.status(200).end();
-      break;
-    default:
-      res.setHeader("Allow", ["POST"]);
-      res.status(405).json({ error: `Method ${method} Not Allowed` });
-  }
-}
+      return session as IronSessionData;
+    }),
+  logout: protectedProcedure.mutation(({ ctx }) => {
+    ctx.session.destroy();
+  }),
+});
 
-export default withSessionRoute(handler);
+// export type definition of API
+export type AppRouter = typeof appRouter;

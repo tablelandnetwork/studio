@@ -8,15 +8,16 @@ import SmartAccount from "@biconomy-sdk-dev/smart-account";
 import "@biconomy-sdk-dev/web3-auth/dist/src/style.css";
 import Button from "./button";
 import toChecksumAddress from "@/lib/toChecksumAddr";
+import { trpcProxy } from "@/utils/trpc";
+
+// TODO: Remember we can get social/email info from:
+// const info = await socialLoginSDK?.getUserInfo();
 
 async function createSiweMessage(
   address: string,
   statement: string,
   chainId: number
 ) {
-  const res = await fetch(`/api/nonce`, {
-    credentials: "include",
-  });
   const message = new SiweMessage({
     domain: window.location.host,
     address,
@@ -24,14 +25,14 @@ async function createSiweMessage(
     uri: origin,
     version: "1",
     chainId,
-    nonce: (await res.json()).result,
+    nonce: await trpcProxy.nonce.query(),
   });
   return message.prepareMessage();
 }
 
 async function signInWithEthereum(signer: ethers.Signer) {
-  const res0 = await fetch("/api/me");
-  if (res0.status === 200) {
+  const authenticated = await trpcProxy.authenticated.query();
+  if (authenticated) {
     return;
   }
   const message = await createSiweMessage(
@@ -41,14 +42,7 @@ async function signInWithEthereum(signer: ethers.Signer) {
   );
   const signature = await signer.signMessage(message);
 
-  await fetch("/api/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ message, signature }),
-    credentials: "include",
-  });
+  await trpcProxy.login.mutate({ message, signature });
 }
 
 export default function Login() {
@@ -132,7 +126,7 @@ export default function Login() {
     setProvider(undefined);
     setAccount(undefined);
     setScwAddress("");
-    await fetch("api/logout");
+    await trpcProxy.logout.mutate();
   };
 
   useEffect(() => {
@@ -157,16 +151,6 @@ export default function Login() {
       setupSmartAccount();
     }
   }, [account, provider]);
-
-  useEffect(() => {
-    async function getInfo() {
-      const info = await socialLoginSDK?.getUserInfo();
-      console.log(info);
-    }
-    if (!!provider && !!account) {
-      getInfo();
-    }
-  }, [provider, account, socialLoginSDK]);
 
   let dispAddr = "";
   if (!!scwAddress) {
