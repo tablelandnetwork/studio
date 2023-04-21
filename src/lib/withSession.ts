@@ -5,14 +5,23 @@ import {
   NextApiHandler,
 } from "next";
 import { IronSessionOptions } from "iron-session";
-import type { SiweMessage } from "siwe";
+import { SiweMessage } from "siwe";
+
+type SiweFields = Omit<
+  SiweMessage,
+  "constructor" | "toMessage" | "prepareMessage" | "validate" | "verify"
+>;
+
+export type Auth = {
+  siweFields: SiweFields;
+  userId: string;
+  personalTeamId: string;
+};
 
 declare module "iron-session" {
   interface IronSessionData {
     nonce: string | null;
-    siweMessage: SiweMessage | null;
-    userId: string | null;
-    personalTeamId: string | null;
+    auth: Auth | null;
   }
 }
 

@@ -8,12 +8,13 @@ import { sessionOptions } from "@/lib/withSession";
 import {
   createUserAndPersonalTeam,
   userAndPersonalTeamByAddress,
+  teamByName,
+  teamById,
 } from "@/db/api";
-import { IronSessionData } from "iron-session";
 
 export const appRouter = router({
   authenticated: publicProcedure.query(({ ctx }) => {
-    return ctx.session.siweMessage ? (ctx.session as IronSessionData) : false;
+    return ctx.session.auth ? ctx.session.auth : false;
   }),
   nonce: publicProcedure.query(async ({ ctx }) => {
     ctx.session.nonce = generateNonce();
@@ -32,7 +33,7 @@ export const appRouter = router({
           // TODO: do we want to verify domain and time here?
         });
       } catch (e: any) {
-        ctx.session.siweMessage = null;
+        ctx.session.auth = null;
         ctx.session.nonce = null;
         await ctx.session.save();
         let code: TRPC_ERROR_CODE_KEY;
@@ -75,20 +76,46 @@ export const appRouter = router({
             : sessionOptions.cookieOptions?.expires,
         },
       };
-      const session = await getIronSession(ctx.req, ctx.res, finalOptions);
-      session.siweMessage = fields.data;
       let info = await userAndPersonalTeamByAddress(fields.data.address);
       if (!info) {
         info = await createUserAndPersonalTeam(fields.data.address);
       }
-      session.userId = info.user.id;
-      session.personalTeamId = info.personalTeam.id;
+      const session = await getIronSession(ctx.req, ctx.res, finalOptions);
+      session.auth = {
+        siweFields: fields.data,
+        userId: info.user.id,
+        personalTeamId: info.personalTeam.id,
+      };
       await session.save();
-      return session as IronSessionData;
+      return session.auth;
     }),
   logout: protectedProcedure.mutation(({ ctx }) => {
     ctx.session.destroy();
   }),
+  teamByName: protectedProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ ctx, input: { name } }) => {
+      const team = await teamByName(name);
+      if (!team) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Team not found",
+        });
+      }
+      return team;
+    }),
+  teamById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input: { id } }) => {
+      const team = await teamById(id);
+      if (!team) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Team not found",
+        });
+      }
+      return team;
+    }),
 });
 
 // export type definition of API

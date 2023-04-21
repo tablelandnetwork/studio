@@ -6,9 +6,11 @@ import { ChainId } from "@biconomy-sdk-dev/core-types";
 import SocialLogin from "@biconomy-sdk-dev/web3-auth";
 import SmartAccount from "@biconomy-sdk-dev/smart-account";
 import "@biconomy-sdk-dev/web3-auth/dist/src/style.css";
+import { useAtom } from "jotai";
 import Button from "./button";
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { trpcProxy } from "@/utils/trpc";
+import { authAtom } from "@/store/auth";
 
 // TODO: Remember we can get social/email info from:
 // const info = await socialLoginSDK?.getUserInfo();
@@ -33,7 +35,7 @@ async function createSiweMessage(
 async function signInWithEthereum(signer: ethers.Signer) {
   const authenticated = await trpcProxy.authenticated.query();
   if (authenticated) {
-    return;
+    return authenticated;
   }
   const message = await createSiweMessage(
     toChecksumAddress(await signer.getAddress()),
@@ -42,7 +44,8 @@ async function signInWithEthereum(signer: ethers.Signer) {
   );
   const signature = await signer.signMessage(message);
 
-  await trpcProxy.login.mutate({ message, signature });
+  const res = await trpcProxy.login.mutate({ message, signature });
+  return res;
 }
 
 export default function Login() {
@@ -53,6 +56,7 @@ export default function Login() {
   const [scwAddress, setScwAddress] = useState("");
   const [scwLoading, setScwLoading] = useState(false);
   const [socialLoginSDK, setSocialLoginSDK] = useState<SocialLogin>();
+  const [, setAuth] = useAtom(authAtom);
 
   useEffect(() => {
     async function initSdk() {
@@ -127,6 +131,7 @@ export default function Login() {
     setAccount(undefined);
     setScwAddress("");
     await trpcProxy.logout.mutate();
+    setAuth(null);
   };
 
   useEffect(() => {
@@ -144,13 +149,14 @@ export default function Login() {
       const context = smartAccount.getSmartAccountContext();
       setScwAddress(context.baseWallet.getAddress());
       setSmartAccount(smartAccount);
-      await signInWithEthereum(smartAccount.signer);
+      const res = await signInWithEthereum(smartAccount.signer);
+      setAuth(res);
       setScwLoading(false);
     }
     if (!!provider && !!account) {
       setupSmartAccount();
     }
-  }, [account, provider]);
+  }, [account, provider, setAuth]);
 
   let dispAddr = "";
   if (!!scwAddress) {

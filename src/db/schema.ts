@@ -7,9 +7,11 @@ export const resolveUsers = tablelandTable(
   {
     id: text("id").primaryKey(),
     address: text("address").notNull(),
+    handle: text("handle"),
   },
   (users) => ({
     addressIdx: uniqueIndex("addressIdx").on(users.address),
+    handleIdx: uniqueIndex("handleIdx").on(users.handle),
   })
 );
 

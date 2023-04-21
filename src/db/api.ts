@@ -101,6 +101,10 @@ export async function teamByName(name: string) {
   return db.select().from(teams).where(eq(teams.name, name)).get();
 }
 
+export async function teamById(id: string) {
+  return db.select().from(teams).where(eq(teams.id, id)).get();
+}
+
 export async function addUserToTeam(params: NewUserTeam) {
   return db.insert(userTeams).values(params).run();
 }
