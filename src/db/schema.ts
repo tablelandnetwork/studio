@@ -20,10 +20,12 @@ export const resolveTeams = tablelandTable(
   {
     id: text("id").primaryKey(),
     name: text("name"),
+    slug: text("slug"),
     personal: integer("personal").notNull(),
   },
   (teams) => ({
     nameIdx: uniqueIndex("nameIdx").on(teams.name),
+    slugIdx: uniqueIndex("slugIdx").on(teams.slug),
   })
 );
 
@@ -32,6 +34,7 @@ export const resolveUserTeams = tablelandTable(
   {
     userId: text("user_id").notNull(),
     teamId: text("team_id").notNull(),
+    isOwner: integer("is_owner").notNull(),
   },
   (userTeams) => {
     return {

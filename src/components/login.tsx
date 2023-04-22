@@ -7,7 +7,7 @@ import SocialLogin from "@biconomy-sdk-dev/web3-auth";
 import SmartAccount from "@biconomy-sdk-dev/smart-account";
 import "@biconomy-sdk-dev/web3-auth/dist/src/style.css";
 import { useAtom } from "jotai";
-import Button from "./button";
+import { Button } from "./ui/button";
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { trpcProxy } from "@/utils/trpc";
 import { authAtom } from "@/store/auth";
@@ -169,7 +169,7 @@ export default function Login() {
       {!scwLoading && !!scwAddress && <p>{dispAddr}</p>}
       <Button
         onClick={!account ? showWallet : disconnectWeb3}
-        intent={account ? "secondary" : "primary"}
+        variant={account ? "outline" : "default"}
         disabled={loadingSdk || scwLoading}
       >
         {!account || scwLoading ? "Sign In" : "Sign Out"}

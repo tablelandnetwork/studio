@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/d1";
-import { eq } from "drizzle-orm/expressions";
+import { eq, inArray } from "drizzle-orm/expressions";
 import { Database } from "@tableland/sdk";
 import { getDefaultProvider, Wallet } from "ethers";
 import { NonceManager } from "@ethersproject/experimental";
@@ -42,7 +42,10 @@ export async function createUserAndPersonalTeam(address: string) {
     .insert(teams)
     .values({ id: teamId, personal: 1 })
     .run();
-  const userTeamsInsert = db.insert(userTeams).values({ userId, teamId }).run();
+  const userTeamsInsert = db
+    .insert(userTeams)
+    .values({ userId, teamId, isOwner: 1 })
+    .run();
   await Promise.all([usersInsert, teamsInsert, userTeamsInsert]);
   const info = await userAndPersonalTeamByAddress(address);
   if (!info) {
@@ -90,19 +93,37 @@ export async function userByAddress(address: string) {
   return db.select().from(users).where(eq(users.address, address)).get();
 }
 
-export async function createTeam(personal: 0 | 1, name?: string) {
+export async function createTeamByUser(name: string, userId: string) {
   const teamId = randomUUID();
-  await db.insert(teams).values({ id: teamId, personal, name }).run();
-  const team: Team = { id: teamId, personal, name: name || null };
+  const slug = slugify(name);
+  await db.insert(teams).values({ id: teamId, personal: 0, name, slug }).run();
+  const team: Team = { id: teamId, personal: 0, name: name || null, slug };
+  await db.insert(userTeams).values({ userId, teamId, isOwner: 1 }).run();
   return team;
 }
 
-export async function teamByName(name: string) {
-  return db.select().from(teams).where(eq(teams.name, name)).get();
+export async function teamBySlug(slug: string) {
+  return db.select().from(teams).where(eq(teams.slug, slug)).get();
 }
 
 export async function teamById(id: string) {
   return db.select().from(teams).where(eq(teams.id, id)).get();
+}
+
+export async function teamsByUserId(userId: string) {
+  const joins = await db
+    .select({ teamId: userTeams.teamId })
+    .from(userTeams)
+    .where(eq(userTeams.userId, userId))
+    .all();
+  const teamIds = joins.map((j) => j.teamId);
+  const list = await db
+    .select()
+    .from(teams)
+    .where(inArray(teams.id, teamIds))
+    .orderBy(teams.name)
+    .all();
+  return list;
 }
 
 export async function addUserToTeam(params: NewUserTeam) {
@@ -111,4 +132,13 @@ export async function addUserToTeam(params: NewUserTeam) {
 
 export async function getUsers(): Promise<User[]> {
   return db.select().from(users).all();
+}
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }

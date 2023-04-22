@@ -3,12 +3,12 @@ import { authAtom } from "@/store/auth";
 import Landing from "@/components/landing";
 import Authed from "@/components/authed";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { teamById, teamByName } from "@/db/api";
+import { teamById, teamBySlug } from "@/db/api";
 import { withSessionSsr } from "@/lib/withSession";
 import { Team } from "@/db/schema";
 
 type Props = {
-  team?: Team;
+  team: Team | null;
 };
 
 const getProps: GetServerSideProps<Props> = async ({ params, req }) => {
@@ -22,9 +22,9 @@ const getProps: GetServerSideProps<Props> = async ({ params, req }) => {
       },
     };
   }
-  let team: Team | undefined;
+  let team: Team | null = null;
   if (teamName) {
-    team = await teamByName(teamName[0]);
+    team = await teamBySlug(teamName[0]);
     if (!team) {
       return { notFound: true };
     }
