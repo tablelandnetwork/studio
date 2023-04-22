@@ -1,4 +1,4 @@
-import AuthedHeader from "./authedHeader";
+import AuthedHeader from "./authed-header";
 
 export default function Authed({
   userId,
@@ -10,8 +10,8 @@ export default function Authed({
   teamId: string;
 }) {
   return (
-    <div className="bg-slate-200">
-      <AuthedHeader />
+    <div>
+      <AuthedHeader userId={userId} />
       <h1>Authed</h1>
       <p>userId: {userId}</p>
       <p>personalTeamId: {personalTeamId}</p>

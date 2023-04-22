@@ -11,15 +11,19 @@ const t = initTRPC.context<Context>().create();
  * Reusable middleware that checks if users are authenticated.
  **/
 const isAuthed = t.middleware(({ next, ctx }) => {
-  if (!ctx.session.siweMessage) {
+  if (!ctx.session.auth) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
     });
   }
+  type FullSession = typeof ctx.session & {
+    auth: NonNullable<(typeof ctx.session)["auth"]>;
+    nonce: NonNullable<(typeof ctx.session)["nonce"]>;
+  };
   return next({
     ctx: {
       // Infers the `session` as non-nullable
-      session: ctx.session,
+      session: ctx.session as FullSession,
     },
   });
 });
