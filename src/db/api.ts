@@ -97,8 +97,8 @@ export async function createTeamByUser(name: string, userId: string) {
   const teamId = randomUUID();
   const slug = slugify(name);
   await db.insert(teams).values({ id: teamId, personal: 0, name, slug }).run();
-  const team: Team = { id: teamId, personal: 0, name: name || null, slug };
   await db.insert(userTeams).values({ userId, teamId, isOwner: 1 }).run();
+  const team: Team = { id: teamId, personal: 0, name, slug };
   return team;
 }
 

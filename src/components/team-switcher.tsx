@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
+import { useAtom } from "jotai";
 
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { trpc } from "@/utils/trpc";
+import { userTeamsAtom, newTeamAtom } from "@/store/teams";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
@@ -49,19 +50,28 @@ interface TeamSwitcherProps extends PopoverTriggerProps {
 }
 
 export default function TeamSwitcher({ className, userId }: TeamSwitcherProps) {
-  const teams = trpc.teamsForUser.useQuery({ userId });
-  type Team = NonNullable<(typeof teams)["data"]>[number]["teams"][number];
+  const [teams] = useAtom(userTeamsAtom);
+  const [, newTeam] = useAtom(newTeamAtom);
+  const teamInput = React.useRef<HTMLInputElement>(null);
+
+  type Team = NonNullable<typeof teams>[number]["teams"][number];
   const [open, setOpen] = React.useState(false);
   const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
   const [selectedTeam, setSelectedTeam] = React.useState<Team | undefined>();
 
-  const newTeam = trpc.newTeam.useMutation();
-
   React.useEffect(() => {
-    if (teams.data?.length) {
-      setSelectedTeam(teams.data[0].teams[0]);
+    if (teams?.length) {
+      setSelectedTeam(teams[0].teams[0]);
     }
-  }, [teams.data]);
+  }, [teams]);
+
+  const handleNewTeam = React.useCallback(async () => {
+    if (teamInput.current) {
+      await newTeam([{ name: teamInput.current.value }]);
+      teamInput.current.value = "";
+    }
+    setShowNewTeamDialog(false);
+  }, [newTeam]);
 
   return (
     <Dialog open={showNewTeamDialog} onOpenChange={setShowNewTeamDialog}>
@@ -93,7 +103,7 @@ export default function TeamSwitcher({ className, userId }: TeamSwitcherProps) {
             <CommandList>
               <CommandInput placeholder="Search team..." />
               <CommandEmpty>No team found.</CommandEmpty>
-              {teams.data?.map((group) => (
+              {teams?.map((group) => (
                 <CommandGroup key={group.label} heading={group.label}>
                   {group.teams.map((team) => (
                     <CommandItem
@@ -156,7 +166,7 @@ export default function TeamSwitcher({ className, userId }: TeamSwitcherProps) {
           <div className="space-y-4 py-2 pb-4">
             <div className="space-y-2">
               <Label htmlFor="name">Team name</Label>
-              <Input id="name" placeholder="Acme Inc." />
+              <Input id="name" placeholder="Acme Inc." ref={teamInput} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="plan">Subscription plan</Label>
@@ -186,7 +196,9 @@ export default function TeamSwitcher({ className, userId }: TeamSwitcherProps) {
           <Button variant="outline" onClick={() => setShowNewTeamDialog(false)}>
             Cancel
           </Button>
-          <Button type="submit">Continue</Button>
+          <Button type="submit" onClick={handleNewTeam}>
+            Continue
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
