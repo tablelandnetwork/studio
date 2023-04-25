@@ -1,6 +1,7 @@
-import { httpBatchLink, createTRPCProxyClient } from "@trpc/client";
+import { httpBatchLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
-import type { AppRouter } from "../server/routers/_app";
+import { createTRPCJotai } from "jotai-trpc";
+import type { AppRouter } from "@/server/routers/_app";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
@@ -46,7 +47,7 @@ export const trpc = createTRPCNext<AppRouter>({
   ssr: false,
 });
 
-export const trpcProxy = createTRPCProxyClient<AppRouter>({
+export const trpcJotai = createTRPCJotai<AppRouter>({
   links: [
     httpBatchLink({
       /**
