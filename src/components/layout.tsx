@@ -1,5 +1,4 @@
 import { Poppins } from "next/font/google";
-import Header from "./header";
 import Footer from "./footer";
 
 const poppins = Poppins({
@@ -15,7 +14,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div
         className={`${poppins.variable} font-sans flex flex-col min-h-screen`}
       >
-        <Header />
         <main className="flex flex-col flex-1">{children}</main>
         <Footer />
       </div>

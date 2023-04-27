@@ -1,7 +1,8 @@
+import { Team } from "@/db/schema";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 
-const LoginDynamic = () => {
+const LoginDynamic = ({ personalTeam }: { personalTeam?: Team }) => {
   const Login = dynamic(() => import("./login").then((res) => res.default), {
     ssr: false,
   });
@@ -9,7 +10,7 @@ const LoginDynamic = () => {
   return (
     <div>
       <Suspense fallback={<div>Loading...</div>}>
-        <Login />
+        <Login personalTeam={personalTeam} />
       </Suspense>
     </div>
   );

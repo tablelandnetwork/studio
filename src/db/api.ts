@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/d1";
-import { eq, inArray } from "drizzle-orm/expressions";
+import { eq, and, inArray } from "drizzle-orm/expressions";
 import { Database } from "@tableland/sdk";
 import { getDefaultProvider, Wallet } from "ethers";
 import { NonceManager } from "@ethersproject/experimental";
@@ -34,13 +34,23 @@ const users = resolveUsers(process.env.CHAIN);
 const teams = resolveTeams(process.env.CHAIN);
 const userTeams = resolveUserTeams(process.env.CHAIN);
 
-export async function createUserAndPersonalTeam(address: string) {
+export async function createUserAndPersonalTeam(
+  address: string,
+  teamName: string,
+  email?: string
+) {
+  // TODO: Store email encrypted.
   const userId = randomUUID();
   const teamId = randomUUID();
   const usersInsert = db.insert(users).values({ id: userId, address }).run();
   const teamsInsert = db
     .insert(teams)
-    .values({ id: teamId, personal: 1 })
+    .values({
+      id: teamId,
+      personal: 1,
+      name: teamName,
+      slug: slugify(teamName),
+    })
     .run();
   const userTeamsInsert = db
     .insert(userTeams)
@@ -80,11 +90,12 @@ export async function userAndPersonalTeamByAddress(address: string) {
     .select({ teamId: userTeams.teamId })
     .from(userTeams)
     .where(eq(userTeams.userId, user.id))
-    .get();
+    .all();
+  const teamIds = join.map((j) => j.teamId);
   const personalTeam = await db
     .select()
     .from(teams)
-    .where(eq(teams.id, join.teamId))
+    .where(and(inArray(teams.id, teamIds), eq(teams.personal, 1)))
     .get();
   return { user, personalTeam };
 }
@@ -139,6 +150,6 @@ function slugify(input: string) {
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[\s-]+/g, "-");
+  // .replace(/^-+|-+$/g, "");
 }

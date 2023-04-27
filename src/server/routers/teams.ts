@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { number, z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 import {
@@ -7,6 +7,7 @@ import {
   teamsByUserId,
   createTeamByUser,
 } from "@/db/api";
+import { Team } from "@/db/schema";
 
 export const teamsRouter = router({
   teamByName: protectedProcedure
@@ -37,7 +38,7 @@ export const teamsRouter = router({
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input: { userId } }) => {
       const teams = await teamsByUserId(userId);
-      const res: { label: string; teams: { id: string; name: string }[] }[] = [
+      const res: { label: string; teams: Team[] }[] = [
         {
           label: "Personal Account",
           teams: [],
@@ -49,20 +50,27 @@ export const teamsRouter = router({
       ];
       teams.forEach((team) => {
         if (team.personal) {
-          res[0].teams.push({
-            id: team.id,
-            name: team.name || "Personal Team",
-          });
+          team.name = team.name || "Personal Team";
+          res[0].teams.push(team);
         } else {
-          res[1].teams.push({ id: team.id, name: team.name || "Missing" });
+          res[1].teams.push(team);
         }
       });
       return res;
     }),
   newTeam: protectedProcedure
-    .input(z.object({ name: z.string() }))
+    .input(
+      z.object({
+        name: z
+          .string()
+          .regex(
+            new RegExp("[A-Za-z]"),
+            "Team name must include at least one letter"
+          ),
+      })
+    )
     .mutation(async ({ ctx, input: { name } }) => {
-      const team = await createTeamByUser(name, ctx.session.auth.userId);
+      const team = await createTeamByUser(name, ctx.session.auth.user.id);
       return team;
     }),
 });
