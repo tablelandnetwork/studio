@@ -40,38 +40,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { userTeamsAtom, newTeamAtom } from "@/store/teams";
+import { Team } from "@/db/schema";
+import { useRouter } from "next/router";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
 >;
 
 interface TeamSwitcherProps extends PopoverTriggerProps {
-  userId: string;
+  team: Team;
 }
 
-export default function TeamSwitcher({ className, userId }: TeamSwitcherProps) {
+export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
+  const router = useRouter();
+
   const [teams] = useAtom(userTeamsAtom);
   const [, newTeam] = useAtom(newTeamAtom);
   const teamInput = React.useRef<HTMLInputElement>(null);
 
-  type Team = NonNullable<typeof teams>[number]["teams"][number];
   const [open, setOpen] = React.useState(false);
   const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
-  const [selectedTeam, setSelectedTeam] = React.useState<Team | undefined>();
-
-  React.useEffect(() => {
-    if (teams?.length) {
-      setSelectedTeam(teams[0].teams[0]);
-    }
-  }, [teams]);
 
   const handleNewTeam = React.useCallback(async () => {
     if (teamInput.current) {
-      await newTeam([{ name: teamInput.current.value }]);
+      const team = await newTeam([{ name: teamInput.current.value }]);
       teamInput.current.value = "";
+      router.push(`/dashboard/${team.slug}`);
     }
     setShowNewTeamDialog(false);
-  }, [newTeam]);
+  }, [newTeam, router]);
 
   return (
     <Dialog open={showNewTeamDialog} onOpenChange={setShowNewTeamDialog}>
@@ -87,14 +84,12 @@ export default function TeamSwitcher({ className, userId }: TeamSwitcherProps) {
           >
             <Avatar className="mr-2 h-5 w-5">
               <AvatarImage
-                src={`https://avatar.vercel.sh/${
-                  selectedTeam?.id || "none"
-                }.png`}
-                alt={selectedTeam?.name}
+                src={`https://avatar.vercel.sh/${team.id}.png`}
+                alt={team.name || undefined}
               />
               <AvatarFallback>SC</AvatarFallback>
             </Avatar>
-            {selectedTeam?.name}
+            {team.name || "Personal Team"}
             <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -105,29 +100,27 @@ export default function TeamSwitcher({ className, userId }: TeamSwitcherProps) {
               <CommandEmpty>No team found.</CommandEmpty>
               {teams?.map((group) => (
                 <CommandGroup key={group.label} heading={group.label}>
-                  {group.teams.map((team) => (
+                  {group.teams.map((groupTeam) => (
                     <CommandItem
-                      key={team.id}
+                      key={groupTeam.id}
                       onSelect={() => {
-                        setSelectedTeam(team);
+                        router.push(`/dashboard/${groupTeam.slug || ""}`);
                         setOpen(false);
                       }}
                       className="text-sm"
                     >
                       <Avatar className="mr-2 h-5 w-5">
                         <AvatarImage
-                          src={`https://avatar.vercel.sh/${team.id}.png`}
-                          alt={team.name}
+                          src={`https://avatar.vercel.sh/${groupTeam.id}.png`}
+                          alt={groupTeam.name || undefined}
                         />
                         <AvatarFallback>SC</AvatarFallback>
                       </Avatar>
-                      {team.name}
+                      {groupTeam.name}
                       <Check
                         className={cn(
                           "ml-auto h-4 w-4",
-                          selectedTeam?.id === team.id
-                            ? "opacity-100"
-                            : "opacity-0"
+                          team.id === groupTeam.id ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>

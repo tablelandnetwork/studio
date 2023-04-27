@@ -129,6 +129,8 @@ export const loginAtom = atom(null, async (get, set) => {
   const res = await set(trpcJotai.auth.login.atomWithMutation(), [
     { message, signature },
   ]);
-  set(authAtom, res);
-  console.log("authenticated", res);
+  if (res) {
+    set(authAtom, res);
+  }
+  return res;
 });

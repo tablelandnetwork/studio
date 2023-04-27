@@ -1,11 +1,26 @@
 import dynamic from "next/dynamic";
-import LoginDynamic from "./login-dynamic";
 import { Team } from "@/db/schema";
+import { TeamNav } from "./team-nav";
+import { Search } from "./search";
+import TeamSwitcher from "./team-switcher";
+// import { UserNav } from "./user-nav";
 
-export default function Header({ personalTeam }: { personalTeam?: Team }) {
+const UserNav = dynamic(() => import("./user-nav").then((res) => res.UserNav), {
+  ssr: false,
+});
+
+export default function Header({
+  userId,
+  personalTeam,
+  team,
+}: {
+  userId: string;
+  team: Team;
+  personalTeam: Team;
+}) {
   return (
-    <header className="px-4 py-2 flex justify-between items-center">
-      <div className="flex flex-row items-center gap-1">
+    <header className="px-4 py-3 flex flex-col space-y-4 border-b sticky top-0 bg-white">
+      <div className="flex justify-start items-center">
         <svg
           className="h-6"
           viewBox="0 0 32 16"
@@ -19,12 +34,18 @@ export default function Header({ personalTeam }: { personalTeam?: Team }) {
             fill="black"
           />
         </svg>
-        <h1 className="font-normal text-2xl uppercase text-fuchsia-800">
-          Studio
-        </h1>
+        <TeamSwitcher team={team} />
+        <div className="ml-auto flex items-center space-x-4">
+          <UserNav team={personalTeam} />
+        </div>
+      </div>
+      <div className="flex">
+        <TeamNav />
+        <div className="ml-auto flex items-center space-x-4">
+          <Search placeholder="Search Project Blueprints..." />
+        </div>
       </div>
       {/* <nav></nav> */}
-      <LoginDynamic personalTeam={personalTeam} />
     </header>
   );
 }

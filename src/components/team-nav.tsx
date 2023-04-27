@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-export function MainNav({
+export function TeamNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
@@ -15,19 +15,13 @@ export function MainNav({
         href="/examples/dashboard"
         className="text-sm font-medium transition-colors hover:text-primary"
       >
-        Overview
+        Projects
       </Link>
       <Link
         href="/examples/dashboard"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
-        Customers
-      </Link>
-      <Link
-        href="/examples/dashboard"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        Products
+        People
       </Link>
       <Link
         href="/examples/dashboard"

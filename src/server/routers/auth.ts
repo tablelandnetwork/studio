@@ -74,18 +74,34 @@ export const authRouter = router({
             : sessionOptions.cookieOptions?.expires,
         },
       };
-      let info = await userAndPersonalTeamByAddress(fields.data.address);
-      if (!info) {
-        info = await createUserAndPersonalTeam(fields.data.address);
-      }
       const session = await getIronSession(ctx.req, ctx.res, finalOptions);
-      session.auth = {
-        siweFields: fields.data,
-        userId: info.user.id,
-        personalTeamId: info.personalTeam.id,
-      };
+      session.siweFields = fields.data;
+      let info = await userAndPersonalTeamByAddress(fields.data.address);
+      if (info) {
+        session.auth = info;
+      }
       await session.save();
       return session.auth;
+    }),
+  register: publicProcedure
+    .input(
+      z.object({ username: z.string(), email: z.string().email().optional() })
+    )
+    .mutation(async ({ ctx, input: { username, email } }) => {
+      if (!ctx.session.siweFields) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "No SIWE fields found in session",
+        });
+      }
+      const info = await createUserAndPersonalTeam(
+        ctx.session.siweFields.address,
+        username,
+        email
+      );
+      ctx.session.auth = info;
+      await ctx.session.save();
+      return info;
     }),
   logout: protectedProcedure.mutation(({ ctx }) => {
     ctx.session.destroy();

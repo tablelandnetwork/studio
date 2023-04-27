@@ -25,3 +25,14 @@ export const authAtom = atom(
     set(_authAtom, auth);
   }
 );
+
+export const registerAtom = atom(
+  null,
+  async (_, set, payload: { username: string; email?: string }) => {
+    const res = await set(trpcJotai.auth.register.atomWithMutation(), [
+      payload,
+    ]);
+    set(authAtom, res);
+    return res;
+  }
+);

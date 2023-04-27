@@ -6,6 +6,7 @@ import {
 } from "next";
 import { IronSessionOptions } from "iron-session";
 import { SiweMessage } from "siwe";
+import { Team, User } from "@/db/schema";
 
 type SiweFields = Omit<
   SiweMessage,
@@ -13,14 +14,14 @@ type SiweFields = Omit<
 >;
 
 export type Auth = {
-  siweFields: SiweFields;
-  userId: string;
-  personalTeamId: string;
+  user: User;
+  personalTeam: Team;
 };
 
 declare module "iron-session" {
   interface IronSessionData {
     nonce: string | null;
+    siweFields: SiweFields | null;
     auth: Auth | null;
   }
 }
