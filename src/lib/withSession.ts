@@ -20,9 +20,9 @@ export type Auth = {
 
 declare module "iron-session" {
   interface IronSessionData {
-    nonce: string | null;
-    siweFields: SiweFields | null;
-    auth: Auth | null;
+    nonce?: string;
+    siweFields?: SiweFields;
+    auth?: Auth;
   }
 }
 

@@ -84,7 +84,7 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
           >
             <Avatar className="mr-2 h-5 w-5">
               <AvatarImage
-                src={`https://avatar.vercel.sh/${team.id}.png`}
+                src={`https://avatar.vercel.sh/${team.slug}.png`}
                 alt={team.name || undefined}
               />
               <AvatarFallback>SC</AvatarFallback>
@@ -111,7 +111,7 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
                     >
                       <Avatar className="mr-2 h-5 w-5">
                         <AvatarImage
-                          src={`https://avatar.vercel.sh/${groupTeam.id}.png`}
+                          src={`https://avatar.vercel.sh/${groupTeam.slug}.png`}
                           alt={groupTeam.name || undefined}
                         />
                         <AvatarFallback>SC</AvatarFallback>
@@ -160,28 +160,6 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
             <div className="space-y-2">
               <Label htmlFor="name">Team name</Label>
               <Input id="name" placeholder="Acme Inc." ref={teamInput} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="plan">Subscription plan</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="free">
-                    <span className="font-medium">Free</span> -{" "}
-                    <span className="text-muted-foreground">
-                      Trial for two weeks
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="pro">
-                    <span className="font-medium">Pro</span> -{" "}
-                    <span className="text-muted-foreground">
-                      $9/month per user
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </div>

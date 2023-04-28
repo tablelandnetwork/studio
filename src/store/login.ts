@@ -1,14 +1,14 @@
-import { Web3Provider } from "@ethersproject/providers";
-import { ChainId } from "@biconomy-sdk-dev/core-types";
 import SocialLogin from "@biconomy-sdk-dev/web3-auth";
 import SmartAccount from "@biconomy-sdk-dev/smart-account";
+import { ChainId } from "@biconomy-sdk-dev/core-types";
 import { atom } from "jotai";
+import { Web3Provider } from "@ethersproject/providers";
 import { ethers } from "ethers";
 import { SiweMessage } from "siwe";
 
 import { trpcJotai } from "@/utils/trpc";
 import toChecksumAddress from "@/lib/toChecksumAddr";
-import { loginModeAtom, authAtom } from "@/store/auth";
+import { authAtom } from "@/store/auth";
 
 export const socialLoginAtom = atom(async () => {
   const sdk = new SocialLogin();
@@ -26,52 +26,42 @@ export const socialLoginAtom = atom(async () => {
   return sdk;
 });
 
-const walletAtom = atom(async (get) => {
-  console.log("running walletAtom");
-  const mode = get(loginModeAtom);
-  if (mode !== "interactive") {
-    console.log("running walletAtom stopped with mode", mode);
-    return undefined;
-  }
-  console.log("running walletAtom", mode);
-  const socialLogin = await get(socialLoginAtom);
-  if (!socialLogin.provider) {
-    socialLogin.showWallet();
-  }
-  while (!socialLogin.provider) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-  socialLogin.hideWallet();
-});
+const ticker = atom(0);
 
 export const providerAndAccountAtom = atom(async (get) => {
-  console.log("getting providerAndAccountAtom");
-  const mode = get(loginModeAtom);
-  if (mode === "stopped") {
-    console.log("getting providerAndAccountAtom stopped, returning");
-    return undefined;
-  }
-  console.log("running providerAndAccountAtom", mode);
+  get(ticker);
   const socialLogin = await get(socialLoginAtom);
   while (!socialLogin.provider) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
   const web3Provider = new Web3Provider(socialLogin.provider);
   const accounts = await web3Provider.listAccounts();
   return { provider: web3Provider, account: accounts[0] };
 });
 
-export const smartAccountAtom = atom(async (get) => {
-  console.log("getting smartAccountAtom");
-  const mode = get(loginModeAtom);
-  if (mode === "stopped") {
-    console.log("getting smartAccountAtom stopped, returning");
-    return undefined;
+const showWalletAtom = atom(null, async (get) => {
+  let open = false;
+  const closeButton = document.querySelector("div.w3a-modal__header button");
+  closeButton?.addEventListener(
+    "click",
+    () => {
+      open = false;
+    },
+    { once: true }
+  );
+  const socialLogin = await get(socialLoginAtom);
+  if (!socialLogin.provider) {
+    socialLogin.showWallet();
+    open = true;
   }
-  console.log("getting smartAccountAtom", mode);
+  while (!socialLogin.provider && open) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  socialLogin.hideWallet();
+});
+
+export const smartAccountAtom = atom(async (get) => {
   const provider = await get(providerAndAccountAtom);
-  if (!provider) return undefined;
-  console.log("getting smartAccountAtom have provider");
   const smartAccount = new SmartAccount(provider.provider, {
     // TODO: Figure out what chain this should be.
     activeNetworkId: ChainId.GOERLI,
@@ -85,34 +75,19 @@ export const smartAccountAtom = atom(async (get) => {
   };
 });
 
-export const logoutAtom = atom(null, async (get, set) => {
-  // console.log("running logoutAtom");
-  const socialLogin = await get(socialLoginAtom);
-  socialLogin.hideWallet();
-  await socialLogin.logout();
-  await set(trpcJotai.auth.logout.atomWithMutation(), []);
-  set(loginModeAtom, "stopped");
-});
-
-// export const loginAtom = atom(null, async (get, set) => {
-//   // console.log("running loginAtom");
-//   set(loginModeAtom, "interactive");
-//   await get(walletAtom);
-// });
-
-export const loginAtom = atom(null, async (get, set) => {
-  set(loginModeAtom, "interactive");
-  get(walletAtom);
-  console.log("starting auth sequence");
-  const isAuthed = await get(authAtom);
-  if (isAuthed) {
-    console.log("already authenticated");
-    return;
+// TODO: Figure out how to cancel this if the user closes the wallet.
+export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
+  if (interactive) {
+    set(showWalletAtom);
   }
-  console.log("getting provider for auth");
+
+  const currentAuth = await get(trpcJotai.auth.authenticated.atomWithQuery());
+  if (currentAuth) {
+    set(authAtom, currentAuth);
+    return currentAuth;
+  }
+
   const provider = await get(providerAndAccountAtom);
-  if (!provider) return;
-  console.log("got provider for auth, signing message");
   const signer = provider.provider.getSigner();
   const rawMessage = new SiweMessage({
     domain: window.location.host,
@@ -126,11 +101,22 @@ export const loginAtom = atom(null, async (get, set) => {
   });
   const message = rawMessage.prepareMessage();
   const signature = await signer.signMessage(message);
-  const res = await set(trpcJotai.auth.login.atomWithMutation(), [
+  const loginAuth = await set(trpcJotai.auth.login.atomWithMutation(), [
     { message, signature },
   ]);
-  if (res) {
-    set(authAtom, res);
+  if (loginAuth) {
+    set(authAtom, loginAuth);
   }
-  return res;
+  return loginAuth;
+});
+
+export const logoutAtom = atom(null, async (get, set) => {
+  const socialLogin = await get(socialLoginAtom);
+  socialLogin.hideWallet();
+  try {
+    await socialLogin.logout();
+  } catch (e) {}
+  await set(trpcJotai.auth.logout.atomWithMutation(), []);
+  set(authAtom, null);
+  set(ticker, new Date().getTime());
 });
