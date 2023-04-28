@@ -1,32 +1,28 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useHydrateAtoms } from "jotai/utils";
 
-import { teamById } from "@/db/api";
-import { withSessionSsr } from "@/lib/withSession";
-import { Team } from "@/db/schema";
+import { Auth, withSessionSsr } from "@/lib/withSession";
 import Header from "@/components/header";
 import Landing from "@/components/landing";
+import { authAtom } from "@/store/auth";
 
 type Props = {
-  personalTeam: Team | null;
+  auth: Auth | null;
 };
 
 const getProps: GetServerSideProps<Props> = async ({ params, req }) => {
-  const personalTeam = req.session.auth
-    ? await teamById(req.session.auth.personalTeam.id)
-    : null;
-
-  return { props: { personalTeam } };
+  return { props: { auth: req.session.auth || null } };
 };
 
 export const getServerSideProps = withSessionSsr(getProps);
 
 export default function Home({
-  personalTeam,
+  auth,
 }: InferGetServerSidePropsType<typeof getProps>) {
-  const team = personalTeam ? personalTeam : undefined;
+  // useHydrateAtoms([[authAtom, auth]]);
   return (
     <>
-      <Header personalTeam={team} />
+      <Header personalTeam={auth?.personalTeam} />
       <Landing />
     </>
   );

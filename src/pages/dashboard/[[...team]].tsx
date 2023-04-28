@@ -58,7 +58,6 @@ export default function Dashboard({
   return (
     <HeaderAuthed
       userId={auth.user.id}
-      // personalTeamId={auth.personalTeamId}
       team={team}
       personalTeam={personalTeam}
     />
