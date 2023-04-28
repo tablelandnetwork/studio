@@ -31,8 +31,8 @@ export const authRouter = router({
           // TODO: do we want to verify domain and time here?
         });
       } catch (e: any) {
-        ctx.session.auth = null;
-        ctx.session.nonce = null;
+        ctx.session.auth = undefined;
+        ctx.session.nonce = undefined;
         await ctx.session.save();
         let code: TRPC_ERROR_CODE_KEY;
         switch (e) {
