@@ -1,5 +1,7 @@
-import { trpcJotai } from "@/utils/trpc";
 import { atom } from "jotai";
+
+import { trpcJotai } from "@/utils/trpc";
+
 import { authAtom } from "./auth";
 
 export const registerAtom = atom(

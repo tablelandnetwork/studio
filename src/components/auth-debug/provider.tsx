@@ -1,5 +1,6 @@
-import { providerAndAccountAtom } from "@/store/login";
 import { useAtom } from "jotai";
+
+import { providerAndAccountAtom } from "@/store/login";
 
 export default function Provider() {
   const [providerAndAccount] = useAtom(providerAndAccountAtom);

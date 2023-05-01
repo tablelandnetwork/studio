@@ -1,10 +1,11 @@
 "use client";
 
-import * as React from "react";
-import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import { useAtom } from "jotai";
+import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/router";
+import * as React from "react";
 
-import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,16 +33,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { userTeamsAtom, newTeamAtom } from "@/store/teams";
 import { Team } from "@/db/schema";
-import { useRouter } from "next/router";
+import { cn } from "@/lib/utils";
+import { newTeamAtom, userTeamsAtom } from "@/store/teams";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
@@ -56,19 +50,35 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
 
   const [teams] = useAtom(userTeamsAtom);
   const [, newTeam] = useAtom(newTeamAtom);
-  const teamInput = React.useRef<HTMLInputElement>(null);
+  const [newTeamName, setNewTeamName] = React.useState("");
+  const [creatingTeam, setCreatingTeam] = React.useState(false);
+  const [error, setError] = React.useState("");
 
   const [open, setOpen] = React.useState(false);
   const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
 
-  const handleNewTeam = React.useCallback(async () => {
-    if (teamInput.current) {
-      const team = await newTeam([{ name: teamInput.current.value }]);
-      teamInput.current.value = "";
-      router.push(`/dashboard/${team.slug}`);
+  const handleNewTeam = async () => {
+    if (!newTeamName.length) return;
+    setError("");
+    setCreatingTeam(true);
+    try {
+      const team = await newTeam([{ name: newTeamName }]);
+      setCreatingTeam(false);
+      setNewTeamName("");
+      setShowNewTeamDialog(false);
+      router.push(`/${team.slug}/projects`);
+    } catch (err: any) {
+      // TODO: Figure out how to handle this error from tRPC.
+      setError("There was an error creating your team.");
+      setCreatingTeam(false);
     }
+  };
+
+  const handleCancel = () => {
     setShowNewTeamDialog(false);
-  }, [newTeam, router]);
+    setCreatingTeam(false);
+    setNewTeamName("");
+  };
 
   return (
     <Dialog open={showNewTeamDialog} onOpenChange={setShowNewTeamDialog}>
@@ -80,17 +90,17 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
             role="combobox"
             aria-expanded={open}
             aria-label="Select a team"
-            className={cn("w-[200px] justify-between", className)}
+            className={cn("justify-between", className)}
           >
             <Avatar className="mr-2 h-5 w-5">
               <AvatarImage
                 src={`https://avatar.vercel.sh/${team.slug}.png`}
-                alt={team.name || undefined}
+                alt={team.name}
               />
-              <AvatarFallback>SC</AvatarFallback>
+              <AvatarFallback>{team.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            {team.name || "Personal Team"}
-            <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+            {team.name}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
@@ -104,7 +114,7 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
                     <CommandItem
                       key={groupTeam.id}
                       onSelect={() => {
-                        router.push(`/dashboard/${groupTeam.slug || ""}`);
+                        router.push(`/${groupTeam.slug}/projects`);
                         setOpen(false);
                       }}
                       className="text-sm"
@@ -112,9 +122,11 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
                       <Avatar className="mr-2 h-5 w-5">
                         <AvatarImage
                           src={`https://avatar.vercel.sh/${groupTeam.slug}.png`}
-                          alt={groupTeam.name || undefined}
+                          alt={groupTeam.name}
                         />
-                        <AvatarFallback>SC</AvatarFallback>
+                        <AvatarFallback>
+                          {groupTeam.name.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       {groupTeam.name}
                       <Check
@@ -159,16 +171,27 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
           <div className="space-y-4 py-2 pb-4">
             <div className="space-y-2">
               <Label htmlFor="name">Team name</Label>
-              <Input id="name" placeholder="Acme Inc." ref={teamInput} />
+              <Input
+                id="name"
+                placeholder="Acme Inc."
+                value={newTeamName}
+                onChange={(e) => setNewTeamName(e.target.value)}
+              />
             </div>
           </div>
+          {!!error && <p>{error}</p>}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setShowNewTeamDialog(false)}>
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={creatingTeam}
+          >
             Cancel
           </Button>
-          <Button type="submit" onClick={handleNewTeam}>
-            Continue
+          <Button type="submit" onClick={handleNewTeam} disabled={creatingTeam}>
+            {creatingTeam && <Loader2 className="animate-spin w-5 h-5 mr-2" />}
+            Submit
           </Button>
         </DialogFooter>
       </DialogContent>

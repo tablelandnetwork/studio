@@ -1,6 +1,7 @@
-import { loginAtom } from "@/store/login";
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";
+
+import { loginAtom } from "@/store/login";
 
 export default function AutoLogin() {
   const login = useSetAtom(loginAtom);

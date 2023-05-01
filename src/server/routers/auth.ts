@@ -1,14 +1,15 @@
-import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc";
-import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
-import { generateNonce, SiweErrorType, SiweMessage, SiweResponse } from "siwe";
 import { getIronSession, IronSessionOptions } from "iron-session";
-import { sessionOptions } from "@/lib/withSession";
+import { generateNonce, SiweErrorType, SiweMessage, SiweResponse } from "siwe";
+import { z } from "zod";
+
 import {
   createUserAndPersonalTeam,
   userAndPersonalTeamByAddress,
 } from "@/db/api";
+import { sessionOptions } from "@/lib/withSession";
+import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 
 export const authRouter = router({
   authenticated: publicProcedure.query(({ ctx }) => {

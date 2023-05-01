@@ -1,13 +1,14 @@
-import { number, z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
+import { number, z } from "zod";
+
 import {
-  teamBySlug,
+  createTeamByPersonalTeam,
   teamById,
-  teamsByUserId,
-  createTeamByUser,
+  teamBySlug,
+  teamsByMemberTeamId,
 } from "@/db/api";
 import { Team } from "@/db/schema";
+import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 
 export const teamsRouter = router({
   teamByName: protectedProcedure
@@ -34,10 +35,10 @@ export const teamsRouter = router({
       }
       return team;
     }),
-  teamsForUser: protectedProcedure
-    .input(z.object({ userId: z.string() }))
-    .query(async ({ ctx, input: { userId } }) => {
-      const teams = await teamsByUserId(userId);
+  teamsForPersonalTeam: protectedProcedure
+    .input(z.object({ personalTeamId: z.string() }))
+    .query(async ({ ctx, input: { personalTeamId } }) => {
+      const teams = await teamsByMemberTeamId(personalTeamId);
       const res: { label: string; teams: Team[] }[] = [
         {
           label: "Personal Account",
@@ -50,7 +51,6 @@ export const teamsRouter = router({
       ];
       teams.forEach((team) => {
         if (team.personal) {
-          team.name = team.name || "Personal Team";
           res[0].teams.push(team);
         } else {
           res[1].teams.push(team);
@@ -70,7 +70,10 @@ export const teamsRouter = router({
       })
     )
     .mutation(async ({ ctx, input: { name } }) => {
-      const team = await createTeamByUser(name, ctx.session.auth.user.id);
+      const team = await createTeamByPersonalTeam(
+        name,
+        ctx.session.auth.personalTeam.id
+      );
       return team;
     }),
 });

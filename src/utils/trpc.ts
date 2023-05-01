@@ -1,6 +1,7 @@
-import { httpBatchLink } from "@trpc/client";
+import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import { createTRPCJotai } from "jotai-trpc";
+
 import type { AppRouter } from "@/server/routers/_app";
 
 function getBaseUrl() {
@@ -65,3 +66,9 @@ export const trpcJotai = createTRPCJotai<AppRouter>({
     }),
   ],
 });
+
+export function isTRPCClientError(
+  cause: unknown
+): cause is TRPCClientError<AppRouter> {
+  return cause instanceof TRPCClientError;
+}

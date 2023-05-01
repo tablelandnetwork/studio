@@ -53,6 +53,7 @@
     "@types/keccak": "^3.0.1",
     "autoprefixer": "^10.4.14",
     "dotenv": "^16.0.3",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.3.1",
     "tsx": "^3.12.6"

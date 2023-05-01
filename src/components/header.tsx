@@ -1,6 +1,8 @@
-import { Team } from "@/db/schema";
-import MesaSvg from "@/components/mesa-svg";
 import dynamic from "next/dynamic";
+import Link from "next/link";
+
+import MesaSvg from "@/components/mesa-svg";
+import { Team } from "@/db/schema";
 
 export default function Header({ personalTeam }: { personalTeam?: Team }) {
   const Login = dynamic(
@@ -8,7 +10,7 @@ export default function Header({ personalTeam }: { personalTeam?: Team }) {
     { ssr: false }
   );
   const UserNav = dynamic(
-    () => import("@/components/user-nav").then((res) => res.UserNav),
+    () => import("@/components/nav-user").then((res) => res.UserNav),
     { ssr: false }
   );
   return (
@@ -19,8 +21,19 @@ export default function Header({ personalTeam }: { personalTeam?: Team }) {
           Studio
         </h1>
       </div>
-      {/* <nav></nav> */}
-      {personalTeam ? <UserNav personalTeam={personalTeam} /> : <Login />}
+      <div className="ml-auto flex items-center space-x-4">
+        <nav>
+          {personalTeam && (
+            <Link
+              href={`/${personalTeam.slug}/projects`}
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              Dashboard
+            </Link>
+          )}
+        </nav>
+        {personalTeam ? <UserNav personalTeam={personalTeam} /> : <Login />}
+      </div>
     </header>
   );
 }

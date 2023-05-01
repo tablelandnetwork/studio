@@ -1,11 +1,12 @@
+import { IronSessionOptions } from "iron-session";
 import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
 import {
   GetServerSidePropsContext,
   GetServerSidePropsResult,
   NextApiHandler,
 } from "next";
-import { IronSessionOptions } from "iron-session";
 import { SiweMessage } from "siwe";
+
 import { Team, User } from "@/db/schema";
 
 type SiweFields = Omit<

@@ -1,10 +1,11 @@
 import { useAtom } from "jotai";
-
 import { Suspense } from "react";
-import SocialLogin from "./social-login";
+
+import { authAtom } from "@/store/auth";
+
 import Provider from "./provider";
 import SmartAccount from "./smart-account";
-import { authAtom } from "@/store/auth";
+import SocialLogin from "./social-login";
 
 export default function AuthDebug() {
   const [auth] = useAtom(authAtom);

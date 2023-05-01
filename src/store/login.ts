@@ -1,14 +1,14 @@
-import SocialLogin from "@biconomy-sdk-dev/web3-auth";
-import SmartAccount from "@biconomy-sdk-dev/smart-account";
 import { ChainId } from "@biconomy-sdk-dev/core-types";
-import { atom } from "jotai";
+import SmartAccount from "@biconomy-sdk-dev/smart-account";
+import SocialLogin from "@biconomy-sdk-dev/web3-auth";
 import { Web3Provider } from "@ethersproject/providers";
 import { ethers } from "ethers";
+import { atom } from "jotai";
 import { SiweMessage } from "siwe";
 
-import { trpcJotai } from "@/utils/trpc";
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { authAtom } from "@/store/auth";
+import { trpcJotai } from "@/utils/trpc";
 
 export const socialLoginAtom = atom(async () => {
   const sdk = new SocialLogin();

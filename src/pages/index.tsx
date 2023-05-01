@@ -1,9 +1,9 @@
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useHydrateAtoms } from "jotai/utils";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
-import { Auth, withSessionSsr } from "@/lib/withSession";
 import Header from "@/components/header";
 import Landing from "@/components/landing";
+import { Auth, withSessionSsr } from "@/lib/withSession";
 import { authAtom } from "@/store/auth";
 
 type Props = {

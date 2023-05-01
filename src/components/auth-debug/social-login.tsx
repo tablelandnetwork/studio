@@ -1,5 +1,6 @@
-import { socialLoginAtom } from "@/store/login";
 import { useAtom } from "jotai";
+
+import { socialLoginAtom } from "@/store/login";
 
 export default function SocialLogin() {
   const [socialLogin] = useAtom(socialLoginAtom);

@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import { Poppins } from "next/font/google";
+
 import Footer from "./footer";
 
 const poppins = Poppins({

@@ -1,5 +1,6 @@
-import { LogOut, Settings, User } from "lucide-react";
 import { useAtom } from "jotai";
+import { LogOut, Settings, User } from "lucide-react";
+import { useRouter } from "next/router";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Team } from "@/db/schema";
 import { logoutAtom } from "@/store/login";
-import { useRouter } from "next/router";
 
 export function UserNav({ personalTeam }: { personalTeam: Team }) {
   const [, logout] = useAtom(logoutAtom);
@@ -25,8 +25,6 @@ export function UserNav({ personalTeam }: { personalTeam: Team }) {
     router.push("/");
   };
 
-  const inDash = router.pathname.includes("dashboard");
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -34,11 +32,9 @@ export function UserNav({ personalTeam }: { personalTeam: Team }) {
           <Avatar className="h-8 w-8">
             <AvatarImage
               src={`https://avatar.vercel.sh/${personalTeam.slug}.png`}
-              alt={personalTeam.name || undefined}
+              alt={personalTeam.name}
             />
-            <AvatarFallback>
-              {personalTeam.name?.charAt(0) || ":)"}
-            </AvatarFallback>
+            <AvatarFallback>{personalTeam.name.charAt(0)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -46,21 +42,12 @@ export function UserNav({ personalTeam }: { personalTeam: Team }) {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {personalTeam.name || "Personal Team"}
+              {personalTeam.name}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {!inDash && (
-            <DropdownMenuItem
-              onClick={() => router.push(`/dashboard/${personalTeam.slug}`)}
-            >
-              <User className="mr-2 h-4 w-4" />
-              <span>Dashboard</span>
-              {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
-            </DropdownMenuItem>
-          )}
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>

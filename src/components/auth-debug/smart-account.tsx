@@ -1,5 +1,6 @@
-import { smartAccountAtom } from "@/store/login";
 import { useAtom } from "jotai";
+
+import { smartAccountAtom } from "@/store/login";
 
 export default function SmartAccount() {
   const [smartAccount] = useAtom(smartAccountAtom);

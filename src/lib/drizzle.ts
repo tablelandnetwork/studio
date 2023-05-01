@@ -1,11 +1,11 @@
+import { BuildColumns } from "drizzle-orm/column-builder";
 import {
   sqliteTableCreator,
   SQLiteTableExtraConfig,
 } from "drizzle-orm/sqlite-core";
 import { AnySQLiteColumnBuilder } from "drizzle-orm/sqlite-core/columns/common";
-import { BuildColumns } from "drizzle-orm/column-builder";
-import { resolve } from "path";
 import { readFileSync } from "fs";
+import { resolve } from "path";
 
 export type Tables = {
   [key: string]: {

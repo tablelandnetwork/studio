@@ -1,12 +1,10 @@
 import "@biconomy-sdk-dev/web3-auth/dist/src/style.css";
-import * as React from "react";
+
 import { useAtom } from "jotai";
 import { loadable } from "jotai/utils";
-
-import { Button } from "./ui/button";
-import { loginAtom, socialLoginAtom } from "@/store/login";
-import { registerAtom } from "@/store/register";
 import { useRouter } from "next/router";
+import * as React from "react";
+
 import {
   Dialog,
   DialogContent,
@@ -17,6 +15,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginAtom, socialLoginAtom } from "@/store/login";
+import { registerAtom } from "@/store/register";
+
+import { Button } from "./ui/button";
 
 // TODO: Remember we can get social/email info from:
 // const info = await socialLoginSDK?.getUserInfo();
@@ -39,7 +41,7 @@ export default function Login() {
     if (!res) {
       setShowRegisterDialog(true);
     } else {
-      router.push(`/dashboard/${res.personalTeam.slug}`);
+      router.push(`/${res.personalTeam.slug}/projects`);
     }
   };
 
@@ -50,7 +52,7 @@ export default function Login() {
       email: emailInput.current?.value,
     });
     setShowRegisterDialog(false);
-    router.push(`/dashboard/${res.personalTeam.slug}`);
+    router.push(`/${res.personalTeam.slug}/projects`);
   };
 
   const buttonDisabled = socialLogin.state === "loading";

@@ -1,28 +1,26 @@
 import dynamic from "next/dynamic";
-import { Team } from "@/db/schema";
-import { TeamNav } from "./team-nav";
-import { Search } from "./search";
-import TeamSwitcher from "./team-switcher";
-import MesaSvg from "./mesa-svg";
 import Link from "next/link";
-// import { UserNav } from "./user-nav";
 
-const UserNav = dynamic(() => import("./user-nav").then((res) => res.UserNav), {
+import MesaSvg from "@/components/mesa-svg";
+import { TeamNav } from "@/components/nav-team";
+import { Search } from "@/components/search";
+import TeamSwitcher from "@/components/team-switcher";
+import { Team } from "@/db/schema";
+
+const UserNav = dynamic(() => import("./nav-user").then((res) => res.UserNav), {
   ssr: false,
 });
 
 export default function Header({
-  userId,
   personalTeam,
   team,
 }: {
-  userId: string;
   team: Team;
   personalTeam: Team;
 }) {
   return (
     <header className="px-4 py-3 flex flex-col space-y-4 border-b sticky top-0 bg-white">
-      <div className="flex justify-start items-center">
+      <div className="flex justify-start items-center gap-x-4">
         <Link href="/">
           <MesaSvg />
         </Link>
@@ -32,7 +30,7 @@ export default function Header({
         </div>
       </div>
       <div className="flex">
-        <TeamNav />
+        <TeamNav team={team} />
         <div className="ml-auto flex items-center space-x-4">
           <Search placeholder="Search Project Blueprints..." />
         </div>

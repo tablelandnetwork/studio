@@ -1,18 +1,21 @@
-import { drizzle } from "drizzle-orm/d1";
-import { eq, and, inArray } from "drizzle-orm/expressions";
-import { Database } from "@tableland/sdk";
-import { getDefaultProvider, Wallet } from "ethers";
 import { NonceManager } from "@ethersproject/experimental";
+import { Database } from "@tableland/sdk";
+import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/d1";
+import { and, eq, inArray } from "drizzle-orm/expressions";
+import { getDefaultProvider, Wallet } from "ethers";
 
 import {
-  resolveUsers,
+  NewTeamMembership,
+  Project,
+  resolveProjects,
+  resolveTeamMemberships,
+  resolveTeamProjects,
   resolveTeams,
-  resolveUserTeams,
-  User,
+  resolveUsers,
   Team,
-  NewUserTeam,
+  User,
 } from "./schema";
-import { randomUUID } from "crypto";
 
 if (!process.env.PRIVATE_KEY) {
   throw new Error("Must provide PRIVATE_KEY env var.");
@@ -32,7 +35,9 @@ const db = drizzle(tbl);
 
 const users = resolveUsers(process.env.CHAIN);
 const teams = resolveTeams(process.env.CHAIN);
-const userTeams = resolveUserTeams(process.env.CHAIN);
+const teamMemberships = resolveTeamMemberships(process.env.CHAIN);
+const projects = resolveProjects(process.env.CHAIN);
+const teamProjects = resolveTeamProjects(process.env.CHAIN);
 
 export async function createUserAndPersonalTeam(
   address: string,
@@ -40,9 +45,8 @@ export async function createUserAndPersonalTeam(
   email?: string
 ) {
   // TODO: Store email encrypted.
-  const userId = randomUUID();
   const teamId = randomUUID();
-  const usersInsert = db.insert(users).values({ id: userId, address }).run();
+  const usersInsert = db.insert(users).values({ address, teamId }).run();
   const teamsInsert = db
     .insert(teams)
     .values({
@@ -52,11 +56,11 @@ export async function createUserAndPersonalTeam(
       slug: slugify(teamName),
     })
     .run();
-  const userTeamsInsert = db
-    .insert(userTeams)
-    .values({ userId, teamId, isOwner: 1 })
+  const teamMembershipInsert = db
+    .insert(teamMemberships)
+    .values({ memberTeamId: teamId, teamId, isOwner: 1 })
     .run();
-  await Promise.all([usersInsert, teamsInsert, userTeamsInsert]);
+  await Promise.all([usersInsert, teamsInsert, teamMembershipInsert]);
   const info = await userAndPersonalTeamByAddress(address);
   if (!info) {
     throw new Error("Failed to create user and personal team.");
@@ -86,16 +90,10 @@ export async function userAndPersonalTeamByAddress(address: string) {
   if (!user) {
     return undefined;
   }
-  const join = await db
-    .select({ teamId: userTeams.teamId })
-    .from(userTeams)
-    .where(eq(userTeams.userId, user.id))
-    .all();
-  const teamIds = join.map((j) => j.teamId);
   const personalTeam = await db
     .select()
     .from(teams)
-    .where(and(inArray(teams.id, teamIds), eq(teams.personal, 1)))
+    .where(eq(teams.id, user.teamId))
     .get();
   return { user, personalTeam };
 }
@@ -104,11 +102,17 @@ export async function userByAddress(address: string) {
   return db.select().from(users).where(eq(users.address, address)).get();
 }
 
-export async function createTeamByUser(name: string, userId: string) {
+export async function createTeamByPersonalTeam(
+  name: string,
+  personalTeamId: string
+) {
   const teamId = randomUUID();
   const slug = slugify(name);
   await db.insert(teams).values({ id: teamId, personal: 0, name, slug }).run();
-  await db.insert(userTeams).values({ userId, teamId, isOwner: 1 }).run();
+  await db
+    .insert(teamMemberships)
+    .values({ memberTeamId: personalTeamId, teamId, isOwner: 1 })
+    .run();
   const team: Team = { id: teamId, personal: 0, name, slug };
   return team;
 }
@@ -121,11 +125,11 @@ export async function teamById(id: string) {
   return db.select().from(teams).where(eq(teams.id, id)).get();
 }
 
-export async function teamsByUserId(userId: string) {
+export async function teamsByMemberTeamId(memberTeamId: string) {
   const joins = await db
-    .select({ teamId: userTeams.teamId })
-    .from(userTeams)
-    .where(eq(userTeams.userId, userId))
+    .select({ teamId: teamMemberships.teamId })
+    .from(teamMemberships)
+    .where(eq(teamMemberships.memberTeamId, memberTeamId))
     .all();
   const teamIds = joins.map((j) => j.teamId);
   const list = await db
@@ -137,12 +141,99 @@ export async function teamsByUserId(userId: string) {
   return list;
 }
 
-export async function addUserToTeam(params: NewUserTeam) {
-  return db.insert(userTeams).values(params).run();
+export async function isAuthorizedForTeam(
+  memberTeamId: string,
+  teamId: string
+) {
+  const join = await db
+    .select()
+    .from(teamMemberships)
+    .where(
+      and(
+        eq(teamMemberships.teamId, teamId),
+        eq(teamMemberships.memberTeamId, memberTeamId)
+      )
+    )
+    .get();
+  return !!join;
 }
 
-export async function getUsers(): Promise<User[]> {
-  return db.select().from(users).all();
+export async function addUserToTeam(params: NewTeamMembership) {
+  return db.insert(teamMemberships).values(params).run();
+}
+
+export async function createProject(
+  teamId: string,
+  name: string,
+  description: string | null
+) {
+  const projectId = randomUUID();
+  const slug = slugify(name);
+  const projectsInsert = db
+    .insert(projects)
+    .values({ id: projectId, name, description, slug })
+    .run();
+  const teamProjectsInsert = db
+    .insert(teamProjects)
+    .values({ projectId, teamId, isOwner: 1 })
+    .run();
+  await Promise.all([projectsInsert, teamProjectsInsert]);
+  const project: Project = { id: projectId, name, description, slug };
+  return project;
+}
+
+export async function projectsByTeamId(teamId: string) {
+  const joins = await db
+    .select({ projectId: teamProjects.projectId })
+    .from(teamProjects)
+    .where(and(eq(teamProjects.teamId, teamId), eq(teamProjects.isOwner, 1)))
+    .all();
+  const projectIds = joins.map((j) => j.projectId);
+  if (projectIds.length === 0) {
+    return [];
+  }
+  const list = await db
+    .select()
+    .from(projects)
+    .where(inArray(projects.id, projectIds))
+    .orderBy(projects.name)
+    .all();
+  return list;
+}
+
+export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
+  const joins = await db
+    .select()
+    .from(teamProjects)
+    .where(and(eq(teamProjects.teamId, teamId), eq(teamProjects.isOwner, 1)))
+    .all();
+  if (!joins.length) {
+    return undefined;
+  }
+  const projectIds = joins.map((j) => j.projectId);
+  const project = await db
+    .select()
+    .from(projects)
+    .where(and(inArray(projects.id, projectIds), eq(projects.slug, slug)))
+    .get();
+  return project;
+}
+
+export async function isAuthorizedForProject(
+  teamId: string,
+  projectId: string
+) {
+  const join = await db
+    .select()
+    .from(teamProjects)
+    .where(
+      and(
+        eq(teamProjects.teamId, teamId),
+        eq(teamProjects.projectId, projectId)
+      )
+    )
+    .get();
+  return !!join;
 }
 
 function slugify(input: string) {
