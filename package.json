@@ -10,9 +10,9 @@
     "tables": "tsx scripts/tables.ts"
   },
   "dependencies": {
-    "@biconomy-sdk-dev/core-types": "^1.0.21",
-    "@biconomy-sdk-dev/smart-account": "^1.0.21",
-    "@biconomy-sdk-dev/web3-auth": "^1.0.21",
+    "@biconomy/core-types": "^2.0.0",
+    "@biconomy/smart-account": "^2.0.0",
+    "@biconomy/web3-auth": "^2.0.0",
     "@ethersproject/experimental": "^5.7.0",
     "@radix-ui/react-avatar": "^1.0.2",
     "@radix-ui/react-dialog": "^1.0.3",
