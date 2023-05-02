@@ -1,6 +1,6 @@
-import { ChainId } from "@biconomy-sdk-dev/core-types";
-import SmartAccount from "@biconomy-sdk-dev/smart-account";
-import SocialLogin from "@biconomy-sdk-dev/web3-auth";
+import { ChainId } from "@biconomy/core-types";
+import SmartAccount from "@biconomy/smart-account";
+import SocialLogin from "@biconomy/web3-auth";
 import { Web3Provider } from "@ethersproject/providers";
 import { ethers } from "ethers";
 import { atom } from "jotai";

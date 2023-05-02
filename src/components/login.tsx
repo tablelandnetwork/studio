@@ -1,4 +1,4 @@
-import "@biconomy-sdk-dev/web3-auth/dist/src/style.css";
+import "@biconomy/web3-auth/dist/src/style.css";
 
 import { useAtom } from "jotai";
 import { loadable } from "jotai/utils";
