@@ -21,6 +21,7 @@ export type Auth = {
 
 declare module "iron-session" {
   interface IronSessionData {
+    invite?: string;
     nonce?: string;
     siweFields?: SiweFields;
     auth?: Auth;

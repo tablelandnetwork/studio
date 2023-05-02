@@ -10,6 +10,7 @@ import {
 } from "@/db/api";
 import { sessionOptions } from "@/lib/withSession";
 import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
+import { sendWelcome } from "@/utils/send";
 
 export const authRouter = router({
   authenticated: publicProcedure.query(({ ctx }) => {
@@ -23,6 +24,8 @@ export const authRouter = router({
   login: publicProcedure
     .input(z.object({ message: z.string(), signature: z.string() }))
     .mutation(async ({ ctx, input: { message, signature } }) => {
+      const foo = await sendWelcome("aaron@textile.io");
+      console.log(foo);
       let fields: SiweResponse;
       try {
         const siweMessage = new SiweMessage(message);
