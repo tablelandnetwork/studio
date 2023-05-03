@@ -72,6 +72,7 @@ export const resolveTeamProjects = tablelandTable(
 export const resolveTeamInvites = tablelandTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),
+  invitedBy: text("invited_by").notNull(),
   createdAt: text("created_at").notNull(),
   claimed: integer("claimed").notNull(),
 });
