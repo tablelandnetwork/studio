@@ -2,6 +2,7 @@ import "@biconomy/web3-auth/dist/src/style.css";
 
 import { useAtom } from "jotai";
 import { loadable } from "jotai/utils";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import * as React from "react";
 
@@ -31,8 +32,10 @@ export default function Login() {
   const [, register] = useAtom(registerAtom);
 
   const [showRegisterDialog, setShowRegisterDialog] = React.useState(false);
-  const usernameInput = React.useRef<HTMLInputElement>(null);
-  const emailInput = React.useRef<HTMLInputElement>(null);
+  const [username, setUsername] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [registering, setRegistering] = React.useState(false);
+  const [error, setError] = React.useState("");
 
   const router = useRouter();
 
@@ -46,13 +49,22 @@ export default function Login() {
   };
 
   const handleRegister = async () => {
-    if (!usernameInput.current) return;
+    if (!username.length) return;
+    setRegistering(true);
     const res = await register({
-      username: usernameInput.current?.value,
-      email: emailInput.current?.value,
+      username,
+      email,
     });
+    setRegistering(false);
     setShowRegisterDialog(false);
     router.push(`/${res.personalTeam.slug}/projects`);
+  };
+
+  const handleCancel = () => {
+    setShowRegisterDialog(false)
+    setRegistering(false);
+    setUsername("");
+    setEmail("");
   };
 
   const buttonDisabled = socialLogin.state === "loading";
@@ -77,22 +89,25 @@ export default function Login() {
           <div className="space-y-4 py-2 pb-4">
             <div className="space-y-2">
               <Label htmlFor="name">Username</Label>
-              <Input id="name" placeholder="myusername" ref={usernameInput} />
+              <Input id="name" placeholder="myusername" value={username} onChange={(e) => setUsername(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="name">Email address</Label>
-              <Input id="name" placeholder="me@me.com" ref={emailInput} />
+              <Input id="name" placeholder="me@me.com" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
           </div>
+          {!!error && <p>{error}</p>}
         </div>
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => setShowRegisterDialog(false)}
+            onClick={handleCancel}
+            disabled={registering}
           >
             Cancel
           </Button>
-          <Button type="submit" onClick={handleRegister}>
+          <Button type="submit" onClick={handleRegister} disabled={registering}>
+            {registering && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Continue
           </Button>
         </DialogFooter>
