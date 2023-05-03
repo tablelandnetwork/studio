@@ -114,7 +114,7 @@ export default function NewProjectDialog({ team, children, ...props }: Props) {
             disabled={creatingProject}
           >
             {creatingProject && (
-              <Loader2 className="animate-spin w-5 h-5 mr-2" />
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             )}
             Submit
           </Button>

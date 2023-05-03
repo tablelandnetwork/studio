@@ -1,6 +1,6 @@
 export default function Landing() {
   return (
-    <div className="p-4 flex flex-1 justify-center items-center">
+    <div className="flex flex-1 items-center justify-center p-4">
       <p>Landing Content</p>
     </div>
   );

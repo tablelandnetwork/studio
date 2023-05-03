@@ -14,10 +14,10 @@ export default function Header({ personalTeam }: { personalTeam?: Team }) {
     { ssr: false }
   );
   return (
-    <header className="px-4 py-3 flex justify-between items-center">
+    <header className="flex items-center justify-between px-4 py-3">
       <div className="flex flex-row items-center gap-x-2">
         <MesaSvg />
-        <h1 className="font-normal text-2xl uppercase text-fuchsia-800">
+        <h1 className="text-2xl font-normal uppercase text-fuchsia-800">
           Studio
         </h1>
       </div>

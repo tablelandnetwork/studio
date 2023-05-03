@@ -190,7 +190,7 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
             Cancel
           </Button>
           <Button type="submit" onClick={handleNewTeam} disabled={creatingTeam}>
-            {creatingTeam && <Loader2 className="animate-spin w-5 h-5 mr-2" />}
+            {creatingTeam && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Submit
           </Button>
         </DialogFooter>

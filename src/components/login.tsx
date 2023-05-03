@@ -59,7 +59,7 @@ export default function Login() {
 
   return (
     <Dialog open={showRegisterDialog} onOpenChange={setShowRegisterDialog}>
-      <div className="flex items-center space gap-4">
+      <div className="flex items-center gap-4">
         <Button onClick={handleLogin} disabled={buttonDisabled}>
           Sign In
         </Button>
