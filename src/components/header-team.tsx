@@ -19,8 +19,8 @@ export default function Header({
   personalTeam: Team;
 }) {
   return (
-    <header className="px-4 py-3 flex flex-col space-y-4 border-b sticky top-0 bg-white">
-      <div className="flex justify-start items-center gap-x-4">
+    <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
+      <div className="flex items-center justify-start gap-x-4">
         <Link href="/">
           <MesaSvg />
         </Link>

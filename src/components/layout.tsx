@@ -20,9 +20,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <AutoLogin />
       <div
-        className={`${poppins.variable} font-sans flex flex-col min-h-screen`}
+        className={`${poppins.variable} flex min-h-screen flex-col font-sans`}
       >
-        <main className="flex flex-col flex-1">{children}</main>
+        <main className="flex flex-1 flex-col">{children}</main>
         <Footer />
       </div>
     </>

@@ -67,7 +67,7 @@ export default function Projects({
       onOpenChange={setShowNewProjectDialog}
     >
       <HeaderAuthed team={team} personalTeam={auth.personalTeam} />
-      <div className="flex flex-col space-y-4 p-4 max-w-3xl mx-auto w-full">
+      <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
         {projects?.map((project) => (
           <Link key={project.id} href={`/${team.slug}/${project.slug}`}>
             <Card>
