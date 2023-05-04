@@ -40,7 +40,9 @@ export default function NewProjectDialog({ team, children, ...props }: Props) {
         {
           teamId: team.id,
           name: newProjectName,
-          description: newProjectDescription,
+          description: newProjectDescription.length
+            ? newProjectDescription
+            : undefined,
         },
       ]);
       setCreatingProject(false);

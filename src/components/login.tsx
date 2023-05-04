@@ -51,13 +51,18 @@ export default function Login() {
   const handleRegister = async () => {
     if (!username.length) return;
     setRegistering(true);
-    const res = await register({
-      username,
-      email,
-    });
-    setRegistering(false);
-    setShowRegisterDialog(false);
-    router.push(`/${res.personalTeam.slug}/projects`);
+    try {
+      const res = await register({
+        username,
+        email: email.length ? email : undefined,
+      });
+      setRegistering(false);
+      setShowRegisterDialog(false);
+      router.push(`/${res.personalTeam.slug}/projects`);
+    } catch (err: any) {
+      setError("There was an error registering your account.");
+      setRegistering(false);
+    }
   };
 
   const handleCancel = () => {
