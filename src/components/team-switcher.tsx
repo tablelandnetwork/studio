@@ -35,6 +35,7 @@ import {
 import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { newTeamAtom, userTeamsAtom } from "@/store/teams";
+import TagInput from "./tag-input";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
@@ -56,7 +57,10 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
   const [open, setOpen] = React.useState(false);
   const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
 
+  const [inviteEmails, setInviteEmails] = React.useState<string[]>([]);
+
   const handleNewTeam = async () => {
+    console.log(inviteEmails);
     if (!newTeamName.length) return;
     setError("");
     setCreatingTeam(true);
@@ -175,6 +179,15 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
                 placeholder="Acme Inc."
                 value={newTeamName}
                 onChange={(e) => setNewTeamName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="emails">Invite others by email</Label>
+              <TagInput
+                id="emails"
+                placeholder="Enter email address"
+                tags={inviteEmails}
+                setTags={setInviteEmails}
               />
             </div>
           </div>
