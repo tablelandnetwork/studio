@@ -2,7 +2,7 @@ import { NonceManager } from "@ethersproject/experimental";
 import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/d1";
-import { and, eq, inArray } from "drizzle-orm/expressions";
+import { and, eq } from "drizzle-orm/expressions";
 import { getDefaultProvider, Wallet } from "ethers";
 
 import {
@@ -30,7 +30,7 @@ const baseSigner = wallet.connect(provider);
 const signer = new NonceManager(baseSigner);
 
 const tbl = new Database({ signer, autoWait: true });
-const db = drizzle(tbl);
+const db = drizzle(tbl, { logger: true });
 
 const users = resolveUsers(process.env.CHAIN);
 const teams = resolveTeams(process.env.CHAIN);
@@ -68,33 +68,14 @@ export async function createUserAndPersonalTeam(
 }
 
 export async function userAndPersonalTeamByAddress(address: string) {
-  // TODO: Reenable this when we can do joins.
-  // return db
-  //   .select({
-  //     userId: usersTable.id,
-  //     address: usersTable.address,
-  //     teamId: teamsTable.id,
-  //     teamName: teamsTable.name,
-  //   })
-  //   .from(usersTable)
-  //   .innerJoin(userTeamsTable, eq(usersTable.id, userTeamsTable.userId))
-  //   .innerJoin(teamsTable, eq(userTeamsTable.teamId, teamsTable.id))
-  //   .where(and(eq(usersTable.address, address), eq(teamsTable.personal, 1)))
-  //   .get();
-  const user = await db
-    .select()
+  return db
+    .select({
+      user: users,
+      personalTeam: teams,
+    })
     .from(users)
-    .where(eq(users.address, address))
+    .innerJoin(teams, eq(users.teamId, teams.id))
     .get();
-  if (!user) {
-    return undefined;
-  }
-  const personalTeam = await db
-    .select()
-    .from(teams)
-    .where(eq(teams.id, user.teamId))
-    .get();
-  return { user, personalTeam };
 }
 
 export async function userByAddress(address: string) {
@@ -125,26 +106,21 @@ export async function teamById(id: string) {
 }
 
 export async function teamsByMemberTeamId(memberTeamId: string) {
-  const joins = await db
-    .select({ teamId: teamMemberships.teamId })
+  const res = await db
+    .select({ teams })
     .from(teamMemberships)
+    .innerJoin(teams, eq(teamMemberships.teamId, teams.id))
     .where(eq(teamMemberships.memberTeamId, memberTeamId))
-    .all();
-  const teamIds = joins.map((j) => j.teamId);
-  const list = await db
-    .select()
-    .from(teams)
-    .where(inArray(teams.id, teamIds))
     .orderBy(teams.name)
     .all();
-  return list;
+  return res.map((r) => r.teams);
 }
 
 export async function isAuthorizedForTeam(
   memberTeamId: string,
   teamId: string
 ) {
-  const join = await db
+  const membership = await db
     .select()
     .from(teamMemberships)
     .where(
@@ -154,7 +130,7 @@ export async function isAuthorizedForTeam(
       )
     )
     .get();
-  return !!join;
+  return !!membership;
 }
 
 export async function addUserToTeam(params: NewTeamMembership) {
@@ -182,47 +158,32 @@ export async function createProject(
 }
 
 export async function projectsByTeamId(teamId: string) {
-  const joins = await db
-    .select({ projectId: teamProjects.projectId })
+  const res = await db
+    .select({ projects }) // TODO: Figure out why if we don't specify select key, projects key ends up as actual table name.
     .from(teamProjects)
+    .innerJoin(projects, eq(teamProjects.projectId, projects.id))
     .where(and(eq(teamProjects.teamId, teamId), eq(teamProjects.isOwner, 1)))
-    .all();
-  const projectIds = joins.map((j) => j.projectId);
-  if (projectIds.length === 0) {
-    return [];
-  }
-  const list = await db
-    .select()
-    .from(projects)
-    .where(inArray(projects.id, projectIds))
     .orderBy(projects.name)
     .all();
-  return list;
+  const mapped = res.map((r) => r.projects);
+  return mapped;
 }
 
 export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
-  const joins = await db
-    .select()
+  const res = await db
+    .select({ projects })
     .from(teamProjects)
-    .where(and(eq(teamProjects.teamId, teamId), eq(teamProjects.isOwner, 1)))
-    .all();
-  if (!joins.length) {
-    return undefined;
-  }
-  const projectIds = joins.map((j) => j.projectId);
-  const project = await db
-    .select()
-    .from(projects)
-    .where(and(inArray(projects.id, projectIds), eq(projects.slug, slug)))
+    .innerJoin(projects, eq(teamProjects.projectId, projects.id))
+    .where(and(eq(teamProjects.teamId, teamId), eq(projects.slug, slug)))
     .get();
-  return project;
+  return res.projects;
 }
 
 export async function isAuthorizedForProject(
   teamId: string,
   projectId: string
 ) {
-  const join = await db
+  const ownsProject = await db
     .select()
     .from(teamProjects)
     .where(
@@ -232,7 +193,7 @@ export async function isAuthorizedForProject(
       )
     )
     .get();
-  return !!join;
+  return !!ownsProject;
 }
 
 function slugify(input: string) {
