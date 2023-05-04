@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/router";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

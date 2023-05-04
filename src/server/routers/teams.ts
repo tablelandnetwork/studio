@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { number, z } from "zod";
+import { z } from "zod";
 
 import {
   createTeamByPersonalTeam,
@@ -8,7 +8,7 @@ import {
   teamsByMemberTeamId,
 } from "@/db/api";
 import { Team } from "@/db/schema";
-import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
+import { protectedProcedure, router } from "@/server/trpc";
 
 export const teamsRouter = router({
   teamByName: protectedProcedure

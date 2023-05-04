@@ -1,4 +1,4 @@
-import { atom, Getter, WritableAtom } from "jotai";
+import { atom, Getter } from "jotai";
 
 export function atomWithRefresh<T>(fn: (get: Getter) => T) {
   const refreshCounter = atom(0);
