@@ -1,8 +1,7 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, PlusCircle } from "lucide-react";
 import { useRouter } from "next/router";
 import * as React from "react";
 

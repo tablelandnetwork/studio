@@ -1,14 +1,14 @@
-import { PathLike, constants } from "fs";
-import { resolve } from "path";
-import { access, writeFile, readFile } from "fs/promises";
-import { createHash } from "crypto";
-import { getTableConfig } from "drizzle-orm/sqlite-core";
 import { Database, helpers } from "@tableland/sdk";
-import { getDefaultProvider, Wallet } from "ethers";
+import { createHash } from "crypto";
 import { config } from "dotenv";
+import { getTableConfig } from "drizzle-orm/sqlite-core";
+import { Wallet, getDefaultProvider } from "ethers";
+import { PathLike, constants } from "fs";
+import { access, readFile, writeFile } from "fs/promises";
+import { resolve } from "path";
 
-import { Tables, tablesJson } from "../src/lib/drizzle";
 import * as schema from "../src/db/schema";
+import { Tables, tablesJson } from "../src/lib/drizzle";
 
 config({ path: resolve(process.cwd(), ".env.local") });
 
