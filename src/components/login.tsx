@@ -61,7 +61,7 @@ export default function Login() {
   };
 
   const handleCancel = () => {
-    setShowRegisterDialog(false)
+    setShowRegisterDialog(false);
     setRegistering(false);
     setUsername("");
     setEmail("");
@@ -89,11 +89,21 @@ export default function Login() {
           <div className="space-y-4 py-2 pb-4">
             <div className="space-y-2">
               <Label htmlFor="name">Username</Label>
-              <Input id="name" placeholder="myusername" value={username} onChange={(e) => setUsername(e.target.value)} />
+              <Input
+                id="name"
+                placeholder="myusername"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="name">Email address</Label>
-              <Input id="name" placeholder="me@me.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input
+                id="name"
+                placeholder="me@me.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
           </div>
           {!!error && <p>{error}</p>}
