@@ -7,7 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "tables": "tsx scripts/tables.ts"
+    "tables": "tsx scripts/tables.ts",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "**/*": [
+      "next lint --fix --file",
+      "prettier --write --ignore-unknown"
+    ]
   },
   "dependencies": {
     "@biconomy/core-types": "^2.0.0",
@@ -54,6 +61,8 @@
     "autoprefixer": "^10.4.14",
     "dotenv": "^16.0.3",
     "eslint-config-prettier": "^8.8.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
     "postcss": "^8.4.21",
     "prettier": "2.8.8",
     "prettier-plugin-organize-imports": "^3.2.2",
