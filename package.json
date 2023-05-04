@@ -10,11 +10,6 @@
     "tables": "tsx scripts/tables.ts",
     "prepare": "husky install"
   },
-  "lint-staged": {
-    "**/*": [
-      "prettier --write --ignore-unknown"
-    ]
-  },
   "dependencies": {
     "@biconomy/core-types": "^2.0.0",
     "@biconomy/smart-account": "^2.0.0",
