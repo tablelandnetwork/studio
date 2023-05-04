@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "tables": "tsx scripts/tables.ts"
+    "tables": "tsx scripts/tables.ts",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@biconomy/core-types": "^2.0.0",
@@ -55,10 +56,14 @@
     "@types/keccak": "^3.0.1",
     "autoprefixer": "^10.4.14",
     "dotenv": "^16.0.3",
-    "eslint-plugin-simple-import-sort": "^10.0.0",
-    "eslint-plugin-tailwindcss": "^3.11.0",
-    "mailing": "^0.9.14",
+    "eslint-config-prettier": "^8.8.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
+    "mailing": "^0.9.15",
     "postcss": "^8.4.21",
+    "prettier": "2.8.8",
+    "prettier-plugin-organize-imports": "^3.2.2",
+    "prettier-plugin-tailwindcss": "^0.2.8",
     "tailwindcss": "^3.3.1",
     "tsx": "^3.12.6"
   }

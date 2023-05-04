@@ -2,7 +2,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 import HeaderProject from "@/components/header-project";
 import { projectByTeamIdAndSlug, teamBySlug } from "@/db/api";
-import { Project,Team } from "@/db/schema";
+import { Project, Team } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
 
 type Props = {

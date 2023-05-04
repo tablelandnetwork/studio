@@ -14,7 +14,6 @@ import {
   resolveTeams,
   resolveUsers,
   Team,
-  User,
 } from "./schema";
 
 if (!process.env.PRIVATE_KEY) {
