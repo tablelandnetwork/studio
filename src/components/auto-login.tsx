@@ -1,4 +1,4 @@
-import { useSetAtom } from "jotai"
+import { useSetAtom } from "jotai";
 import { useEffect } from "react";
 
 import { loginAtom } from "@/store/login";

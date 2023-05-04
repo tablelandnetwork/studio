@@ -12,7 +12,6 @@
   },
   "lint-staged": {
     "**/*": [
-      "next lint --fix --file",
       "prettier --write --ignore-unknown"
     ]
   },
