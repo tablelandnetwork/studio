@@ -13,7 +13,7 @@ export default function AuthDebug() {
   return (
     <div>
       <h1>AuthDebug</h1>
-      <p>User id: {auth ? auth.user.id : "undefined"}</p>
+      <p>User id: {auth ? auth.user.teamId : "undefined"}</p>
       <Suspense fallback={<p>Loading social login...</p>}>
         <SocialLogin />
       </Suspense>
