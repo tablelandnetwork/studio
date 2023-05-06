@@ -8,7 +8,7 @@ export async function sendInvite(invite: TeamInvite) {
   const inviterTeam = await teamById(invite.inviterTeamId);
   const team = await teamById(invite.teamId);
   const seal = await sealData(
-    { invite },
+    { inviteId: invite.id },
     {
       password: process.env.DATA_SEAL_PASS as string,
       ttl: 0,

@@ -4,11 +4,12 @@ import { z } from "zod";
 import {
   acceptInvite,
   createTeamByPersonalTeam,
+  inviteById,
   teamById,
   teamBySlug,
   teamsByMemberTeamId,
 } from "@/db/api";
-import { Team, TeamInvite } from "@/db/schema";
+import { Team } from "@/db/schema";
 import { protectedProcedure, router } from "@/server/trpc";
 import { sendInvite } from "@/utils/send";
 import { unsealData } from "iron-session";
@@ -85,10 +86,10 @@ export const teamsRouter = router({
   acceptInvite: protectedProcedure
     .input(z.object({ seal: z.string() }))
     .mutation(async ({ ctx, input: { seal } }) => {
-      const { invite: res } = await unsealData(seal, {
+      const { inviteId } = await unsealData(seal, {
         password: process.env.DATA_SEAL_PASS as string,
       });
-      const invite = res as TeamInvite;
+      const invite = await inviteById(inviteId as string);
       await acceptInvite(invite, ctx.session.auth.personalTeam);
     }),
 });

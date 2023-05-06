@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { teamById } from "@/db/api";
+import { inviteById, teamById } from "@/db/api";
 import { Team, TeamInvite } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
 import { acceptInviteAtom } from "@/store/teams";
@@ -32,11 +32,10 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
   if (typeof query.seal !== "string") {
     return { notFound: true };
   }
-  const { invite: res } = await unsealData(query.seal, {
+  const { inviteId } = await unsealData(query.seal, {
     password: process.env.DATA_SEAL_PASS as string,
   });
-  const invite = res as TeamInvite;
-  console.log("unsealed invite:", invite);
+  const invite = await inviteById(inviteId as string);
   if (!invite) {
     return { notFound: true };
   }
