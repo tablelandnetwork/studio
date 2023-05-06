@@ -1,8 +1,8 @@
 import { teamById } from "@/db/api";
 import { TeamInvite } from "@/db/schema";
+import sendMail from "@/emails";
+import Invite from "@/emails/Invite";
 import { sealData } from "iron-session";
-import sendMail from "../../emails";
-import Invite from "../../emails/Invite";
 
 export async function sendInvite(invite: TeamInvite) {
   const inviterTeam = await teamById(invite.inviterTeamId);
