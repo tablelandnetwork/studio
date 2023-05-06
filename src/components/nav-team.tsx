@@ -19,12 +19,14 @@ export function TeamNav({
       >
         Projects
       </Link>
-      <Link
-        href="/"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        People
-      </Link>
+      {!team.personal && (
+        <Link
+          href="/"
+          className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+        >
+          People
+        </Link>
+      )}
       <Link
         href="/"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
