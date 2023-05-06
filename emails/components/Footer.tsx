@@ -1,15 +1,14 @@
-import React from "react";
-import {
-  MjmlSection,
-  MjmlWrapper,
-  MjmlColumn,
-  MjmlText,
-  MjmlImage,
-  MjmlGroup,
-} from "mjml-react";
-import Link from "./Link";
-import { colors, fontSize, fontWeight } from "../theme";
 import { EMAIL_PREFERENCES_URL } from "mailing-core";
+import {
+  MjmlColumn,
+  MjmlGroup,
+  MjmlImage,
+  MjmlSection,
+  MjmlText,
+  MjmlWrapper,
+} from "mjml-react";
+import { colors, fontSize, fontWeight } from "../theme";
+import Link from "./Link";
 
 type FooterProps = {
   includeUnsubscribe?: boolean;

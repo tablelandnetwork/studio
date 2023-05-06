@@ -69,13 +69,26 @@ export const resolveTeamProjects = tablelandTable(
   }
 );
 
-export const resolveTeamInvites = tablelandTable("team_invites", {
-  id: text("id").primaryKey(),
-  teamId: text("team_id").notNull(),
-  invitedBy: text("invited_by").notNull(),
-  createdAt: text("created_at").notNull(),
-  claimed: integer("claimed").notNull(),
-});
+export const resolveTeamInvites = tablelandTable(
+  "team_invites",
+  {
+    id: text("id").primaryKey(),
+    teamId: text("team_id").notNull(),
+    email: text("email").notNull(),
+    inviterTeamId: text("inviter_team_id").notNull(),
+    createdAt: text("created_at").notNull(),
+    claimedByTeamId: text("claimed_by_team_id"),
+    claimedAt: text("claimed_at"),
+  },
+  (teamInvites) => {
+    return {
+      emailTeamIdx: uniqueIndex("emailTeamIdx").on(
+        teamInvites.email,
+        teamInvites.teamId
+      ),
+    };
+  }
+);
 
 export type User = InferModel<ReturnType<typeof resolveUsers>>;
 export type NewUser = InferModel<ReturnType<typeof resolveUsers>, "insert">;

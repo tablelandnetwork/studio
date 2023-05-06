@@ -57,15 +57,15 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
   const [open, setOpen] = React.useState(false);
   const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
 
-  const [inviteEmails, setInviteEmails] = React.useState<string[]>([]);
+  const [emailInvites, setEmailInvites] = React.useState<string[]>([]);
 
   const handleNewTeam = async () => {
-    console.log(inviteEmails);
+    console.log(emailInvites);
     if (!newTeamName.length) return;
     setError("");
     setCreatingTeam(true);
     try {
-      const team = await newTeam([{ name: newTeamName }]);
+      const team = await newTeam([{ name: newTeamName, emailInvites }]);
       setCreatingTeam(false);
       setNewTeamName("");
       setShowNewTeamDialog(false);
@@ -81,6 +81,7 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
     setShowNewTeamDialog(false);
     setCreatingTeam(false);
     setNewTeamName("");
+    setEmailInvites([]);
   };
 
   return (
@@ -185,9 +186,9 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
               <Label htmlFor="emails">Invite others by email</Label>
               <TagInput
                 id="emails"
-                placeholder="Enter email address"
-                tags={inviteEmails}
-                setTags={setInviteEmails}
+                placeholder="Enter email address, press enter"
+                tags={emailInvites}
+                setTags={setEmailInvites}
               />
             </div>
           </div>

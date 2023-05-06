@@ -1,8 +1,7 @@
-import React from "react";
 import { MjmlColumn, MjmlGroup, MjmlSection, MjmlWrapper } from "mjml-react";
-import Text from "./Text";
+import { colors, fontSize, fontWeight, lineHeight } from "../theme";
 import Link from "./Link";
-import { colors, fontSize, lineHeight, fontWeight } from "../theme";
+import Text from "./Text";
 
 export default function Header() {
   return (

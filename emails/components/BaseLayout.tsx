@@ -1,21 +1,21 @@
-import React from "react";
 import {
   Mjml,
-  MjmlBody,
-  MjmlHead,
-  MjmlFont,
-  MjmlStyle,
-  MjmlAttributes,
   MjmlAll,
+  MjmlAttributes,
+  MjmlBody,
+  MjmlFont,
+  MjmlHead,
+  MjmlStyle,
 } from "mjml-react";
+import React from "react";
 import {
-  screens,
-  themeDefaults,
-  spacing,
+  borderRadius,
   colors,
   fontFamily,
   fontSize,
-  borderRadius,
+  screens,
+  spacing,
+  themeDefaults,
 } from "../theme";
 
 type BaseLayoutProps = {

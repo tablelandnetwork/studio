@@ -1,5 +1,5 @@
+import { HrefProps, MjmlText } from "mjml-react";
 import React from "react";
-import { MjmlText, HrefProps } from "mjml-react";
 import { colors } from "../theme";
 
 type LinkProps = HrefProps & React.ComponentProps<typeof MjmlText>;

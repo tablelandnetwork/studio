@@ -1,13 +1,13 @@
-import React from "react";
 import cx from "classnames";
 import { MjmlButton } from "mjml-react";
+import React from "react";
 
 import {
+  borderRadius,
   colors,
   fontSize,
-  borderRadius,
-  lineHeight,
   fontWeight,
+  lineHeight,
 } from "../theme";
 
 type ButtonProps = React.ComponentProps<typeof MjmlButton>;

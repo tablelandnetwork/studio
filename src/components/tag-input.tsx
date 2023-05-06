@@ -22,9 +22,6 @@ export default function TagInput({ id, placeholder, tags, setTags }: Props) {
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = e;
     const trimmedInput = input.trim();
-
-    console.log(key);
-
     if (
       (key === "," || key === "Enter") &&
       trimmedInput.length &&
@@ -58,7 +55,7 @@ export default function TagInput({ id, placeholder, tags, setTags }: Props) {
   return (
     <div
       id={id}
-      className="flex w-full max-w-full space-x-1 overflow-scroll rounded-md border pl-1"
+      className="flex w-full max-w-full space-x-1 overflow-scroll rounded-md border pl-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
     >
       {tags.map((tag, i) => (
         <div

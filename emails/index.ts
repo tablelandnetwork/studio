@@ -15,7 +15,7 @@ const transport = nodemailer.createTransport({
 
 const sendMail = buildSendMail({
   transport,
-  defaultFrom: "ops@textile.io",
+  defaultFrom: "noreply@tableland.xyz",
   configPath: "./mailing.config.json",
 });
 
