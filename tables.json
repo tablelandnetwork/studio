@@ -1,0 +1,44 @@
+{
+  "projects": {
+    "arbitrum-goerli": {
+      "table": "projects_421613_17",
+      "hash": "952682729d94254c106e699e1407c9d3a54c2fe95292ab503849206e307f79d8",
+      "createStmt": "create table projects(id text primary key not null,name text not null,slug text not null,description text)"
+    }
+  },
+  "team_invites": {
+    "arbitrum-goerli": {
+      "table": "team_invites_421613_18",
+      "hash": "a2a0aaf894a8adccbf819d1e5e6ab524749dab326b8eaa672955ba30bf79efa2",
+      "createStmt": "create table team_invites(id text primary key not null,team_id text not null,email text not null,inviter_team_id text not null,created_at text not null,claimed_by_team_id text,claimed_at text,unique(email,team_id))"
+    }
+  },
+  "team_memberships": {
+    "arbitrum-goerli": {
+      "table": "team_memberships_421613_19",
+      "hash": "f2e34f270c7efb7cad65931a4e1c82c0f0d87966a2c256bcb0bcb551ddb5e107",
+      "createStmt": "create table team_memberships(member_team_id text not null,team_id text not null,is_owner integer not null,unique(member_team_id,team_id))"
+    }
+  },
+  "team_projects": {
+    "arbitrum-goerli": {
+      "table": "team_projects_421613_20",
+      "hash": "983a72b7e51d411df8b7aae57e7c6a54498b711120e4bcebdf9607168790f4f7",
+      "createStmt": "create table team_projects(team_id text not null,project_id text not null,is_owner integer not null,unique(team_id,project_id))"
+    }
+  },
+  "teams": {
+    "arbitrum-goerli": {
+      "table": "teams_421613_21",
+      "hash": "ff0a3030e6b4858b1a5b17613d34f6960b9e884eb070469ad56e43106750fc02",
+      "createStmt": "create table teams(id text primary key not null,name text not null,slug text not null,personal integer not null,unique(name),unique(slug))"
+    }
+  },
+  "users": {
+    "arbitrum-goerli": {
+      "table": "users_421613_22",
+      "hash": "406c9d9a1119a2e60f4237fb50cc2a0ee643127428a10cae784d0eba779c09d4",
+      "createStmt": "create table users(address text primary key not null,team_id text not null,unique(team_id))"
+    }
+  }
+}
