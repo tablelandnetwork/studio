@@ -8,9 +8,9 @@
   },
   "team_invites": {
     "arbitrum-goerli": {
-      "table": "team_invites_421613_18",
-      "hash": "a2a0aaf894a8adccbf819d1e5e6ab524749dab326b8eaa672955ba30bf79efa2",
-      "createStmt": "create table team_invites(id text primary key not null,team_id text not null,email text not null,inviter_team_id text not null,created_at text not null,claimed_by_team_id text,claimed_at text,unique(email,team_id))"
+      "table": "team_invites_421613_23",
+      "hash": "40e333d980b7012c6b9ef2ebf48a4cbceb72a0366dc81303a4ca497c2b830eb4",
+      "createStmt": "create table team_invites(id text primary key not null,team_id text not null,sealed text not null,inviter_team_id text not null,created_at text not null,claimed_by_team_id text,claimed_at text)"
     }
   },
   "team_memberships": {
@@ -36,9 +36,9 @@
   },
   "users": {
     "arbitrum-goerli": {
-      "table": "users_421613_22",
-      "hash": "406c9d9a1119a2e60f4237fb50cc2a0ee643127428a10cae784d0eba779c09d4",
-      "createStmt": "create table users(address text primary key not null,team_id text not null,unique(team_id))"
+      "table": "users_421613_24",
+      "hash": "180395d6c2d26472f04d5ddd326a9494da557b26df201b47f147cff440f00a1c",
+      "createStmt": "create table users(address text primary key not null,team_id text not null,sealed text not null,unique(team_id))"
     }
   }
 }

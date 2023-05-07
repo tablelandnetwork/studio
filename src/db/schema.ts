@@ -8,6 +8,7 @@ export const resolveUsers = tablelandTable(
   {
     address: text("address").primaryKey(),
     teamId: text("team_id").notNull(),
+    sealed: text("sealed").notNull(),
   },
   (users) => ({
     teamIdIdx: uniqueIndex("teamIdIdx").on(users.teamId),
@@ -69,29 +70,25 @@ export const resolveTeamProjects = tablelandTable(
   }
 );
 
-export const resolveTeamInvites = tablelandTable(
-  "team_invites",
-  {
-    id: text("id").primaryKey(),
-    teamId: text("team_id").notNull(),
-    email: text("email").notNull(),
-    inviterTeamId: text("inviter_team_id").notNull(),
-    createdAt: text("created_at").notNull(),
-    claimedByTeamId: text("claimed_by_team_id"),
-    claimedAt: text("claimed_at"),
-  },
-  (teamInvites) => {
-    return {
-      emailTeamIdx: uniqueIndex("emailTeamIdx").on(
-        teamInvites.email,
-        teamInvites.teamId
-      ),
-    };
-  }
-);
+export const resolveTeamInvites = tablelandTable("team_invites", {
+  id: text("id").primaryKey(),
+  teamId: text("team_id").notNull(),
+  sealed: text("sealed").notNull(),
+  inviterTeamId: text("inviter_team_id").notNull(),
+  createdAt: text("created_at").notNull(),
+  claimedByTeamId: text("claimed_by_team_id"),
+  claimedAt: text("claimed_at"),
+});
 
-export type User = InferModel<ReturnType<typeof resolveUsers>>;
-export type NewUser = InferModel<ReturnType<typeof resolveUsers>, "insert">;
+export type UserSealed = InferModel<ReturnType<typeof resolveUsers>>;
+export type NewUserSealed = InferModel<
+  ReturnType<typeof resolveUsers>,
+  "insert"
+>;
+export type User = Omit<UserSealed, "sealed"> & { email?: string };
+export type NewUser = Omit<NewUserSealed, "sealed"> & {
+  email?: string;
+};
 
 export type Team = InferModel<ReturnType<typeof resolveTeams>>;
 export type NewTeam = InferModel<ReturnType<typeof resolveTeams>, "insert">;
@@ -116,8 +113,14 @@ export type NewTeamProject = InferModel<
   "insert"
 >;
 
-export type TeamInvite = InferModel<ReturnType<typeof resolveTeamInvites>>;
-export type NewTeamInvite = InferModel<
+export type TeamInviteSealed = InferModel<
+  ReturnType<typeof resolveTeamInvites>
+>;
+export type NewTeamInviteSealed = InferModel<
   ReturnType<typeof resolveTeamInvites>,
   "insert"
 >;
+export type TeamInvite = Omit<TeamInviteSealed, "sealed"> & { email: string };
+export type NewTeamInvite = Omit<NewTeamInviteSealed, "sealed"> & {
+  email: string;
+};
