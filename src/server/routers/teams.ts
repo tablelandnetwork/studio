@@ -4,13 +4,14 @@ import { z } from "zod";
 import {
   acceptInvite,
   createTeamByPersonalTeam,
+  deleteInvite,
   inviteById,
   teamById,
   teamBySlug,
   teamsByMemberTeamId,
 } from "@/db/api";
 import { Team } from "@/db/schema";
-import { protectedProcedure, router } from "@/server/trpc";
+import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 import { sendInvite } from "@/utils/send";
 import { unsealData } from "iron-session";
 
@@ -90,7 +91,18 @@ export const teamsRouter = router({
         password: process.env.DATA_SEAL_PASS as string,
       });
       const invite = await inviteById(inviteId as string);
+      if (!invite) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Invite not found" });
+      }
       await acceptInvite(invite, ctx.session.auth.personalTeam);
+    }),
+  ignoreInvite: publicProcedure
+    .input(z.object({ seal: z.string() }))
+    .mutation(async ({ input: { seal } }) => {
+      const { inviteId } = await unsealData(seal, {
+        password: process.env.DATA_SEAL_PASS as string,
+      });
+      await deleteInvite(inviteId as string);
     }),
 });
 

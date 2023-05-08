@@ -11,7 +11,7 @@ import {
 import { inviteById, teamById } from "@/db/api";
 import { Team, TeamInvite } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
-import { acceptInviteAtom } from "@/store/teams";
+import { acceptInviteAtom, ignoreInviteAtom } from "@/store/teams";
 import { unsealData } from "iron-session";
 import { useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
@@ -68,6 +68,7 @@ export default function Invite({
   );
 
   const accpectInvite = useSetAtom(acceptInviteAtom);
+  const ignoreInvite = useSetAtom(ignoreInviteAtom);
   const [accepting, setAccepting] = React.useState(false);
   const [ignoring, setIgnoring] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -91,7 +92,8 @@ export default function Invite({
     try {
       setError("");
       setIgnoring(true);
-      // await ignoreInvite([{ seal }]);
+      await ignoreInvite([{ seal }]);
+      router.replace("/");
     } catch (err: any) {
       setError("Error ingoring invite.");
     } finally {

@@ -34,7 +34,7 @@ const baseSigner = wallet.connect(provider);
 const signer = new NonceManager(baseSigner);
 
 const tbl = new Database({ signer, autoWait: true });
-const db = drizzle(tbl, { logger: false });
+const db = drizzle(tbl, { logger: true });
 
 const users = resolveUsers(process.env.CHAIN);
 const teams = resolveTeams(process.env.CHAIN);
@@ -136,7 +136,7 @@ export async function createTeamByPersonalTeam(
     .insert(teamMemberships)
     .values({ memberTeamId: personalTeamId, teamId, isOwner: 1 })
     .toSQL();
-  const invites = inviteEmails.map((email) => ({
+  const invites: TeamInvite[] = inviteEmails.map((email) => ({
     id: randomUUID(),
     teamId,
     inviterTeamId: personalTeamId,
@@ -150,11 +150,11 @@ export async function createTeamByPersonalTeam(
     tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
   ];
   if (!!invites.length) {
-    const invitesEncrypted: NewTeamInviteSealed[] = await Promise.all(
-      invites.map(async (invite) => ({
-        ...invite,
+    const sealedInvites: NewTeamInviteSealed[] = await Promise.all(
+      invites.map(async ({ email, ...rest }) => ({
+        ...rest,
         sealed: await sealData(
-          { email: invite.email },
+          { email },
           {
             password: process.env.DATA_SEAL_PASS as string,
             ttl: 0,
@@ -164,7 +164,7 @@ export async function createTeamByPersonalTeam(
     );
     const { sql: invitesSql, params: invitesParams } = db
       .insert(teamInvites)
-      .values(invitesEncrypted)
+      .values(sealedInvites)
       .toSQL();
     batch.push(tbl.prepare(invitesSql).bind(invitesParams));
   }
@@ -217,11 +217,18 @@ export async function inviteEmailsToTeam(
   inviterTeamId: string,
   emails: string[]
 ) {
-  const invites: NewTeamInviteSealed[] = await Promise.all(
-    emails.map(async (email) => ({
-      id: randomUUID(),
-      teamId,
-      inviterTeamId,
+  const invites: TeamInvite[] = emails.map((email) => ({
+    id: randomUUID(),
+    teamId,
+    inviterTeamId,
+    email,
+    createdAt: new Date().toISOString(),
+    claimedByTeamId: null,
+    claimedAt: null,
+  }));
+  const sealedInvites: NewTeamInviteSealed[] = await Promise.all(
+    invites.map(async ({ email, ...rest }) => ({
+      ...rest,
       sealed: await sealData(
         { email },
         {
@@ -229,10 +236,10 @@ export async function inviteEmailsToTeam(
           ttl: 0,
         }
       ),
-      createdAt: new Date().toISOString(),
     }))
   );
-  await db.insert(teamInvites).values(invites).run();
+  await db.insert(teamInvites).values(sealedInvites).run();
+  return invites;
 }
 
 export async function inviteById(id: string) {
@@ -241,6 +248,7 @@ export async function inviteById(id: string) {
     .from(teamInvites)
     .where(eq(teamInvites.id, id))
     .get();
+  if (!invite) return undefined;
   const { sealed, ...rest } = invite;
   const { email } = await unsealData(sealed, {
     password: process.env.DATA_SEAL_PASS as string,
