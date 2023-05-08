@@ -16,14 +16,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Project } from "@/db/schema";
+import { Project, Team } from "@/db/schema";
 import { newTableAtom } from "@/store/tables";
 
 interface Props extends DialogProps {
   project: Project;
+  team: Team;
 }
 
-export default function NewTableDialog({ project, children, ...props }: Props) {
+export default function NewTableDialog({
+  project,
+  team,
+  children,
+  ...props
+}: Props) {
   const [newTableName, setNewTableName] = React.useState("");
   const [newTableSchema, setNewTableSchema] = React.useState("");
   const [newTableDescription, setNewTableDescription] = React.useState("");
@@ -37,7 +43,7 @@ export default function NewTableDialog({ project, children, ...props }: Props) {
     setError("");
     setCreatingTable(true);
     try {
-      const Table = await newTable([
+      const table = await newTable([
         {
           projectId: project.id,
           name: newTableName,
@@ -55,7 +61,7 @@ export default function NewTableDialog({ project, children, ...props }: Props) {
         props.onOpenChange(false);
       }
       // TODO: Maybe restore below and add route for individual tables?
-      // router.push(`/${team.slug}/${Table.slug}`);
+      router.push(`/${team.slug}/${project.slug}/${table.slug}`);
     } catch (err: any) {
       // TODO: Figure out how to handle this error from tRPC.
       setError("There was an error creating your Table.");

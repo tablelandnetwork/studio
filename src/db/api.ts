@@ -169,17 +169,29 @@ export async function createTable(
   schema: string
 ) {
   const tableId = randomUUID();
+  const slug = slugify(name);
   const tablesInsert = db
     .insert(tables)
-    .values({ id: tableId, name, description, schema })
+    .values({ id: tableId, name, description, schema, slug })
     .run();
   const projectTablesInsert = db
     .insert(projectTables)
     .values({ tableId, projectId })
     .run();
   await Promise.all([tablesInsert, projectTablesInsert]);
-  const table: Table = { id: tableId, name, description, schema };
+  const table: Table = { id: tableId, name, description, schema, slug };
   return table;
+}
+
+export async function getTablesByProjectId(projectId: string) {
+  const res = await db
+    .select({ tables })
+    .from(projectTables)
+    .innerJoin(tables, eq(projectTables.tableId, tables.id))
+    .where(eq(projectTables.projectId, projectId))
+    .orderBy(tables.name)
+    .all();
+  return res.map((r) => r.tables);
 }
 
 export async function projectsByTeamId(teamId: string) {
@@ -197,7 +209,7 @@ export async function projectsByTeamId(teamId: string) {
 export async function tablesByProjectId(projectId: string) {
   const res = await db
     .select({ tables })
-    .from(tables)
+    .from(projectTables)
     .innerJoin(tables, eq(projectTables.tableId, tables.id))
     .where(and(eq(projectTables.projectId, projectId)))
     .orderBy(tables.name)
@@ -224,7 +236,7 @@ export async function projectTeamByProjectId(projectId: string) {
     .where(eq(teamProjects.projectId, projectId))
     .orderBy(teams.name)
     .get();
-  return res.teams.id;
+  return res?.teams?.id;
 }
 
 export async function isAuthorizedForProject(

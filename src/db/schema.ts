@@ -71,6 +71,7 @@ export const resolveTeamProjects = tablelandTable(
 
 export const resolveTables = tablelandTable("tables", {
   id: text("id").primaryKey(),
+  slug: text("slug").notNull(),
   name: text("name").notNull(),
   description: text("description"),
   schema: text("schema").notNull(),
