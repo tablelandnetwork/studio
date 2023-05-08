@@ -5,14 +5,18 @@ import { drizzle } from "drizzle-orm/d1";
 import { and, eq } from "drizzle-orm/expressions";
 import { Wallet, getDefaultProvider } from "ethers";
 
+import { sealData, unsealData } from "iron-session";
 import {
+  NewTeamInviteSealed,
   NewTeamMembership,
   Project,
   Table,
   Team,
+  TeamInvite,
   resolveProjectTables,
   resolveProjects,
   resolveTables,
+  resolveTeamInvites,
   resolveTeamMemberships,
   resolveTeamProjects,
   resolveTeams,
@@ -42,16 +46,23 @@ const projects = resolveProjects(process.env.CHAIN);
 const teamProjects = resolveTeamProjects(process.env.CHAIN);
 const tables = resolveTables(process.env.CHAIN);
 const projectTables = resolveProjectTables(process.env.CHAIN);
+const teamInvites = resolveTeamInvites(process.env.CHAIN);
 
 export async function createUserAndPersonalTeam(
   address: string,
   teamName: string,
   email?: string
 ) {
-  // TODO: Store email encrypted.
   const teamId = randomUUID();
-  const usersInsert = db.insert(users).values({ address, teamId }).run();
-  const teamsInsert = db
+  const sealed = await sealData(
+    { email },
+    { password: process.env.DATA_SEAL_PASS as string, ttl: 0 }
+  );
+  const { sql: usersSql, params: usersParams } = db
+    .insert(users)
+    .values({ address, teamId, sealed })
+    .toSQL();
+  const { sql: teamsSql, params: teamsParams } = db
     .insert(teams)
     .values({
       id: teamId,
@@ -59,12 +70,16 @@ export async function createUserAndPersonalTeam(
       name: teamName,
       slug: slugify(teamName),
     })
-    .run();
-  const teamMembershipInsert = db
+    .toSQL();
+  const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
     .insert(teamMemberships)
     .values({ memberTeamId: teamId, teamId, isOwner: 1 })
-    .run();
-  await Promise.all([usersInsert, teamsInsert, teamMembershipInsert]);
+    .toSQL();
+  await tbl.batch([
+    tbl.prepare(usersSql).bind(usersParams),
+    tbl.prepare(teamsSql).bind(teamsParams),
+    tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
+  ]);
   const info = await userAndPersonalTeamByAddress(address);
   if (!info) {
     throw new Error("Failed to create user and personal team.");
@@ -73,33 +88,93 @@ export async function createUserAndPersonalTeam(
 }
 
 export async function userAndPersonalTeamByAddress(address: string) {
-  return db
+  const res = await db
     .select({
       user: users,
       personalTeam: teams,
     })
     .from(users)
     .innerJoin(teams, eq(users.teamId, teams.id))
+    .where(eq(users.address, address))
     .get();
+  if (!res) {
+    return undefined;
+  }
+  const { sealed, ...rest } = res.user;
+  const { email } = await unsealData(sealed, {
+    password: process.env.DATA_SEAL_PASS as string,
+  });
+  return {
+    user: {
+      ...rest,
+      email: email as string | undefined,
+    },
+    personalTeam: res.personalTeam,
+  };
 }
 
 export async function userByAddress(address: string) {
-  return db.select().from(users).where(eq(users.address, address)).get();
+  const { sealed, ...rest } = await db
+    .select()
+    .from(users)
+    .where(eq(users.address, address))
+    .get();
+  const { email } = await unsealData(sealed, {
+    password: process.env.DATA_SEAL_PASS as string,
+  });
+  return { ...rest, email: email as string | undefined };
 }
 
 export async function createTeamByPersonalTeam(
   name: string,
-  personalTeamId: string
+  personalTeamId: string,
+  inviteEmails: string[]
 ) {
   const teamId = randomUUID();
   const slug = slugify(name);
-  await db.insert(teams).values({ id: teamId, personal: 0, name, slug }).run();
-  await db
+  const team: Team = { id: teamId, personal: 0, name, slug };
+  const { sql: teamsSql, params: teamsParams } = db
+    .insert(teams)
+    .values(team)
+    .toSQL();
+  const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
     .insert(teamMemberships)
     .values({ memberTeamId: personalTeamId, teamId, isOwner: 1 })
-    .run();
-  const team: Team = { id: teamId, personal: 0, name, slug };
-  return team;
+    .toSQL();
+  const invites: TeamInvite[] = inviteEmails.map((email) => ({
+    id: randomUUID(),
+    teamId,
+    inviterTeamId: personalTeamId,
+    email,
+    createdAt: new Date().toISOString(),
+    claimedByTeamId: null,
+    claimedAt: null,
+  }));
+  const batch = [
+    tbl.prepare(teamsSql).bind(teamsParams),
+    tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
+  ];
+  if (!!invites.length) {
+    const sealedInvites: NewTeamInviteSealed[] = await Promise.all(
+      invites.map(async ({ email, ...rest }) => ({
+        ...rest,
+        sealed: await sealData(
+          { email },
+          {
+            password: process.env.DATA_SEAL_PASS as string,
+            ttl: 0,
+          }
+        ),
+      }))
+    );
+    const { sql: invitesSql, params: invitesParams } = db
+      .insert(teamInvites)
+      .values(sealedInvites)
+      .toSQL();
+    batch.push(tbl.prepare(invitesSql).bind(invitesParams));
+  }
+  await tbl.batch(batch);
+  return { team, invites };
 }
 
 export async function teamBySlug(slug: string) {
@@ -139,7 +214,81 @@ export async function isAuthorizedForTeam(
 }
 
 export async function addUserToTeam(params: NewTeamMembership) {
-  return db.insert(teamMemberships).values(params).run();
+  await db.insert(teamMemberships).values(params).run();
+}
+
+export async function inviteEmailsToTeam(
+  teamId: string,
+  inviterTeamId: string,
+  emails: string[]
+) {
+  const invites: TeamInvite[] = emails.map((email) => ({
+    id: randomUUID(),
+    teamId,
+    inviterTeamId,
+    email,
+    createdAt: new Date().toISOString(),
+    claimedByTeamId: null,
+    claimedAt: null,
+  }));
+  const sealedInvites: NewTeamInviteSealed[] = await Promise.all(
+    invites.map(async ({ email, ...rest }) => ({
+      ...rest,
+      sealed: await sealData(
+        { email },
+        {
+          password: process.env.DATA_SEAL_PASS as string,
+          ttl: 0,
+        }
+      ),
+    }))
+  );
+  await db.insert(teamInvites).values(sealedInvites).run();
+  return invites;
+}
+
+export async function inviteById(id: string) {
+  const invite = await db
+    .select()
+    .from(teamInvites)
+    .where(eq(teamInvites.id, id))
+    .get();
+  if (!invite) return undefined;
+  const { sealed, ...rest } = invite;
+  const { email } = await unsealData(sealed, {
+    password: process.env.DATA_SEAL_PASS as string,
+  });
+  return {
+    ...rest,
+    email: email as string,
+  };
+}
+
+export async function acceptInvite(invite: TeamInvite, personalTeam: Team) {
+  const { sql: invitesSql, params: invitesParams } = db
+    .update(teamInvites)
+    .set({
+      claimedByTeamId: personalTeam.id,
+      claimedAt: new Date().toISOString(),
+    })
+    .where(eq(teamInvites.id, invite.id))
+    .toSQL();
+  const { sql: membershipsSql, params: membershipsParams } = db
+    .insert(teamMemberships)
+    .values({
+      teamId: invite.teamId,
+      memberTeamId: personalTeam.id,
+      isOwner: 0,
+    })
+    .toSQL();
+  await tbl.batch([
+    tbl.prepare(invitesSql).bind(invitesParams),
+    tbl.prepare(membershipsSql).bind(membershipsParams),
+  ]);
+}
+
+export async function deleteInvite(id: string) {
+  await db.delete(teamInvites).where(eq(teamInvites.id, id)).run();
 }
 
 export async function createProject(
@@ -149,15 +298,18 @@ export async function createProject(
 ) {
   const projectId = randomUUID();
   const slug = slugify(name);
-  const projectsInsert = db
+  const { sql: projectsSql, params: projectsParams } = db
     .insert(projects)
     .values({ id: projectId, name, description, slug })
-    .run();
-  const teamProjectsInsert = db
+    .toSQL();
+  const { sql: teamProjectsSql, params: teamProjectsParams } = db
     .insert(teamProjects)
     .values({ projectId, teamId, isOwner: 1 })
-    .run();
-  await Promise.all([projectsInsert, teamProjectsInsert]);
+    .toSQL();
+  await tbl.batch([
+    tbl.prepare(projectsSql).bind(projectsParams),
+    tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
+  ]);
   const project: Project = { id: projectId, name, description, slug };
   return project;
 }
@@ -243,7 +395,7 @@ export async function isAuthorizedForProject(
   teamId: string,
   projectId: string
 ) {
-  const ownsProject = await db
+  const authorized = await db
     .select()
     .from(teamProjects)
     .where(
@@ -253,7 +405,7 @@ export async function isAuthorizedForProject(
       )
     )
     .get();
-  return !!ownsProject;
+  return !!authorized;
 }
 
 function slugify(input: string) {

@@ -10,7 +10,7 @@ import { resolve } from "path";
 import * as schema from "../src/db/schema";
 import { Tables, tablesJson } from "../src/lib/drizzle";
 
-config({ path: resolve(process.cwd(), ".env.local") });
+config({ path: resolve(process.cwd(), process.argv[2] || ".env.local") });
 
 if (!process.env.PRIVATE_KEY) {
   throw new Error("Must provide PRIVATE_KEY env var.");

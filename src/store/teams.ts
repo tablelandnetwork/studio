@@ -10,10 +10,15 @@ export const selectedTeamAtom = atom<Team | null>(null);
 
 export const newTeamAtom = trpcJotai.teams.newTeam.atomWithMutation();
 
+export const acceptInviteAtom = trpcJotai.teams.acceptInvite.atomWithMutation();
+
+export const ignoreInviteAtom = trpcJotai.teams.ignoreInvite.atomWithMutation();
+
 export const userTeamsAtom = trpcJotai.teams.teamsForPersonalTeam.atomWithQuery(
   (get) => {
     get(newTeamAtom);
     get(registerAtom);
+    get(acceptInviteAtom);
     const auth = get(authAtom);
     return auth ? { personalTeamId: auth.user.teamId } : DISABLED;
   }

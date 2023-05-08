@@ -3,7 +3,7 @@ import "@biconomy/web3-auth/dist/src/style.css";
 import { useAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/router";
+import { NextRouter, useRouter } from "next/router";
 import * as React from "react";
 
 import {
@@ -24,9 +24,13 @@ import { Button } from "./ui/button";
 // TODO: Remember we can get social/email info from:
 // const info = await socialLoginSDK?.getUserInfo();
 
+type Props = {
+  successRouterCallback?: (router: NextRouter) => void;
+};
+
 const socialLoginLoader = loadable(socialLoginAtom);
 
-export default function Login() {
+export default function Login({ successRouterCallback }: Props) {
   const [socialLogin] = useAtom(socialLoginLoader);
   const [, login] = useAtom(loginAtom);
   const [, register] = useAtom(registerAtom);
@@ -44,7 +48,11 @@ export default function Login() {
     if (!res) {
       setShowRegisterDialog(true);
     } else {
-      router.push(`/${res.personalTeam.slug}/projects`);
+      if (successRouterCallback) {
+        successRouterCallback(router);
+      } else {
+        router.push(`/${res.personalTeam.slug}/projects`);
+      }
     }
   };
 
@@ -58,7 +66,11 @@ export default function Login() {
       });
       setRegistering(false);
       setShowRegisterDialog(false);
-      router.push(`/${res.personalTeam.slug}/projects`);
+      if (successRouterCallback) {
+        successRouterCallback(router);
+      } else {
+        router.push(`/${res.personalTeam.slug}/projects`);
+      }
     } catch (err: any) {
       setError("There was an error registering your account.");
       setRegistering(false);

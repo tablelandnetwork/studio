@@ -8,7 +8,7 @@ type Props = {
   auth: Auth | null;
 };
 
-const getProps: GetServerSideProps<Props> = async ({ params, req }) => {
+const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
   return { props: { auth: req.session.auth || null } };
 };
 
@@ -17,7 +17,6 @@ export const getServerSideProps = withSessionSsr(getProps);
 export default function Home({
   auth,
 }: InferGetServerSidePropsType<typeof getProps>) {
-  // useHydrateAtoms([[authAtom, auth]]);
   return (
     <>
       <Header personalTeam={auth?.personalTeam} />
