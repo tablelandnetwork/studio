@@ -15,7 +15,14 @@ type SiweFields = Omit<
 >;
 
 export type Auth = {
-  user: User;
+  // TODO: Find clearer way to do this
+  user:
+    | User
+    | {
+        address: string;
+        sealed: string;
+        teamId: string;
+      };
   personalTeam: Team;
 };
 
