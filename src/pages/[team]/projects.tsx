@@ -61,11 +61,7 @@ export default function Projects({
   }, [setSelectedTeam, team]);
 
   return (
-    <NewProjectDialog
-      team={team}
-      open={showNewProjectDialog}
-      onOpenChange={setShowNewProjectDialog}
-    >
+    <>
       <HeaderAuthed team={team} personalTeam={auth.personalTeam} />
       <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
         {projects?.map((project) => (
@@ -84,10 +80,19 @@ export default function Projects({
             </Card>
           </Link>
         ))}
-        <Button className="w-28" onClick={() => setShowNewProjectDialog(true)}>
-          New project
-        </Button>
+        <NewProjectDialog
+          team={team}
+          open={showNewProjectDialog}
+          onOpenChange={setShowNewProjectDialog}
+        >
+          <Button
+            className="w-28"
+            onClick={() => setShowNewProjectDialog(true)}
+          >
+            New project
+          </Button>
+        </NewProjectDialog>
       </div>
-    </NewProjectDialog>
+    </>
   );
 }

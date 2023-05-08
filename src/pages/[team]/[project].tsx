@@ -1,5 +1,6 @@
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
+import BodyProject from "@/components/body-project";
 import HeaderProject from "@/components/header-project";
 import { projectByTeamIdAndSlug, teamBySlug } from "@/db/api";
 import { Project, Team } from "@/db/schema";
@@ -57,6 +58,11 @@ export default function Project({
         </p>
         <p>{project.description}</p>
       </div>
+      <BodyProject
+        team={team}
+        personalTeam={auth.personalTeam}
+        project={project}
+      />
     </>
   );
 }
