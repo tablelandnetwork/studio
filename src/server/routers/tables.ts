@@ -14,7 +14,6 @@ export const tablesRouter = router({
     .input(z.object({ teamId: z.string(), projectId: z.string() }))
     .query(async ({ ctx, input: { projectId, teamId } }) => {
       // Is this person a team a member of the requested team?
-
       if (
         !(await isAuthorizedForTeam(ctx.session.auth.personalTeam.id, teamId))
       ) {
