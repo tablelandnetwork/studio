@@ -10,7 +10,6 @@ import { selectedProjectAtom } from "@/store/projects";
 import { tablesFromCurrentProjectAtom } from "@/store/tables";
 import { selectedTeamAtom } from "@/store/teams";
 import { useAtomValue, useSetAtom } from "jotai";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { Project, Team } from "@/db/schema";
@@ -18,10 +17,6 @@ import { DialogProps } from "@radix-ui/react-dialog";
 import React from "react";
 import NewTableDialog from "./new-table-dialog";
 import { Button } from "./ui/button";
-
-const UserNav = dynamic(() => import("./nav-user").then((res) => res.UserNav), {
-  ssr: false,
-});
 
 interface TableDialogProps extends DialogProps {
   project: Project;
