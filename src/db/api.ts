@@ -322,15 +322,18 @@ export async function createTable(
 ) {
   const tableId = randomUUID();
   const slug = slugify(name);
-  const tablesInsert = db
+  const { sql: tableSql, params: tableParams } = db
     .insert(tables)
     .values({ id: tableId, name, description, schema, slug })
-    .run();
-  const projectTablesInsert = db
+    .toSQL();
+  const { sql: projectTableSql, params: projectTableParams } = db
     .insert(projectTables)
     .values({ tableId, projectId })
-    .run();
-  await Promise.all([tablesInsert, projectTablesInsert]);
+    .toSQL();
+  await tbl.batch([
+    tbl.prepare(projectTableSql).bind(projectTableParams),
+    tbl.prepare(tableSql).bind(tableParams),
+  ]);
   const table: Table = { id: tableId, name, description, schema, slug };
   return table;
 }
