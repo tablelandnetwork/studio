@@ -97,8 +97,6 @@ export const resolveProjectTables = tablelandTable(
 export type Table = InferModel<ReturnType<typeof resolveTables>>;
 export type NewTable = InferModel<ReturnType<typeof resolveTables>, "insert">;
 
-export type User = InferModel<ReturnType<typeof resolveUsers>>;
-export type NewUser = InferModel<ReturnType<typeof resolveUsers>, "insert">;
 export const resolveTeamInvites = tablelandTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),
@@ -114,6 +112,11 @@ export type NewUserSealed = InferModel<
   ReturnType<typeof resolveUsers>,
   "insert"
 >;
+
+export type User = Omit<UserSealed, "sealed"> & { email?: string };
+export type NewUser = Omit<NewUserSealed, "sealed"> & {
+  email?: string;
+};
 
 export type Team = InferModel<ReturnType<typeof resolveTeams>>;
 export type NewTeam = InferModel<ReturnType<typeof resolveTeams>, "insert">;
