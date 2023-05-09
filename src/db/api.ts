@@ -10,9 +10,12 @@ import {
   NewTeamInviteSealed,
   NewTeamMembership,
   Project,
+  Table,
   Team,
   TeamInvite,
+  resolveProjectTables,
   resolveProjects,
+  resolveTables,
   resolveTeamInvites,
   resolveTeamMemberships,
   resolveTeamProjects,
@@ -41,6 +44,8 @@ const teams = resolveTeams(process.env.CHAIN);
 const teamMemberships = resolveTeamMemberships(process.env.CHAIN);
 const projects = resolveProjects(process.env.CHAIN);
 const teamProjects = resolveTeamProjects(process.env.CHAIN);
+const tables = resolveTables(process.env.CHAIN);
+const projectTables = resolveProjectTables(process.env.CHAIN);
 const teamInvites = resolveTeamInvites(process.env.CHAIN);
 
 export async function createUserAndPersonalTeam(
@@ -309,6 +314,30 @@ export async function createProject(
   return project;
 }
 
+export async function createTable(
+  projectId: string,
+  name: string,
+  description: string | null,
+  schema: string
+) {
+  const tableId = randomUUID();
+  const slug = slugify(name);
+  const { sql: tableSql, params: tableParams } = db
+    .insert(tables)
+    .values({ id: tableId, name, description, schema, slug })
+    .toSQL();
+  const { sql: projectTableSql, params: projectTableParams } = db
+    .insert(projectTables)
+    .values({ tableId, projectId })
+    .toSQL();
+  await tbl.batch([
+    tbl.prepare(projectTableSql).bind(projectTableParams),
+    tbl.prepare(tableSql).bind(tableParams),
+  ]);
+  const table: Table = { id: tableId, name, description, schema, slug };
+  return table;
+}
+
 export async function projectsByTeamId(teamId: string) {
   const res = await db
     .select({ projects }) // TODO: Figure out why if we don't specify select key, projects key ends up as actual table name.
@@ -321,6 +350,18 @@ export async function projectsByTeamId(teamId: string) {
   return mapped;
 }
 
+export async function tablesByProjectId(projectId: string) {
+  const res = await db
+    .select({ tables })
+    .from(projectTables)
+    .innerJoin(tables, eq(projectTables.tableId, tables.id))
+    .where(and(eq(projectTables.projectId, projectId)))
+    .orderBy(tables.name)
+    .all();
+  const mapped = res.map((r) => r.tables);
+  return mapped;
+}
+
 export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
   const res = await db
     .select({ projects })
@@ -329,6 +370,17 @@ export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
     .where(and(eq(teamProjects.teamId, teamId), eq(projects.slug, slug)))
     .get();
   return res.projects;
+}
+
+export async function projectTeamByProjectId(projectId: string) {
+  const res = await db
+    .select({ teams })
+    .from(teamProjects)
+    .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+    .where(eq(teamProjects.projectId, projectId))
+    .orderBy(teams.name)
+    .get();
+  return res?.teams?.id;
 }
 
 export async function isAuthorizedForProject(

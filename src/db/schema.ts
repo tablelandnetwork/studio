@@ -70,6 +70,33 @@ export const resolveTeamProjects = tablelandTable(
   }
 );
 
+export const resolveTables = tablelandTable("tables", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  schema: text("schema").notNull(),
+});
+
+export const resolveProjectTables = tablelandTable(
+  "project_tables",
+  {
+    projectId: text("project_id").notNull(),
+    tableId: text("table_id").notNull(),
+  },
+  (projectTables) => {
+    return {
+      projectTablesIdx: uniqueIndex("projectTablesIdx").on(
+        projectTables.projectId,
+        projectTables.tableId
+      ),
+    };
+  }
+);
+
+export type Table = InferModel<ReturnType<typeof resolveTables>>;
+export type NewTable = InferModel<ReturnType<typeof resolveTables>, "insert">;
+
 export const resolveTeamInvites = tablelandTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),
@@ -85,6 +112,7 @@ export type NewUserSealed = InferModel<
   ReturnType<typeof resolveUsers>,
   "insert"
 >;
+
 export type User = Omit<UserSealed, "sealed"> & { email?: string };
 export type NewUser = Omit<NewUserSealed, "sealed"> & {
   email?: string;
