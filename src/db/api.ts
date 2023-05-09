@@ -335,17 +335,6 @@ export async function createTable(
   return table;
 }
 
-export async function getTablesByProjectId(projectId: string) {
-  const res = await db
-    .select({ tables })
-    .from(projectTables)
-    .innerJoin(tables, eq(projectTables.tableId, tables.id))
-    .where(eq(projectTables.projectId, projectId))
-    .orderBy(tables.name)
-    .all();
-  return res.map((r) => r.tables);
-}
-
 export async function projectsByTeamId(teamId: string) {
   const res = await db
     .select({ projects }) // TODO: Figure out why if we don't specify select key, projects key ends up as actual table name.
