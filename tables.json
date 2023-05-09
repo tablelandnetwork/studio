@@ -40,5 +40,19 @@
       "hash": "180395d6c2d26472f04d5ddd326a9494da557b26df201b47f147cff440f00a1c",
       "createStmt": "create table users(address text primary key not null,team_id text not null,sealed text not null,unique(team_id))"
     }
+  },
+  "project_tables": {
+    "arbitrum-goerli": {
+      "table": "project_tables_421613_25",
+      "hash": "0600e4ad11bb8b8ce9e226853881b6fd17b32c761747e85500d15f6b8ad906a8",
+      "createStmt": "create table project_tables(project_id text not null,table_id text not null,unique(project_id,table_id))"
+    }
+  },
+  "tables": {
+    "arbitrum-goerli": {
+      "table": "tables_421613_26",
+      "hash": "35268f76eef7097bf5273a5254768d542b074e57f80e6fbb66a410415202d818",
+      "createStmt": "create table tables(id text primary key not null,slug text not null,name text not null,description text,schema text not null)"
+    }
   }
 }
