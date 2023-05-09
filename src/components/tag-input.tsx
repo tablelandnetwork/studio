@@ -55,7 +55,7 @@ export default function TagInput({ id, placeholder, tags, setTags }: Props) {
   return (
     <div
       id={id}
-      className="flex w-full max-w-full space-x-1 overflow-scroll rounded-md border pl-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+      className="flex w-full max-w-full flex-wrap space-x-1 overflow-scroll rounded-md border pl-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
     >
       {tags.map((tag, i) => (
         <div

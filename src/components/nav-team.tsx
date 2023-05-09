@@ -2,12 +2,26 @@ import Link from "next/link";
 
 import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/router";
+import { useCallback } from "react";
 
-export function TeamNav({
+export function NavTeam({
   className,
   team,
   ...props
 }: React.HTMLAttributes<HTMLElement> & { team: Team }) {
+  const router = useRouter();
+
+  const navItemClassName = useCallback(
+    (path: string) => {
+      return cn(
+        "text-sm font-medium transition-colors hover:text-primary",
+        !router.pathname.endsWith(path) && "text-muted-foreground"
+      );
+    },
+    [router]
+  );
+
   return (
     <nav
       className={cn("flex items-center space-x-4 lg:space-x-6", className)}
@@ -15,21 +29,21 @@ export function TeamNav({
     >
       <Link
         href={`/${team.slug}/projects`}
-        className="text-sm font-medium transition-colors hover:text-primary"
+        className={navItemClassName("projects")}
       >
         Projects
       </Link>
       {!team.personal && (
         <Link
-          href="/"
-          className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          href={`/${team.slug}/people`}
+          className={navItemClassName("people")}
         >
           People
         </Link>
       )}
       <Link
-        href="/"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+        href={`/${team.slug}/settings`}
+        className={navItemClassName("settings")}
       >
         Settings
       </Link>
