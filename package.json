@@ -38,6 +38,7 @@
     "eslint": "8.37.0",
     "eslint-config-next": "13.3.0",
     "iron-session": "^6.3.1",
+    "javascript-time-ago": "^2.5.9",
     "jotai": "^2.0.4",
     "jotai-trpc": "^0.5.1",
     "lucide-react": "^0.171.0",

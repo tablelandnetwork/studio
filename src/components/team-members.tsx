@@ -1,7 +1,4 @@
-import { ChevronDown } from "lucide-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,19 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Team } from "@/db/schema";
 import AddressDisplay from "./address-display";
 
@@ -75,7 +59,7 @@ export function TeamMembers({ personalTeam, people }: Props) {
                 />
               </div>
             </div>
-            <Popover>
+            {/* <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="ml-auto">
                   Owner{" "}
@@ -116,7 +100,7 @@ export function TeamMembers({ personalTeam, people }: Props) {
                   </CommandList>
                 </Command>
               </PopoverContent>
-            </Popover>
+            </Popover> */}
           </div>
         ))}
       </CardContent>

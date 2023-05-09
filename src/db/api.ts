@@ -3,6 +3,7 @@ import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/d1";
 import { and, desc, eq } from "drizzle-orm/expressions";
+import { alias } from "drizzle-orm/sqlite-core";
 import { Wallet, getDefaultProvider } from "ethers";
 import { sealData, unsealData } from "iron-session";
 import {
@@ -303,20 +304,31 @@ export async function deleteInvite(id: string) {
 }
 
 export async function invitesForTeam(teamId: string) {
+  const claimedByTeams = alias(teams, "claimed_by_teams");
   const invitesSealed = await db
-    .select({ inviter: teams, invite: teamInvites })
+    .select({ inviter: teams, invite: teamInvites, claimedBy: claimedByTeams })
     .from(teamInvites)
     .innerJoin(teams, eq(teamInvites.inviterTeamId, teams.id))
+    .leftJoin(
+      claimedByTeams,
+      eq(teamInvites.claimedByTeamId, claimedByTeams.id)
+    )
     .where(eq(teamInvites.teamId, teamId))
     .orderBy(desc(teamInvites.createdAt))
     .all();
   const invites = await Promise.all(
-    invitesSealed.map(async ({ inviter, invite: { sealed, ...rest } }) => {
-      const { email } = await unsealData(sealed, {
-        password: process.env.DATA_SEAL_PASS as string,
-      });
-      return { inviter, invite: { ...rest, email: email as string } };
-    })
+    invitesSealed.map(
+      async ({ inviter, invite: { sealed, ...rest }, claimedBy }) => {
+        const { email } = await unsealData(sealed, {
+          password: process.env.DATA_SEAL_PASS as string,
+        });
+        return {
+          inviter,
+          invite: { ...rest, email: email as string },
+          claimedBy,
+        };
+      }
+    )
   );
   return invites;
 }
