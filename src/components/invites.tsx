@@ -15,10 +15,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Team } from "@/db/schema";
-import { trpcJotai } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import { useSetAtom } from "jotai";
 import { Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/router";
 import React from "react";
@@ -58,35 +57,25 @@ type Props = {
 };
 
 export function Invites({ invites, team, personalTeam }: Props) {
-  const inviteEmails = useSetAtom(
-    trpcJotai.teams.inviteEmails.atomWithMutation()
-  );
-  const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
+  const inviteEmails = trpc.teams.inviteEmails.useMutation();
+  const [showInviteDialog, setShowInviteDialog] = React.useState(false);
   const [emailInvites, setEmailInvites] = React.useState<string[]>([]);
-  const [creatingTeam, setCreatingTeam] = React.useState(false);
-  const [error, setError] = React.useState("");
-
   const router = useRouter();
 
   const handleNewTeam = async () => {
     if (!emailInvites.length) return;
-    try {
-      setError("");
-      setCreatingTeam(true);
-      await inviteEmails([{ teamId: team.id, emails: emailInvites }]);
-      setShowNewTeamDialog(false);
-      router.replace(router.asPath);
-    } catch (err: any) {
-      // TODO: Figure out how to handle this error from tRPC.
-      setError("There was an error creating invites.");
-    } finally {
-      setCreatingTeam(false);
-    }
+    inviteEmails.mutate({ teamId: team.id, emails: emailInvites });
   };
 
+  React.useEffect(() => {
+    if (inviteEmails.isSuccess) {
+      setShowInviteDialog(false);
+      router.replace(router.asPath);
+    }
+  }, [inviteEmails.isSuccess, router]);
+
   const handleCancel = () => {
-    setShowNewTeamDialog(false);
-    setCreatingTeam(false);
+    setShowInviteDialog(false);
     setEmailInvites([]);
   };
 
@@ -97,7 +86,7 @@ export function Invites({ invites, team, personalTeam }: Props) {
   });
 
   return (
-    <Dialog open={showNewTeamDialog} onOpenChange={setShowNewTeamDialog}>
+    <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
       <Card>
         <div className="flex items-center pr-6">
           <CardHeader>
@@ -109,7 +98,7 @@ export function Invites({ invites, team, personalTeam }: Props) {
           <Button
             variant="outline"
             className="ml-auto"
-            onClick={() => setShowNewTeamDialog(true)}
+            onClick={() => setShowInviteDialog(true)}
           >
             <Plus className="" />
           </Button>
@@ -232,18 +221,26 @@ export function Invites({ invites, team, personalTeam }: Props) {
               />
             </div>
           </div>
-          {!!error && <p>{error}</p>}
+          {inviteEmails.error && (
+            <p>Error sending invites: {inviteEmails.error.message}</p>
+          )}
         </div>
         <DialogFooter>
           <Button
             variant="outline"
             onClick={handleCancel}
-            disabled={creatingTeam}
+            disabled={inviteEmails.isLoading}
           >
             Cancel
           </Button>
-          <Button type="submit" onClick={handleNewTeam} disabled={creatingTeam}>
-            {creatingTeam && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+          <Button
+            type="submit"
+            onClick={handleNewTeam}
+            disabled={inviteEmails.isLoading}
+          >
+            {inviteEmails.isLoading && (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            )}
             Submit
           </Button>
         </DialogFooter>

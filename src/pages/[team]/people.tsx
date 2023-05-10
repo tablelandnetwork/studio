@@ -88,25 +88,6 @@ export default function People({
           </Container>
         </div>
       </div>
-      {/* <div className="space-4 mx-auto flex w-full max-w-3xl p-4">
-        {people.map((person) => (
-          <Card key={person.address}>
-            <CardHeader>
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={`https://avatar.vercel.sh/${person.personalTeam.slug}.png`}
-                  alt={person.personalTeam.name}
-                />
-                <AvatarFallback>
-                  {person.personalTeam.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <CardTitle>{person.personalTeam.name}</CardTitle>
-              <CardDescription>{person.address}</CardDescription>
-            </CardHeader>
-          </Card>
-        ))}
-      </div> */}
     </>
   );
 }
