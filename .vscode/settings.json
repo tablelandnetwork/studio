@@ -14,5 +14,6 @@
     "typescriptreact"
   ],
   "eslint.codeActionsOnSave.mode": "all",
-  "eslint.lintTask.enable": true
+  "eslint.lintTask.enable": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
