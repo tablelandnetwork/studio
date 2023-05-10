@@ -80,7 +80,11 @@ export default function People({
         </div>
         <div className="col-span-2 grid items-start gap-6 lg:col-span-1">
           <Container>
-            <Invites invites={invites} team={team} />
+            <Invites
+              invites={invites}
+              team={team}
+              personalTeam={auth.personalTeam}
+            />
           </Container>
         </div>
       </div>

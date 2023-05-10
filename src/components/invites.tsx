@@ -54,9 +54,10 @@ type Props = {
     } | null;
   }[];
   team: Team;
+  personalTeam: Team;
 };
 
-export function Invites({ invites, team }: Props) {
+export function Invites({ invites, team, personalTeam }: Props) {
   const inviteEmails = useSetAtom(
     trpcJotai.teams.inviteEmails.atomWithMutation()
   );
@@ -142,14 +143,20 @@ export function Invites({ invites, team }: Props) {
                   {claimedBy && invite.claimedAt && (
                     <p className="text-sm text-muted-foreground">
                       Claimed by{" "}
-                      <span className="font-medium">{claimedBy.name}</span>{" "}
+                      <span className="font-medium">
+                        {claimedBy.id === personalTeam.id
+                          ? "you"
+                          : claimedBy.name}
+                      </span>{" "}
                       {timeAgo.format(new Date(invite.claimedAt))}
                     </p>
                   )}
                   {!claimedBy && (
                     <p className="text-sm text-muted-foreground">
                       Invited by{" "}
-                      <span className="font-medium">{inviter.name}</span>{" "}
+                      <span className="font-medium">
+                        {inviter.id === personalTeam.id ? "you" : inviter.name}
+                      </span>{" "}
                       {timeAgo.format(new Date(invite.createdAt))}
                     </p>
                   )}
