@@ -2,9 +2,9 @@ import { NonceManager } from "@ethersproject/experimental";
 import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/d1";
-import { and, eq } from "drizzle-orm/expressions";
+import { and, desc, eq } from "drizzle-orm/expressions";
+import { alias } from "drizzle-orm/sqlite-core";
 import { Wallet, getDefaultProvider } from "ethers";
-
 import { sealData, unsealData } from "iron-session";
 import {
   NewTeamInviteSealed,
@@ -37,7 +37,7 @@ const baseSigner = wallet.connect(provider);
 const signer = new NonceManager(baseSigner);
 
 const tbl = new Database({ signer, autoWait: true });
-const db = drizzle(tbl, { logger: true });
+const db = drizzle(tbl, { logger: false });
 
 const users = resolveUsers(process.env.CHAIN);
 const teams = resolveTeams(process.env.CHAIN);
@@ -196,6 +196,18 @@ export async function teamsByMemberTeamId(memberTeamId: string) {
   return res.map((r) => r.teams);
 }
 
+export async function userTeamsForTeamId(teamId: string) {
+  const res = await db
+    .select({ teams, users })
+    .from(users)
+    .innerJoin(teamMemberships, eq(users.teamId, teamMemberships.memberTeamId))
+    .innerJoin(teams, eq(users.teamId, teams.id))
+    .where(eq(teamMemberships.teamId, teamId))
+    .orderBy(teams.name)
+    .all();
+  return res.map((r) => ({ address: r.users.address, personalTeam: r.teams }));
+}
+
 export async function isAuthorizedForTeam(
   memberTeamId: string,
   teamId: string
@@ -289,6 +301,36 @@ export async function acceptInvite(invite: TeamInvite, personalTeam: Team) {
 
 export async function deleteInvite(id: string) {
   await db.delete(teamInvites).where(eq(teamInvites.id, id)).run();
+}
+
+export async function invitesForTeam(teamId: string) {
+  const claimedByTeams = alias(teams, "claimed_by_teams");
+  const invitesSealed = await db
+    .select({ inviter: teams, invite: teamInvites, claimedBy: claimedByTeams })
+    .from(teamInvites)
+    .innerJoin(teams, eq(teamInvites.inviterTeamId, teams.id))
+    .leftJoin(
+      claimedByTeams,
+      eq(teamInvites.claimedByTeamId, claimedByTeams.id)
+    )
+    .where(eq(teamInvites.teamId, teamId))
+    .orderBy(desc(teamInvites.createdAt))
+    .all();
+  const invites = await Promise.all(
+    invitesSealed.map(
+      async ({ inviter, invite: { sealed, ...rest }, claimedBy }) => {
+        const { email } = await unsealData(sealed, {
+          password: process.env.DATA_SEAL_PASS as string,
+        });
+        return {
+          inviter,
+          invite: { ...rest, email: email as string },
+          claimedBy,
+        };
+      }
+    )
+  );
+  return invites;
 }
 
 export async function createProject(
