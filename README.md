@@ -1,26 +1,27 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
 ## Getting Started
 
-First, run the development server:
+The following instructions will get Studio running on your development machine.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+1. Clone this repo, you're probably interested in the `main` branch.
+2. Run `npm install`.
+3. Create a `.env.local` file in the root of the project with the following content:
+
+```
+PRIVATE_KEY=0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356
+PROVIDER_URL=http://127.0.0.1:8545
+CHAIN=local-tableland
+SESSION_COOKIE_NAME=STUDIO_SESSION
+SESSION_COOKIE_PASS="secure password secure password secure password"
+DATA_SEAL_PASS="secure password secure password secure password"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. In a separate terminal, start `local-tableland` with `npx local-tableland`
+5. Back in your primary terminal, clear any previous information about tables that were created on `local-tabland` by removing `tables_local.json` with `rm tables_local.json`.
+6. Create the Studio tables on `local-tableland` by running `npm run tables`.
+7. Start the Studio webb app with `npm run dev`.
+8. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+**NOTE:** Steps 5 and 6 have to be preformed any time you stop and restart `local-tableland`.
 
 ## Learn More
 
