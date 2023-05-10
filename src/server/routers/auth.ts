@@ -4,10 +4,7 @@ import { getIronSession, IronSessionOptions } from "iron-session";
 import { generateNonce, SiweErrorType, SiweMessage, SiweResponse } from "siwe";
 import { z } from "zod";
 
-import {
-  createUserAndPersonalTeam,
-  userAndPersonalTeamByAddress,
-} from "@/db/api";
+import db from "@/db/api";
 import { sessionOptions } from "@/lib/withSession";
 import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 
@@ -77,7 +74,9 @@ export const authRouter = router({
       };
       const session = await getIronSession(ctx.req, ctx.res, finalOptions);
       session.siweFields = fields.data;
-      let info = await userAndPersonalTeamByAddress(fields.data.address);
+      let info = await db.auth.userAndPersonalTeamByAddress(
+        fields.data.address
+      );
       if (info) {
         session.auth = info;
       }
@@ -95,7 +94,7 @@ export const authRouter = router({
           message: "No SIWE fields found in session",
         });
       }
-      const info = await createUserAndPersonalTeam(
+      const info = await db.auth.createUserAndPersonalTeam(
         ctx.session.siweFields.address,
         username,
         email

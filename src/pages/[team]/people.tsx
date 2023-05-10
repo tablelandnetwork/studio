@@ -1,12 +1,7 @@
 import HeaderTeam from "@/components/header-team";
 import { Invites } from "@/components/invites";
 import { TeamMembers } from "@/components/team-members";
-import {
-  invitesForTeam,
-  isAuthorizedForTeam,
-  teamBySlug,
-  userTeamsForTeamId,
-} from "@/db/api";
+import db from "@/db/api";
 import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { Auth, withSessionSsr } from "@/lib/withSession";
@@ -14,8 +9,8 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 type Props = {
   team: Team;
-  people: Awaited<ReturnType<typeof userTeamsForTeamId>>;
-  invites: Awaited<ReturnType<typeof invitesForTeam>>;
+  people: Awaited<ReturnType<typeof db.teams.userTeamsForTeamId>>;
+  invites: Awaited<ReturnType<typeof db.invites.invitesForTeam>>;
   auth: Auth;
 };
 
@@ -30,18 +25,20 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
     return { notFound: true };
   }
 
-  const team = await teamBySlug(query.team);
+  const team = await db.teams.teamBySlug(query.team);
   // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
   if (!team) {
     return { notFound: true };
   }
 
-  if (!isAuthorizedForTeam(req.session.auth.personalTeam.id, team.id)) {
+  if (
+    !db.teams.isAuthorizedForTeam(req.session.auth.personalTeam.id, team.id)
+  ) {
     return { notFound: true };
   }
 
-  const people = await userTeamsForTeamId(team.id);
-  const invites = await invitesForTeam(team.id);
+  const people = await db.teams.userTeamsForTeamId(team.id);
+  const invites = await db.invites.invitesForTeam(team.id);
 
   return { props: { team, people, invites, auth: req.session.auth } };
 };

@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { teamBySlug } from "@/db/api";
+import db from "@/db/api";
 import { Team } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
 import { projectsForCurrentTeamAtom } from "@/store/projects";
@@ -36,7 +36,7 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
     return { notFound: true };
   }
 
-  const team = await teamBySlug(query.team);
+  const team = await db.teams.teamBySlug(query.team);
   // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
   if (!team) {
     return { notFound: true };

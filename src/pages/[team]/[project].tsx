@@ -2,7 +2,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 import BodyProject from "@/components/body-project";
 import HeaderProject from "@/components/header-project";
-import { projectByTeamIdAndSlug, teamBySlug } from "@/db/api";
+import db from "@/db/api";
 import { Project, Team } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
 
@@ -23,13 +23,16 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
     return { notFound: true };
   }
 
-  const team = await teamBySlug(query.team);
+  const team = await db.teams.teamBySlug(query.team);
   // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
   if (!team) {
     return { notFound: true };
   }
 
-  const project = await projectByTeamIdAndSlug(team.id, query.project);
+  const project = await db.projects.projectByTeamIdAndSlug(
+    team.id,
+    query.project
+  );
   if (!project) {
     return { notFound: true };
   }

@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { inviteById, teamById } from "@/db/api";
+import db from "@/db/api";
 import { Team, TeamInvite } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
 import { acceptInviteAtom, ignoreInviteAtom } from "@/store/teams";
@@ -35,13 +35,13 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
   const { inviteId } = await unsealData(query.seal, {
     password: process.env.DATA_SEAL_PASS as string,
   });
-  const invite = await inviteById(inviteId as string);
+  const invite = await db.invites.inviteById(inviteId as string);
   if (!invite) {
     return { notFound: true };
   }
   // TODO: Return not found if invite is claimed or expired
-  const team = await teamById(invite.teamId);
-  const inviterTeam = await teamById(invite.inviterTeamId);
+  const team = await db.teams.teamById(invite.teamId);
+  const inviterTeam = await db.teams.teamById(invite.inviterTeamId);
   return {
     props: {
       auth: req.session.auth || null,

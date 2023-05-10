@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createProject, isAuthorizedForTeam, projectsByTeamId } from "@/db/api";
+import db from "@/db/api";
 import { protectedProcedure, router } from "@/server/trpc";
 
 export const projectsRouter = router({
@@ -10,11 +10,14 @@ export const projectsRouter = router({
     .query(async ({ ctx, input: { teamId } }) => {
       // Is this personal team a member of the requested team?
       if (
-        !(await isAuthorizedForTeam(ctx.session.auth.personalTeam.id, teamId))
+        !(await db.teams.isAuthorizedForTeam(
+          ctx.session.auth.personalTeam.id,
+          teamId
+        ))
       ) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
-      return await projectsByTeamId(teamId);
+      return await db.projects.projectsByTeamId(teamId);
     }),
   newProject: protectedProcedure
     .input(
@@ -26,11 +29,18 @@ export const projectsRouter = router({
     )
     .mutation(async ({ ctx, input: { teamId, name, description } }) => {
       if (
-        !(await isAuthorizedForTeam(ctx.session.auth.personalTeam.id, teamId))
+        !(await db.teams.isAuthorizedForTeam(
+          ctx.session.auth.personalTeam.id,
+          teamId
+        ))
       ) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
-      const team = await createProject(teamId, name, description || null);
+      const team = await db.projects.createProject(
+        teamId,
+        name,
+        description || null
+      );
       return team;
     }),
 });
