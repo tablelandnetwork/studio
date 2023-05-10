@@ -38,3 +38,7 @@ export async function tablesByProjectId(projectId: string) {
   const mapped = res.map((r) => r.tables);
   return mapped;
 }
+
+export async function tablesBySlug(slug: string) {
+  return db.select().from(tables).where(eq(tables.slug, slug)).get();
+}

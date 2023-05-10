@@ -37,7 +37,7 @@ export default function Header({
         </div>
       </div>
       <div className="flex">
-        <ProjectNav project={project} />
+        <ProjectNav project={project} team={team} />
         <div className="ml-auto flex items-center space-x-4">
           <Search placeholder="Search Project Blueprints..." />
         </div>

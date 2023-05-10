@@ -46,7 +46,7 @@ export default function Body(props: TableDialogProps) {
             {tables?.map((table) => (
               <Link
                 key={table.id}
-                href={`/${team.slug}/${project.slug}/${table.name}`}
+                href={`/${team.slug}/${project.slug}/${table.slug}`}
               >
                 <Card>
                   <CardHeader>
