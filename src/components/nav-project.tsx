@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Project } from "@/db/schema";
 import { cn } from "@/lib/utils";
 
-export function ProjectNav({
+export function NavProject({
   className,
   project,
   ...props

@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { Poppins } from "next/font/google";
 
+import { Auth } from "@/lib/withSession";
 import Footer from "./footer";
 
 const poppins = Poppins({
@@ -15,7 +16,13 @@ const AutoLogin = dynamic(
   { ssr: false }
 );
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function LayoutBase({
+  auth,
+  children,
+}: {
+  auth: Auth | null;
+  children: React.ReactNode;
+}) {
   return (
     <>
       <AutoLogin />
@@ -23,7 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className={`${poppins.variable} flex min-h-screen flex-col font-sans`}
       >
         <main className="flex flex-1 flex-col">{children}</main>
-        <Footer />
+        <Footer auth={auth} />
       </div>
     </>
   );

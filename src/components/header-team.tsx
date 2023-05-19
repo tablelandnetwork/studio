@@ -4,18 +4,20 @@ import Link from "next/link";
 import MesaSvg from "@/components/mesa-svg";
 import { NavTeam } from "@/components/nav-team";
 import { Search } from "@/components/search";
-import TeamSwitcher from "@/components/team-switcher";
 import { Team } from "@/db/schema";
+import TeamSwitcher from "./team-switcher";
 
-const UserNav = dynamic(() => import("./nav-user").then((res) => res.UserNav), {
+const NavUser = dynamic(() => import("./nav-user").then((res) => res.NavUser), {
   ssr: false,
 });
 
 export default function HeaderTeam({
   personalTeam,
   team,
+  teams,
 }: {
   team: Team;
+  teams: Team[];
   personalTeam: Team;
 }) {
   return (
@@ -24,9 +26,9 @@ export default function HeaderTeam({
         <Link href="/">
           <MesaSvg />
         </Link>
-        <TeamSwitcher team={team} />
+        <TeamSwitcher team={team} teams={teams} />
         <div className="ml-auto flex items-center space-x-4">
-          <UserNav personalTeam={personalTeam} />
+          <NavUser personalTeam={personalTeam} />
         </div>
       </div>
       <div className="flex">

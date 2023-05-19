@@ -1,8 +1,8 @@
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-
-import Header from "@/components/header";
 import Landing from "@/components/landing";
+import LayoutMain from "@/components/layout-main";
 import { Auth, withSessionSsr } from "@/lib/withSession";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { NextPageWithLayout } from "./_app";
 
 type Props = {
   auth: Auth | null;
@@ -14,13 +14,18 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
 
 export const getServerSideProps = withSessionSsr(getProps);
 
-export default function Home({
-  auth,
-}: InferGetServerSidePropsType<typeof getProps>) {
+const Home: NextPageWithLayout<
+  InferGetServerSidePropsType<typeof getProps>
+> = () => {
+  return <Landing />;
+};
+
+Home.getLayout = function (page: React.ReactElement, { auth }) {
   return (
-    <>
-      <Header personalTeam={auth?.personalTeam} />
-      <Landing />
-    </>
+    <LayoutMain auth={auth} personalTeam={auth?.personalTeam}>
+      {page}
+    </LayoutMain>
   );
-}
+};
+
+export default Home;

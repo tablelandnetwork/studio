@@ -1,8 +1,7 @@
-import dynamic from "next/dynamic";
-import Link from "next/link";
-
 import MesaSvg from "@/components/mesa-svg";
 import { Team } from "@/db/schema";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 import { NextRouter } from "next/router";
 
 export default function Header({
@@ -16,8 +15,8 @@ export default function Header({
     () => import("@/components/login").then((res) => res.default),
     { ssr: false }
   );
-  const UserNav = dynamic(
-    () => import("@/components/nav-user").then((res) => res.UserNav),
+  const NavUser = dynamic(
+    () => import("@/components/nav-user").then((res) => res.NavUser),
     { ssr: false }
   );
   return (
@@ -40,7 +39,7 @@ export default function Header({
           )}
         </nav>
         {personalTeam ? (
-          <UserNav personalTeam={personalTeam} />
+          <NavUser personalTeam={personalTeam} />
         ) : (
           <Login successRouterCallback={loginSuccessRouterCallback} />
         )}

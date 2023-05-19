@@ -1,9 +1,3 @@
-import { DialogProps } from "@radix-ui/react-dialog";
-import { useSetAtom } from "jotai";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/router";
-import React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,55 +11,57 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Team } from "@/db/schema";
-import { newProjectAtom } from "@/store/projects";
+import { trpc } from "@/utils/trpc";
+import { DialogProps } from "@radix-ui/react-dialog";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
 
 interface Props extends DialogProps {
   team: Team;
 }
 
-export default function NewProjectDialog({ team, children, ...props }: Props) {
+export default function NewProjectDialog({
+  team,
+  onOpenChange,
+  children,
+  ...props
+}: Props) {
   const [newProjectName, setNewProjectName] = React.useState("");
   const [newProjectDescription, setNewProjectDescription] = React.useState("");
-  const newProject = useSetAtom(newProjectAtom);
-  const [creatingProject, setCreatingProject] = React.useState(false);
-  const [error, setError] = React.useState("");
+
+  const newProject = trpc.projects.newProject.useMutation();
+
   const router = useRouter();
 
-  const handleNewProject = async () => {
-    if (!newProjectName.length) return;
-    setError("");
-    setCreatingProject(true);
-    try {
-      const project = await newProject([
-        {
-          teamId: team.id,
-          name: newProjectName,
-          description: newProjectDescription.length
-            ? newProjectDescription
-            : undefined,
-        },
-      ]);
-      setCreatingProject(false);
+  useEffect(() => {
+    if (newProject.isSuccess) {
+      router.push(`/${team.slug}/${newProject.data.slug}`);
       setNewProjectName("");
       setNewProjectDescription("");
-      if (props.onOpenChange) {
-        props.onOpenChange(false);
+      if (onOpenChange) {
+        onOpenChange(false);
       }
-      router.push(`/${team.slug}/${project.slug}`);
-    } catch (err: any) {
-      // TODO: Figure out how to handle this error from tRPC.
-      setError("There was an error creating your project.");
-      setCreatingProject(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newProject.isSuccess]);
+
+  const handleNewProject = () => {
+    if (!newProjectName.length) return;
+    newProject.mutate({
+      teamId: team.id,
+      name: newProjectName,
+      description: newProjectDescription.length
+        ? newProjectDescription
+        : undefined,
+    });
   };
 
   const handleCancel = () => {
-    setCreatingProject(false);
     setNewProjectName("");
     setNewProjectDescription("");
-    setError("");
-    if (props.onOpenChange) {
-      props.onOpenChange(false);
+    if (onOpenChange) {
+      onOpenChange(false);
     }
   };
 
@@ -100,22 +96,24 @@ export default function NewProjectDialog({ team, children, ...props }: Props) {
               />
             </div>
           </div>
-          {!!error && <p>{error}</p>}
+          {!!newProject.error && (
+            <p>Error creating project: {newProject.error.message}</p>
+          )}
         </div>
         <DialogFooter>
           <Button
             variant="outline"
             onClick={handleCancel}
-            disabled={creatingProject}
+            disabled={newProject.isLoading}
           >
             Cancel
           </Button>
           <Button
             type="submit"
             onClick={handleNewProject}
-            disabled={creatingProject}
+            disabled={newProject.isLoading}
           >
-            {creatingProject && (
+            {newProject.isLoading && (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             )}
             Submit

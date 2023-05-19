@@ -1,6 +1,5 @@
 "use client";
 
-import { useAtom } from "jotai";
 import { Check, ChevronsUpDown, Loader2, PlusCircle } from "lucide-react";
 import { useRouter } from "next/router";
 import * as React from "react";
@@ -34,7 +33,7 @@ import {
 } from "@/components/ui/popover";
 import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { newTeamAtom, userTeamsAtom } from "@/store/teams";
+import { trpc } from "@/utils/trpc";
 import TagInput from "./tag-input";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
@@ -43,46 +42,59 @@ type PopoverTriggerProps = React.ComponentPropsWithoutRef<
 
 interface TeamSwitcherProps extends PopoverTriggerProps {
   team: Team;
+  teams: Team[];
 }
 
-export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
+export default function TeamSwitcher({
+  className,
+  team,
+  teams,
+}: TeamSwitcherProps) {
   const router = useRouter();
-
-  const [teams] = useAtom(userTeamsAtom);
-  const [, newTeam] = useAtom(newTeamAtom);
+  const newTeam = trpc.teams.newTeam.useMutation();
   const [newTeamName, setNewTeamName] = React.useState("");
-  const [creatingTeam, setCreatingTeam] = React.useState(false);
-  const [error, setError] = React.useState("");
-
+  const [emailInvites, setEmailInvites] = React.useState<string[]>([]);
   const [open, setOpen] = React.useState(false);
   const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
 
-  const [emailInvites, setEmailInvites] = React.useState<string[]>([]);
-
-  const handleNewTeam = async () => {
-    console.log(emailInvites);
-    if (!newTeamName.length) return;
-    setError("");
-    setCreatingTeam(true);
-    try {
-      const team = await newTeam([{ name: newTeamName, emailInvites }]);
-      setCreatingTeam(false);
-      setNewTeamName("");
-      setShowNewTeamDialog(false);
-      router.push(`/${team.slug}/projects`);
-    } catch (err: any) {
-      // TODO: Figure out how to handle this error from tRPC.
-      setError("There was an error creating your team.");
-      setCreatingTeam(false);
+  const teamGroups: { label: string; teams: Team[] }[] = [
+    {
+      label: "Personal Team",
+      teams: [],
+    },
+    {
+      label: "Teams",
+      teams: [],
+    },
+  ];
+  teams.forEach((team) => {
+    if (team.personal) {
+      teamGroups[0].teams.push(team);
+    } else {
+      teamGroups[1].teams.push(team);
     }
+  });
+
+  const handleNewTeam = () => {
+    if (!newTeamName.length) return;
+    newTeam.mutate({ name: newTeamName, emailInvites });
   };
 
   const handleCancel = () => {
     setShowNewTeamDialog(false);
-    setCreatingTeam(false);
     setNewTeamName("");
     setEmailInvites([]);
   };
+
+  React.useEffect(() => {
+    if (newTeam.isSuccess) {
+      router.push(`/${newTeam.data.slug}/projects`);
+      setNewTeamName("");
+      setEmailInvites([]);
+      setShowNewTeamDialog(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newTeam.isSuccess]);
 
   return (
     <Dialog open={showNewTeamDialog} onOpenChange={setShowNewTeamDialog}>
@@ -112,7 +124,7 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
             <CommandList>
               <CommandInput placeholder="Search team..." />
               <CommandEmpty>No team found.</CommandEmpty>
-              {teams?.map((group) => (
+              {teamGroups.map((group) => (
                 <CommandGroup key={group.label} heading={group.label}>
                   {group.teams.map((groupTeam) => (
                     <CommandItem
@@ -192,18 +204,26 @@ export default function TeamSwitcher({ className, team }: TeamSwitcherProps) {
               />
             </div>
           </div>
-          {!!error && <p>{error}</p>}
+          {newTeam.isError && (
+            <p>Error creating team: {newTeam.error.message}</p>
+          )}
         </div>
         <DialogFooter>
           <Button
             variant="outline"
             onClick={handleCancel}
-            disabled={creatingTeam}
+            disabled={newTeam.isLoading}
           >
             Cancel
           </Button>
-          <Button type="submit" onClick={handleNewTeam} disabled={creatingTeam}>
-            {creatingTeam && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+          <Button
+            type="submit"
+            onClick={handleNewTeam}
+            disabled={newTeam.isLoading}
+          >
+            {newTeam.isLoading && (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            )}
             Submit
           </Button>
         </DialogFooter>

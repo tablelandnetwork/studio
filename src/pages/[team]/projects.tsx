@@ -1,9 +1,8 @@
-import { useAtomValue, useSetAtom } from "jotai";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import React from "react";
 
-import HeaderAuthed from "@/components/header-team";
+import LayoutTeam from "@/components/layout-team";
 import NewProjectDialog from "@/components/new-project-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,13 +14,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import db from "@/db/api";
-import { Team } from "@/db/schema";
+import { Project, Team } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
-import { projectsForCurrentTeamAtom } from "@/store/projects";
-import { selectedTeamAtom } from "@/store/teams";
+import { NextPageWithLayout } from "../_app";
 
 type Props = {
+  teams: Team[];
   team: Team;
+  projects: Project[];
   auth: Auth;
 };
 
@@ -42,57 +42,73 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
     return { notFound: true };
   }
 
-  return { props: { team, auth: req.session.auth } };
+  const projects = await db.projects.projectsByTeamId(team.id);
+
+  const userTeams = await db.teams.teamsByMemberTeamId(
+    req.session.auth.user.teamId
+  );
+
+  return {
+    props: { teams: userTeams, team, projects, auth: req.session.auth },
+  };
 };
 
 export const getServerSideProps = withSessionSsr(getProps);
 
-export default function Projects({
+const Projects: NextPageWithLayout<
+  InferGetServerSidePropsType<typeof getProps>
+> = ({
+  teams: userTeams,
   team,
-  auth,
-}: InferGetServerSidePropsType<typeof getProps>) {
+  projects,
+}: InferGetServerSidePropsType<typeof getProps>) => {
   const [showNewProjectDialog, setShowNewProjectDialog] = React.useState(false);
 
-  const projects = useAtomValue(projectsForCurrentTeamAtom);
-  const setSelectedTeam = useSetAtom(selectedTeamAtom);
-
-  React.useEffect(() => {
-    setSelectedTeam(team);
-  }, [setSelectedTeam, team]);
-
   return (
-    <>
-      <HeaderAuthed team={team} personalTeam={auth.personalTeam} />
-      <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
-        {projects?.map((project) => (
-          <Link key={project.id} href={`/${team.slug}/${project.slug}`}>
-            <Card>
-              <CardHeader>
-                <CardTitle>{project.name}</CardTitle>
-                <CardDescription>{project.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Card Content</p>
-              </CardContent>
-              <CardFooter>
-                <p>Card Footer</p>
-              </CardFooter>
-            </Card>
-          </Link>
-        ))}
-        <NewProjectDialog
-          team={team}
-          open={showNewProjectDialog}
-          onOpenChange={setShowNewProjectDialog}
-        >
-          <Button
-            className="w-28"
-            onClick={() => setShowNewProjectDialog(true)}
-          >
-            New project
-          </Button>
-        </NewProjectDialog>
-      </div>
-    </>
+    <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
+      {projects.map((project) => (
+        <Link key={project.id} href={`/${team.slug}/${project.slug}`}>
+          <Card>
+            <CardHeader>
+              <CardTitle>{project.name}</CardTitle>
+              <CardDescription>{project.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Card Content</p>
+            </CardContent>
+            <CardFooter>
+              <p>Card Footer</p>
+            </CardFooter>
+          </Card>
+        </Link>
+      ))}
+      <NewProjectDialog
+        team={team}
+        open={showNewProjectDialog}
+        onOpenChange={setShowNewProjectDialog}
+      >
+        <Button className="w-28" onClick={() => setShowNewProjectDialog(true)}>
+          New project
+        </Button>
+      </NewProjectDialog>
+    </div>
   );
-}
+};
+
+Projects.getLayout = function (
+  page: React.ReactElement,
+  { auth, team, teams }
+) {
+  return (
+    <LayoutTeam
+      auth={auth}
+      personalTeam={auth.personalTeam}
+      team={team}
+      teams={teams}
+    >
+      {page}
+    </LayoutTeam>
+  );
+};
+
+export default Projects;
