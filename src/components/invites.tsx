@@ -64,22 +64,20 @@ export function Invites({ invites, team, personalTeam }: Props) {
 
   const handleNewTeam = async () => {
     if (!emailInvites.length) return;
-    await inviteEmails.mutateAsync({ teamId: team.id, emails: emailInvites });
-    if (!inviteEmails.error) {
-      setShowInviteDialog(false);
-      setEmailInvites([]);
-      router.replace(router.asPath);
-    }
+    inviteEmails.mutate({ teamId: team.id, emails: emailInvites });
   };
-
-  // React.useEffect(() => {
-
-  // }, [inviteEmails.isSuccess, router]);
 
   const handleCancel = () => {
     setShowInviteDialog(false);
     setEmailInvites([]);
   };
+
+  React.useEffect(() => {
+    router.replace(router.asPath);
+    setShowInviteDialog(false);
+    setEmailInvites([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inviteEmails.isSuccess]);
 
   invites.sort((a, b) => {
     const aVal = a.invite.claimedAt || a.invite.createdAt;
