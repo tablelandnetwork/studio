@@ -97,6 +97,36 @@ export const resolveProjectTables = tablelandTable(
 export type Table = InferModel<ReturnType<typeof resolveTables>>;
 export type NewTable = InferModel<ReturnType<typeof resolveTables>, "insert">;
 
+export const resolveDeployments = tablelandTable("deployment", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id").notNull(),
+  block: text("deployed_at").notNull(),
+  deployedBy: text("deployed_by").notNull(), // Address
+  chain: text("deployed_to").notNull(),
+  transactionHash: text("transaction_hash").notNull(),
+});
+
+export type Deployment = InferModel<ReturnType<typeof resolveDeployments>>;
+export type NewDeployment = InferModel<
+  ReturnType<typeof resolveDeployments>,
+  "insert"
+>;
+
+export const resolveDeploymentTables = tablelandTable("deployment_tables", {
+  deploymentId: text("deployment_id").notNull(),
+  tableId: text("table_id").notNull(), // Table's studio ID
+  tableName: text("table_name").notNull(), // Table's tableland prefix + chain + id.
+  schema: text("schema").notNull(), // The schema of the table at the time of deployment.
+});
+
+export type DeploymentTables = InferModel<
+  ReturnType<typeof resolveDeploymentTables>
+>;
+export type NewDeploymentTables = InferModel<
+  ReturnType<typeof resolveDeploymentTables>,
+  "insert"
+>;
+
 export const resolveTeamInvites = tablelandTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),

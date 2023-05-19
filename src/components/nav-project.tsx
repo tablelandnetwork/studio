@@ -22,7 +22,7 @@ export function ProjectNav({
         href={`/${team.slug}/${project.slug}`}
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary",
-          currentPage !== "[team]" && "text-muted-foreground"
+          currentPage !== "[project]" && "text-muted-foreground"
         )}
       >
         Tables

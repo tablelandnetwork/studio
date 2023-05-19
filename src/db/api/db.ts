@@ -3,6 +3,8 @@ import { Database } from "@tableland/sdk";
 import { drizzle } from "drizzle-orm/d1";
 import { Wallet, getDefaultProvider } from "ethers";
 import {
+  resolveDeploymentTables,
+  resolveDeployments,
   resolveProjectTables,
   resolveProjects,
   resolveTables,
@@ -37,6 +39,8 @@ export const teamProjects = resolveTeamProjects(process.env.CHAIN);
 export const tables = resolveTables(process.env.CHAIN);
 export const projectTables = resolveProjectTables(process.env.CHAIN);
 export const teamInvites = resolveTeamInvites(process.env.CHAIN);
+export const deployments = resolveDeployments(process.env.CHAIN);
+export const deploymentTables = resolveDeploymentTables(process.env.CHAIN);
 
 export function slugify(input: string) {
   return input

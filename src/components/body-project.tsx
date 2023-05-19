@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Project, Team } from "@/db/schema";
 import { DialogProps } from "@radix-ui/react-dialog";
 import React from "react";
+import NewDeploymentDialog from "./new-deployment-dialog";
 import NewTableDialog from "./new-table-dialog";
 import { Button } from "./ui/button";
 
@@ -37,6 +38,8 @@ export default function Body(props: TableDialogProps) {
   }, [setSelectedTeam, team, setSelectedProject, project]);
 
   const [showNewTableDialog, setShowNewTableDialog] = React.useState(false);
+  const [showNewDeploymentDialog, setShowNewDeploymentDialog] =
+    React.useState(false);
 
   return (
     <main className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
@@ -73,6 +76,15 @@ export default function Body(props: TableDialogProps) {
               New Table
             </Button>
           </NewTableDialog>
+          <NewDeploymentDialog
+            {...props}
+            open={showNewDeploymentDialog}
+            onOpenChange={setShowNewDeploymentDialog}
+          >
+            <Button onClick={() => setShowNewDeploymentDialog(true)}>
+              New Deployment
+            </Button>
+          </NewDeploymentDialog>
         </div>
       </div>
     </main>

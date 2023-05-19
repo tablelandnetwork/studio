@@ -2,6 +2,7 @@ import { ChainId } from "@biconomy/core-types";
 import SmartAccount from "@biconomy/smart-account";
 import SocialLogin from "@biconomy/web3-auth";
 import { Web3Provider } from "@ethersproject/providers";
+import { drizzle } from "drizzle-orm/d1";
 import { ethers } from "ethers";
 import { atom } from "jotai";
 import { SiweMessage } from "siwe";
@@ -9,6 +10,8 @@ import { SiweMessage } from "siwe";
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { authAtom } from "@/store/auth";
 import { trpcJotai } from "@/utils/trpc";
+import { Database } from "@tableland/sdk";
+import { dbAtom, tablelandAtom } from "./db";
 
 export const socialLoginAtom = atom(async () => {
   const sdk = new SocialLogin();
@@ -31,6 +34,7 @@ const ticker = atom(0);
 export const providerAndAccountAtom = atom(async (get) => {
   get(ticker);
   const socialLogin = await get(socialLoginAtom);
+
   while (!socialLogin.provider) {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
@@ -64,8 +68,8 @@ export const smartAccountAtom = atom(async (get) => {
   const provider = await get(providerAndAccountAtom);
   const smartAccount = new SmartAccount(provider.provider, {
     // TODO: Figure out what chain this should be.
-    activeNetworkId: ChainId.GOERLI,
-    supportedNetworksIds: [ChainId.GOERLI],
+    activeNetworkId: ChainId.POLYGON_MUMBAI,
+    supportedNetworksIds: [ChainId.POLYGON_MUMBAI],
   });
   await smartAccount.init();
   const context = smartAccount.getSmartAccountContext();
@@ -81,14 +85,16 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
     set(showWalletAtom);
   }
 
+  const provider = await get(providerAndAccountAtom);
+  const signer = provider.provider.getSigner();
   const currentAuth = await get(trpcJotai.auth.authenticated.atomWithQuery());
   if (currentAuth) {
+    set(tablelandAtom, new Database({ signer, autoWait: true }));
+    set(dbAtom, drizzle(get(tablelandAtom), { logger: false }));
     set(authAtom, currentAuth);
     return currentAuth;
   }
 
-  const provider = await get(providerAndAccountAtom);
-  const signer = provider.provider.getSigner();
   const rawMessage = new SiweMessage({
     domain: window.location.host,
     address: toChecksumAddress(await signer.getAddress()),

@@ -66,7 +66,7 @@ export default function Project({
         project={project}
       />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-semibold">Project</h1>
+        <h1 className="text-3xl font-semibold">Table</h1>
         <p className="text-lg text-gray-600">
           {team.name} / {project.name} / {table.name}
         </p>
