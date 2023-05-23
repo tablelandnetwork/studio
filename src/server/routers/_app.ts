@@ -1,4 +1,5 @@
 import { authRouter } from "@/server/routers/auth";
+import { deploymentsRouter } from "@/server/routers/deployments";
 import { projectsRouter } from "@/server/routers/projects";
 import { tablesRouter } from "@/server/routers/tables";
 import { teamsRouter } from "@/server/routers/teams";
@@ -9,6 +10,7 @@ export const appRouter = router({
   teams: teamsRouter,
   projects: projectsRouter,
   tables: tablesRouter,
+  deployments: deploymentsRouter,
 });
 
 // export type definition of API

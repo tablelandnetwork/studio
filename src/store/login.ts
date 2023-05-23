@@ -8,6 +8,9 @@ import { SiweMessage } from "siwe";
 
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { trpcJotai } from "@/utils/trpc";
+import { Database } from "@tableland/sdk";
+import { drizzle } from "drizzle-orm/d1";
+import { dbAtom, tablelandAtom } from "./db";
 
 export const socialLoginAtom = atom(async () => {
   const sdk = new SocialLogin();
@@ -63,14 +66,19 @@ export const smartAccountAtom = atom(async (get) => {
   const provider = await get(providerAndAccountAtom);
   const smartAccount = new SmartAccount(provider.provider, {
     // TODO: Figure out what chain this should be.
-    activeNetworkId: ChainId.GOERLI,
-    supportedNetworksIds: [ChainId.GOERLI],
+    activeNetworkId: ChainId.POLYGON_MUMBAI,
+    supportedNetworksIds: [ChainId.POLYGON_MUMBAI],
   });
   await smartAccount.init();
   const context = smartAccount.getSmartAccountContext();
+  const signer = provider.provider.getSigner();
+
   return {
     smartAccount,
     smartAccountWalletAddress: context.baseWallet.getAddress(),
+    smartAccountWalletBalance: await provider.provider
+      .getBalance(await signer.getAddress())
+      .toString(),
   };
 });
 
@@ -87,6 +95,10 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
 
   const provider = await get(providerAndAccountAtom);
   const signer = provider.provider.getSigner();
+
+  set(tablelandAtom, new Database({ signer, autoWait: true }));
+  set(dbAtom, drizzle(get(tablelandAtom), { logger: false }));
+
   const rawMessage = new SiweMessage({
     domain: window.location.host,
     address: toChecksumAddress(await signer.getAddress()),

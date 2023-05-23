@@ -40,7 +40,7 @@ export default function NewTableDialog({
   useEffect(() => {
     if (newTable.isSuccess) {
       // TODO: Maybe restore below and add route for individual tables?
-      // router.push(`/${team.slug}/${project.slug}/${newTable.data.slug}`);
+      router.push(`/${team.slug}/${project.slug}`);
       setNewTableName("");
       setNewTableDescription("");
       setNewTableSchema("");

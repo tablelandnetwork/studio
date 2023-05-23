@@ -1,4 +1,5 @@
 import * as auth from "./auth";
+import * as deployments from "./deployments";
 import * as invites from "./invites";
 import * as projects from "./projects";
 import * as tables from "./tables";
@@ -10,6 +11,7 @@ const api = {
   projects,
   tables,
   teams,
+  deployments,
 };
 
 export default api;
