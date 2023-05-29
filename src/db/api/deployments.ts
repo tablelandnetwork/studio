@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
-import { Deployment } from "../schema";
+import { eq } from "drizzle-orm";
+import { Deployment, DeploymentTables } from "../schema";
 import { db, deploymentTables, deployments, tbl } from "./db";
 
 // Feels like this should exist elsewhere
@@ -64,6 +65,50 @@ export async function createDeployment({
   return deployment;
 }
 
-export async function listDeployments() {
-  return [];
+export interface DeploymentsWithTables extends Deployment {
+  tables: DeploymentTables[];
+}
+
+export async function deploymentsByProjectId(projectId: string) {
+  const res = await db
+    .select({ deployments, deploymentTables })
+    .from(deployments)
+    .where(eq(deployments.projectId, projectId))
+    .fullJoin(
+      deploymentTables,
+      eq(deployments.id, deploymentTables.deploymentId)
+    )
+    .orderBy(deployments.block)
+    .all();
+
+  function formatDeployments(data: any): DeploymentsWithTables[] {
+    const result: any = {};
+
+    data.forEach((item: any) => {
+      const deploymentId = item.deployments.id;
+
+      // If this deployment hasn't been seen before, add it to the result
+      if (!result[deploymentId]) {
+        result[deploymentId] = { ...item.deployments, tables: [] };
+      }
+
+      // Add this table to the deployment
+      result[deploymentId].tables.push(item.deploymentTables);
+    });
+
+    // Convert the result object back into an array
+    return Object.values(result);
+  }
+
+  return formatDeployments(res);
+}
+
+export async function deploymentTablesByDeploymentId(deploymentId: string) {
+  const res = await db
+    .select({ deployments, deploymentTables })
+    .from(deploymentTables)
+    .where(eq(deploymentTables.deploymentId, deploymentId))
+    .all();
+
+  return res.map((deploymentTable) => deploymentTable.deploymentTables);
 }

@@ -1,7 +1,6 @@
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useAtom } from "jotai";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/router";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -16,8 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Project, Table, Team } from "@/db/schema";
-import { tablelandAtom } from "@/store/db";
-import { smartAccountAtom } from "@/store/login";
+import { accountAtom, tablelandAtom } from "@/store/db";
 import { trpc } from "@/utils/trpc";
 import { ChainId } from "@biconomy/core-types";
 import {
@@ -43,16 +41,15 @@ export default function NewDeploymentDialog({
   ...props
 }: Props) {
   const [tbl] = useAtom(tablelandAtom);
+  accountAtom;
+  const [account] = useAtom(accountAtom);
 
   const [NewDeploymentName, setNewDeploymentName] = React.useState("");
 
   const [NewDeploymentChain, setNewDeploymentChain] = React.useState("");
-  const [NewDeploymentDescription, setNewDeploymentDescription] =
-    React.useState("");
 
   const [creatingDeployment, setCreatingDeployment] = React.useState(false);
   const [error, setError] = React.useState("");
-  const router = useRouter();
 
   const newDeployment = trpc.deployments.newDeployment.useMutation();
   const [chain, setChain] = React.useState<string | undefined>();
@@ -63,7 +60,7 @@ export default function NewDeploymentDialog({
     setError("");
     setCreatingDeployment(true);
 
-    if (!tbl) return;
+    if (!tbl) throw new Error("Tableland not initialized.");
 
     const inserts = tables.map((table) => {
       return tbl.prepare(table.schema);
@@ -71,12 +68,10 @@ export default function NewDeploymentDialog({
 
     const [res] = await tbl.batch(inserts);
 
-    const acc = await smartAccountAtom;
-
     const deployment = {
       transactionHash: res.meta.txn.transactionHash,
       block: res.meta.txn.blockNumber.toString(),
-      tables: res.meta.meta.txn.names.map((name: string, key: number) => {
+      tables: res.meta.txn.names.map((name: string, key: number) => {
         return {
           name,
           schema: tables[key].schema,
@@ -85,14 +80,14 @@ export default function NewDeploymentDialog({
       }),
       projectId: project.id,
       chain: ChainId.POLYGON_MUMBAI.toString(),
-      deployedBy: "", // acc.smartAccountWalletAddress
+      deployedBy: account?.smartAccountWalletAddress || "",
     };
 
+    console.log("deployment", deployment);
     try {
       const dep = newDeployment.mutate(deployment);
       setCreatingDeployment(false);
       setNewDeploymentName("");
-      setNewDeploymentDescription("");
       setNewDeploymentChain("");
       if (props.onOpenChange) {
         props.onOpenChange(false);
@@ -109,7 +104,6 @@ export default function NewDeploymentDialog({
   const handleCancel = () => {
     setCreatingDeployment(false);
     setNewDeploymentName("");
-    setNewDeploymentDescription("");
     setError("");
     if (props.onOpenChange) {
       props.onOpenChange(false);

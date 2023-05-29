@@ -10,7 +10,7 @@ import toChecksumAddress from "@/lib/toChecksumAddr";
 import { trpcJotai } from "@/utils/trpc";
 import { Database } from "@tableland/sdk";
 import { drizzle } from "drizzle-orm/d1";
-import { dbAtom, tablelandAtom } from "./db";
+import { accountAtom, dbAtom, tablelandAtom } from "./db";
 
 export const socialLoginAtom = atom(async () => {
   const sdk = new SocialLogin();
@@ -98,6 +98,7 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
 
   set(tablelandAtom, new Database({ signer, autoWait: true }));
   set(dbAtom, drizzle(get(tablelandAtom), { logger: false }));
+  set(accountAtom, await get(smartAccountAtom));
 
   const rawMessage = new SiweMessage({
     domain: window.location.host,

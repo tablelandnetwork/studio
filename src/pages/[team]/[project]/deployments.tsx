@@ -3,7 +3,8 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import BodyDeployments from "@/components/body-deployments";
 import LayoutProject from "@/components/layout-project";
 import db from "@/db/api";
-import { Deployment, Project, Table, Team } from "@/db/schema";
+import { DeploymentsWithTables } from "@/db/api/deployments";
+import { Project, Table, Team } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
 import { NextPageWithLayout } from "../../_app";
 
@@ -12,7 +13,7 @@ type Props = {
   project: Project;
   tables: Table[];
   auth: Auth;
-  deployments: Deployment[];
+  deployments: DeploymentsWithTables[];
 };
 
 const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
@@ -44,7 +45,7 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
 
   const tables = await db.tables.tablesByProjectId(project.id);
 
-  const deployments = await db.deployments.listDeployments();
+  const deployments = await db.deployments.deploymentsByProjectId(project.id);
 
   return {
     props: {
@@ -78,14 +79,19 @@ const Project: NextPageWithLayout<
         <p>{project.description}</p>
       </div>
 
-      <BodyDeployments team={team} project={project} tables={tables} />
+      <BodyDeployments
+        team={team}
+        project={project}
+        tables={tables}
+        deployments={deployments}
+      />
     </>
   );
 };
 
 Project.getLayout = function (
   page: React.ReactElement,
-  { auth, team, project, projects, deployments }
+  { auth, team, project, projects }
 ) {
   return (
     <LayoutProject
