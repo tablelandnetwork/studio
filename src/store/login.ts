@@ -8,6 +8,7 @@ import { SiweMessage } from "siwe";
 
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { trpcJotai } from "@/utils/trpc";
+import { TablelandTables__factory } from "@tableland/evm";
 import { Database } from "@tableland/sdk";
 import { drizzle } from "drizzle-orm/d1";
 import { accountAtom, dbAtom, tablelandAtom } from "./db";
@@ -72,13 +73,12 @@ export const smartAccountAtom = atom(async (get) => {
   await smartAccount.init();
   const context = smartAccount.getSmartAccountContext();
   const signer = provider.provider.getSigner();
+  const balance = await provider.provider.getBalance(await signer.getAddress());
 
   return {
     smartAccount,
     smartAccountWalletAddress: context.baseWallet.getAddress(),
-    smartAccountWalletBalance: await provider.provider
-      .getBalance(await signer.getAddress())
-      .toString(),
+    smartAccountWalletBalance: await balance.toString(),
   };
 });
 
@@ -87,6 +87,7 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
   if (interactive) {
     set(showWalletAtom);
   }
+  // 198369388042622336
 
   const currentAuth = await get(trpcJotai.auth.authenticated.atomWithQuery());
   if (currentAuth) {
@@ -96,7 +97,32 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
   const provider = await get(providerAndAccountAtom);
   const signer = provider.provider.getSigner();
 
-  set(tablelandAtom, new Database({ signer, autoWait: true }));
+  set(
+    tablelandAtom,
+    new Database({
+      signer,
+      customizeTransaction: (
+        signer,
+        contractAddress,
+        functionSignature,
+        functionArgs
+      ) => {
+        const txData = new ethers.utils.Interface(
+          TablelandTables__factory.abi
+        ).encodeFunctionData(functionSignature, functionArgs);
+
+        const tx = {
+          to: contractAddress,
+          data: txData,
+        };
+
+        console.log("I've been called!");
+
+        return signer.sendTransaction({ transaction: tx });
+      },
+      autoWait: true,
+    })
+  );
   set(dbAtom, drizzle(get(tablelandAtom), { logger: false }));
   set(accountAtom, await get(smartAccountAtom));
 
