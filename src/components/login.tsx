@@ -1,6 +1,6 @@
 import "@biconomy/web3-auth/dist/src/style.css";
 
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import { Loader2 } from "lucide-react";
 import { NextRouter, useRouter } from "next/router";
@@ -32,7 +32,7 @@ const socialLoginLoader = loadable(socialLoginAtom);
 
 export default function Login({ successRouterCallback }: Props) {
   const [socialLogin] = useAtom(socialLoginLoader);
-  const [, login] = useAtom(loginAtom);
+  const login = useSetAtom(loginAtom);
   const register = trpc.auth.register.useMutation();
 
   const [showRegisterDialog, setShowRegisterDialog] = React.useState(false);
