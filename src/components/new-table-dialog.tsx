@@ -1,8 +1,7 @@
 import { DialogProps } from "@radix-ui/react-dialog";
-import { useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Project, Team } from "@/db/schema";
-import { newTableAtom } from "@/store/tables";
+import { trpc } from "@/utils/trpc";
 
 interface Props extends DialogProps {
   project: Project;
@@ -33,47 +32,39 @@ export default function NewTableDialog({
   const [newTableName, setNewTableName] = React.useState("");
   const [newTableSchema, setNewTableSchema] = React.useState("");
   const [newTableDescription, setNewTableDescription] = React.useState("");
-  const newTable = useSetAtom(newTableAtom);
-  const [creatingTable, setCreatingTable] = React.useState(false);
-  const [error, setError] = React.useState("");
+
+  const newTable = trpc.tables.newTable.useMutation();
+
   const router = useRouter();
 
-  const handleNewTable = async () => {
-    if (!newTableName.length) return;
-    setError("");
-    setCreatingTable(true);
-    try {
-      const table = await newTable([
-        {
-          projectId: project.id,
-          name: newTableName,
-          description: newTableDescription.length
-            ? newTableDescription
-            : undefined,
-          schema: newTableSchema,
-        },
-      ]);
-      setCreatingTable(false);
+  useEffect(() => {
+    if (newTable.isSuccess) {
+      // TODO: Maybe restore below and add route for individual tables?
+      // router.push(`/${team.slug}/${project.slug}/${newTable.data.slug}`);
       setNewTableName("");
       setNewTableDescription("");
       setNewTableSchema("");
       if (props.onOpenChange) {
         props.onOpenChange(false);
       }
-      // TODO: Maybe restore below and add route for individual tables?
-      router.push(`/${team.slug}/${project.slug}/${table.slug}`);
-    } catch (err: any) {
-      // TODO: Figure out how to handle this error from tRPC.
-      setError("There was an error creating your Table.");
-      setCreatingTable(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newTable.isSuccess]);
+
+  const handleNewTable = () => {
+    if (!newTableName.length) return;
+    newTable.mutate({
+      projectId: project.id,
+      name: newTableName,
+      description: newTableDescription.length ? newTableDescription : undefined,
+      schema: newTableSchema,
+    });
   };
 
   const handleCancel = () => {
-    setCreatingTable(false);
     setNewTableName("");
     setNewTableDescription("");
-    setError("");
+    setNewTableSchema("");
     if (props.onOpenChange) {
       props.onOpenChange(false);
     }
@@ -119,22 +110,26 @@ export default function NewTableDialog({
               />
             </div>
           </div>
-          {!!error && <p>{error}</p>}
+          {newTable.isError && (
+            <p>Error creating table: {newTable.error.message}</p>
+          )}
         </div>
         <DialogFooter>
           <Button
             variant="outline"
             onClick={handleCancel}
-            disabled={creatingTable}
+            disabled={newTable.isLoading}
           >
             Cancel
           </Button>
           <Button
             type="submit"
             onClick={handleNewTable}
-            disabled={creatingTable}
+            disabled={newTable.isLoading}
           >
-            {creatingTable && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+            {newTable.isLoading && (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            )}
             Submit
           </Button>
         </DialogFooter>

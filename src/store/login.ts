@@ -7,7 +7,6 @@ import { atom } from "jotai";
 import { SiweMessage } from "siwe";
 
 import toChecksumAddress from "@/lib/toChecksumAddr";
-import { authAtom } from "@/store/auth";
 import { trpcJotai } from "@/utils/trpc";
 
 export const socialLoginAtom = atom(async () => {
@@ -83,7 +82,6 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
 
   const currentAuth = await get(trpcJotai.auth.authenticated.atomWithQuery());
   if (currentAuth) {
-    set(authAtom, currentAuth);
     return currentAuth;
   }
 
@@ -104,9 +102,6 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
   const loginAuth = await set(trpcJotai.auth.login.atomWithMutation(), [
     { message, signature },
   ]);
-  if (loginAuth) {
-    set(authAtom, loginAuth);
-  }
   return loginAuth;
 });
 
@@ -117,6 +112,5 @@ export const logoutAtom = atom(null, async (get, set) => {
     await socialLogin.logout();
   } catch (e) {}
   await set(trpcJotai.auth.logout.atomWithMutation(), []);
-  set(authAtom, null);
   set(ticker, new Date().getTime());
 });

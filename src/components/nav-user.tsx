@@ -1,7 +1,3 @@
-import { useAtom } from "jotai";
-import { LogOut, Settings } from "lucide-react";
-import { useRouter } from "next/router";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +11,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Team } from "@/db/schema";
 import { logoutAtom } from "@/store/login";
+import { useSetAtom } from "jotai";
+import { LogOut, Settings } from "lucide-react";
+import { useRouter } from "next/router";
 
-export function UserNav({ personalTeam }: { personalTeam: Team }) {
-  const [, logout] = useAtom(logoutAtom);
+export function NavUser({ personalTeam }: { personalTeam: Team }) {
+  const logout = useSetAtom(logoutAtom);
   const router = useRouter();
 
   const handleSignOut = async () => {

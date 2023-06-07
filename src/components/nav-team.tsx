@@ -1,7 +1,6 @@
-import Link from "next/link";
-
 import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
 

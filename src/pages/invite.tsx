@@ -1,4 +1,4 @@
-import Header from "@/components/header";
+import LayoutMain from "@/components/layout-main";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,14 +11,14 @@ import {
 import db from "@/db/api";
 import { Team, TeamInvite } from "@/db/schema";
 import { Auth, withSessionSsr } from "@/lib/withSession";
-import { acceptInviteAtom, ignoreInviteAtom } from "@/store/teams";
+import { trpc } from "@/utils/trpc";
 import { unsealData } from "iron-session";
-import { useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect } from "react";
+import { NextPageWithLayout } from "./_app";
 
 type Props = {
   auth: Auth | null;
@@ -55,118 +55,129 @@ const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
 
 export const getServerSideProps = withSessionSsr(getProps);
 
-export default function Invite({
+const Invite: NextPageWithLayout<
+  InferGetServerSidePropsType<typeof getProps>
+> = ({
   auth,
   invite,
   team,
   inviterTeam,
   seal,
-}: InferGetServerSidePropsType<typeof getProps>) {
+}: InferGetServerSidePropsType<typeof getProps>) => {
   const Login = dynamic(
     () => import("@/components/login").then((res) => res.default),
     { ssr: false }
   );
 
-  const accpectInvite = useSetAtom(acceptInviteAtom);
-  const ignoreInvite = useSetAtom(ignoreInviteAtom);
-  const [accepting, setAccepting] = React.useState(false);
-  const [ignoring, setIgnoring] = React.useState(false);
-  const [error, setError] = React.useState("");
+  const accpectInvite = trpc.teams.acceptInvite.useMutation();
+  const ignoreInvite = trpc.teams.ignoreInvite.useMutation();
 
   const router = useRouter();
 
-  const handleAccept = async () => {
-    try {
-      setError("");
-      setAccepting(true);
-      await accpectInvite([{ seal }]);
-      router.push(`/${team.slug}/projects`);
-    } catch (err: any) {
-      setError("Error accepting invite.");
-    } finally {
-      setAccepting(false);
-    }
+  const handleAccept = () => {
+    accpectInvite.mutate({ seal });
   };
 
-  const handleIgnore = async () => {
-    try {
-      setError("");
-      setIgnoring(true);
-      await ignoreInvite([{ seal }]);
-      router.replace("/");
-    } catch (err: any) {
-      setError("Error ingoring invite.");
-    } finally {
-      setIgnoring(false);
-    }
+  const handleIgnore = () => {
+    ignoreInvite.mutate({ seal });
   };
+
+  useEffect(() => {
+    if (accpectInvite.isSuccess) {
+      router.push(`/${team.slug}/projects`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accpectInvite.isSuccess]);
+
+  useEffect(() => {
+    if (ignoreInvite.isSuccess) {
+      router.replace("/");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ignoreInvite.isSuccess]);
 
   return (
-    <>
-      <Header
-        personalTeam={auth?.personalTeam}
-        loginSuccessRouterCallback={(router) => router.replace(router.asPath)}
-      />
-      <div className="flex flex-1 flex-col items-center justify-center p-4">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>Tableland Studio Invite</CardTitle>
-            <CardDescription>
-              User{" "}
+    <div className="flex flex-1 flex-col items-center justify-center p-4">
+      <Card className="max-w-md">
+        <CardHeader>
+          <CardTitle>Tableland Studio Invite</CardTitle>
+          <CardDescription>
+            User{" "}
+            <span className="font-semibold text-black">{inviterTeam.name}</span>{" "}
+            invited you to join the team{" "}
+            <span className="font-semibold text-black">{team.name}</span>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!auth && (
+            <p className="text-center">
+              You need to sign in to accept your invitation or you can choose to
+              ignore it now.
+            </p>
+          )}
+          {auth && (
+            <p className="text-center">
+              You are signed in as{" "}
               <span className="font-semibold text-black">
-                {inviterTeam.name}
+                {auth.personalTeam.name}
               </span>{" "}
-              invited you to join the team{" "}
-              <span className="font-semibold text-black">{team.name}</span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+              and you can accept or ignore your invitation now.
+            </p>
+          )}
+          {accpectInvite.isError && (
+            <p>Error accepting invite: {accpectInvite.error.message}</p>
+          )}
+          {ignoreInvite.isError && (
+            <p>Error ignoring invite: {ignoreInvite.error.message}</p>
+          )}
+        </CardContent>
+        <CardFooter>
+          <div className="flex flex-1 items-center justify-center space-x-3">
+            <Button
+              variant={"outline"}
+              onClick={handleIgnore}
+              disabled={accpectInvite.isLoading || ignoreInvite.isLoading}
+            >
+              {ignoreInvite.isLoading && (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              )}
+              Ignore
+            </Button>
             {!auth && (
-              <p className="text-center">
-                You need to sign in to accept your invitation or you can choose
-                to ignore it now.
-              </p>
+              <Login
+                successRouterCallback={(router) =>
+                  router.replace(router.asPath)
+                }
+              />
             )}
             {auth && (
-              <p className="text-center">
-                You are signed in as{" "}
-                <span className="font-semibold text-black">
-                  {auth.personalTeam.name}
-                </span>{" "}
-                and you can accept or ignore your invitation now.
-              </p>
-            )}
-            {!!error && <p>{error}</p>}
-          </CardContent>
-          <CardFooter>
-            <div className="flex flex-1 items-center justify-center space-x-3">
               <Button
-                variant={"outline"}
-                onClick={handleIgnore}
-                disabled={accepting || ignoring}
+                onClick={handleAccept}
+                disabled={accpectInvite.isLoading || ignoreInvite.isLoading}
               >
-                {ignoring && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                Ignore
+                {accpectInvite.isLoading && (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                )}
+                Accept
               </Button>
-              {!auth && (
-                <Login
-                  successRouterCallback={(router) =>
-                    router.replace(router.asPath)
-                  }
-                />
-              )}
-              {auth && (
-                <Button onClick={handleAccept} disabled={accepting || ignoring}>
-                  {accepting && (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  )}
-                  Accept
-                </Button>
-              )}
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
-    </>
+            )}
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
   );
-}
+};
+
+Invite.getLayout = function (page: React.ReactElement, { auth }) {
+  return (
+    <LayoutMain
+      auth={auth}
+      personalTeam={auth?.personalTeam}
+      loginSuccessRouterCallback={(router) => router.replace(router.asPath)}
+    >
+      {page}
+    </LayoutMain>
+  );
+};
+
+export default Invite;

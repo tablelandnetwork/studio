@@ -1,6 +1,5 @@
 "use client";
 
-import { useAtom } from "jotai";
 import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import { useRouter } from "next/router";
 import * as React from "react";
@@ -23,7 +22,6 @@ import {
 } from "@/components/ui/popover";
 import { Project, Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { projectsForCurrentTeamAtom } from "@/store/projects";
 
 import NewProjectDialog from "./new-project-dialog";
 
@@ -34,16 +32,16 @@ type PopoverTriggerProps = React.ComponentPropsWithoutRef<
 interface ProjectSwitcherProps extends PopoverTriggerProps {
   team: Team;
   selectedProject: Project;
+  projects: Project[];
 }
 
 export default function ProjectSwitcher({
   className,
   team,
   selectedProject,
+  projects,
 }: ProjectSwitcherProps) {
   const router = useRouter();
-
-  const [projects] = useAtom(projectsForCurrentTeamAtom);
 
   const [open, setOpen] = React.useState(false);
   const [showNewProjectDialog, setShowNewTeamDialog] = React.useState(false);
@@ -74,7 +72,7 @@ export default function ProjectSwitcher({
               <CommandInput placeholder="Search projects..." />
               <CommandEmpty>No project found.</CommandEmpty>
               <CommandGroup heading="Projects">
-                {projects?.map((project) => (
+                {projects.map((project) => (
                   <CommandItem
                     key={project.id}
                     onSelect={() => {

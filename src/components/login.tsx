@@ -1,6 +1,6 @@
 import "@biconomy/web3-auth/dist/src/style.css";
 
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import { Loader2 } from "lucide-react";
 import { NextRouter, useRouter } from "next/router";
@@ -17,8 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginAtom, socialLoginAtom } from "@/store/login";
-import { registerAtom } from "@/store/register";
 
+import { trpc } from "@/utils/trpc";
 import { Button } from "./ui/button";
 
 // TODO: Remember we can get social/email info from:
@@ -32,14 +32,12 @@ const socialLoginLoader = loadable(socialLoginAtom);
 
 export default function Login({ successRouterCallback }: Props) {
   const [socialLogin] = useAtom(socialLoginLoader);
-  const [, login] = useAtom(loginAtom);
-  const [, register] = useAtom(registerAtom);
+  const login = useSetAtom(loginAtom);
+  const register = trpc.auth.register.useMutation();
 
   const [showRegisterDialog, setShowRegisterDialog] = React.useState(false);
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [registering, setRegistering] = React.useState(false);
-  const [error, setError] = React.useState("");
 
   const router = useRouter();
 
@@ -56,33 +54,33 @@ export default function Login({ successRouterCallback }: Props) {
     }
   };
 
-  const handleRegister = async () => {
+  const handleRegister = () => {
     if (!username.length) return;
-    setRegistering(true);
-    try {
-      const res = await register({
-        username,
-        email: email.length ? email : undefined,
-      });
-      setRegistering(false);
-      setShowRegisterDialog(false);
-      if (successRouterCallback) {
-        successRouterCallback(router);
-      } else {
-        router.push(`/${res.personalTeam.slug}/projects`);
-      }
-    } catch (err: any) {
-      setError("There was an error registering your account.");
-      setRegistering(false);
-    }
+    register.mutate({
+      username,
+      email: email.length ? email : undefined,
+    });
   };
 
   const handleCancel = () => {
     setShowRegisterDialog(false);
-    setRegistering(false);
     setUsername("");
     setEmail("");
   };
+
+  React.useEffect(() => {
+    if (register.isSuccess) {
+      setShowRegisterDialog(false);
+      setUsername("");
+      setEmail("");
+      if (successRouterCallback) {
+        successRouterCallback(router);
+      } else {
+        router.push(`/${register.data.personalTeam.slug}/projects`);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [register.isSuccess]);
 
   const buttonDisabled = socialLogin.state === "loading";
 
@@ -123,18 +121,26 @@ export default function Login({ successRouterCallback }: Props) {
               />
             </div>
           </div>
-          {!!error && <p>{error}</p>}
+          {register.isError && (
+            <p>Error registering: {register.error.message}</p>
+          )}
         </div>
         <DialogFooter>
           <Button
             variant="outline"
             onClick={handleCancel}
-            disabled={registering}
+            disabled={register.isLoading}
           >
             Cancel
           </Button>
-          <Button type="submit" onClick={handleRegister} disabled={registering}>
-            {registering && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+          <Button
+            type="submit"
+            onClick={handleRegister}
+            disabled={register.isLoading}
+          >
+            {register.isLoading && (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            )}
             Continue
           </Button>
         </DialogFooter>

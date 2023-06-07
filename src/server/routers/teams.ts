@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import db from "@/db/api";
-import { Team } from "@/db/schema";
 import { protectedProcedure, publicProcedure, router } from "@/server/trpc";
 import { sendInvite } from "@/utils/send";
 import { unsealData } from "iron-session";
@@ -36,24 +35,7 @@ export const teamsRouter = router({
     .input(z.object({ personalTeamId: z.string() }))
     .query(async ({ ctx, input: { personalTeamId } }) => {
       const teams = await db.teams.teamsByMemberTeamId(personalTeamId);
-      const res: { label: string; teams: Team[] }[] = [
-        {
-          label: "Personal Team",
-          teams: [],
-        },
-        {
-          label: "Teams",
-          teams: [],
-        },
-      ];
-      teams.forEach((team) => {
-        if (team.personal) {
-          res[0].teams.push(team);
-        } else {
-          res[1].teams.push(team);
-        }
-      });
-      return res;
+      return teams;
     }),
   newTeam: protectedProcedure
     .input(
