@@ -1,4 +1,3 @@
-import { EMAIL_PREFERENCES_URL } from "mailing-core";
 import {
   MjmlColumn,
   MjmlGroup,
@@ -6,7 +5,8 @@ import {
   MjmlSection,
   MjmlText,
   MjmlWrapper,
-} from "mjml-react";
+} from "@faire/mjml-react";
+import { EMAIL_PREFERENCES_URL } from "mailing-core";
 import { colors, fontSize, fontWeight } from "../theme";
 import Link from "./Link";
 

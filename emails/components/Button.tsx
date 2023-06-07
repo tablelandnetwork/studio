@@ -1,5 +1,5 @@
+import { MjmlButton } from "@faire/mjml-react";
 import cx from "classnames";
-import { MjmlButton } from "mjml-react";
 import React from "react";
 
 import {

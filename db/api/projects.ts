@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { and, eq } from "drizzle-orm/expressions";
+import { and, eq } from "drizzle-orm";
 import { Project } from "../schema";
 import { db, projects, slugify, tbl, teamProjects, teams } from "./db";
 

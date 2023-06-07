@@ -7,8 +7,8 @@ import { PathLike, constants } from "fs";
 import { access, readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
 
-import * as schema from "../src/db/schema";
-import { Tables, tablesJson } from "../src/lib/drizzle";
+import * as schema from "@/db/schema";
+import { Tables, tablesJson } from "@/lib/drizzle";
 
 config({ path: resolve(process.cwd(), process.argv[2] || ".env.local") });
 

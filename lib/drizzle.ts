@@ -1,9 +1,9 @@
-import { BuildColumns } from "drizzle-orm/column-builder";
+import { BuildColumns } from "drizzle-orm";
 import {
+  AnySQLiteColumnBuilder,
   sqliteTableCreator,
   SQLiteTableExtraConfig,
 } from "drizzle-orm/sqlite-core";
-import { AnySQLiteColumnBuilder } from "drizzle-orm/sqlite-core/columns/common";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
