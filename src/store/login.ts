@@ -96,14 +96,12 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
   }
 
   const currentAuth = await get(trpcJotai.auth.authenticated.atomWithQuery());
-
   if (currentAuth) {
     return currentAuth;
   }
 
   const provider = await get(providerAndAccountAtom);
   const signer = provider.provider.getSigner();
-
   const rawMessage = new SiweMessage({
     domain: window.location.host,
     address: toChecksumAddress(await signer.getAddress()),
