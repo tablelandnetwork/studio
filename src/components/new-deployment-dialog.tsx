@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Project, Table, Team } from "@/db/schema";
 import SmartAccountDatabase from "@/lib/smartAccountTableland";
-import { accountAtom } from "@/store/db";
+import { smartAccountAtom } from "@/store/login";
 import { trpc } from "@/utils/trpc";
 import { ChainId } from "@biconomy/core-types";
 import { Validator } from "@tableland/sdk";
@@ -42,8 +42,8 @@ export default function NewDeploymentDialog({
   tables,
   ...props
 }: Props) {
-  accountAtom;
-  const [account] = useAtom(accountAtom);
+  smartAccountAtom;
+  const [account] = useAtom(smartAccountAtom);
 
   const [NewDeploymentName, setNewDeploymentName] = React.useState("");
 

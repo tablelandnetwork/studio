@@ -8,7 +8,6 @@ import { SiweMessage } from "siwe";
 
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { trpcJotai } from "@/utils/trpc";
-import { accountAtom } from "./db";
 
 export const socialLoginAtom = atom(async () => {
   const sdk = new SocialLogin();
@@ -95,7 +94,6 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
   if (interactive) {
     set(showWalletAtom);
   }
-  // 198369388042622336
 
   const currentAuth = await get(trpcJotai.auth.authenticated.atomWithQuery());
 
@@ -105,11 +103,6 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
 
   const provider = await get(providerAndAccountAtom);
   const signer = provider.provider.getSigner();
-
-  const smartAccount = await get(smartAccountAtom);
-
-  // For some reason the app freaks out when this is in the login file
-  set(accountAtom, smartAccount);
 
   const rawMessage = new SiweMessage({
     domain: window.location.host,
