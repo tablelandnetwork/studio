@@ -15,9 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Project, Table, Team } from "@/db/schema";
-import { accountAtom, tablelandAtom } from "@/store/db";
+import SmartAccountDatabase from "@/lib/smartAccountTableland";
+import { accountAtom } from "@/store/db";
 import { trpc } from "@/utils/trpc";
 import { ChainId } from "@biconomy/core-types";
+import { Validator } from "@tableland/sdk";
 import {
   Select,
   SelectContent,
@@ -40,7 +42,6 @@ export default function NewDeploymentDialog({
   tables,
   ...props
 }: Props) {
-  const [tbl] = useAtom(tablelandAtom);
   accountAtom;
   const [account] = useAtom(accountAtom);
 
@@ -56,34 +57,55 @@ export default function NewDeploymentDialog({
 
   const handleNewDeployment = async () => {
     if (!NewDeploymentName.length) return;
-    //
+
     setError("");
     setCreatingDeployment(true);
 
-    if (!tbl) throw new Error("Tableland not initialized.");
+    account?.smartAccount.setActiveChain(parseInt(NewDeploymentChain));
+
+    if (!account?.smartAccount) {
+      throw new Error("No smart account");
+    }
+    const tbl = SmartAccountDatabase(account?.smartAccount);
 
     const inserts = tables.map((table) => {
       return tbl.prepare(table.schema);
     });
 
-    const [res] = await tbl.batch(inserts);
+    const [r] = await tbl.batch(inserts);
+
+    const res = await r.results.wait();
+
+    const v = Validator.forChain(parseInt(NewDeploymentChain));
+
+    // TODO: This is _not_ how the transaction hash should be accessed, but it's how the SDK is currently
+    // returning it, soo... fix ASAP, once SDK is fixed.
+    const receipt = await v.receiptByTransactionHash(
+      res.meta.txn?.transactionHash || ""
+    );
 
     const deployment = {
-      transactionHash: res.meta.txn.transactionHash,
-      block: res.meta.txn.blockNumber.toString(),
-      tables: res.meta.txn.names.map((name: string, key: number) => {
-        return {
-          name,
-          schema: tables[key].schema,
-          tableId: tables[key].id,
-        };
-      }),
+      transactionHash: res.meta.txn?.transactionHash,
+      block: receipt.blockNumber.toString(),
+      tables: await Promise.all(
+        receipt.tableIds.map(async (tableId: string) => {
+          const tbl = await v.getTableById({
+            chainId: parseInt(NewDeploymentChain),
+            tableId,
+          });
+
+          return {
+            name: tbl.name,
+            schema: tbl.schema as unknown as string,
+            tableId: tableId,
+          };
+        })
+      ),
       projectId: project.id,
-      chain: ChainId.POLYGON_MUMBAI.toString(),
-      deployedBy: account?.smartAccountWalletAddress || "",
+      chain: NewDeploymentChain,
+      deployedBy: account?.smartAccountWalletAddress,
     };
 
-    console.log("deployment", deployment);
     try {
       const dep = newDeployment.mutate(deployment);
       setCreatingDeployment(false);
@@ -146,14 +168,13 @@ export default function NewDeploymentDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="maticmum">
+                    <SelectItem value={ChainId.POLYGON_MUMBAI.toString()}>
                       Matic Mumbai (sponsored)
                     </SelectItem>
-                    <SelectItem value={ChainId.POLYGON_MUMBAI.toString()}>
+                    <SelectItem
+                      value={ChainId.ARBITRUM_NOVA_MAINNET.toString()}
+                    >
                       Arbitrum Nova (sponsored)
-                    </SelectItem>
-                    <SelectItem value="filecoin-calibration">
-                      Filecoin Calibration
                     </SelectItem>
                   </SelectGroup>
                 </SelectContent>

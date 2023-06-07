@@ -8,10 +8,7 @@ import { SiweMessage } from "siwe";
 
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { trpcJotai } from "@/utils/trpc";
-import { TablelandTables__factory } from "@tableland/evm";
-import { Database } from "@tableland/sdk";
-import { drizzle } from "drizzle-orm/d1";
-import { accountAtom, dbAtom, tablelandAtom } from "./db";
+import { accountAtom } from "./db";
 
 export const socialLoginAtom = atom(async () => {
   const sdk = new SocialLogin();
@@ -69,7 +66,18 @@ export const smartAccountAtom = atom(async (get) => {
     // TODO: Figure out what chain this should be.
     activeNetworkId: ChainId.POLYGON_MUMBAI,
     supportedNetworksIds: [ChainId.POLYGON_MUMBAI],
+    networkConfig: [
+      {
+        chainId: ChainId.POLYGON_MUMBAI,
+        dappAPIKey: process.env.MATMICMUM_PAYMASTER_API_KEY,
+      },
+      {
+        chainId: ChainId.ARBITRUM_NOVA_MAINNET,
+        dappAPIKey: process.env.ARBITRUM_NOVA_PAYMASTER_API_KEY,
+      },
+    ],
   });
+
   await smartAccount.init();
   const context = smartAccount.getSmartAccountContext();
   const signer = provider.provider.getSigner();
@@ -90,6 +98,7 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
   // 198369388042622336
 
   const currentAuth = await get(trpcJotai.auth.authenticated.atomWithQuery());
+
   if (currentAuth) {
     return currentAuth;
   }
@@ -97,34 +106,10 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
   const provider = await get(providerAndAccountAtom);
   const signer = provider.provider.getSigner();
 
-  set(
-    tablelandAtom,
-    new Database({
-      signer,
-      customizeTransaction: (
-        signer,
-        contractAddress,
-        functionSignature,
-        functionArgs
-      ) => {
-        const txData = new ethers.utils.Interface(
-          TablelandTables__factory.abi
-        ).encodeFunctionData(functionSignature, functionArgs);
+  const smartAccount = await get(smartAccountAtom);
 
-        const tx = {
-          to: contractAddress,
-          data: txData,
-        };
-
-        console.log("I've been called!");
-
-        return signer.sendTransaction({ transaction: tx });
-      },
-      autoWait: true,
-    })
-  );
-  set(dbAtom, drizzle(get(tablelandAtom), { logger: false }));
-  set(accountAtom, await get(smartAccountAtom));
+  // For some reason the app freaks out when this is in the login file
+  set(accountAtom, smartAccount);
 
   const rawMessage = new SiweMessage({
     domain: window.location.host,
