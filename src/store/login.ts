@@ -8,6 +8,7 @@ import { SiweMessage } from "siwe";
 
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { trpcJotai } from "@/utils/trpc";
+import { accountAtom } from "./db";
 
 export const socialLoginAtom = atom(async () => {
   const sdk = new SocialLogin();
@@ -68,11 +69,11 @@ export const smartAccountAtom = atom(async (get) => {
     networkConfig: [
       {
         chainId: ChainId.POLYGON_MUMBAI,
-        dappAPIKey: process.env.MATMICMUM_PAYMASTER_API_KEY,
+        dappAPIKey: process.env.NEXT_PUBLIC_MATMICMUM_PAYMASTER_API_KEY,
       },
       {
         chainId: ChainId.ARBITRUM_NOVA_MAINNET,
-        dappAPIKey: process.env.ARBITRUM_NOVA_PAYMASTER_API_KEY,
+        dappAPIKey: process.env.NEXT_PUBLIC_ARBITRUM_NOVA_PAYMASTER_API_KEY,
       },
     ],
   });
@@ -94,6 +95,8 @@ export const loginAtom = atom(null, async (get, set, interactive: boolean) => {
   if (interactive) {
     set(showWalletAtom);
   }
+
+  set(accountAtom, (await get(smartAccountAtom)).smartAccount);
 
   const currentAuth = await get(trpcJotai.auth.authenticated.atomWithQuery());
   if (currentAuth) {

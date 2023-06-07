@@ -16,10 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Project, Table, Team } from "@/db/schema";
 import SmartAccountDatabase from "@/lib/smartAccountTableland";
-import { smartAccountAtom } from "@/store/login";
+import { accountAtom } from "@/store/db";
 import { trpc } from "@/utils/trpc";
 import { ChainId } from "@biconomy/core-types";
 import { Validator } from "@tableland/sdk";
+import { useRouter } from "next/router";
 import {
   Select,
   SelectContent,
@@ -42,83 +43,83 @@ export default function NewDeploymentDialog({
   tables,
   ...props
 }: Props) {
-  smartAccountAtom;
-  const [account] = useAtom(smartAccountAtom);
+  const [account] = useAtom(accountAtom);
 
+  const router = useRouter();
   const [NewDeploymentName, setNewDeploymentName] = React.useState("");
-
-  const [NewDeploymentChain, setNewDeploymentChain] = React.useState("");
 
   const [creatingDeployment, setCreatingDeployment] = React.useState(false);
   const [error, setError] = React.useState("");
 
   const newDeployment = trpc.deployments.newDeployment.useMutation();
-  const [chain, setChain] = React.useState<string | undefined>();
+  const [chain, setChain] = React.useState<string>("80001");
 
   const handleNewDeployment = async () => {
-    if (!NewDeploymentName.length) return;
-
-    setError("");
-    setCreatingDeployment(true);
-
-    account?.smartAccount.setActiveChain(parseInt(NewDeploymentChain));
-
-    if (!account?.smartAccount) {
-      throw new Error("No smart account");
-    }
-    const tbl = SmartAccountDatabase(account?.smartAccount);
-
-    const inserts = tables.map((table) => {
-      return tbl.prepare(table.schema);
-    });
-
-    const [r] = await tbl.batch(inserts);
-
-    const res = await r.results.wait();
-
-    const v = Validator.forChain(parseInt(NewDeploymentChain));
-
-    // TODO: This is _not_ how the transaction hash should be accessed, but it's how the SDK is currently
-    // returning it, soo... fix ASAP, once SDK is fixed.
-    const receipt = await v.receiptByTransactionHash(
-      res.meta.txn?.transactionHash || ""
-    );
-
-    const deployment = {
-      transactionHash: res.meta.txn?.transactionHash,
-      block: receipt.blockNumber.toString(),
-      tables: await Promise.all(
-        receipt.tableIds.map(async (tableId: string) => {
-          const tbl = await v.getTableById({
-            chainId: parseInt(NewDeploymentChain),
-            tableId,
-          });
-
-          return {
-            name: tbl.name,
-            schema: tbl.schema as unknown as string,
-            tableId: tableId,
-          };
-        })
-      ),
-      projectId: project.id,
-      chain: NewDeploymentChain,
-      deployedBy: account?.smartAccountWalletAddress,
-    };
-
     try {
+      if (!NewDeploymentName.length) return;
+
+      setError("");
+      setCreatingDeployment(true);
+
+      if (!account) {
+        throw new Error("No smart account attached");
+      }
+      await account.setActiveChain(parseInt(chain));
+
+      const tbl = SmartAccountDatabase(account);
+
+      const inserts = tables.map((table) => {
+        return tbl.prepare(table.schema);
+      });
+
+      const [r] = await tbl.batch(inserts);
+
+      const res = await r.results.wait();
+
+      const v = Validator.forChain(parseInt(chain));
+
+      // TODO: This is _not_ how the transaction hash should be accessed, but it's how the SDK is currently
+      // returning it, soo... fix ASAP, once SDK is fixed.
+      const receipt = await v.receiptByTransactionHash({
+        transactionHash: res.transactionHash || "",
+        chainId: parseInt(chain),
+      });
+
+      const deployment = {
+        transactionHash: res.transactionHash,
+        block: receipt.blockNumber.toString(),
+        tables: await Promise.all(
+          receipt.tableIds.map(async (tableId: string, key: number) => {
+            const tbl = await v.getTableById({
+              chainId: parseInt(chain),
+              tableId,
+            });
+
+            return {
+              name: tbl.name,
+              schema: tables[key].schema,
+              tableId: tableId,
+            };
+          })
+        ),
+        projectId: project.id,
+        chain: chain,
+        deployedBy: account.address,
+      };
+
       const dep = newDeployment.mutate(deployment);
       setCreatingDeployment(false);
       setNewDeploymentName("");
-      setNewDeploymentChain("");
+      setChain("");
       if (props.onOpenChange) {
         props.onOpenChange(false);
       }
 
-      // router.push(`/${team.slug}/${project.slug}/${deployment?.slug}`);
+      router.replace(router.asPath);
     } catch (err: any) {
       // TODO: Figure out how to handle this error from tRPC.
       setError("There was an error creating your Deployment.");
+      console.error(err);
       setCreatingDeployment(false);
     }
   };

@@ -23,25 +23,7 @@ export default function SmartAccountDatabase(
       data: txData,
     };
 
-    const response = await smartAccount.sendTransaction({ transaction: tx });
-
-    const receipt = await response.wait();
-
-    const events = receipt.logs.map((log) => {
-      try {
-        const l = ci.parseLog(log);
-        const event = ci.decodeEventLog(l.eventFragment, log.data);
-        return {
-          args: event,
-          event: l.name,
-        };
-      } catch (e) {
-        console.log(e);
-        return null;
-      }
-    });
-
-    return { ...response, events };
+    return await smartAccount.sendTransaction({ transaction: tx });
   };
 
   return new Database({

@@ -44,7 +44,7 @@ export default function Body(props: TableDialogProps) {
                   {deployment.tables.map((table: any) => {
                     return (
                       <li key={table.id}>
-                        <strong>{table.name}</strong>
+                        <strong>{table.tableName}</strong>
                         <p>{table.schema}</p>
                       </li>
                     );
