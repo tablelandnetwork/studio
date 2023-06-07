@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { eq } from "drizzle-orm/expressions";
+import { eq } from "drizzle-orm";
 import { sealData, unsealData } from "iron-session";
 import { db, slugify, tbl, teamMemberships, teams, users } from "./db";
 

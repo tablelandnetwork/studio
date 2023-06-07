@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { desc, eq } from "drizzle-orm/expressions";
+import { desc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { sealData, unsealData } from "iron-session";
 import { NewTeamInviteSealed, Team, TeamInvite } from "../schema";
