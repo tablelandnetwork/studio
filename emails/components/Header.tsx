@@ -1,4 +1,9 @@
-import { MjmlColumn, MjmlGroup, MjmlSection, MjmlWrapper } from "mjml-react";
+import {
+  MjmlColumn,
+  MjmlGroup,
+  MjmlSection,
+  MjmlWrapper,
+} from "@faire/mjml-react";
 import { colors, fontSize, fontWeight, lineHeight } from "../theme";
 import Link from "./Link";
 import Text from "./Text";

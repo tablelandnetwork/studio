@@ -6,7 +6,7 @@ import {
   MjmlFont,
   MjmlHead,
   MjmlStyle,
-} from "mjml-react";
+} from "@faire/mjml-react";
 import React from "react";
 import {
   borderRadius,

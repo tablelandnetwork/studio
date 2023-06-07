@@ -1,5 +1,5 @@
+import { MjmlText } from "@faire/mjml-react";
 import cx from "classnames";
-import { MjmlText } from "mjml-react";
 import React from "react";
 
 type TextProps = {
