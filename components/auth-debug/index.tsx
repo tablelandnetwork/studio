@@ -1,10 +1,24 @@
-import dynamic from "next/dynamic";
+import { getServerSession } from "@/lib/withSession";
+import { Suspense } from "react";
+import Provider from "./provider";
+import SmartAccount from "./smart-account";
+import SocialLogin from "./social-login";
 
-const AuthDebugDynamic = dynamic(
-  () => import("./auth-debug").then((res) => res.default),
-  {
-    ssr: false,
-  }
-);
-
-export default AuthDebugDynamic;
+export default async function AuthDebug() {
+  const { auth } = await getServerSession();
+  return (
+    <div>
+      <h1>AuthDebug</h1>
+      <p>User id: {auth ? auth.user.teamId : "null"}</p>
+      <Suspense fallback={<p>Loading social login...</p>}>
+        <SocialLogin />
+      </Suspense>
+      <Suspense fallback={<p>Loading provider...</p>}>
+        <Provider />
+      </Suspense>
+      <Suspense fallback={<p>Loading smart account...</p>}>
+        <SmartAccount />
+      </Suspense>
+    </div>
+  );
+}

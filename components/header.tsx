@@ -1,22 +1,14 @@
 import MesaSvg from "@/components/mesa-svg";
-import { Team } from "@/db/schema";
+import { getServerSession } from "@/lib/withSession";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { NextRouter } from "next/router";
+import { NavUser } from "./nav-user";
 
-export default function Header({
-  personalTeam,
-  loginSuccessRouterCallback,
-}: {
-  personalTeam?: Team;
-  loginSuccessRouterCallback?: (router: NextRouter) => void;
-}) {
+export default async function Header() {
+  const { auth } = await getServerSession();
+
   const Login = dynamic(
     () => import("@/components/login").then((res) => res.default),
-    { ssr: false }
-  );
-  const NavUser = dynamic(
-    () => import("@/components/nav-user").then((res) => res.NavUser),
     { ssr: false }
   );
   return (
@@ -29,19 +21,19 @@ export default function Header({
       </div>
       <div className="ml-auto flex items-center space-x-4">
         <nav>
-          {personalTeam && (
+          {auth?.personalTeam && (
             <Link
-              href={`/${personalTeam.slug}/projects`}
+              href={`/${auth.personalTeam.slug}/projects`}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
             >
               Dashboard
             </Link>
           )}
         </nav>
-        {personalTeam ? (
-          <NavUser personalTeam={personalTeam} />
+        {auth?.personalTeam ? (
+          <NavUser personalTeam={auth.personalTeam} />
         ) : (
-          <Login successRouterCallback={loginSuccessRouterCallback} />
+          <Login />
         )}
       </div>
     </header>

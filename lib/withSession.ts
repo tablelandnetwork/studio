@@ -1,13 +1,8 @@
-import { IronSessionOptions } from "iron-session";
-import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
-import {
-  GetServerSidePropsContext,
-  GetServerSidePropsResult,
-  NextApiHandler,
-} from "next";
-import { SiweMessage } from "siwe";
-
 import { Team, User } from "@/db/schema";
+import { IronSessionOptions, getIronSession } from "iron-session";
+import { cookies, headers } from "next/headers";
+import { cache } from "react";
+import { SiweMessage } from "siwe";
 
 type SiweFields = Omit<
   SiweMessage,
@@ -19,15 +14,13 @@ export type Auth = {
   personalTeam: Team;
 };
 
-declare module "iron-session" {
-  interface IronSessionData {
-    nonce?: string;
-    siweFields?: SiweFields;
-    auth?: Auth;
-  }
+export interface IronSessionData {
+  nonce?: string;
+  siweFields?: SiweFields;
+  auth?: Auth;
 }
 
-const sessionOptions: IronSessionOptions = {
+export const sessionOptions: IronSessionOptions = {
   cookieName: process.env.SESSION_COOKIE_NAME || "",
   password: process.env.SESSION_COOKIE_PASS || "",
   cookieOptions: {
@@ -35,18 +28,26 @@ const sessionOptions: IronSessionOptions = {
   },
 };
 
-export function withSessionRoute(handler: NextApiHandler) {
-  return withIronSessionApiRoute(handler, sessionOptions);
-}
+export const getServerSession = cache(async () => {
+  console.log("GETTING SERVER SESSION");
+  const req = {
+    headers: Object.fromEntries(headers() as Headers),
+    cookies: Object.fromEntries(
+      cookies()
+        .getAll()
+        .map((c) => [c.name, c.value])
+    ),
+  };
+  const res = {
+    getHeader: headers().get,
+    setCookie: cookies().set,
+    setHeader: headers().set,
+  };
+  const session = await getIronSession<IronSessionData>(
+    req as unknown as Request,
+    res as unknown as Response,
+    sessionOptions
+  );
 
-export function withSessionSsr(
-  handler: (
-    context: GetServerSidePropsContext
-  ) =>
-    | GetServerSidePropsResult<{ [key: string]: unknown }>
-    | Promise<GetServerSidePropsResult<{ [key: string]: unknown }>>
-) {
-  return withIronSessionSsr(handler, sessionOptions);
-}
-
-export { sessionOptions };
+  return session;
+});

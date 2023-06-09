@@ -1,10 +1,10 @@
+import type { AppRouter } from "@/server/routers/_app";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
+import { createTRPCReact } from "@trpc/react-query";
 import { createTRPCJotai } from "jotai-trpc";
 
-import type { AppRouter } from "@/server/routers/_app";
-
-function getBaseUrl() {
+export function getBaseUrl() {
   if (typeof window !== "undefined")
     // browser should use relative path
     return "";
@@ -47,6 +47,8 @@ export const trpc = createTRPCNext<AppRouter>({
    **/
   ssr: false,
 });
+
+export const trpcReact = createTRPCReact<AppRouter>();
 
 export const trpcJotai = createTRPCJotai<AppRouter>({
   links: [

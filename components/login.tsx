@@ -1,9 +1,11 @@
+"use client";
+
 import "@biconomy/web3-auth/dist/src/style.css";
 
 import { useAtom, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import { Loader2 } from "lucide-react";
-import { NextRouter, useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import {
@@ -19,13 +21,14 @@ import { Label } from "@/components/ui/label";
 import { loginAtom, socialLoginAtom } from "@/store/login";
 
 import { trpc } from "@/utils/trpc";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
 import { Button } from "./ui/button";
 
 // TODO: Remember we can get social/email info from:
 // const info = await socialLoginSDK?.getUserInfo();
 
 type Props = {
-  successRouterCallback?: (router: NextRouter) => void;
+  successRouterCallback?: (router: AppRouterInstance) => void;
 };
 
 const socialLoginLoader = loadable(socialLoginAtom);

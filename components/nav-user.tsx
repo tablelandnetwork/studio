@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +15,7 @@ import { Team } from "@/db/schema";
 import { logoutAtom } from "@/store/login";
 import { useSetAtom } from "jotai";
 import { LogOut, Settings } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export function NavUser({ personalTeam }: { personalTeam: Team }) {
   const logout = useSetAtom(logoutAtom);
