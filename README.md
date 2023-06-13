@@ -3,8 +3,9 @@
 The following instructions will get Studio running on your development machine.
 
 1. Clone this repo, you're probably interested in the `main` branch.
-2. Run `npm install`.
-3. Create a `.env.local` file in the root of the project with the following content:
+2. ensure yarn is installed globally, `npm install -g yarn`
+3. Run `npm install`.
+4. Create a `.env.local` file in the root of the project with the following content:
 
 ```
 PRIVATE_KEY=0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356
@@ -15,11 +16,11 @@ SESSION_COOKIE_PASS="secure password secure password secure password"
 DATA_SEAL_PASS="secure password secure password secure password"
 ```
 
-4. In a separate terminal, start `local-tableland` with `npx local-tableland`
-5. Back in your primary terminal, clear any previous information about tables that were created on `local-tabland` by removing `tables_local.json` with `rm tables_local.json`.
-6. Create the Studio tables on `local-tableland` by running `npm run tables`.
-7. Start the Studio webb app with `npm run dev`.
-8. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. In a separate terminal, start `local-tableland` with `npx local-tableland`
+6. Back in your primary terminal, clear any previous information about tables that were created on `local-tabland` by removing `tables_local.json` with `rm tables_local.json`.
+7. Create the Studio tables on `local-tableland` by running `npm run tables`.
+8. Start the Studio webb app with `npm run dev`.
+9. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 **NOTE:** Steps 5 and 6 have to be preformed any time you stop and restart `local-tableland`.
 

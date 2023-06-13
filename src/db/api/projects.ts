@@ -3,6 +3,10 @@ import { and, eq } from "drizzle-orm/expressions";
 import { Project } from "../schema";
 import { db, projects, slugify, tbl, teamProjects, teams } from "./db";
 
+// This will create two tables, which are owned by the privkey in the .env file, right?
+// - one of the tables is used to track what tables have been created for a project
+// - the other table is used to track what projects exist
+// - the project "isOwner" value is true, what does this mean?
 export async function createProject(
   teamId: string,
   name: string,
