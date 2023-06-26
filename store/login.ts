@@ -21,7 +21,7 @@ export const socialLoginAtom = atom(async () => {
     const sig = await sdk.whitelistUrl(url);
     whitelistUrls[url] = sig;
   }
-  await sdk.init({ whitelistUrls, chainId: ethers.utils.hexValue(80001) });
+  await sdk.init({ whitelistUrls, chainId: ethers.utils.hexValue(31337) });
   return sdk;
 });
 

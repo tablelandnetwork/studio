@@ -1,9 +1,7 @@
 import { InferModel } from "drizzle-orm";
-import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { integer, text, uniqueIndex, sqliteTable } from "drizzle-orm/sqlite-core";
 
-import { tablelandTable } from "@/lib/drizzle";
-
-export const resolveUsers = tablelandTable(
+export const resolveUsers = () => sqliteTable(
   "users",
   {
     address: text("address").primaryKey(),
@@ -15,7 +13,7 @@ export const resolveUsers = tablelandTable(
   })
 );
 
-export const resolveTeams = tablelandTable(
+export const resolveTeams = () => sqliteTable(
   "teams",
   {
     id: text("id").primaryKey(),
@@ -29,7 +27,7 @@ export const resolveTeams = tablelandTable(
   })
 );
 
-export const resolveTeamMemberships = tablelandTable(
+export const resolveTeamMemberships = () => sqliteTable(
   "team_memberships",
   {
     memberTeamId: text("member_team_id").notNull(),
@@ -46,14 +44,14 @@ export const resolveTeamMemberships = tablelandTable(
   }
 );
 
-export const resolveProjects = tablelandTable("projects", {
+export const resolveProjects = () => sqliteTable("projects", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
   description: text("description"),
 });
 
-export const resolveTeamProjects = tablelandTable(
+export const resolveTeamProjects = () => sqliteTable(
   "team_projects",
   {
     teamId: text("team_id").notNull(),
@@ -70,7 +68,7 @@ export const resolveTeamProjects = tablelandTable(
   }
 );
 
-export const resolveTables = tablelandTable("tables", {
+export const resolveTables = () => sqliteTable("tables", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
@@ -78,7 +76,7 @@ export const resolveTables = tablelandTable("tables", {
   schema: text("schema").notNull(),
 });
 
-export const resolveProjectTables = tablelandTable(
+export const resolveProjectTables = () => sqliteTable(
   "project_tables",
   {
     projectId: text("project_id").notNull(),
@@ -94,10 +92,7 @@ export const resolveProjectTables = tablelandTable(
   }
 );
 
-export type Table = InferModel<ReturnType<typeof resolveTables>>;
-export type NewTable = InferModel<ReturnType<typeof resolveTables>, "insert">;
-
-export const resolveTeamInvites = tablelandTable("team_invites", {
+export const resolveTeamInvites = () => sqliteTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),
   sealed: text("sealed").notNull(),
@@ -106,6 +101,9 @@ export const resolveTeamInvites = tablelandTable("team_invites", {
   claimedByTeamId: text("claimed_by_team_id"),
   claimedAt: text("claimed_at"),
 });
+
+export type Table = InferModel<ReturnType<typeof resolveTables>>;
+export type NewTable = InferModel<ReturnType<typeof resolveTables>, "insert">;
 
 export type UserSealed = InferModel<ReturnType<typeof resolveUsers>>;
 export type NewUserSealed = InferModel<
