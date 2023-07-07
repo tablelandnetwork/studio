@@ -12,17 +12,41 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Team } from "@/db/schema";
-import { logoutAtom } from "@/store/login";
-import { useSetAtom } from "jotai";
+import {
+  accountAtom,
+  providerAtom,
+  scwAddressAtom,
+  smartAccountAtom,
+  socialLoginSDKAtom,
+} from "@/store/wallet";
+import { useAtomValue, useSetAtom } from "jotai";
 import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export function NavUser({ personalTeam }: { personalTeam: Team }) {
-  const logout = useSetAtom(logoutAtom);
+export function MenuUser({ personalTeam }: { personalTeam: Team }) {
   const router = useRouter();
 
+  const socialLoginSDK = useAtomValue(socialLoginSDKAtom);
+  const setAccount = useSetAtom(accountAtom);
+  const setProvider = useSetAtom(providerAtom);
+  const setScwAddress = useSetAtom(scwAddressAtom);
+  const setSmartAccount = useSetAtom(smartAccountAtom);
+
+  const disconnectWeb3 = async () => {
+    if (!socialLoginSDK || !socialLoginSDK.web3auth) {
+      console.error("Web3Modal not initialized.");
+      return;
+    }
+    await socialLoginSDK.logout();
+    socialLoginSDK.hideWallet();
+    setProvider(null);
+    setAccount(null);
+    setSmartAccount(null);
+    setScwAddress(null);
+  };
+
   const handleSignOut = async () => {
-    await logout();
+    await disconnectWeb3();
     router.push("/");
   };
 

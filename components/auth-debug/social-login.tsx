@@ -1,14 +1,13 @@
 "use client";
 
-import { useAtom } from "jotai";
-
-import { socialLoginAtom } from "@/store/login";
+import { socialLoginSDKAtom } from "@/store/wallet";
+import { useAtomValue } from "jotai";
 
 export default function SocialLogin() {
-  const [socialLogin] = useAtom(socialLoginAtom);
+  const socialLoginSDK = useAtomValue(socialLoginSDKAtom);
   return (
     <div>
-      <p>Social login client id: {socialLogin.clientId}</p>
+      <p>Social login client id: {socialLoginSDK?.clientId}</p>
     </div>
   );
 }

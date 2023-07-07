@@ -1,11 +1,12 @@
-import { getServerSession } from "@/lib/withSession";
+import Session from "@/lib/session";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 import Provider from "./provider";
 import SmartAccount from "./smart-account";
 import SocialLogin from "./social-login";
 
 export default async function AuthDebug() {
-  const { auth } = await getServerSession();
+  const { auth } = await Session.fromCookies(cookies());
   return (
     <div>
       <h1>AuthDebug</h1>

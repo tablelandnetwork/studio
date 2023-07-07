@@ -7,9 +7,12 @@ import { Project, Team } from "@/db/schema";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-const UserNav = dynamic(() => import("./nav-user").then((res) => res.NavUser), {
-  ssr: false,
-});
+const UserNav = dynamic(
+  () => import("./menu-user").then((res) => res.MenuUser),
+  {
+    ssr: false,
+  }
+);
 
 export default function HeaderProject({
   personalTeam,
