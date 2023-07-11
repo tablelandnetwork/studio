@@ -29,7 +29,7 @@ export default async function Header() {
         <nav>
           {auth?.personalTeam && (
             <Link
-              href={`/${auth.personalTeam.slug}/projects`}
+              href={`/${auth.personalTeam.slug}`}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
             >
               Dashboard

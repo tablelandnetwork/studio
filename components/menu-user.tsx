@@ -1,5 +1,6 @@
 "use client";
 
+import { logout } from "@/app/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import {
 import { useAtomValue, useSetAtom } from "jotai";
 import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 export function MenuUser({ personalTeam }: { personalTeam: Team }) {
   const router = useRouter();
@@ -32,6 +34,9 @@ export function MenuUser({ personalTeam }: { personalTeam: Team }) {
   const setScwAddress = useSetAtom(scwAddressAtom);
   const setSmartAccount = useSetAtom(smartAccountAtom);
 
+  // TODO: Use isPending.
+  const [isPending, startTransition] = useTransition();
+
   const disconnectWeb3 = async () => {
     if (!socialLoginSDK || !socialLoginSDK.web3auth) {
       console.error("Web3Modal not initialized.");
@@ -39,6 +44,7 @@ export function MenuUser({ personalTeam }: { personalTeam: Team }) {
     }
     await socialLoginSDK.logout();
     socialLoginSDK.hideWallet();
+    await logout();
     setProvider(null);
     setAccount(null);
     setSmartAccount(null);
@@ -46,8 +52,10 @@ export function MenuUser({ personalTeam }: { personalTeam: Team }) {
   };
 
   const handleSignOut = async () => {
-    await disconnectWeb3();
-    router.push("/");
+    startTransition(async () => {
+      await disconnectWeb3();
+      router.push("/");
+    });
   };
 
   return (

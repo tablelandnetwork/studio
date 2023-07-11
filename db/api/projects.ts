@@ -57,7 +57,7 @@ export async function projectTeamByProjectId(projectId: string) {
     .where(eq(teamProjects.projectId, projectId))
     .orderBy(teams.name)
     .get();
-  return res?.teams?.id;
+  return res.teams;
 }
 
 export async function isAuthorizedForProject(

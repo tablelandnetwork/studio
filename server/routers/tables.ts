@@ -30,22 +30,22 @@ export const tablesRouter = router({
     )
     .mutation(
       async ({ ctx, input: { projectId, name, description, schema } }) => {
-        const teamId = await db.projects.projectTeamByProjectId(projectId);
+        const team = await db.projects.projectTeamByProjectId(projectId);
         if (
           !(await db.teams.isAuthorizedForTeam(
             ctx.session.auth.personalTeam.id,
-            teamId
+            team.id
           ))
         ) {
           throw new TRPCError({ code: "UNAUTHORIZED" });
         }
-        const team = await db.tables.createTable(
+        const table = await db.tables.createTable(
           projectId,
           name,
           description || null,
           schema
         );
-        return team;
+        return table;
       }
     ),
 });

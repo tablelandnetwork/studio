@@ -33,7 +33,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { SiweMessage } from "siwe";
 import { MenuUser } from "./menu-user";
-import { MenuWallet } from "./menu-wallet";
 import { Button } from "./ui/button";
 
 export default function UserActions({ personalTeam }: { personalTeam?: Team }) {
@@ -192,8 +191,7 @@ export default function UserActions({ personalTeam }: { personalTeam?: Team }) {
       {!account && !personalTeam && (
         <Button onClick={() => connectWeb3(true)}>Connect Wallet</Button>
       )}
-      {account && !personalTeam && <MenuWallet />}
-      {account && personalTeam && <MenuUser personalTeam={personalTeam} />}
+      {personalTeam && <MenuUser personalTeam={personalTeam} />}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Studio Registration</DialogTitle>

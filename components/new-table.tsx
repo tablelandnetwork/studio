@@ -1,8 +1,10 @@
+"use client";
+
 import { DialogProps } from "@radix-ui/react-dialog";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React from "react";
 
+import { newTable } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,49 +17,34 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Project, Team } from "@/db/schema";
-import { trpc } from "@/utils/trpc";
+import { Project } from "@/db/schema";
 
 interface Props extends DialogProps {
   project: Project;
-  team: Team;
 }
 
-export default function NewTableDialog({
-  project,
-  team,
-  children,
-  ...props
-}: Props) {
+export default function NewTable({ project, ...props }: Props) {
+  const [showNewTableDialog, setShowNewTableDialog] = React.useState(false);
   const [newTableName, setNewTableName] = React.useState("");
   const [newTableSchema, setNewTableSchema] = React.useState("");
   const [newTableDescription, setNewTableDescription] = React.useState("");
-
-  const newTable = trpc.tables.newTable.useMutation();
-
-  const router = useRouter();
-
-  useEffect(() => {
-    if (newTable.isSuccess) {
-      // TODO: Maybe restore below and add route for individual tables?
-      // router.push(`/${team.slug}/${project.slug}/${newTable.data.slug}`);
-      setNewTableName("");
-      setNewTableDescription("");
-      setNewTableSchema("");
-      if (props.onOpenChange) {
-        props.onOpenChange(false);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newTable.isSuccess]);
+  const [isPending, startTransition] = React.useTransition();
 
   const handleNewTable = () => {
     if (!newTableName.length) return;
-    newTable.mutate({
-      projectId: project.id,
-      name: newTableName,
-      description: newTableDescription.length ? newTableDescription : undefined,
-      schema: newTableSchema,
+    startTransition(async () => {
+      const table = await newTable(
+        project,
+        newTableName,
+        newTableSchema,
+        newTableDescription
+      );
+      // TODO: Maybe restore below and add route for individual tables?
+      // router.push(`/${team.slug}/${project.slug}/${table.slug}`);
+      setNewTableName("");
+      setNewTableDescription("");
+      setNewTableSchema("");
+      setShowNewTableDialog(false);
     });
   };
 
@@ -65,14 +52,16 @@ export default function NewTableDialog({
     setNewTableName("");
     setNewTableDescription("");
     setNewTableSchema("");
-    if (props.onOpenChange) {
-      props.onOpenChange(false);
-    }
+    setShowNewTableDialog(false);
   };
 
   return (
-    <Dialog {...props}>
-      {children}
+    <Dialog
+      open={showNewTableDialog}
+      onOpenChange={setShowNewTableDialog}
+      {...props}
+    >
+      <Button onClick={() => setShowNewTableDialog(true)}>New Table</Button>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create a new table</DialogTitle>
@@ -110,26 +99,16 @@ export default function NewTableDialog({
               />
             </div>
           </div>
-          {newTable.isError && (
+          {/* {newTable.isError && (
             <p>Error creating table: {newTable.error.message}</p>
-          )}
+          )} */}
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={newTable.isLoading}
-          >
+          <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            onClick={handleNewTable}
-            disabled={newTable.isLoading}
-          >
-            {newTable.isLoading && (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            )}
+          <Button type="submit" onClick={handleNewTable} disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Submit
           </Button>
         </DialogFooter>

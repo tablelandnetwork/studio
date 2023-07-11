@@ -23,7 +23,7 @@ import {
 import { Project, Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
 
-import NewProjectDialog from "./new-project-dialog";
+import NewProject from "./new-project";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
@@ -47,7 +47,7 @@ export default function ProjectSwitcher({
   const [showNewProjectDialog, setShowNewTeamDialog] = React.useState(false);
 
   return (
-    <NewProjectDialog
+    <NewProject
       team={team}
       open={showNewProjectDialog}
       onOpenChange={setShowNewTeamDialog}
@@ -113,6 +113,6 @@ export default function ProjectSwitcher({
           </Command>
         </PopoverContent>
       </Popover>
-    </NewProjectDialog>
+    </NewProject>
   );
 }
