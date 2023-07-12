@@ -18,7 +18,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import { NextPageWithLayout } from "./_app";
+import { NextPageWithLayout } from "../../xpages/_app";
 
 type Props = {
   auth: Auth | null;
