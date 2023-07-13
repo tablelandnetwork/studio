@@ -27,4 +27,5 @@ export async function sendInvite(invite: TeamInvite) {
       />
     ),
   });
+  console.log("sendMail result:", res);
 }

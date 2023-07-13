@@ -1,4 +1,4 @@
-import NewProject from "@/components/new-project";
+import NewProjectButton from "@/components/new-project-button";
 import {
   Card,
   CardContent,
@@ -47,7 +47,7 @@ export default async function Projects({
           </Card>
         </Link>
       ))}
-      <NewProject team={team} />
+      <NewProjectButton team={team} />
     </div>
   );
 }

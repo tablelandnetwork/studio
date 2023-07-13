@@ -123,6 +123,21 @@ export async function newTable(
   return table;
 }
 
+export async function newTeam(name: string, emailInvites: string[]) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const { team, invites } = await db.teams.createTeamByPersonalTeam(
+    name,
+    session.auth.user.teamId,
+    emailInvites
+  );
+  await Promise.all(invites.map((invite) => sendInvite(invite)));
+  revalidatePath(`/${team.slug}`);
+  return team;
+}
+
 export async function inviteEmails(team: Team, emails: string[]) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {

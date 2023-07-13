@@ -13,9 +13,7 @@ const UserActions = dynamic(
 
 export default async function Header() {
   const { auth } = await Session.fromCookies(cookies());
-  const teams = auth
-    ? await db.teams.teamsByMemberTeamId(auth.user.teamId)
-    : [];
+  const teams = auth ? await db.teams.teamsByMemberId(auth.user.teamId) : [];
 
   return (
     <header className="flex items-center justify-between px-4 py-3">

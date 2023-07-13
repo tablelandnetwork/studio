@@ -1,9 +1,9 @@
-import { InferModel } from "drizzle-orm";
+import { InferModel, relations } from "drizzle-orm";
 import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 import { tablelandTable } from "@/lib/drizzle";
 
-export const resolveUsers = tablelandTable(
+export const users = tablelandTable(
   "users",
   {
     address: text("address").primaryKey(),
@@ -13,9 +13,16 @@ export const resolveUsers = tablelandTable(
   (users) => ({
     teamIdIdx: uniqueIndex("teamIdIdx").on(users.teamId),
   })
-);
+)(process.env.CHAIN);
 
-export const resolveTeams = tablelandTable(
+export const usersRelations = relations(users, ({ one }) => ({
+  personalTeam: one(teams, {
+    fields: [users.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const teams = tablelandTable(
   "teams",
   {
     id: text("id").primaryKey(),
@@ -27,9 +34,14 @@ export const resolveTeams = tablelandTable(
     nameIdx: uniqueIndex("nameIdx").on(teams.name),
     slugIdx: uniqueIndex("slugIdx").on(teams.slug),
   })
-);
+)(process.env.CHAIN);
 
-export const resolveTeamMemberships = tablelandTable(
+export const teamsRelations = relations(teams, ({ many }) => ({
+  teamProjects: many(teamProjects),
+  teamMemberships: many(teamMemberships),
+}));
+
+export const teamMemberships = tablelandTable(
   "team_memberships",
   {
     memberTeamId: text("member_team_id").notNull(),
@@ -44,16 +56,34 @@ export const resolveTeamMemberships = tablelandTable(
       ),
     };
   }
+)(process.env.CHAIN);
+
+export const teamMembershipsRelations = relations(
+  teamMemberships,
+  ({ one }) => ({
+    team: one(teams, {
+      fields: [teamMemberships.teamId],
+      references: [teams.id],
+    }),
+    memberTeam: one(teams, {
+      fields: [teamMemberships.memberTeamId],
+      references: [teams.id],
+    }),
+  })
 );
 
-export const resolveProjects = tablelandTable("projects", {
+export const projects = tablelandTable("projects", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
   description: text("description"),
-});
+})(process.env.CHAIN);
 
-export const resolveTeamProjects = tablelandTable(
+export const projectsRelations = relations(projects, ({ many }) => ({
+  teamProjects: many(teamProjects),
+}));
+
+export const teamProjects = tablelandTable(
   "team_projects",
   {
     teamId: text("team_id").notNull(),
@@ -68,17 +98,28 @@ export const resolveTeamProjects = tablelandTable(
       ),
     };
   }
-);
+)(process.env.CHAIN);
 
-export const resolveTables = tablelandTable("tables", {
+export const teamProjectsRelations = relations(teamProjects, ({ one }) => ({
+  project: one(projects, {
+    fields: [teamProjects.projectId],
+    references: [projects.id],
+  }),
+  team: one(teams, {
+    fields: [teamProjects.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const tables = tablelandTable("tables", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
   description: text("description"),
   schema: text("schema").notNull(),
-});
+})(process.env.CHAIN);
 
-export const resolveProjectTables = tablelandTable(
+export const projectTables = tablelandTable(
   "project_tables",
   {
     projectId: text("project_id").notNull(),
@@ -92,12 +133,12 @@ export const resolveProjectTables = tablelandTable(
       ),
     };
   }
-);
+)(process.env.CHAIN);
 
-export type Table = InferModel<ReturnType<typeof resolveTables>>;
-export type NewTable = InferModel<ReturnType<typeof resolveTables>, "insert">;
+export type Table = InferModel<typeof tables>;
+export type NewTable = InferModel<typeof tables, "insert">;
 
-export const resolveTeamInvites = tablelandTable("team_invites", {
+export const teamInvites = tablelandTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),
   sealed: text("sealed").notNull(),
@@ -105,49 +146,30 @@ export const resolveTeamInvites = tablelandTable("team_invites", {
   createdAt: text("created_at").notNull(),
   claimedByTeamId: text("claimed_by_team_id"),
   claimedAt: text("claimed_at"),
-});
+})(process.env.CHAIN);
 
-export type UserSealed = InferModel<ReturnType<typeof resolveUsers>>;
-export type NewUserSealed = InferModel<
-  ReturnType<typeof resolveUsers>,
-  "insert"
->;
+export type UserSealed = InferModel<typeof users>;
+export type NewUserSealed = InferModel<typeof users, "insert">;
 
 export type User = Omit<UserSealed, "sealed"> & { email?: string };
 export type NewUser = Omit<NewUserSealed, "sealed"> & {
   email?: string;
 };
 
-export type Team = InferModel<ReturnType<typeof resolveTeams>>;
-export type NewTeam = InferModel<ReturnType<typeof resolveTeams>, "insert">;
+export type Team = InferModel<typeof teams>;
+export type NewTeam = InferModel<typeof teams, "insert">;
 
-export type TeamMembership = InferModel<
-  ReturnType<typeof resolveTeamMemberships>
->;
-export type NewTeamMembership = InferModel<
-  ReturnType<typeof resolveTeamMemberships>,
-  "insert"
->;
+export type TeamMembership = InferModel<typeof teamMemberships>;
+export type NewTeamMembership = InferModel<typeof teamMemberships, "insert">;
 
-export type Project = InferModel<ReturnType<typeof resolveProjects>>;
-export type NewProject = InferModel<
-  ReturnType<typeof resolveProjects>,
-  "insert"
->;
+export type Project = InferModel<typeof projects>;
+export type NewProject = InferModel<typeof projects, "insert">;
 
-export type TeamProject = InferModel<ReturnType<typeof resolveTeamProjects>>;
-export type NewTeamProject = InferModel<
-  ReturnType<typeof resolveTeamProjects>,
-  "insert"
->;
+export type TeamProject = InferModel<typeof teamProjects>;
+export type NewTeamProject = InferModel<typeof teamProjects, "insert">;
 
-export type TeamInviteSealed = InferModel<
-  ReturnType<typeof resolveTeamInvites>
->;
-export type NewTeamInviteSealed = InferModel<
-  ReturnType<typeof resolveTeamInvites>,
-  "insert"
->;
+export type TeamInviteSealed = InferModel<typeof teamInvites>;
+export type NewTeamInviteSealed = InferModel<typeof teamInvites, "insert">;
 export type TeamInvite = Omit<TeamInviteSealed, "sealed"> & { email: string };
 export type NewTeamInvite = Omit<NewTeamInviteSealed, "sealed"> & {
   email: string;

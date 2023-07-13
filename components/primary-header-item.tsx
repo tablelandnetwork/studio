@@ -1,8 +1,10 @@
 "use client";
 
-import { Team } from "@/db/schema";
+import db from "@/db/api";
 import { Auth } from "@/lib/session";
 import { useParams } from "next/navigation";
+import ProjectSwitcher from "./project-switcher";
+import TeamButton from "./team-button";
 import TeamSwitcher from "./team-switcher";
 
 export default function PrimaryHeaderItem({
@@ -10,28 +12,42 @@ export default function PrimaryHeaderItem({
   teams,
 }: {
   auth?: Auth;
-  teams: Team[];
+  teams: Awaited<ReturnType<typeof db.teams.teamsByMemberId>>;
 }) {
-  const { team, project } = useParams();
-  if (!!!team) {
+  // NOTE: The team project params can be undefined depending on the url.
+  const { team: teamSlug, project: projectSlug } = useParams();
+
+  const team = teams.find((team) => team.slug === teamSlug);
+
+  if (!team) {
     return (
       <h1 className="text-2xl font-normal uppercase text-fuchsia-800">
         Studio
       </h1>
     );
   }
-  if (auth && !!team && !!!project) {
-    return <TeamSwitcher team={auth.personalTeam} teams={teams} />;
+
+  if (auth && !!!projectSlug) {
+    return <TeamSwitcher team={team} teams={teams} />;
   }
-  if (!!team && !!project) {
-    return <p>project switcher</p>;
+
+  if (!!projectSlug) {
+    const project = team.projects.find(
+      (project) => project.slug === projectSlug
+    );
+    if (!project) {
+      return null;
+    }
+    return (
+      <>
+        <TeamButton team={team} />
+        <p className="text-sm text-muted-foreground">/</p>
+        <ProjectSwitcher
+          selectedProject={project}
+          projects={team.projects}
+          team={team}
+        />
+      </>
+    );
   }
-  // return (
-  //   <div>
-  //     <p>{pathname}</p>
-  //     <p>{team}</p>
-  //     <p>{selectedLayoutSegment}</p>
-  //     <p>{selectedLayoutSegments}</p>
-  //   </div>
-  // );
 }

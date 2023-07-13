@@ -1,9 +1,5 @@
 "use client";
 
-import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
-import { useRouter } from "next/router";
-import * as React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -22,8 +18,10 @@ import {
 } from "@/components/ui/popover";
 import { Project, Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
-
-import NewProject from "./new-project";
+import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import NewProjectDialog from "./new-project-dialog";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
@@ -47,7 +45,7 @@ export default function ProjectSwitcher({
   const [showNewProjectDialog, setShowNewTeamDialog] = React.useState(false);
 
   return (
-    <NewProject
+    <NewProjectDialog
       team={team}
       open={showNewProjectDialog}
       onOpenChange={setShowNewTeamDialog}
@@ -113,6 +111,6 @@ export default function ProjectSwitcher({
           </Command>
         </PopoverContent>
       </Popover>
-    </NewProject>
+    </NewProjectDialog>
   );
 }

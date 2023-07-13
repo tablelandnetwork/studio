@@ -1,9 +1,6 @@
 "use client";
 
-import { Check, ChevronsUpDown, Loader2, PlusCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import * as React from "react";
-
+import { newTeam } from "@/app/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +30,9 @@ import {
 } from "@/components/ui/popover";
 import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { trpc } from "@/utils/trpc";
+import { Check, ChevronsUpDown, Loader2, PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 import TagInput from "./tag-input";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
@@ -51,11 +50,11 @@ export default function TeamSwitcher({
   teams,
 }: TeamSwitcherProps) {
   const router = useRouter();
-  const newTeam = trpc.teams.newTeam.useMutation();
   const [newTeamName, setNewTeamName] = React.useState("");
   const [emailInvites, setEmailInvites] = React.useState<string[]>([]);
   const [open, setOpen] = React.useState(false);
   const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
 
   const teamGroups: { label: string; teams: Team[] }[] = [
     {
@@ -77,7 +76,14 @@ export default function TeamSwitcher({
 
   const handleNewTeam = () => {
     if (!newTeamName.length) return;
-    newTeam.mutate({ name: newTeamName, emailInvites });
+    startTransition(async () => {
+      const res = await newTeam(newTeamName, emailInvites);
+      router.push(`/${res.slug}`);
+      router.refresh();
+      setNewTeamName("");
+      setEmailInvites([]);
+      setShowNewTeamDialog(false);
+    });
   };
 
   const handleCancel = () => {
@@ -85,16 +91,6 @@ export default function TeamSwitcher({
     setNewTeamName("");
     setEmailInvites([]);
   };
-
-  React.useEffect(() => {
-    if (newTeam.isSuccess) {
-      router.push(`/${newTeam.data.slug}/projects`);
-      setNewTeamName("");
-      setEmailInvites([]);
-      setShowNewTeamDialog(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newTeam.isSuccess]);
 
   return (
     <Dialog open={showNewTeamDialog} onOpenChange={setShowNewTeamDialog}>
@@ -130,7 +126,7 @@ export default function TeamSwitcher({
                     <CommandItem
                       key={groupTeam.id}
                       onSelect={() => {
-                        router.push(`/${groupTeam.slug}/projects`);
+                        router.push(`/${groupTeam.slug}`);
                         setOpen(false);
                       }}
                       className="text-sm"
@@ -204,26 +200,16 @@ export default function TeamSwitcher({
               />
             </div>
           </div>
-          {newTeam.isError && (
+          {/* {newTeam.isError && (
             <p>Error creating team: {newTeam.error.message}</p>
-          )}
+          )} */}
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={newTeam.isLoading}
-          >
+          <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            onClick={handleNewTeam}
-            disabled={newTeam.isLoading}
-          >
-            {newTeam.isLoading && (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            )}
+          <Button type="submit" onClick={handleNewTeam} disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Submit
           </Button>
         </DialogFooter>

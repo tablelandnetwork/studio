@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,7 +27,7 @@ export default function TeamButton({
       role="navigation"
       aria-label="Go to team"
       className={cn("justify-between", className)}
-      onClick={() => router.push(`/${team.slug}/projects`)}
+      onClick={() => router.push(`/${team.slug}`)}
       {...props}
     >
       <Avatar className="mr-2 h-5 w-5">
