@@ -4,6 +4,7 @@ import Session from "@/lib/session";
 import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { NavPrimary } from "./nav-primary";
 import PrimaryHeaderItem from "./primary-header-item";
 
 const UserActions = dynamic(
@@ -11,7 +12,7 @@ const UserActions = dynamic(
   { ssr: false }
 );
 
-export default async function Header() {
+export default async function HeaderPrimary() {
   const { auth } = await Session.fromCookies(cookies());
   const teams = auth ? await db.teams.teamsByMemberId(auth.user.teamId) : [];
 
@@ -24,16 +25,7 @@ export default async function Header() {
         <PrimaryHeaderItem auth={auth} teams={teams} />
       </div>
       <div className="ml-auto flex items-center space-x-4">
-        <nav>
-          {auth?.personalTeam && (
-            <Link
-              href={`/${auth.personalTeam.slug}`}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-            >
-              Dashboard
-            </Link>
-          )}
-        </nav>
+        <NavPrimary personalTeam={auth?.personalTeam} />
         <UserActions personalTeam={auth?.personalTeam} />
       </div>
     </header>

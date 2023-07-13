@@ -1,4 +1,4 @@
-import HeaderTeam from "@/components/header-team";
+import HeaderSecondary from "@/components/header-secondary";
 import Session from "@/lib/session";
 import { cookies } from "next/headers";
 
@@ -10,7 +10,7 @@ export default async function LayoutTeam({
   const { auth } = await Session.fromCookies(cookies());
   return (
     <div>
-      <HeaderTeam />
+      <HeaderSecondary />
       {children}
     </div>
   );

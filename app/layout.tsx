@@ -1,5 +1,5 @@
 import Footer from "@/components/footer";
-import Header from "@/components/header";
+import HeaderPrimary from "@/components/header-primary";
 import { TrpcProvider } from "@/components/trpc-provider";
 import { Poppins } from "next/font/google";
 import "./globals.css";
@@ -28,7 +28,7 @@ export default function RootLayout({
         <body
           className={`${poppins.className} flex min-h-screen flex-col font-sans`}
         >
-          <Header />
+          <HeaderPrimary />
           <div className="flex-1">{children}</div>
           <Footer />
         </body>
