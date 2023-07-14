@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Project, Team } from "@/db/schema";
 import { trpc } from "@/utils/trpc";
+import SchemaBuilder from "./schema-builder";
 
 interface Props extends DialogProps {
   project: Project;
@@ -32,6 +32,8 @@ export default function NewTableDialog({
   const [newTableName, setNewTableName] = React.useState("");
   const [newTableSchema, setNewTableSchema] = React.useState("");
   const [newTableDescription, setNewTableDescription] = React.useState("");
+
+  function createNewTableSchema() {}
 
   const newTable = trpc.tables.newTable.useMutation();
 
@@ -73,7 +75,7 @@ export default function NewTableDialog({
   return (
     <Dialog {...props}>
       {children}
-      <DialogContent>
+      <DialogContent className="sm:max-w-[40rem]">
         <DialogHeader>
           <DialogTitle>Create a new table</DialogTitle>
           <DialogDescription>
@@ -92,22 +94,8 @@ export default function NewTableDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="message">Description</Label>
-              <Textarea
-                placeholder="Type your Table description here."
-                id="description"
-                value={newTableDescription}
-                onChange={(e) => setNewTableDescription(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="message">Schema</Label>
-              <Textarea
-                placeholder="Type your schema here."
-                id="schema"
-                value={newTableSchema}
-                onChange={(e) => setNewTableSchema(e.target.value)}
-              />
+              <SchemaBuilder />
             </div>
           </div>
           {newTable.isError && (
