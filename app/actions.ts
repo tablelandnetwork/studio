@@ -4,6 +4,7 @@ import db from "@/db/api";
 import { Project, Team } from "@/db/schema";
 import Session, { Auth } from "@/lib/session";
 import { sendInvite } from "@/utils/send";
+import { unsealData } from "iron-session";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { SiweMessage, generateNonce } from "siwe";
@@ -19,6 +20,8 @@ export async function nonce() {
   await session.persist(cookies());
   return session.nonce;
 }
+
+// TODO: Add Zod validation and error return everywhere.
 
 export async function login(
   message: string,
@@ -156,4 +159,37 @@ export async function inviteEmails(team: Team, emails: string[]) {
   );
   await Promise.all(invites.map((invite) => sendInvite(invite)));
   revalidatePath(`/${team.slug}/people`);
+}
+
+export async function acceptInvite(seal: string) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    // TODO: Proper error return.
+    throw new Error("Not authenticated");
+  }
+  const { inviteId } = await unsealData(seal, {
+    password: process.env.DATA_SEAL_PASS as string,
+  });
+  const invite = await db.invites.inviteById(inviteId as string);
+  if (!invite) {
+    throw new Error("Invite not found");
+  }
+  if (invite.claimedAt || invite.claimedByTeamId) {
+    throw new Error("Invite has already been claimed");
+  }
+  await db.invites.acceptInvite(invite, session.auth.personalTeam);
+}
+
+export async function ignoreInvite(seal: string) {
+  const { inviteId } = await unsealData(seal, {
+    password: process.env.DATA_SEAL_PASS as string,
+  });
+  const invite = await db.invites.inviteById(inviteId as string);
+  if (!invite) {
+    throw new Error("Invite not found");
+  }
+  if (invite.claimedAt || invite.claimedByTeamId) {
+    throw new Error("Invite has already been claimed");
+  }
+  await db.invites.deleteInvite(inviteId as string);
 }

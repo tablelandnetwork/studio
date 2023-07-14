@@ -1,19 +1,19 @@
 "use client";
 
 import db from "@/db/api";
-import { Auth } from "@/lib/session";
+import { authAtom } from "@/store/wallet";
+import { useAtomValue } from "jotai";
 import { useParams } from "next/navigation";
 import ProjectSwitcher from "./project-switcher";
 import TeamButton from "./team-button";
 import TeamSwitcher from "./team-switcher";
 
 export default function PrimaryHeaderItem({
-  auth,
   teams,
 }: {
-  auth?: Auth;
   teams: Awaited<ReturnType<typeof db.teams.teamsByMemberId>>;
 }) {
+  const auth = useAtomValue(authAtom);
   // NOTE: The team project params can be undefined depending on the url.
   const { team: teamSlug, project: projectSlug } = useParams();
 

@@ -2,6 +2,8 @@
 
 import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { authAtom } from "@/store/wallet";
+import { useAtomValue } from "jotai";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback } from "react";
@@ -21,11 +23,9 @@ function links(team?: Team) {
 
 export function NavPrimary({
   className,
-  personalTeam,
   ...props
-}: React.HTMLAttributes<HTMLElement> & {
-  personalTeam?: Team;
-}) {
+}: React.HTMLAttributes<HTMLElement>) {
+  const auth = useAtomValue(authAtom);
   const pathname = usePathname();
   const navItemClassName = useCallback(
     (path: string) => {
@@ -42,7 +42,7 @@ export function NavPrimary({
       className={cn("flex items-center space-x-4 lg:space-x-6", className)}
       {...props}
     >
-      {links(personalTeam).map((link) => (
+      {links(auth?.personalTeam).map((link) => (
         <Link
           key={link.href}
           href={link.href}

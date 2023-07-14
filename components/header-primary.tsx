@@ -22,11 +22,11 @@ export default async function HeaderPrimary() {
         <Link href="/">
           <MesaSvg />
         </Link>
-        <PrimaryHeaderItem auth={auth} teams={teams} />
+        <PrimaryHeaderItem teams={teams} />
       </div>
       <div className="ml-auto flex items-center space-x-4">
-        <NavPrimary personalTeam={auth?.personalTeam} />
-        <UserActions personalTeam={auth?.personalTeam} />
+        <NavPrimary />
+        <UserActions label="AAA" shouldAutoConnect={true} />
       </div>
     </header>
   );

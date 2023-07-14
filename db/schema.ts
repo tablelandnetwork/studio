@@ -1,4 +1,4 @@
-import { InferModel, relations } from "drizzle-orm";
+import { InferModel } from "drizzle-orm";
 import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 import { tablelandTable } from "@/lib/drizzle";
@@ -15,12 +15,12 @@ export const users = tablelandTable(
   })
 )(process.env.CHAIN);
 
-export const usersRelations = relations(users, ({ one }) => ({
-  personalTeam: one(teams, {
-    fields: [users.teamId],
-    references: [teams.id],
-  }),
-}));
+// export const usersRelations = relations(users, ({ one }) => ({
+//   personalTeam: one(teams, {
+//     fields: [users.teamId],
+//     references: [teams.id],
+//   }),
+// }));
 
 export const teams = tablelandTable(
   "teams",
@@ -36,10 +36,10 @@ export const teams = tablelandTable(
   })
 )(process.env.CHAIN);
 
-export const teamsRelations = relations(teams, ({ many }) => ({
-  teamProjects: many(teamProjects),
-  teamMemberships: many(teamMemberships),
-}));
+// export const teamsRelations = relations(teams, ({ many }) => ({
+//   teamProjects: many(teamProjects),
+//   teamMemberships: many(teamMemberships),
+// }));
 
 export const teamMemberships = tablelandTable(
   "team_memberships",
@@ -58,19 +58,19 @@ export const teamMemberships = tablelandTable(
   }
 )(process.env.CHAIN);
 
-export const teamMembershipsRelations = relations(
-  teamMemberships,
-  ({ one }) => ({
-    team: one(teams, {
-      fields: [teamMemberships.teamId],
-      references: [teams.id],
-    }),
-    memberTeam: one(teams, {
-      fields: [teamMemberships.memberTeamId],
-      references: [teams.id],
-    }),
-  })
-);
+// export const teamMembershipsRelations = relations(
+//   teamMemberships,
+//   ({ one }) => ({
+//     team: one(teams, {
+//       fields: [teamMemberships.teamId],
+//       references: [teams.id],
+//     }),
+//     memberTeam: one(teams, {
+//       fields: [teamMemberships.memberTeamId],
+//       references: [teams.id],
+//     }),
+//   })
+// );
 
 export const projects = tablelandTable("projects", {
   id: text("id").primaryKey(),
@@ -79,9 +79,9 @@ export const projects = tablelandTable("projects", {
   description: text("description"),
 })(process.env.CHAIN);
 
-export const projectsRelations = relations(projects, ({ many }) => ({
-  teamProjects: many(teamProjects),
-}));
+// export const projectsRelations = relations(projects, ({ many }) => ({
+//   teamProjects: many(teamProjects),
+// }));
 
 export const teamProjects = tablelandTable(
   "team_projects",
@@ -100,16 +100,16 @@ export const teamProjects = tablelandTable(
   }
 )(process.env.CHAIN);
 
-export const teamProjectsRelations = relations(teamProjects, ({ one }) => ({
-  project: one(projects, {
-    fields: [teamProjects.projectId],
-    references: [projects.id],
-  }),
-  team: one(teams, {
-    fields: [teamProjects.teamId],
-    references: [teams.id],
-  }),
-}));
+// export const teamProjectsRelations = relations(teamProjects, ({ one }) => ({
+//   project: one(projects, {
+//     fields: [teamProjects.projectId],
+//     references: [projects.id],
+//   }),
+//   team: one(teams, {
+//     fields: [teamProjects.teamId],
+//     references: [teams.id],
+//   }),
+// }));
 
 export const tables = tablelandTable("tables", {
   id: text("id").primaryKey(),

@@ -13,35 +13,42 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Team } from "@/db/schema";
 import toChecksumAddress from "@/lib/toChecksumAddr";
+import { socialLoginSDKAtom } from "@/store/social-login";
 import {
   accountAtom,
+  authAtom,
   providerAtom,
   scwAddressAtom,
   scwLoadingAtom,
   smartAccountAtom,
-  socialLoginSDKAtom,
 } from "@/store/wallet";
 import { ChainId } from "@biconomy/core-types";
 import SmartAccount from "@biconomy/smart-account";
-import SocialLogin from "@biconomy/web3-auth";
 import { ethers } from "ethers";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { SiweMessage } from "siwe";
-import { MenuUser } from "./menu-user";
+import MenuUser from "./menu-user";
 import { Button } from "./ui/button";
 
-export default function UserActions({ personalTeam }: { personalTeam?: Team }) {
-  const [socialLoginSDK, setSocialLoginSDK] = useAtom(socialLoginSDKAtom);
+export default function UserActions({
+  label,
+  shouldAutoConnect,
+}: {
+  label: string;
+  shouldAutoConnect: boolean;
+}) {
+  const socialLoginSDK = useAtomValue(socialLoginSDKAtom);
   const [account, setAccount] = useAtom(accountAtom);
   const [provider, setProvider] = useAtom(providerAtom);
   const setScwAddress = useSetAtom(scwAddressAtom);
   const setScwLoading = useSetAtom(scwLoadingAtom);
   const setSmartAccount = useSetAtom(smartAccountAtom);
+  const [auth, setAuth] = useAtom(authAtom);
+  const [wasInteractive, setWasInteractive] = useState(false);
 
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
   const [username, setUsername] = useState("");
@@ -50,16 +57,15 @@ export default function UserActions({ personalTeam }: { personalTeam?: Team }) {
 
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const pathname = usePathname();
+  const [pathnameSnapshot, setPathnameSnapshot] = useState("");
 
   const handleRegister = () => {
     if (!username.length) return;
     startTransition(async () => {
       const res = await register(username, email);
       if (res.auth) {
-        setShowRegisterDialog(false);
-        setUsername("");
-        setEmail("");
-        router.push(`/${res.auth.personalTeam.slug}`);
+        setAuth(res.auth);
       } else if (res.error) {
         setRegisterError(res.error);
       }
@@ -72,40 +78,80 @@ export default function UserActions({ personalTeam }: { personalTeam?: Team }) {
     setEmail("");
   };
 
+  useEffect(() => {
+    setPathnameSnapshot(pathname);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (auth) {
+      setShowRegisterDialog(false);
+      setUsername("");
+      setEmail("");
+      if (pathnameSnapshot === "/invite" || !wasInteractive) {
+        router.refresh();
+      } else {
+        router.push(`/${auth.personalTeam.slug}`);
+      }
+    }
+  }, [auth, pathnameSnapshot, router, wasInteractive]);
+
+  const runLogin = useCallback(
+    async (provider: ethers.providers.Web3Provider) => {
+      if (!provider) {
+        return;
+      }
+      const currentAuth = await authenticated();
+      if (currentAuth) {
+        setAuth(currentAuth);
+        return;
+      }
+      const signer = provider.getSigner();
+      const rawMessage = new SiweMessage({
+        domain: window.location.host,
+        address: toChecksumAddress(await signer.getAddress()),
+        statement:
+          "Sign in to Studio with your wallet address. This only requires a signature, no transaction will be sent.",
+        uri: origin,
+        version: "1",
+        chainId: await signer.getChainId(),
+        nonce: await nonce(),
+      });
+      const message = rawMessage.prepareMessage();
+      const signature = await signer.signMessage(message);
+      startTransition(async () => {
+        const res = await login(message, signature);
+        if (res.error) {
+          // TODO: Handle error.
+        } else if (res.auth) {
+          setAuth(res.auth);
+        } else {
+          setShowRegisterDialog(true);
+        }
+      });
+    },
+    [setAuth]
+  );
+
   const connectWeb3 = useCallback(
     async (showWallet: boolean) => {
       if (typeof window === "undefined") return;
-      if (socialLoginSDK?.provider) {
+      if (socialLoginSDK.provider) {
         const web3Provider = new ethers.providers.Web3Provider(
           socialLoginSDK.provider
         );
         setProvider(web3Provider);
         const accounts = await web3Provider.listAccounts();
         setAccount(accounts[0]);
+        setWasInteractive(showWallet);
+        await runLogin(web3Provider);
         return;
       }
-      if (socialLoginSDK && showWallet) {
-        socialLoginSDK.showWallet();
-        return;
-      }
-      const sdk = new SocialLogin();
-      let whitelistUrls: { [x: string]: string } = {};
-      if (!!process.env.NEXT_PUBLIC_SITE_URL) {
-        const sig = await sdk.whitelistUrl(process.env.NEXT_PUBLIC_SITE_URL);
-        whitelistUrls[process.env.NEXT_PUBLIC_SITE_URL] = sig;
-      }
-      if (!!process.env.NEXT_PUBLIC_VERCEL_URL) {
-        const url = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-        const sig = await sdk.whitelistUrl(url);
-        whitelistUrls[url] = sig;
-      }
-      await sdk.init({ whitelistUrls, chainId: ethers.utils.hexValue(80001) });
-      setSocialLoginSDK(sdk);
       if (showWallet) {
-        sdk.showWallet();
+        socialLoginSDK.showWallet();
       }
     },
-    [setAccount, setProvider, setSocialLoginSDK, socialLoginSDK]
+    [runLogin, setAccount, setProvider, socialLoginSDK]
   );
 
   // if wallet already connected close widget
@@ -130,9 +176,11 @@ export default function UserActions({ personalTeam }: { personalTeam?: Team }) {
     };
   }, [account, connectWeb3, socialLoginSDK]);
 
-  // useEffect(() => {
-  //   connectWeb3(false);
-  // }, [connectWeb3]);
+  useEffect(() => {
+    if (shouldAutoConnect) {
+      connectWeb3(false);
+    }
+  }, [connectWeb3, shouldAutoConnect]);
 
   useEffect(() => {
     async function setupSmartAccount() {
@@ -153,48 +201,15 @@ export default function UserActions({ personalTeam }: { personalTeam?: Team }) {
     }
   }, [account, provider, setScwAddress, setScwLoading, setSmartAccount]);
 
-  useEffect(() => {
-    (async () => {
-      if (!provider) return;
-      const currentAuth = await authenticated();
-      if (currentAuth) {
-        return currentAuth;
-      }
-      const signer = provider.getSigner();
-      const rawMessage = new SiweMessage({
-        domain: window.location.host,
-        address: toChecksumAddress(await signer.getAddress()),
-        statement:
-          "Sign in to Studio with your wallet address. This only requires a signature, no transaction will be sent.",
-        uri: origin,
-        version: "1",
-        chainId: await signer.getChainId(),
-        nonce: await nonce(),
-      });
-      const message = rawMessage.prepareMessage();
-      const signature = await signer.signMessage(message);
-      startTransition(async () => {
-        const res = await login(message, signature);
-        if (res.error) {
-          // TODO: Handle error.
-        } else if (!res.auth) {
-          setShowRegisterDialog(true);
-        } else {
-          router.push(`/${res.auth.personalTeam.slug}`);
-        }
-      });
-    })();
-  }, [provider, router]);
-
   return (
-    <Dialog open={showRegisterDialog} onOpenChange={setShowRegisterDialog}>
-      {!account && !personalTeam && (
-        <Button onClick={() => connectWeb3(true)}>Connect Wallet</Button>
+    <Dialog open={showRegisterDialog}>
+      {!account && !auth?.personalTeam && (
+        <Button onClick={() => connectWeb3(true)}>Sign In</Button>
       )}
-      {personalTeam && <MenuUser personalTeam={personalTeam} />}
+      {auth?.personalTeam && <MenuUser personalTeam={auth.personalTeam} />}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Studio Registration</DialogTitle>
+          <DialogTitle>Studio Registration with label {label}</DialogTitle>
           <DialogDescription>
             To use Studio, you&apos;ll need to choose a username. Email
             isn&apos;t required, but if you do share it with us, we&apos;ll only
