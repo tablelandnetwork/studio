@@ -59,7 +59,7 @@ export default function InviteHandler({
         {pendingIgnore && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
         Ignore
       </Button>
-      {!auth && <UserActions label="BBB" shouldAutoConnect={false} />}
+      {!auth && <UserActions />}
       {auth && (
         <Button
           onClick={handleAccept}

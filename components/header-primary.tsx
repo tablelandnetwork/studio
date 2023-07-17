@@ -26,7 +26,7 @@ export default async function HeaderPrimary() {
       </div>
       <div className="ml-auto flex items-center space-x-4">
         <NavPrimary />
-        <UserActions label="AAA" shouldAutoConnect={true} />
+        <UserActions />
       </div>
     </header>
   );

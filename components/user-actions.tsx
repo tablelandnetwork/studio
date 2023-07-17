@@ -21,13 +21,7 @@ import { useEffect, useState, useTransition } from "react";
 import MenuUser from "./menu-user";
 import { Button } from "./ui/button";
 
-export default function UserActions({
-  label,
-  shouldAutoConnect,
-}: {
-  label: string;
-  shouldAutoConnect: boolean;
-}) {
+export default function UserActions() {
   const account = useAtomValue(accountAtom);
   const auth = useAtomValue(authAtom);
   const connectWeb3 = useSetAtom(connectWeb3Atom);
@@ -47,9 +41,8 @@ export default function UserActions({
   const handleSignIn = () => {
     startTransition(async () => {
       const res = await connectWeb3(true);
-      if (res.awaitingProvider) {
-        return;
-      } else if (res.error) {
+      console.log("connect res", res);
+      if (res.error) {
         // TODO: Display error.
       } else if (res.auth) {
         if (pathnameSnapshot === "/invite") {
@@ -101,7 +94,7 @@ export default function UserActions({
       {auth?.personalTeam && <MenuUser personalTeam={auth.personalTeam} />}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Studio Registration with label {label}</DialogTitle>
+          <DialogTitle>Studio Registration</DialogTitle>
           <DialogDescription>
             To use Studio, you&apos;ll need to choose a username. Email
             isn&apos;t required, but if you do share it with us, we&apos;ll only

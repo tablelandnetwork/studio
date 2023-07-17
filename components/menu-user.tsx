@@ -1,6 +1,5 @@
 "use client";
 
-import { logout } from "@/app/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,15 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Team } from "@/db/schema";
-import { socialLoginSDKAtom } from "@/store/social-login";
-import {
-  accountAtom,
-  authAtom,
-  providerAtom,
-  scwAddressAtom,
-  smartAccountAtom,
-} from "@/store/wallet";
-import { useAtomValue, useSetAtom } from "jotai";
+import { logoutAtom } from "@/store/social-login";
+import { useSetAtom } from "jotai";
 import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -29,34 +21,14 @@ import { useTransition } from "react";
 export default function MenuUser({ personalTeam }: { personalTeam: Team }) {
   const router = useRouter();
 
-  const socialLoginSDK = useAtomValue(socialLoginSDKAtom);
-  const setAccount = useSetAtom(accountAtom);
-  const setProvider = useSetAtom(providerAtom);
-  const setScwAddress = useSetAtom(scwAddressAtom);
-  const setSmartAccount = useSetAtom(smartAccountAtom);
-  const setAuth = useSetAtom(authAtom);
+  const logout = useSetAtom(logoutAtom);
 
   // TODO: Use isPending.
   const [isPending, startTransition] = useTransition();
 
-  const disconnectWeb3 = async () => {
-    await logout();
-    if (!socialLoginSDK.web3auth) {
-      console.error("Web3Modal not initialized.");
-      return;
-    }
-    await socialLoginSDK.logout();
-    socialLoginSDK.hideWallet();
-    setProvider(null);
-    setAccount(null);
-    setSmartAccount(null);
-    setScwAddress(null);
-    setAuth(null);
-  };
-
   const handleSignOut = async () => {
     startTransition(async () => {
-      await disconnectWeb3();
+      await logout();
       router.push("/");
       router.refresh();
     });

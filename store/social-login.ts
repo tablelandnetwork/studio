@@ -1,4 +1,4 @@
-import { authenticated, login, nonce, register } from "@/app/actions";
+import { authenticated, login, logout, nonce, register } from "@/app/actions";
 import { Auth } from "@/lib/session";
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { ChainId } from "@biconomy/core-types";
@@ -32,61 +32,70 @@ export const socialLoginSDKAtom = atom(async () => {
   return sdk;
 });
 
+const loggedOutAtAtom = atom(new Date());
+
+const blockUntilProvider = atom(async (get) => {
+  get(loggedOutAtAtom);
+  const socialLoginSDK = await get(socialLoginSDKAtom);
+  while (!socialLoginSDK.provider) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  return socialLoginSDK.provider;
+});
+
 export const connectWeb3Atom = atom(
   undefined,
   async (
     get,
     set,
     showWallet: boolean
-  ): Promise<{ auth?: Auth; awaitingProvider: boolean; error?: string }> => {
+  ): Promise<{ auth?: Auth; error?: string }> => {
     const socialLoginSDK = await get(socialLoginSDKAtom);
-    if (socialLoginSDK.provider) {
-      // Moved this here because it seems like we don't need a separate effect for it.
-      socialLoginSDK.hideWallet();
-      const web3Provider = new ethers.providers.Web3Provider(
-        socialLoginSDK.provider
-      );
-      set(providerAtom, web3Provider);
-      const accounts = await web3Provider.listAccounts();
-      set(accountAtom, accounts[0]);
-
-      // Kick off smart account setup.
-      set(setupSmartAccount, web3Provider);
-
-      // Sign in with server
-      const currentAuth = await authenticated();
-      if (
-        currentAuth &&
-        currentAuth.user.address.toLowerCase() === accounts[0].toLowerCase()
-      ) {
-        // TODO: Something here to make sure the session/auth originates from this wallet. Compare address? Done.
-        set(authAtom, currentAuth);
-        return { auth: currentAuth, awaitingProvider: false };
-      }
-      const signer = web3Provider.getSigner();
-      const rawMessage = new SiweMessage({
-        domain: window.location.host,
-        address: toChecksumAddress(await signer.getAddress()),
-        statement:
-          "Sign in to Studio with your wallet address. This only requires a signature, no transaction will be sent.",
-        uri: origin,
-        version: "1",
-        chainId: await signer.getChainId(),
-        nonce: await nonce(),
-      });
-      const message = rawMessage.prepareMessage();
-      const signature = await signer.signMessage(message);
-      const res = await login(message, signature);
-      if (res.error) {
-        return { error: res.error, awaitingProvider: false };
-      }
-      set(authAtom, res.auth ? res.auth : null);
-      return { auth: res.auth, awaitingProvider: false };
-    }
-    if (showWallet) {
+    if (!socialLoginSDK.provider && showWallet) {
       socialLoginSDK.showWallet();
+    } else if (!socialLoginSDK.provider && !showWallet) {
+      return { error: "No provider, but you don't want to show the wallet." };
     }
-    return { awaitingProvider: true };
+    const provider = await get(blockUntilProvider);
+    // Moved this here because it seems like we don't need a separate effect for it.
+    socialLoginSDK.hideWallet();
+    const web3Provider = new ethers.providers.Web3Provider(provider);
+    set(providerAtom, web3Provider);
+    const accounts = await web3Provider.listAccounts();
+    set(accountAtom, accounts[0]);
+
+    // Kick off smart account setup.
+    set(setupSmartAccount, web3Provider);
+
+    // Sign in with server
+    const currentAuth = await authenticated();
+    if (
+      currentAuth &&
+      currentAuth.user.address.toLowerCase() === accounts[0].toLowerCase()
+    ) {
+      // TODO: Something here to make sure the session/auth originates from this wallet. Compare address? Done.
+      set(authAtom, currentAuth);
+      return { auth: currentAuth };
+    }
+    const signer = web3Provider.getSigner();
+    const rawMessage = new SiweMessage({
+      domain: window.location.host,
+      address: toChecksumAddress(await signer.getAddress()),
+      statement:
+        "Sign in to Studio with your wallet address. This only requires a signature, no transaction will be sent.",
+      uri: origin,
+      version: "1",
+      chainId: await signer.getChainId(),
+      nonce: await nonce(),
+    });
+    const message = rawMessage.prepareMessage();
+    const signature = await signer.signMessage(message);
+    const res = await login(message, signature);
+    if (res.error) {
+      return { error: res.error };
+    }
+    set(authAtom, res.auth ? res.auth : null);
+    return { auth: res.auth };
   }
 );
 
@@ -99,6 +108,22 @@ export const registerAtom = atom(
   }
 );
 
+export const logoutAtom = atom(undefined, async (get, set) => {
+  const socialLoginSDK = await get(socialLoginSDKAtom);
+  await logout();
+  if (socialLoginSDK.web3auth) {
+    console.log("logging out of sdk");
+    await socialLoginSDK.logout();
+    socialLoginSDK.hideWallet();
+  }
+  set(providerAtom, null);
+  set(accountAtom, null);
+  set(smartAccountAtom, null);
+  set(scwAddressAtom, null);
+  set(authAtom, null);
+  set(loggedOutAtAtom, new Date());
+});
+
 // Moved to connectWeb3Atom.
 // const closeLogin = atom(async (get) => {
 //   get(accountAtom);
@@ -108,19 +133,21 @@ export const registerAtom = atom(
 //   }
 // });
 
-export const pollProviderAtom = atom(undefined, (get, set) => {
-  const interval = setInterval(async () => {
-    const account = get(accountAtom);
-    const socialLoginSDK = await get(socialLoginSDKAtom);
-    if (account) {
-      clearInterval(interval);
-    }
-    if (socialLoginSDK.provider && !account) {
-      set(connectWeb3Atom, false);
-    }
-  }, 500);
-  return interval;
-});
+// export const pollProviderAtom = atom(undefined, (get, set) => {
+//   const interval = setInterval(async () => {
+//     console.log("polling");
+//     const account = get(accountAtom);
+//     const socialLoginSDK = await get(socialLoginSDKAtom);
+//     if (account) {
+//       clearInterval(interval);
+//     }
+//     if (socialLoginSDK.provider && !account) {
+//       const res = await set(connectWeb3Atom, false);
+//       console.log("polling res", res);
+//     }
+//   }, 500);
+//   return interval;
+// });
 // pollProviderAtom.onMount = (setAtom) => {
 //   console.log("polling on mount");
 //   const interval = setAtom();
