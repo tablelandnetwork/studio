@@ -7,8 +7,8 @@ import { PathLike, constants } from "fs";
 import { access, readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
 
-import * as schema from "../src/db/schema";
-import { Tables, tablesJson } from "../src/lib/drizzle";
+import * as schema from "@/db/schema";
+import { Tables, tablesJson } from "@/lib/drizzle";
 
 config({ path: resolve(process.cwd(), process.argv[2] || ".env.local") });
 
@@ -33,7 +33,7 @@ async function tables(chain: string) {
 
   const values = Object.values(schema);
   for (const value of values) {
-    const config = getTableConfig(value());
+    const config = getTableConfig(value);
     const create = createStmt(config);
     const normalizedStatement = await helpers.normalize(create);
     const normalized = normalizedStatement.statements[0];
@@ -70,9 +70,7 @@ async function tables(chain: string) {
   }
 
   const tableNames = Object.keys(tables);
-  const schemaNames = Object.values(schema)
-    .map((s) => s())
-    .map((i) => getTableConfig(i).name);
+  const schemaNames = Object.values(schema).map((i) => getTableConfig(i).name);
   for (const tableName of tableNames) {
     if (!schemaNames.includes(tableName)) {
       delete tables[tableName];
