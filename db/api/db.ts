@@ -2,15 +2,16 @@ import { NonceManager } from "@ethersproject/experimental";
 import { Database } from "@tableland/sdk";
 import { drizzle } from "drizzle-orm/d1";
 import { Wallet, getDefaultProvider } from "ethers";
+import * as schema from "../schema";
 import {
-  resolveProjectTables,
-  resolveProjects,
-  resolveTables,
-  resolveTeamInvites,
-  resolveTeamMemberships,
-  resolveTeamProjects,
-  resolveTeams,
-  resolveUsers,
+  projectTables,
+  projects,
+  tables,
+  teamInvites,
+  teamMemberships,
+  teamProjects,
+  teams,
+  users,
 } from "../schema";
 
 if (!process.env.PRIVATE_KEY) {
@@ -27,16 +28,18 @@ const baseSigner = wallet.connect(provider);
 const signer = new NonceManager(baseSigner);
 
 export const tbl = new Database({ signer, autoWait: true });
-export const db = drizzle(tbl, { logger: false });
+export const db = drizzle(tbl, { logger: false, schema });
 
-export const users = resolveUsers(process.env.CHAIN);
-export const teams = resolveTeams(process.env.CHAIN);
-export const teamMemberships = resolveTeamMemberships(process.env.CHAIN);
-export const projects = resolveProjects(process.env.CHAIN);
-export const teamProjects = resolveTeamProjects(process.env.CHAIN);
-export const tables = resolveTables(process.env.CHAIN);
-export const projectTables = resolveProjectTables(process.env.CHAIN);
-export const teamInvites = resolveTeamInvites(process.env.CHAIN);
+export {
+  projectTables,
+  projects,
+  tables,
+  teamInvites,
+  teamMemberships,
+  teamProjects,
+  teams,
+  users,
+};
 
 export function slugify(input: string) {
   return input

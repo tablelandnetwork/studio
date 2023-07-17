@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,24 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Team } from "@/db/schema";
-import { trpc } from "@/utils/trpc";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import { Loader2, Plus } from "lucide-react";
-import { useRouter } from "next/router";
-import React from "react";
-import TagInput from "./tag-input";
+import { Invite } from "./invite";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Label } from "./ui/label";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -57,28 +43,6 @@ type Props = {
 };
 
 export function Invites({ invites, team, personalTeam }: Props) {
-  const inviteEmails = trpc.teams.inviteEmails.useMutation();
-  const [showInviteDialog, setShowInviteDialog] = React.useState(false);
-  const [emailInvites, setEmailInvites] = React.useState<string[]>([]);
-  const router = useRouter();
-
-  const handleNewTeam = async () => {
-    if (!emailInvites.length) return;
-    inviteEmails.mutate({ teamId: team.id, emails: emailInvites });
-  };
-
-  const handleCancel = () => {
-    setShowInviteDialog(false);
-    setEmailInvites([]);
-  };
-
-  React.useEffect(() => {
-    router.replace(router.asPath);
-    setShowInviteDialog(false);
-    setEmailInvites([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inviteEmails.isSuccess]);
-
   invites.sort((a, b) => {
     const aVal = a.invite.claimedAt || a.invite.createdAt;
     const bVal = b.invite.claimedAt || b.invite.createdAt;
@@ -86,72 +50,65 @@ export function Invites({ invites, team, personalTeam }: Props) {
   });
 
   return (
-    <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-      <Card>
-        <div className="flex items-center pr-6">
-          <CardHeader>
-            <CardTitle>Invites</CardTitle>
-            <CardDescription>
-              Invite your team members to collaborate.
-            </CardDescription>
-          </CardHeader>
-          <Button
-            variant="outline"
-            className="ml-auto"
-            onClick={() => setShowInviteDialog(true)}
+    <Card>
+      <div className="flex items-center pr-6">
+        <CardHeader>
+          <CardTitle>Invites</CardTitle>
+          <CardDescription>
+            Invite your team members to collaborate.
+          </CardDescription>
+        </CardHeader>
+        <Invite invites={invites} team={team} />
+      </div>
+      <CardContent className="grid gap-6">
+        {invites.map(({ invite, inviter, claimedBy }) => (
+          <div
+            key={invite.id}
+            className="flex items-center justify-between space-x-4"
           >
-            <Plus className="" />
-          </Button>
-        </div>
-        <CardContent className="grid gap-6">
-          {invites.map(({ invite, inviter, claimedBy }) => (
-            <div
-              key={invite.id}
-              className="flex items-center justify-between space-x-4"
-            >
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  {claimedBy && (
-                    <AvatarImage
-                      src={`https://avatar.vercel.sh/${claimedBy.slug}.png`}
-                      alt={claimedBy.name}
-                    />
-                  )}
-                  <AvatarFallback>
-                    {claimedBy
-                      ? claimedBy.name.charAt(0)
-                      : invite.email.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+            <div className="flex items-center space-x-4">
+              <Avatar>
+                {claimedBy && (
+                  <AvatarImage
+                    src={`https://avatar.vercel.sh/${claimedBy.slug}.png`}
+                    alt={claimedBy.name}
+                  />
+                )}
+                <AvatarFallback>
+                  {claimedBy
+                    ? claimedBy.name.charAt(0)
+                    : invite.email.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
 
-                <div>
-                  <p className="text-sm font-medium leading-none">
-                    {invite.email}
+              <div>
+                <p className="text-sm font-medium leading-none">
+                  {invite.email}
+                </p>
+
+                {claimedBy && invite.claimedAt && (
+                  <p className="text-sm text-muted-foreground">
+                    Claimed by{" "}
+                    <span className="font-medium">
+                      {claimedBy.id === personalTeam.id
+                        ? "you"
+                        : claimedBy.name}
+                    </span>{" "}
+                    {timeAgo.format(new Date(invite.claimedAt))}
                   </p>
-
-                  {claimedBy && invite.claimedAt && (
-                    <p className="text-sm text-muted-foreground">
-                      Claimed by{" "}
-                      <span className="font-medium">
-                        {claimedBy.id === personalTeam.id
-                          ? "you"
-                          : claimedBy.name}
-                      </span>{" "}
-                      {timeAgo.format(new Date(invite.claimedAt))}
-                    </p>
-                  )}
-                  {!claimedBy && (
-                    <p className="text-sm text-muted-foreground">
-                      Invited by{" "}
-                      <span className="font-medium">
-                        {inviter.id === personalTeam.id ? "you" : inviter.name}
-                      </span>{" "}
-                      {timeAgo.format(new Date(invite.createdAt))}
-                    </p>
-                  )}
-                </div>
+                )}
+                {!claimedBy && (
+                  <p className="text-sm text-muted-foreground">
+                    Invited by{" "}
+                    <span className="font-medium">
+                      {inviter.id === personalTeam.id ? "you" : inviter.name}
+                    </span>{" "}
+                    {timeAgo.format(new Date(invite.createdAt))}
+                  </p>
+                )}
               </div>
-              {/* <Popover>
+            </div>
+            {/* <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="ml-auto">
                     Owner{" "}
@@ -193,58 +150,9 @@ export function Invites({ invites, team, personalTeam }: Props) {
                   </Command>
                 </PopoverContent>
               </Popover> */}
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            Invite others to the{" "}
-            <span className="text-muted-foreground">{team.name}</span> team
-          </DialogTitle>
-          <DialogDescription>
-            You can invite others by email address and they will be able to
-            ingore your invite or accept it with any authentication mechanism
-            they choose.
-          </DialogDescription>
-        </DialogHeader>
-        <div>
-          <div className="space-y-4 py-2 pb-4">
-            <div className="space-y-2">
-              <Label htmlFor="emails">Email addresses to invite</Label>
-              <TagInput
-                id="emails"
-                placeholder="Enter email address, press enter"
-                tags={emailInvites}
-                setTags={setEmailInvites}
-              />
-            </div>
           </div>
-          {inviteEmails.error && (
-            <p>Error sending invites: {inviteEmails.error.message}</p>
-          )}
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={inviteEmails.isLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            onClick={handleNewTeam}
-            disabled={inviteEmails.isLoading}
-          >
-            {inviteEmails.isLoading && (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            )}
-            Submit
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        ))}
+      </CardContent>
+    </Card>
   );
 }

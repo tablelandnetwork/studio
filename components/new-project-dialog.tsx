@@ -1,3 +1,6 @@
+"use client";
+
+import { newProject } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,11 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Team } from "@/db/schema";
-import { trpc } from "@/utils/trpc";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 interface Props extends DialogProps {
   team: Team;
@@ -29,31 +31,25 @@ export default function NewProjectDialog({
 }: Props) {
   const [newProjectName, setNewProjectName] = React.useState("");
   const [newProjectDescription, setNewProjectDescription] = React.useState("");
-
-  const newProject = trpc.projects.newProject.useMutation();
+  const [isPending, startTransition] = React.useTransition();
 
   const router = useRouter();
 
-  useEffect(() => {
-    if (newProject.isSuccess) {
-      router.push(`/${team.slug}/${newProject.data.slug}`);
+  const handleNewProject = () => {
+    if (!newProjectName.length) return;
+    startTransition(async () => {
+      const res = await newProject(
+        team.id,
+        newProjectName,
+        newProjectDescription
+      );
+      router.push(`/${team.slug}/${res.slug}`);
+      router.refresh();
       setNewProjectName("");
       setNewProjectDescription("");
       if (onOpenChange) {
         onOpenChange(false);
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newProject.isSuccess]);
-
-  const handleNewProject = () => {
-    if (!newProjectName.length) return;
-    newProject.mutate({
-      teamId: team.id,
-      name: newProjectName,
-      description: newProjectDescription.length
-        ? newProjectDescription
-        : undefined,
     });
   };
 
@@ -96,26 +92,16 @@ export default function NewProjectDialog({
               />
             </div>
           </div>
-          {!!newProject.error && (
+          {/* {!!newProject.error && (
             <p>Error creating project: {newProject.error.message}</p>
-          )}
+          )} */}
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={newProject.isLoading}
-          >
+          <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            onClick={handleNewProject}
-            disabled={newProject.isLoading}
-          >
-            {newProject.isLoading && (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            )}
+          <Button type="submit" onClick={handleNewProject} disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Submit
           </Button>
         </DialogFooter>

@@ -1,13 +1,15 @@
+"use client";
+
+import { autoConnectAtom } from "@/store/social-login";
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";
 
-import { loginAtom } from "@/store/login";
-
 export default function AutoLogin() {
-  const login = useSetAtom(loginAtom);
+  const autoConnect = useSetAtom(autoConnectAtom);
+
   useEffect(() => {
-    login(false);
-  }, [login]);
+    autoConnect();
+  }, [autoConnect]);
 
   return null;
 }

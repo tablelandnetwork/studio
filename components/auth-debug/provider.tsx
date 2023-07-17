@@ -1,12 +1,14 @@
-import { useAtom } from "jotai";
+"use client";
 
-import { providerAndAccountAtom } from "@/store/login";
+import { useAtomValue } from "jotai";
+
+import { accountAtom } from "@/store/wallet";
 
 export default function Provider() {
-  const [providerAndAccount] = useAtom(providerAndAccountAtom);
+  const account = useAtomValue(accountAtom);
   return (
     <div>
-      <p>Account address: {providerAndAccount.account}</p>
+      <p>Account address: {account}</p>
     </div>
   );
 }

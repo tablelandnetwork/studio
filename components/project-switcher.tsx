@@ -1,9 +1,5 @@
 "use client";
 
-import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
-import { useRouter } from "next/router";
-import * as React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -22,7 +18,9 @@ import {
 } from "@/components/ui/popover";
 import { Project, Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
-
+import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 import NewProjectDialog from "./new-project-dialog";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
