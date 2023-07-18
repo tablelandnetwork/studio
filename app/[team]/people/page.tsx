@@ -4,7 +4,7 @@ import db from "@/db/api";
 import Session from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 function Container({
   className,
@@ -24,21 +24,18 @@ function Container({
 export default async function People({ params }: { params: { team: string } }) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
-    // For now only allow authenticated users access.
-    // TODO: Really should redirect to some 401 not authorized.
-    redirect("/");
+    notFound();
   }
 
   const team = await db.teams.teamBySlug(params.team);
-  // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
   if (!team) {
-    // TODO: Really should redirect to some 404 not found.
-    redirect("/");
+    notFound();
   }
 
-  if (!db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id)) {
-    // TODO: Really should redirect to some 401 not authorized.
-    redirect("/");
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    notFound();
   }
 
   const people = await db.teams.userTeamsForTeamId(team.id);
