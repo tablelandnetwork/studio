@@ -38,10 +38,11 @@ export default function NewProjectDialog({ team, children, ...props }: Props) {
         newProjectName,
         newProjectDescription
       );
-      router.push(`/${team.slug}/${res.slug}`);
-      router.refresh();
+      props.onOpenChange && props.onOpenChange(false);
       setNewProjectName("");
       setNewProjectDescription("");
+      router.push(`/${team.slug}/${res.slug}`);
+      router.refresh();
     });
   };
 
