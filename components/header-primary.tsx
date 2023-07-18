@@ -6,10 +6,11 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { NavPrimary } from "./nav-primary";
 import PrimaryHeaderItem from "./primary-header-item";
+import { Button } from "./ui/button";
 
 const UserActions = dynamic(
   () => import("@/components/user-actions").then((res) => res.default),
-  { ssr: false }
+  { ssr: false, loading: () => <Button disabled={true}>Sign In</Button> }
 );
 
 export default async function HeaderPrimary() {

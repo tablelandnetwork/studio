@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { connectWeb3Atom, registerAtom } from "@/store/social-login";
-import { accountAtom, authAtom } from "@/store/wallet";
+import { authAtom, loggingInAtom } from "@/store/wallet";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -22,8 +22,8 @@ import MenuUser from "./menu-user";
 import { Button } from "./ui/button";
 
 export default function UserActions() {
-  const account = useAtomValue(accountAtom);
   const auth = useAtomValue(authAtom);
+  const loggingIn = useAtomValue(loggingInAtom);
   const connectWeb3 = useSetAtom(connectWeb3Atom);
   const register = useSetAtom(registerAtom);
 
@@ -88,10 +88,13 @@ export default function UserActions() {
 
   return (
     <Dialog open={showRegisterDialog} onOpenChange={setShowRegisterDialog}>
-      {!account && !auth?.personalTeam && (
-        <Button onClick={handleSignIn}>Sign In</Button>
+      {auth?.personalTeam ? (
+        <MenuUser personalTeam={auth.personalTeam} />
+      ) : (
+        <Button onClick={handleSignIn} disabled={loggingIn}>
+          Sign In
+        </Button>
       )}
-      {auth?.personalTeam && <MenuUser personalTeam={auth.personalTeam} />}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Studio Registration</DialogTitle>
