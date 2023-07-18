@@ -2,10 +2,11 @@ import { randomUUID } from "crypto";
 import { desc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { sealData, unsealData } from "iron-session";
+import { cache } from "react";
 import { NewTeamInviteSealed, Team, TeamInvite } from "../schema";
 import { db, tbl, teamInvites, teamMemberships, teams } from "./db";
 
-export async function inviteEmailsToTeam(
+export const inviteEmailsToTeam = cache(async function (
   teamId: string,
   inviterTeamId: string,
   emails: string[]
@@ -33,9 +34,9 @@ export async function inviteEmailsToTeam(
   );
   await db.insert(teamInvites).values(sealedInvites).run();
   return invites;
-}
+});
 
-export async function inviteById(id: string) {
+export const inviteById = cache(async function (id: string) {
   const invite = await db
     .select()
     .from(teamInvites)
@@ -50,9 +51,12 @@ export async function inviteById(id: string) {
     ...rest,
     email: email as string,
   };
-}
+});
 
-export async function acceptInvite(invite: TeamInvite, personalTeam: Team) {
+export const acceptInvite = cache(async function (
+  invite: TeamInvite,
+  personalTeam: Team
+) {
   const { sql: invitesSql, params: invitesParams } = db
     .update(teamInvites)
     .set({
@@ -73,13 +77,15 @@ export async function acceptInvite(invite: TeamInvite, personalTeam: Team) {
     tbl.prepare(invitesSql).bind(invitesParams),
     tbl.prepare(membershipsSql).bind(membershipsParams),
   ]);
-}
+});
 
-export async function deleteInvite(id: string) {
+export const deleteInvite = cache(async function (id: string) {
   await db.delete(teamInvites).where(eq(teamInvites.id, id)).run();
-}
+});
 
-export async function invitesForTeam(teamId: string) {
+export const invitesForTeam = cache(async function invitesForTeam(
+  teamId: string
+) {
   const claimedByTeams = alias(teams, "claimed_by_teams");
   const invitesSealed = await db
     .select({ inviter: teams, invite: teamInvites, claimedBy: claimedByTeams })
@@ -107,4 +113,4 @@ export async function invitesForTeam(teamId: string) {
     )
   );
   return invites;
-}
+});

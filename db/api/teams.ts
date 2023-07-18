@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { and, asc, eq } from "drizzle-orm";
 import { sealData } from "iron-session";
+import { cache } from "react";
 import { NewTeamInviteSealed, Team, TeamInvite, teamProjects } from "../schema";
 import {
   db,
@@ -13,7 +14,7 @@ import {
   users,
 } from "./db";
 
-export async function createTeamByPersonalTeam(
+export const createTeamByPersonalTeam = cache(async function (
   name: string,
   personalTeamId: string,
   inviteEmails: string[]
@@ -63,19 +64,19 @@ export async function createTeamByPersonalTeam(
   }
   await tbl.batch(batch);
   return { team, invites };
-}
+});
 
-export async function teamBySlug(slug: string) {
+export const teamBySlug = cache(async function (slug: string) {
   const team = await db.select().from(teams).where(eq(teams.slug, slug)).get();
   // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
   return team ? team : undefined;
-}
+});
 
-export async function teamById(id: string) {
+export const teamById = cache(async function (id: string) {
   return db.select().from(teams).where(eq(teams.id, id)).get();
-}
+});
 
-export async function teamsByMemberId(memberId: string) {
+export const teamsByMemberId = cache(async function (memberId: string) {
   const res = await db
     .select()
     .from(teamMemberships)
@@ -148,9 +149,9 @@ export async function teamsByMemberId(memberId: string) {
   //     projects,
   //   };
   // });
-}
+});
 
-export async function userTeamsForTeamId(teamId: string) {
+export const userTeamsForTeamId = cache(async function (teamId: string) {
   const res = await db
     .select({ teams, users })
     .from(users)
@@ -160,9 +161,9 @@ export async function userTeamsForTeamId(teamId: string) {
     .orderBy(teams.name)
     .all();
   return res.map((r) => ({ address: r.users.address, personalTeam: r.teams }));
-}
+});
 
-export async function isAuthorizedForTeam(
+export const isAuthorizedForTeam = cache(async function (
   memberTeamId: string,
   teamId: string
 ) {
@@ -177,4 +178,4 @@ export async function isAuthorizedForTeam(
     )
     .get();
   return !!membership;
-}
+});

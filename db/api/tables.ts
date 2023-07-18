@@ -1,9 +1,10 @@
 import { randomUUID } from "crypto";
 import { and, eq } from "drizzle-orm";
+import { cache } from "react";
 import { Table } from "../schema";
 import { db, projectTables, slugify, tables, tbl } from "./db";
 
-export async function createTable(
+export const createTable = cache(async function (
   projectId: string,
   name: string,
   description: string | null,
@@ -25,9 +26,9 @@ export async function createTable(
   ]);
   const table: Table = { id: tableId, name, description, schema, slug };
   return table;
-}
+});
 
-export async function tablesByProjectId(projectId: string) {
+export const tablesByProjectId = cache(async function (projectId: string) {
   const res = await db
     .select({ tables })
     .from(projectTables)
@@ -37,4 +38,4 @@ export async function tablesByProjectId(projectId: string) {
     .all();
   const mapped = res.map((r) => r.tables);
   return mapped;
-}
+});
