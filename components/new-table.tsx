@@ -63,7 +63,7 @@ export default function NewTable({ project, ...props }: Props) {
       {...props}
     >
       <Button onClick={() => setShowNewTableDialog(true)}>New Table</Button>
-      <DialogContent>
+      <DialogContent className="w-full sm:w-full sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create a new table</DialogTitle>
           <DialogDescription>
