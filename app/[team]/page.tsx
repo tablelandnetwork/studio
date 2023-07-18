@@ -11,7 +11,7 @@ import db from "@/db/api";
 import Session from "@/lib/session";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export default async function Projects({
   params,
@@ -20,13 +20,20 @@ export default async function Projects({
 }) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
-    // TODO: Redirect to 401 page.
-    redirect("/");
+    notFound();
   }
 
-  // TODO: Check that user is authorized to access this team/project.
-
   const team = await db.teams.teamBySlug(params.team);
+  if (!team) {
+    notFound();
+  }
+
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.user.teamId, team.id))
+  ) {
+    notFound();
+  }
+
   const projects = await db.projects.projectsByTeamId(team.id);
 
   return (

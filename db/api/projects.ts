@@ -45,7 +45,8 @@ export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
     .innerJoin(projects, eq(teamProjects.projectId, projects.id))
     .where(and(eq(teamProjects.teamId, teamId), eq(projects.slug, slug)))
     .get();
-  return res.projects;
+  // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
+  return res.projects ? res.projects : undefined;
 }
 
 // TODO: Where does this belong?

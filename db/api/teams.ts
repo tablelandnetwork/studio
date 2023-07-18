@@ -66,7 +66,9 @@ export async function createTeamByPersonalTeam(
 }
 
 export async function teamBySlug(slug: string) {
-  return db.select().from(teams).where(eq(teams.slug, slug)).get();
+  const team = await db.select().from(teams).where(eq(teams.slug, slug)).get();
+  // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
+  return team ? team : undefined;
 }
 
 export async function teamById(id: string) {
