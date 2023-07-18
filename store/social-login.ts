@@ -112,7 +112,6 @@ export const logoutAtom = atom(undefined, async (get, set) => {
   const socialLoginSDK = await get(socialLoginSDKAtom);
   await logout();
   if (socialLoginSDK.web3auth) {
-    console.log("logging out of sdk");
     await socialLoginSDK.logout();
     socialLoginSDK.hideWallet();
   }

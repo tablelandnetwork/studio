@@ -41,7 +41,6 @@ export default function UserActions() {
   const handleSignIn = () => {
     startTransition(async () => {
       const res = await connectWeb3(true);
-      console.log("connect res", res);
       if (res.error) {
         // TODO: Display error.
       } else if (res.auth) {
@@ -88,7 +87,7 @@ export default function UserActions() {
   }, []);
 
   return (
-    <Dialog open={showRegisterDialog}>
+    <Dialog open={showRegisterDialog} onOpenChange={setShowRegisterDialog}>
       {!account && !auth?.personalTeam && (
         <Button onClick={handleSignIn}>Sign In</Button>
       )}
