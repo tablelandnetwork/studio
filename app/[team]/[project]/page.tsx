@@ -11,7 +11,7 @@ import db from "@/db/api";
 import Session from "@/lib/session";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export default async function Project({
   params,
@@ -19,19 +19,19 @@ export default async function Project({
   params: { team: string; project: string };
 }) {
   const session = await Session.fromCookies(cookies());
-
   if (!session.auth) {
-    // TODO: Redirect to 401 page.
-    redirect("/");
+    notFound();
   }
 
-  // TODO: Check that user is authorized to access this team/project.
-
   const team = await db.teams.teamBySlug(params.team);
-  // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
   if (!team) {
-    // TODO: Redirect to 404 page.
-    redirect("/");
+    notFound();
+  }
+
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    notFound();
   }
 
   const project = await db.projects.projectByTeamIdAndSlug(
@@ -39,8 +39,7 @@ export default async function Project({
     params.project
   );
   if (!project) {
-    // TODO: Redirect to 401 page.
-    redirect("/");
+    notFound();
   }
 
   const tables = await db.tables.tablesByProjectId(project.id);

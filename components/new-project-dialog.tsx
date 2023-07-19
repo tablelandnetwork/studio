@@ -23,12 +23,7 @@ interface Props extends DialogProps {
   team: Team;
 }
 
-export default function NewProjectDialog({
-  team,
-  onOpenChange,
-  children,
-  ...props
-}: Props) {
+export default function NewProjectDialog({ team, children, ...props }: Props) {
   const [newProjectName, setNewProjectName] = React.useState("");
   const [newProjectDescription, setNewProjectDescription] = React.useState("");
   const [isPending, startTransition] = React.useTransition();
@@ -43,22 +38,18 @@ export default function NewProjectDialog({
         newProjectName,
         newProjectDescription
       );
-      router.push(`/${team.slug}/${res.slug}`);
-      router.refresh();
+      props.onOpenChange && props.onOpenChange(false);
       setNewProjectName("");
       setNewProjectDescription("");
-      if (onOpenChange) {
-        onOpenChange(false);
-      }
+      router.push(`/${team.slug}/${res.slug}`);
+      router.refresh();
     });
   };
 
   const handleCancel = () => {
     setNewProjectName("");
     setNewProjectDescription("");
-    if (onOpenChange) {
-      onOpenChange(false);
-    }
+    props.onOpenChange && props.onOpenChange(false);
   };
 
   return (

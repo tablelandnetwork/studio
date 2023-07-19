@@ -1,74 +1,42 @@
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-
 import BodyDeployments from "@/components/body-deployments";
-import LayoutProject from "@/components/layout-project";
 import db from "@/db/api";
-import { DeploymentsWithTables } from "@/db/api/deployments";
-import { Project, Table, Team } from "@/db/schema";
-import { Auth, withSessionSsr } from "@/lib/withSession";
-import { NextPageWithLayout } from "../../_app";
+import Session from "@/lib/session";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 
-type Props = {
-  team: Team;
-  project: Project;
-  tables: Table[];
-  auth: Auth;
-  deployments: DeploymentsWithTables[];
-};
-
-const getProps: GetServerSideProps<Props> = async ({ req, query }) => {
-  if (typeof query.team !== "string" || typeof query.project !== "string") {
-    return { notFound: true };
+export default async function Deployments({
+  params,
+}: {
+  params: { team: string; project: string };
+}) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    notFound();
   }
 
-  if (!req.session.auth) {
-    // For now only allow authenticated users access.
-    // TODO: Really should redirect to some 404 not authorized.
-    return { notFound: true };
-  }
-
-  const team = await db.teams.teamBySlug(query.team);
-  // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
+  const team = await db.teams.teamBySlug(params.team);
   if (!team) {
-    return { notFound: true };
+    notFound();
+  }
+
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    notFound();
   }
 
   const project = await db.projects.projectByTeamIdAndSlug(
     team.id,
-    query.project
+    params.project
   );
   if (!project) {
-    return { notFound: true };
+    notFound();
   }
-
-  const projects = await db.projects.projectsByTeamId(team.id);
-
-  const tables = await db.tables.tablesByProjectId(project.id);
 
   const deployments = await db.deployments.deploymentsByProjectId(project.id);
 
-  return {
-    props: {
-      team,
-      project,
-      projects,
-      tables,
-      auth: req.session.auth,
-      deployments,
-    },
-  };
-};
+  const tables = await db.tables.tablesByProjectId(project.id);
 
-export const getServerSideProps = withSessionSsr(getProps);
-
-const Project: NextPageWithLayout<
-  InferGetServerSidePropsType<typeof getProps>
-> = ({
-  team,
-  project,
-  tables,
-  deployments,
-}: InferGetServerSidePropsType<typeof getProps>) => {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
@@ -78,32 +46,14 @@ const Project: NextPageWithLayout<
         </p>
         <p>{project.description}</p>
       </div>
-
-      <BodyDeployments
-        team={team}
-        project={project}
-        tables={tables}
-        deployments={deployments}
-      />
+      <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
+        <BodyDeployments
+          team={team}
+          project={project}
+          tables={tables}
+          deployments={deployments}
+        />
+      </div>
     </>
   );
-};
-
-Project.getLayout = function (
-  page: React.ReactElement,
-  { auth, team, project, projects }
-) {
-  return (
-    <LayoutProject
-      team={team}
-      auth={auth}
-      personalTeam={auth.personalTeam}
-      project={project}
-      projects={projects}
-    >
-      {page}
-    </LayoutProject>
-  );
-};
-
-export default Project;
+}

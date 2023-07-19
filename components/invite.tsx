@@ -14,7 +14,6 @@ import { Team } from "@/db/schema";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { Loader2, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React from "react";
 import TagInput from "./tag-input";
 import { Label } from "./ui/label";
@@ -53,7 +52,6 @@ export function Invite({ invites, team }: Props) {
   const [showInviteDialog, setShowInviteDialog] = React.useState(false);
   const [emailInvites, setEmailInvites] = React.useState<string[]>([]);
   const [isPending, startTransition] = React.useTransition();
-  const router = useRouter();
 
   const handleInvite = async () => {
     if (!emailInvites.length) return;
@@ -116,7 +114,11 @@ export function Invite({ invites, team }: Props) {
           <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             Cancel
           </Button>
-          <Button type="submit" onClick={handleInvite} disabled={isPending}>
+          <Button
+            type="submit"
+            onClick={handleInvite}
+            disabled={isPending || !emailInvites.length}
+          >
             {isPending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Submit
           </Button>

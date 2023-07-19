@@ -1,13 +1,10 @@
 import { randomUUID } from "crypto";
 import { and, eq } from "drizzle-orm";
+import { cache } from "react";
 import { Project } from "../schema";
 import { db, projects, slugify, tbl, teamProjects, teams } from "./db";
 
-// This will create two tables, which are owned by the privkey in the .env file, right?
-// - one of the tables is used to track what tables have been created for a project
-// - the other table is used to track what projects exist
-// - the project "isOwner" value is true, what does this mean?
-export async function createProject(
+export const createProject = cache(async function (
   teamId: string,
   name: string,
   description: string | null
@@ -28,9 +25,9 @@ export async function createProject(
   ]);
   const project: Project = { id: projectId, name, description, slug };
   return project;
-}
+});
 
-export async function projectsByTeamId(teamId: string) {
+export const projectsByTeamId = cache(async function (teamId: string) {
   const res = await db
     .select({ projects }) // TODO: Figure out why if we don't specify select key, projects key ends up as actual table name.
     .from(teamProjects)
@@ -40,20 +37,24 @@ export async function projectsByTeamId(teamId: string) {
     .all();
   const mapped = res.map((r) => r.projects);
   return mapped;
-}
+});
 
-export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
+export const projectByTeamIdAndSlug = cache(async function (
+  teamId: string,
+  slug: string
+) {
   const res = await db
     .select({ projects })
     .from(teamProjects)
     .innerJoin(projects, eq(teamProjects.projectId, projects.id))
     .where(and(eq(teamProjects.teamId, teamId), eq(projects.slug, slug)))
     .get();
-  return res.projects;
-}
+  // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
+  return res.projects ? res.projects : undefined;
+});
 
 // TODO: Where does this belong?
-export async function projectTeamByProjectId(projectId: string) {
+export const projectTeamByProjectId = cache(async function (projectId: string) {
   const res = await db
     .select({ teams })
     .from(teamProjects)
@@ -62,9 +63,9 @@ export async function projectTeamByProjectId(projectId: string) {
     .orderBy(teams.name)
     .get();
   return res.teams;
-}
+});
 
-export async function isAuthorizedForProject(
+export const isAuthorizedForProject = cache(async function (
   teamId: string,
   projectId: string
 ) {
@@ -79,4 +80,4 @@ export async function isAuthorizedForProject(
     )
     .get();
   return !!authorized;
-}
+});

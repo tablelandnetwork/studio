@@ -10,6 +10,7 @@ import { SiweMessage } from "siwe";
 import {
   accountAtom,
   authAtom,
+  loggingInAtom,
   providerAtom,
   scwAddressAtom,
   scwLoadingAtom,
@@ -50,10 +51,12 @@ export const connectWeb3Atom = atom(
     set,
     showWallet: boolean
   ): Promise<{ auth?: Auth; error?: string }> => {
+    set(loggingInAtom, true);
     const socialLoginSDK = await get(socialLoginSDKAtom);
     if (!socialLoginSDK.provider && showWallet) {
       socialLoginSDK.showWallet();
     } else if (!socialLoginSDK.provider && !showWallet) {
+      set(loggingInAtom, false);
       return { error: "No provider, but you don't want to show the wallet." };
     }
     const provider = await get(blockUntilProvider);
@@ -75,6 +78,7 @@ export const connectWeb3Atom = atom(
     ) {
       // TODO: Something here to make sure the session/auth originates from this wallet. Compare address? Done.
       set(authAtom, currentAuth);
+      set(loggingInAtom, false);
       return { auth: currentAuth };
     }
     const signer = web3Provider.getSigner();
@@ -92,9 +96,11 @@ export const connectWeb3Atom = atom(
     const signature = await signer.signMessage(message);
     const res = await login(message, signature);
     if (res.error) {
+      set(loggingInAtom, false);
       return { error: res.error };
     }
     set(authAtom, res.auth ? res.auth : null);
+    set(loggingInAtom, false);
     return { auth: res.auth };
   }
 );
@@ -112,7 +118,6 @@ export const logoutAtom = atom(undefined, async (get, set) => {
   const socialLoginSDK = await get(socialLoginSDKAtom);
   await logout();
   if (socialLoginSDK.web3auth) {
-    console.log("logging out of sdk");
     await socialLoginSDK.logout();
     socialLoginSDK.hideWallet();
   }

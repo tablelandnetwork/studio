@@ -1,9 +1,10 @@
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { sealData, unsealData } from "iron-session";
+import { cache } from "react";
 import { db, slugify, tbl, teamMemberships, teams, users } from "./db";
 
-export async function createUserAndPersonalTeam(
+export const createUserAndPersonalTeam = cache(async function (
   address: string,
   teamName: string,
   email?: string
@@ -40,9 +41,11 @@ export async function createUserAndPersonalTeam(
     throw new Error("Failed to create user and personal team.");
   }
   return info;
-}
+});
 
-export async function userAndPersonalTeamByAddress(address: string) {
+export const userAndPersonalTeamByAddress = cache(async function (
+  address: string
+) {
   const res = await db
     .select({
       user: users,
@@ -66,4 +69,4 @@ export async function userAndPersonalTeamByAddress(address: string) {
     },
     personalTeam: res.personalTeam,
   };
-}
+});
