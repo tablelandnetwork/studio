@@ -37,13 +37,14 @@ export default function NewTable({ project, ...props }: Props) {
   const [createTable, setCreateTable] = useAtom(createTableAtom);
 
   const handleNewTable = () => {
-    if (!createTableStatementFromObject(createTable)) return;
+    const statement = createTableStatementFromObject(createTable);
+    if (!statement) return;
     if (!newTableName.length) return;
     startTransition(async () => {
       const table = await newTable(
         project,
         newTableName,
-        createTableStatementFromObject(createTable),
+        statement,
         newTableDescription
       );
       // TODO: Maybe restore below and add route for individual tables?
