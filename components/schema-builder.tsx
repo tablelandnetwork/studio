@@ -16,6 +16,7 @@ function isValidColumnName(variable: string) {
 }
 
 export function createTableStatementFromObject(tableObj: CreateTable) {
+  if (!tableObj.name) return false;
   let statement = "CREATE TABLE " + tableObj.name + " (";
   let invalid = false;
 
@@ -57,7 +58,7 @@ export function createTableStatementFromObject(tableObj: CreateTable) {
 }
 
 export default function SchemaBuilder() {
-  const [tbl, setAtom] = useAtom(createTableAtom);
+  const [tbl, setCreateTable] = useAtom(createTableAtom);
   return (
     <div className="schema-builder">
       <table>
@@ -125,7 +126,7 @@ function AddRemoveColumns() {
 }
 
 function CreateColumn(props: any) {
-  const [tbl, setAtom] = useAtom(createTableAtom);
+  const [tbl, setCreateTable] = useAtom(createTableAtom);
   const column = tbl && tbl.columns[props.columnIndex];
 
   return (
@@ -141,7 +142,7 @@ function CreateColumn(props: any) {
           }
           defaultValue={column.name}
           onChange={(e) => {
-            setAtom((prev) => {
+            setCreateTable((prev) => {
               prev.columns[props.columnIndex].name = e.target.value;
               return {
                 ...prev,
@@ -154,7 +155,7 @@ function CreateColumn(props: any) {
         <Select
           defaultValue={column.type}
           onValueChange={(e) => {
-            setAtom((prev) => {
+            setCreateTable((prev) => {
               prev.columns[props.columnIndex].type = e;
               return {
                 ...prev,
@@ -177,7 +178,7 @@ function CreateColumn(props: any) {
           type="checkbox"
           checked={column.notNull}
           onChange={(e) => {
-            setAtom((prev) => {
+            setCreateTable((prev) => {
               prev.columns[props.columnIndex].notNull = e.target.checked;
               return {
                 ...prev,
@@ -192,7 +193,7 @@ function CreateColumn(props: any) {
           type="checkbox"
           checked={column.primaryKey}
           onChange={(e) => {
-            setAtom((prev) => {
+            setCreateTable((prev) => {
               prev.columns[props.columnIndex].primaryKey = e.target.checked;
               return {
                 ...prev,
@@ -207,7 +208,7 @@ function CreateColumn(props: any) {
           type="checkbox"
           checked={column.unique}
           onChange={(e) => {
-            setAtom((prev) => {
+            setCreateTable((prev) => {
               prev.columns[props.columnIndex].unique = e.target.checked;
               return {
                 ...prev,
@@ -224,7 +225,7 @@ function CreateColumn(props: any) {
           placeholder="null"
           defaultValue={column.default}
           onChange={(e) => {
-            setAtom((prev) => {
+            setCreateTable((prev) => {
               prev.columns[props.columnIndex].default = e.target.value;
               return {
                 ...prev,
