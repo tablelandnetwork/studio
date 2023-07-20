@@ -79,6 +79,22 @@ export const projects = tablelandTable("projects", {
   description: text("description"),
 })(process.env.CHAIN);
 
+export const deployments = tablelandTable("deployment", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id").notNull(),
+  block: integer("deployed_at").notNull(),
+  deployedBy: text("deployed_by").notNull(), // Address
+  chain: integer("deployed_to").notNull(),
+  transactionHash: text("transaction_hash").notNull(),
+})(process.env.CHAIN);
+
+export const deploymentTables = tablelandTable("deployment_tables", {
+  deploymentId: text("deployment_id").notNull(),
+  tableId: text("table_id").notNull(), // Table's studio ID
+  tableName: text("table_name").notNull(), // Table's tableland prefix + chain + id.
+  schema: text("schema").notNull(), // The schema of the table at the time of deployment.
+})(process.env.CHAIN);
+
 // export const projectsRelations = relations(projects, ({ many }) => ({
 //   teamProjects: many(teamProjects),
 // }));
@@ -164,6 +180,12 @@ export type NewTeamMembership = InferModel<typeof teamMemberships, "insert">;
 
 export type Project = InferModel<typeof projects>;
 export type NewProject = InferModel<typeof projects, "insert">;
+
+export type Deployment = InferModel<typeof deployments>;
+export type NewDeployment = InferModel<typeof deployments, "insert">;
+
+export type DeploymentTables = InferModel<typeof deploymentTables>;
+export type NewDeploymentTables = InferModel<typeof deploymentTables, "insert">;
 
 export type TeamProject = InferModel<typeof teamProjects>;
 export type NewTeamProject = InferModel<typeof teamProjects, "insert">;
