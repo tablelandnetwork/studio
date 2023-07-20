@@ -16,6 +16,7 @@ function isValidColumnName(variable: string) {
 }
 
 export function createTableStatementFromObject(tableObj: CreateTable) {
+  if (!tableObj.name) return false;
   let statement = "CREATE TABLE " + tableObj.name + " (";
   let invalid = false;
 

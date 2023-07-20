@@ -39,7 +39,6 @@ export default function NewTable({ project, ...props }: Props) {
   const handleNewTable = () => {
     const statement = createTableStatementFromObject(createTable);
     if (!statement) return;
-    if (!newTableName.length) return;
     startTransition(async () => {
       const table = await newTable(
         project,
