@@ -17,9 +17,11 @@ function isValidColumnName(variable: string) {
 
 export function createTableStatementFromObject(tableObj: CreateTable) {
   let statement = "CREATE TABLE " + tableObj.name + " (";
+  let invalid = false;
 
   let columns = tableObj.columns.map((column) => {
-    if (isValidColumnName(column.name)) {
+    if (!isValidColumnName(column.name)) {
+      invalid = true;
       return false;
     }
     let columnStatement = "\n     " + column.name + " " + column.type;
@@ -46,6 +48,10 @@ export function createTableStatementFromObject(tableObj: CreateTable) {
 
   statement += columns.join(", ");
   statement += "\n);";
+
+  if (invalid) {
+    return false;
+  }
 
   return statement;
 }
