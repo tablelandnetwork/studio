@@ -53,6 +53,7 @@ export const connectWeb3Atom = atom(
   ): Promise<{ auth?: Auth; error?: string }> => {
     set(loggingInAtom, true);
     const socialLoginSDK = await get(socialLoginSDKAtom);
+    // TODO: Sometimes we have a session with the server, but the login sdk has no provider. We should log out with the server.
     if (!socialLoginSDK.provider && showWallet) {
       socialLoginSDK.showWallet();
     } else if (!socialLoginSDK.provider && !showWallet) {
