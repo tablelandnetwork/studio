@@ -82,8 +82,13 @@ export default function NewTable({ project, ...props }: Props) {
               <Input
                 id="name"
                 placeholder="Table Name"
-                value={newTableName}
-                onChange={(e) => setNewTableName(e.target.value)}
+                value={createTable.name}
+                onChange={(e) => {
+                  setCreateTable((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }));
+                }}
               />
             </div>
             <div className="space-y-2">
