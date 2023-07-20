@@ -100,6 +100,40 @@ export async function newProject(
   return project;
 }
 
+interface TableMeta {
+  name: string;
+  schema: string;
+  tableId: string;
+}
+
+interface Deployment {
+  transactionHash: string;
+  block: number;
+  tables: TableMeta[];
+  projectId: string;
+  chain: number;
+  deployedBy: string;
+}
+
+export async function newDeployment(deploymentData: Deployment) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    // TODO: Proper error return.
+    throw new Error("Not authenticated");
+  }
+
+  const deployment = db.deployments.createDeployment({
+    projectId: deploymentData.projectId,
+    chain: deploymentData.chain,
+    block: deploymentData.block,
+    deployedBy: deploymentData.deployedBy,
+    transactionHash: deploymentData.transactionHash,
+    tables: deploymentData.tables,
+  });
+
+  return deployment;
+}
+
 export async function newTable(
   project: Project,
   name: string,
