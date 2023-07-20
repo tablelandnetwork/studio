@@ -3,7 +3,7 @@ import Footer from "@/components/footer";
 import HeaderPrimary from "@/components/header-primary";
 import { JotaiProvider } from "@/components/jotai-provider";
 import { Source_Sans_3 } from "next/font/google";
-import "./globals.css";
+import "./globals.scss";
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
