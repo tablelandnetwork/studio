@@ -1,4 +1,4 @@
-import { Breadcrumbs } from "@/components/breadcrumbs";
+import { CrumbProject } from "@/components/crumb-project";
 import NavProject from "@/components/nav-project";
 import { Search } from "@/components/search";
 import db from "@/db/api";
@@ -14,7 +14,7 @@ export default async function ProjectLayout({
   const teams = auth ? await db.teams.teamsByMemberId(auth.user.teamId) : [];
   return (
     <div>
-      <Breadcrumbs teams={teams} className="px-4 pb-1 pt-3" />
+      <CrumbProject teams={teams} className="px-4 pb-1 pt-3" />
       <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
         <div className="flex">
           <NavProject teams={teams} />

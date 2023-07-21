@@ -1,13 +1,10 @@
 "use client";
 
 import db from "@/db/api";
-import { cn } from "@/lib/utils";
-import { ChevronLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { Button } from "./ui/button";
+import { Crumb } from "./crumb";
 
-export function Breadcrumbs({
-  className,
+export function CrumbProject({
   teams,
   ...props
 }: React.HTMLAttributes<HTMLElement> & {
@@ -23,7 +20,7 @@ export function Breadcrumbs({
   const project = team.projects.find((project) => project.slug === projectSlug);
 
   const handleBack = () => {
-    router.back();
+    router.push(`/${team.slug}`);
   };
 
   if (!project) {
@@ -31,14 +28,11 @@ export function Breadcrumbs({
   }
 
   return (
-    <div className={cn("flex flex-col", className)} {...props}>
-      <div className="flex items-center space-x-1">
-        <Button variant="ghost" size="sm" className="px-0" onClick={handleBack}>
-          <ChevronLeft />
-        </Button>
-        <h1 className="text-2xl">{project.name}</h1>
-      </div>
-      <p>{project.description}</p>
-    </div>
+    <Crumb
+      title={project.name}
+      subtitle={project.description || undefined}
+      onBack={handleBack}
+      {...props}
+    />
   );
 }
