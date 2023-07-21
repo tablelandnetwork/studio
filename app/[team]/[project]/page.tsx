@@ -43,40 +43,32 @@ export default async function Project({
   }
 
   const tables = await db.tables.tablesByProjectId(project.id);
+  console.log(tables);
 
   return (
-    <>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-semibold">Project</h1>
-        <p className="text-lg text-gray-600">
-          {team.name} / {project.name}
-        </p>
-        <p>{project.description}</p>
+    <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
+      <div className="flex w-full max-w-3xl flex-col space-y-4">
+        {tables.map((table) => (
+          <Link
+            key={table.id}
+            href={`/${team.slug}/${project.slug}/${table.name}`}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>{table.name}</CardTitle>
+                <CardDescription>{table.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>{table.schema}</p>
+              </CardContent>
+              <CardFooter>
+                <p>Card Footer</p>
+              </CardFooter>
+            </Card>
+          </Link>
+        ))}
       </div>
-      <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
-        <div className="flex w-full max-w-3xl flex-col space-y-4">
-          {tables.map((table) => (
-            <Link
-              key={table.id}
-              href={`/${team.slug}/${project.slug}/${table.name}`}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>{table.name}</CardTitle>
-                  <CardDescription>{table.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p>{table.schema}</p>
-                </CardContent>
-                <CardFooter>
-                  <p>Card Footer</p>
-                </CardFooter>
-              </Card>
-            </Link>
-          ))}
-        </div>
-        <NewTable project={project} />
-      </div>
-    </>
+      <NewTable project={project} />
+    </div>
   );
 }
