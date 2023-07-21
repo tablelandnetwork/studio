@@ -43,7 +43,6 @@ export default async function Project({
   }
 
   const tables = await db.tables.tablesByProjectId(project.id);
-  console.log(tables);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
