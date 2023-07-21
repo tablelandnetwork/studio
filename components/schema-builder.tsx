@@ -60,16 +60,16 @@ export function createTableStatementFromObject(tableObj: CreateTable) {
 export default function SchemaBuilder() {
   const [tbl, setCreateTable] = useAtom(createTableAtom);
   return (
-    <div className="schema-builder">
+    <div className="schema-builder py-10">
       <table>
         <thead>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Not null</th>
-            <th>Primary Key</th>
-            <th>Unique</th>
-            <th>Default value</th>
+          <tr className="text-center">
+            <th className="p-2">Name</th>
+            <th className="p-2">Type</th>
+            <th className="p-2 leading-5">Not null</th>
+            <th className="p-2 leading-5">Primary Key</th>
+            <th className="p-2 leading-5">Unique</th>
+            <th className="p-2 leading-5">Default value</th>
             <th></th>
           </tr>
         </thead>
@@ -87,7 +87,7 @@ export default function SchemaBuilder() {
 function AddRemoveColumns() {
   const [tbl, setAtom] = useAtom(createTableAtom);
   return (
-    <div className="button-group">
+    <div className="button-group me-0 mt-10">
       <Button
         onClick={() => {
           setAtom((prev) => {
@@ -172,7 +172,7 @@ function CreateColumn(props: any) {
           </SelectContent>
         </Select>
       </td>
-      <td>
+      <td className="text-center">
         <input
           name="notNull"
           type="checkbox"
@@ -187,7 +187,7 @@ function CreateColumn(props: any) {
           }}
         />
       </td>
-      <td>
+      <td className="text-center">
         <input
           name="primaryKey"
           type="checkbox"
@@ -202,7 +202,7 @@ function CreateColumn(props: any) {
           }}
         />
       </td>
-      <td>
+      <td className="text-center">
         <input
           name="unique"
           type="checkbox"
