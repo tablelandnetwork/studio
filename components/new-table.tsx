@@ -18,6 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Project } from "@/db/schema";
+import { createTableAtom } from "@/store/create-table";
+import { useAtom } from "jotai";
+import SchemaBuilder, {
+  createTableStatementFromObject,
+} from "./schema-builder";
 
 interface Props extends DialogProps {
   project: Project;
@@ -29,21 +34,22 @@ export default function NewTable({ project, ...props }: Props) {
   const [newTableSchema, setNewTableSchema] = React.useState("");
   const [newTableDescription, setNewTableDescription] = React.useState("");
   const [isPending, startTransition] = React.useTransition();
+  const [createTable, setCreateTable] = useAtom(createTableAtom);
 
   const handleNewTable = () => {
-    if (!newTableName.length) return;
+    const statement = createTableStatementFromObject(createTable);
+    if (!statement) return;
     startTransition(async () => {
       const table = await newTable(
         project,
         newTableName,
-        newTableSchema,
+        statement,
         newTableDescription
       );
       // TODO: Maybe restore below and add route for individual tables?
       // router.push(`/${team.slug}/${project.slug}/${table.slug}`);
       setNewTableName("");
       setNewTableDescription("");
-      setNewTableSchema("");
       setShowNewTableDialog(false);
     });
   };
@@ -51,7 +57,6 @@ export default function NewTable({ project, ...props }: Props) {
   const handleCancel = () => {
     setNewTableName("");
     setNewTableDescription("");
-    setNewTableSchema("");
     setShowNewTableDialog(false);
   };
 
@@ -62,7 +67,7 @@ export default function NewTable({ project, ...props }: Props) {
       {...props}
     >
       <Button onClick={() => setShowNewTableDialog(true)}>New Table</Button>
-      <DialogContent>
+      <DialogContent className="sm:max-w-min">
         <DialogHeader>
           <DialogTitle>Create a new table</DialogTitle>
           <DialogDescription>
@@ -76,8 +81,13 @@ export default function NewTable({ project, ...props }: Props) {
               <Input
                 id="name"
                 placeholder="Table Name"
-                value={newTableName}
-                onChange={(e) => setNewTableName(e.target.value)}
+                value={createTable.name}
+                onChange={(e) => {
+                  setCreateTable((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }));
+                }}
               />
             </div>
             <div className="space-y-2">
@@ -91,12 +101,10 @@ export default function NewTable({ project, ...props }: Props) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="message">Schema</Label>
-              <Textarea
-                placeholder="Type your schema here."
-                id="schema"
-                value={newTableSchema}
-                onChange={(e) => setNewTableSchema(e.target.value)}
-              />
+              <SchemaBuilder />
+            </div>
+            <div className="space-y-2">
+              <pre>{createTableStatementFromObject(createTable)}</pre>
             </div>
           </div>
           {/* {newTable.isError && (
