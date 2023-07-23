@@ -19,9 +19,9 @@ export function Crumb({
         <Button variant="ghost" size="sm" className="px-0" onClick={onBack}>
           <ChevronLeft />
         </Button>
-        <h1 className="text-2xl">{title}</h1>
+        <h1 className="text-xl">{title}</h1>
       </div>
-      {subtitle && <p>{subtitle}</p>}
+      {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
