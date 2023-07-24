@@ -13,7 +13,7 @@ function links(team?: Team) {
     { label: "Home", href: "/" },
     { label: "Tableland", href: "https://tableland.xyz" },
     { label: "Docs", href: "https://docs.tableland.xyz" },
-    { label: "Dashboard", href: `/${team?.slug}` },
+    { label: "Studio", href: `/${team?.slug}` },
   ];
   if (!team) {
     links.pop();

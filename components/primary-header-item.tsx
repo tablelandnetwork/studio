@@ -2,8 +2,6 @@
 
 import db from "@/db/api";
 import { useParams } from "next/navigation";
-import ProjectSwitcher from "./project-switcher";
-import TeamButton from "./team-button";
 import TeamSwitcher from "./team-switcher";
 
 export default function PrimaryHeaderItem({
@@ -11,8 +9,8 @@ export default function PrimaryHeaderItem({
 }: {
   teams: Awaited<ReturnType<typeof db.teams.teamsByMemberId>>;
 }) {
-  // NOTE: The team project params can be undefined depending on the url.
-  const { team: teamSlug, project: projectSlug } = useParams();
+  // NOTE: The team param can be undefined depending on the url.
+  const { team: teamSlug } = useParams();
 
   const team = teams.find((team) => team.slug === teamSlug);
 
@@ -24,27 +22,5 @@ export default function PrimaryHeaderItem({
     );
   }
 
-  if (!!!projectSlug) {
-    return <TeamSwitcher team={team} teams={teams} />;
-  }
-
-  if (!!projectSlug) {
-    const project = team.projects.find(
-      (project) => project.slug === projectSlug
-    );
-    if (!project) {
-      return null;
-    }
-    return (
-      <>
-        <TeamButton team={team} />
-        <p className="text-sm text-muted-foreground">/</p>
-        <ProjectSwitcher
-          selectedProject={project}
-          projects={team.projects}
-          team={team}
-        />
-      </>
-    );
-  }
+  return <TeamSwitcher team={team} teams={teams} />;
 }
