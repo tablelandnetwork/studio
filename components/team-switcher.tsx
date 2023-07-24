@@ -1,13 +1,11 @@
 "use client";
 
 import { newTeam } from "@/app/actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
@@ -104,13 +102,6 @@ export default function TeamSwitcher({
             aria-label="Select a team"
             className={cn("justify-between", className)}
           >
-            <Avatar className="mr-2 h-5 w-5">
-              <AvatarImage
-                src={`https://avatar.vercel.sh/${team.slug}.png`}
-                alt={team.name}
-              />
-              <AvatarFallback>{team.name.charAt(0)}</AvatarFallback>
-            </Avatar>
             {team.name}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -118,39 +109,37 @@ export default function TeamSwitcher({
         <PopoverContent className="w-[200px] p-0">
           <Command>
             <CommandList>
-              <CommandInput placeholder="Search team..." />
+              {/* <CommandInput placeholder="Search team..." /> */}
               <CommandEmpty>No team found.</CommandEmpty>
-              {teamGroups.map((group) => (
-                <CommandGroup key={group.label} heading={group.label}>
-                  {group.teams.map((groupTeam) => (
-                    <CommandItem
-                      key={groupTeam.id}
-                      onSelect={() => {
-                        router.push(`/${groupTeam.slug}`);
-                        setOpen(false);
-                      }}
-                      className="text-sm"
-                    >
-                      <Avatar className="mr-2 h-5 w-5">
-                        <AvatarImage
-                          src={`https://avatar.vercel.sh/${groupTeam.slug}.png`}
-                          alt={groupTeam.name}
+              {teamGroups.map((group) => {
+                if (!group.teams.length) {
+                  return;
+                }
+                return (
+                  <CommandGroup key={group.label} heading={group.label}>
+                    {group.teams.map((groupTeam) => (
+                      <CommandItem
+                        key={groupTeam.id}
+                        onSelect={() => {
+                          router.push(`/${groupTeam.slug}`);
+                          setOpen(false);
+                        }}
+                        className="text-sm"
+                      >
+                        {groupTeam.name}
+                        <Check
+                          className={cn(
+                            "ml-auto h-4 w-4",
+                            team.id === groupTeam.id
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
                         />
-                        <AvatarFallback>
-                          {groupTeam.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {groupTeam.name}
-                      <Check
-                        className={cn(
-                          "ml-auto h-4 w-4",
-                          team.id === groupTeam.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              ))}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                );
+              })}
             </CommandList>
             <CommandSeparator />
             <CommandList>

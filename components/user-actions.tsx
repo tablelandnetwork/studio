@@ -65,6 +65,7 @@ export default function UserActions() {
           router.refresh();
         } else {
           router.push(`/${res.auth.personalTeam.slug}`);
+          router.refresh();
         }
         setShowRegisterDialog(false);
         setUsername("");

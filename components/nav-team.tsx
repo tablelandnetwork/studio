@@ -1,7 +1,7 @@
 "use client";
 
 import db from "@/db/api";
-import { Project, Team } from "@/db/schema";
+import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -19,15 +19,7 @@ function teamLinks(team: Team) {
   return links;
 }
 
-function projectLinks(team: Team, project: Project) {
-  return [
-    { label: "Schema", href: `/${team.slug}/${project.slug}` },
-    { label: "Deployments", href: `/${team.slug}/${project.slug}/deployments` },
-    { label: "Settings", href: `/${team.slug}/${project.slug}/settings` },
-  ];
-}
-
-export function NavSecondary({
+export default function NavTeam({
   className,
   teams,
   ...props
@@ -50,15 +42,13 @@ export function NavSecondary({
   if (!team) {
     return null;
   }
-  const project = team.projects.find((project) => project.slug === projectSlug);
-  const links = project ? projectLinks(team, project) : teamLinks(team);
 
   return (
     <nav
       className={cn("flex items-center space-x-4 lg:space-x-6", className)}
       {...props}
     >
-      {links.map((link) => (
+      {teamLinks(team).map((link) => (
         <Link
           key={link.href}
           href={link.href}

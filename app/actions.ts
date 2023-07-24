@@ -95,6 +95,8 @@ export async function newProject(
     name,
     description || null
   );
+  const team = await db.teams.teamById(teamId);
+  revalidatePath(`/${team.slug}`);
   return project;
 }
 
