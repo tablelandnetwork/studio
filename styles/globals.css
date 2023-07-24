@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "schema-builder.scss";
 
 @layer base {
   :root {
