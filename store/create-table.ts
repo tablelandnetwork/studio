@@ -1,7 +1,6 @@
 import { atom } from "jotai";
 
 export interface CreateTable {
-  name: string;
   columns: CreateColumn[];
 }
 
@@ -15,7 +14,6 @@ export interface CreateColumn {
 }
 
 export const createTableAtom = atom<CreateTable>({
-  name: "TableName",
   columns: [
     {
       name: "id",

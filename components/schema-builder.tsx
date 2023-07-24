@@ -15,37 +15,42 @@ function isValidColumnName(variable: string) {
   return columnNameRegex.test(variable);
 }
 
-export function createTableStatementFromObject(tableObj: CreateTable) {
-  if (!tableObj.name) return false;
-  let statement = "CREATE TABLE " + tableObj.name + " (";
+export function createTableStatementFromObject(
+  tableObj: CreateTable,
+  name: string
+) {
+  if (!name) return false;
+  let statement = "CREATE TABLE " + name + " (";
   let invalid = false;
 
-  let columns = tableObj.columns.map((column) => {
-    if (!isValidColumnName(column.name)) {
-      invalid = true;
-      return false;
-    }
-    let columnStatement = "\n     " + column.name + " " + column.type;
-
-    if (column.notNull) {
-      columnStatement += " NOT NULL";
-    }
-    if (column.unique) {
-      columnStatement += " UNIQUE";
-    }
-    if (column.primaryKey) {
-      columnStatement += " PRIMARY KEY";
-    }
-    if (column.default) {
-      let defaultValue = column.default;
-      if (!column.type.toUpperCase().startsWith("INTEGER")) {
-        defaultValue = "'" + defaultValue + "'";
+  let columns = tableObj.columns
+    .filter((column) => column.name !== "")
+    .map((column) => {
+      if (!isValidColumnName(column.name)) {
+        invalid = true;
+        return false;
       }
-      columnStatement += " DEFAULT " + defaultValue;
-    }
+      let columnStatement = "\n     " + column.name + " " + column.type;
 
-    return columnStatement;
-  });
+      if (column.notNull) {
+        columnStatement += " NOT NULL";
+      }
+      if (column.unique) {
+        columnStatement += " UNIQUE";
+      }
+      if (column.primaryKey) {
+        columnStatement += " PRIMARY KEY";
+      }
+      if (column.default) {
+        let defaultValue = column.default;
+        if (!column.type.toUpperCase().startsWith("INTEGER")) {
+          defaultValue = "'" + defaultValue + "'";
+        }
+        columnStatement += " DEFAULT " + defaultValue;
+      }
+
+      return columnStatement;
+    });
 
   statement += columns.join(", ");
   statement += "\n);";
@@ -60,7 +65,7 @@ export function createTableStatementFromObject(tableObj: CreateTable) {
 export default function SchemaBuilder() {
   const [tbl, setCreateTable] = useAtom(createTableAtom);
   return (
-    <div className="schema-builder py-10">
+    <div className="schema-builder">
       <table>
         <thead>
           <tr className="text-center">
@@ -89,6 +94,7 @@ function AddRemoveColumns() {
   return (
     <div className="button-group me-0 mt-10">
       <Button
+        type="button"
         onClick={() => {
           setAtom((prev) => {
             const newColumn = {
@@ -109,6 +115,7 @@ function AddRemoveColumns() {
         Add column
       </Button>
       <Button
+        type="button"
         variant="outline"
         onClick={() => {
           setAtom((prev) => {

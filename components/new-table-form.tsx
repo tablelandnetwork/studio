@@ -1,6 +1,8 @@
 "use client";
 
-import { newProject } from "@/app/actions";
+import { Loader2 } from "lucide-react";
+
+import { newTable } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,25 +15,36 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Team } from "@/db/schema";
+import { Project, Team } from "@/db/schema";
+import { createTableAtom } from "@/store/create-table";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import SchemaBuilder, {
+  createTableStatementFromObject,
+} from "./schema-builder";
 
 const schema = z.object({
-  name: z.string().min(3),
+  name: z.string(),
   description: z
     .string()
     .optional()
     .transform((v) => (!v ? undefined : v)),
 });
 
-export default function NewProjectForm({ team }: { team: Team }) {
+interface Props {
+  team: Team;
+  project: Project;
+}
+
+export default function NewTable({ project, team }: Props) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+
+  const [createTable, setCreateTable] = useAtom(createTableAtom);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -41,10 +54,18 @@ export default function NewProjectForm({ team }: { team: Team }) {
     },
   });
 
+  const name = form.watch("name");
+
   function onSubmit(values: z.infer<typeof schema>) {
     startTransition(async () => {
-      const res = await newProject(team.id, values.name, values.description);
-      router.push(`/${team.slug}/${res.slug}`);
+      const statement = createTableStatementFromObject(
+        createTable,
+        values.name
+      );
+      if (!statement) return;
+      await newTable(project, values.name, statement, values.description);
+      router.replace(`/${team.slug}/${project.slug}`);
+      setCreateTable({ columns: [] });
     });
   }
 
@@ -61,11 +82,10 @@ export default function NewProjectForm({ team }: { team: Team }) {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Project name" {...field} />
+                <Input placeholder="Table name" {...field} />
               </FormControl>
               <FormDescription>
-                Project name must be unique within your team and at least three
-                characters long.
+                Table name must be unique within your Project.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -78,16 +98,18 @@ export default function NewProjectForm({ team }: { team: Team }) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Project description" {...field} />
+                <Textarea placeholder="Table description" {...field} />
               </FormControl>
               <FormDescription>
-                This is the description for your new Project and it&apos;s
+                This is the description for your new Table and it&apos;s
                 optional.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+        <SchemaBuilder />
+        <pre>{createTableStatementFromObject(createTable, name)}</pre>
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit

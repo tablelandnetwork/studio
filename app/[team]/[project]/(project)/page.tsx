@@ -1,14 +1,14 @@
-import NewTable from "@/components/new-table";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import db from "@/db/api";
 import Session from "@/lib/session";
+import { Plus } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -45,29 +45,37 @@ export default async function Project({
   const tables = await db.tables.tablesByProjectId(project.id);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
-      <div className="flex w-full max-w-3xl flex-col space-y-4">
-        {tables.map((table) => (
+    <div className="container m-auto grid grid-flow-row grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {tables.map((table) => {
+        return (
           <Link
             key={table.id}
-            href={`/${team.slug}/${project.slug}/${table.name}`}
+            href={`/${team.slug}/${project.slug}/${table.slug}`}
           >
-            <Card>
+            <Card className="">
               <CardHeader>
                 <CardTitle>{table.name}</CardTitle>
-                <CardDescription>{table.description}</CardDescription>
+                <CardDescription className="truncate">
+                  {table.description}
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p>{table.schema}</p>
-              </CardContent>
-              <CardFooter>
-                <p>Card Footer</p>
-              </CardFooter>
+              <CardContent className="flex items-center justify-center space-x-6"></CardContent>
             </Card>
           </Link>
-        ))}
-      </div>
-      <NewTable project={project} />
+        );
+      })}
+      <Card className="">
+        <CardHeader className="items-center">
+          <CardTitle>New Table</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center">
+          <Link href={`/${team.slug}/${project.slug}/new-table`}>
+            <Button variant={"ghost"}>
+              <Plus />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }
