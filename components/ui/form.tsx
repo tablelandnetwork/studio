@@ -145,7 +145,8 @@ const FormMessage = React.forwardRef<
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField()
-  const body = error ? String(error?.message) : children
+  // This hack to support when error is actually an array of errors. This is possible when using our custom TagInput component.
+  const body = error ? String(Array.isArray(error) ? error.filter((e) => !!e).map((e) => e.message).join(", ") : error.message) : children
 
   if (!body) {
     return null
