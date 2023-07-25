@@ -77,7 +77,6 @@ export default function SchemaBuilder() {
             <th className="p-2 leading-5">Unique</th>
             <th className="p-2 leading-5">Default value</th>
             <th></th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
