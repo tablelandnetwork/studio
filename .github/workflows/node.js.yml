@@ -11,7 +11,7 @@ on:
 
 env:
   PRIVATE_KEY: "0xasdf"
-  CHAIN: "local-tableland"
+  CHAIN: "foo-chain"
 
 jobs:
   build:
