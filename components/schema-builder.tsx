@@ -124,24 +124,22 @@ function RemoveColumn(props: { columnIndex: number }) {
   const columnIndex = props.columnIndex;
   const [tbl, setAtom] = useAtom(createTableAtom);
   return (
-    <>
-      <td>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            setAtom((prev) => {
-              prev.columns.splice(columnIndex, 1);
-              return {
-                ...prev,
-              };
-            });
-          }}
-        >
-          <Trash2 />
-        </Button>
-      </td>
-    </>
+    <td>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => {
+          setAtom((prev) => {
+            prev.columns.splice(columnIndex, 1);
+            return {
+              ...prev,
+            };
+          });
+        }}
+      >
+        <Trash2 />
+      </Button>
+    </td>
   );
 }
 
