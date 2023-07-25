@@ -1,5 +1,6 @@
 import { CreateTable, createTableAtom } from "@/store/create-table";
 import { useAtom } from "jotai";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -82,53 +83,60 @@ export default function SchemaBuilder() {
           {tbl.columns.map((column, index) => {
             return <CreateColumn key={index} columnIndex={index} />;
           })}
+          <tr>
+            <td>
+              <Button
+                type="button"
+                variant="outline"
+                className="me-1"
+                onClick={() => {
+                  setCreateTable((prev) => {
+                    const newColumn = {
+                      name: "",
+                      type: "text",
+                      notNull: false,
+                      primaryKey: false,
+                      unique: false,
+                      default: null,
+                    };
+                    return {
+                      ...prev,
+                      columns: [...prev.columns, newColumn],
+                    };
+                  });
+                }}
+              >
+                <Plus />
+                Add Column
+              </Button>
+            </td>
+          </tr>
         </tbody>
       </table>
-      <AddRemoveColumns />
     </div>
   );
 }
 
-function AddRemoveColumns() {
+function RemoveColumn(props: { columnIndex: number }) {
+  const columnIndex = props.columnIndex;
   const [tbl, setAtom] = useAtom(createTableAtom);
   return (
-    <div className="button-group me-0 mt-10">
-      <Button
-        type="button"
-        onClick={() => {
-          setAtom((prev) => {
-            const newColumn = {
-              name: "",
-              type: "text",
-              notNull: false,
-              primaryKey: false,
-              unique: false,
-              default: null,
-            };
-            return {
-              ...prev,
-              columns: [...prev.columns, newColumn],
-            };
-          });
-        }}
-      >
-        Add column
-      </Button>
+    <td>
       <Button
         type="button"
         variant="outline"
         onClick={() => {
           setAtom((prev) => {
-            prev.columns.pop();
+            prev.columns.splice(columnIndex, 1);
             return {
               ...prev,
             };
           });
         }}
       >
-        Remove column
+        <Trash2 />
       </Button>
-    </div>
+    </td>
   );
 }
 
@@ -147,7 +155,7 @@ function CreateColumn(props: any) {
           title={
             "Letter, numbers, and underscores only. First character cannot be a number"
           }
-          defaultValue={column.name}
+          value={column.name}
           onChange={(e) => {
             setCreateTable((prev) => {
               prev.columns[props.columnIndex].name = e.target.value;
@@ -249,6 +257,7 @@ function CreateColumn(props: any) {
           className="fa-solid fa-x remove-column-x"
         ></i>
       </td>
+      <RemoveColumn columnIndex={props.columnIndex} />
     </tr>
   );
 }
