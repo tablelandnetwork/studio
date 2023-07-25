@@ -85,32 +85,30 @@ export default function SchemaBuilder() {
           })}
           <tr>
             <td>
-              <td>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="me-1"
-                  onClick={() => {
-                    setCreateTable((prev) => {
-                      const newColumn = {
-                        name: "",
-                        type: "text",
-                        notNull: false,
-                        primaryKey: false,
-                        unique: false,
-                        default: null,
-                      };
-                      return {
-                        ...prev,
-                        columns: [...prev.columns, newColumn],
-                      };
-                    });
-                  }}
-                >
-                  <Plus />
-                  Add Column
-                </Button>
-              </td>
+              <Button
+                type="button"
+                variant="outline"
+                className="me-1"
+                onClick={() => {
+                  setCreateTable((prev) => {
+                    const newColumn = {
+                      name: "",
+                      type: "text",
+                      notNull: false,
+                      primaryKey: false,
+                      unique: false,
+                      default: null,
+                    };
+                    return {
+                      ...prev,
+                      columns: [...prev.columns, newColumn],
+                    };
+                  });
+                }}
+              >
+                <Plus />
+                Add Column
+              </Button>
             </td>
           </tr>
         </tbody>
