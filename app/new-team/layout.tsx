@@ -8,7 +8,7 @@ export default async function NewProjectLayout({
   return (
     <div>
       <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
-        <CrumbBack title="New Project" />
+        <CrumbBack title="New Team" />
       </header>
       {children}
     </div>
