@@ -73,7 +73,7 @@ export default function NewTable({ project, team }: Props) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mx-auto max-w-lg space-y-8"
+        className="mx-auto max-w-2xl space-y-8"
       >
         <FormField
           control={form.control}
@@ -108,8 +108,11 @@ export default function NewTable({ project, team }: Props) {
             </FormItem>
           )}
         />
-        <SchemaBuilder />
-        <pre>{createTableStatementFromObject(createTable, name)}</pre>
+        <div className="space-y-2">
+          <FormLabel>Columns</FormLabel>
+          <SchemaBuilder />
+          <pre>{createTableStatementFromObject(createTable, name)}</pre>
+        </div>
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit

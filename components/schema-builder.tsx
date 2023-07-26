@@ -1,7 +1,16 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { CreateTable, createTableAtom } from "@/store/create-table";
 import { useAtom } from "jotai";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import {
   Select,
@@ -66,65 +75,62 @@ export function createTableStatementFromObject(
 export default function SchemaBuilder() {
   const [tbl, setCreateTable] = useAtom(createTableAtom);
   return (
-    <div className="schema-builder">
-      <table>
-        <thead>
-          <tr className="text-center">
-            <th className="p-2">Name</th>
-            <th className="p-2">Type</th>
-            <th className="p-2 leading-5">Not null</th>
-            <th className="p-2 leading-5">Primary Key</th>
-            <th className="p-2 leading-5">Unique</th>
-            <th className="p-2 leading-5">Default value</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="flex flex-col items-center">
+      <Table>
+        {tbl.columns.length > 0 && (
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Not Null</TableHead>
+              <TableHead>Primary Key</TableHead>
+              <TableHead>Unique</TableHead>
+              <TableHead>Default Value</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+        )}
+        <TableBody>
           {tbl.columns.map((column, index) => {
             return <CreateColumn key={index} columnIndex={index} />;
           })}
-          <tr>
-            <td>
-              <Button
-                type="button"
-                variant="outline"
-                className="me-1"
-                onClick={() => {
-                  setCreateTable((prev) => {
-                    const newColumn = {
-                      name: "",
-                      type: "text",
-                      notNull: false,
-                      primaryKey: false,
-                      unique: false,
-                      default: null,
-                    };
-                    return {
-                      ...prev,
-                      columns: [...prev.columns, newColumn],
-                    };
-                  });
-                }}
-              >
-                <Plus />
-                Add Column
-              </Button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
+      <Button
+        className="my-4"
+        type="button"
+        variant="outline"
+        onClick={() => {
+          setCreateTable((prev) => {
+            const newColumn = {
+              name: "",
+              type: "text",
+              notNull: false,
+              primaryKey: false,
+              unique: false,
+              default: null,
+            };
+            return {
+              ...prev,
+              columns: [...prev.columns, newColumn],
+            };
+          });
+        }}
+      >
+        <Plus className="mr-2" />
+        Add Column
+      </Button>
     </div>
   );
 }
 
-function RemoveColumn(props: { columnIndex: number }) {
-  const columnIndex = props.columnIndex;
+function RemoveColumn({ columnIndex }: { columnIndex: number }) {
   const [tbl, setAtom] = useAtom(createTableAtom);
   return (
     <td>
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         onClick={() => {
           setAtom((prev) => {
             prev.columns.splice(columnIndex, 1);
@@ -140,17 +146,23 @@ function RemoveColumn(props: { columnIndex: number }) {
   );
 }
 
-function CreateColumn(props: any) {
+function CreateColumn({
+  key,
+  columnIndex,
+}: {
+  key: number;
+  columnIndex: number;
+}) {
   const [tbl, setCreateTable] = useAtom(createTableAtom);
-  const column = tbl && tbl.columns[props.columnIndex];
+  const column = tbl && tbl.columns[columnIndex];
 
   return (
-    <tr>
-      <td key={"name"}>
+    <TableRow>
+      <TableCell>
         <Input
-          placeholder="Column Name"
+          className="w-24"
+          placeholder="name"
           pattern="[a-zA-Z0-9_]*"
-          className="form-input w-[200px]"
           name="name"
           title={
             "Letter, numbers, and underscores only. First character cannot be a number"
@@ -158,106 +170,99 @@ function CreateColumn(props: any) {
           value={column.name}
           onChange={(e) => {
             setCreateTable((prev) => {
-              prev.columns[props.columnIndex].name = e.target.value;
+              prev.columns[columnIndex].name = e.target.value;
               return {
                 ...prev,
               };
             });
           }}
         />
-      </td>
-      <td>
+      </TableCell>
+      <TableCell>
         <Select
           defaultValue={column.type}
           onValueChange={(e) => {
             setCreateTable((prev) => {
-              prev.columns[props.columnIndex].type = e;
+              prev.columns[columnIndex].type = e;
               return {
                 ...prev,
               };
             });
           }}
         >
-          <SelectTrigger className="w-[100px]">
+          <SelectTrigger>
             <SelectValue placeholder="Select a type" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="text">Text</SelectItem>
             <SelectItem value="integer">Integer</SelectItem>
+            <SelectItem value="int">Int</SelectItem>
+            <SelectItem value="blob">Blob</SelectItem>
           </SelectContent>
         </Select>
-      </td>
-      <td className="text-center">
-        <input
+      </TableCell>
+      <TableCell>
+        <Checkbox
           name="notNull"
-          type="checkbox"
           checked={column.notNull}
-          onChange={(e) => {
+          onCheckedChange={(state) => {
             setCreateTable((prev) => {
-              prev.columns[props.columnIndex].notNull = e.target.checked;
+              prev.columns[columnIndex].notNull = !!state;
               return {
                 ...prev,
               };
             });
           }}
         />
-      </td>
-      <td className="text-center">
-        <input
+      </TableCell>
+      <TableCell>
+        <Checkbox
           name="primaryKey"
-          type="checkbox"
           checked={column.primaryKey}
-          onChange={(e) => {
+          onCheckedChange={(state) => {
             setCreateTable((prev) => {
-              prev.columns[props.columnIndex].primaryKey = e.target.checked;
+              prev.columns[columnIndex].primaryKey = !!state;
               return {
                 ...prev,
               };
             });
           }}
         />
-      </td>
-      <td className="text-center">
-        <input
+      </TableCell>
+      <TableCell>
+        <Checkbox
           name="unique"
-          type="checkbox"
           checked={column.unique}
-          onChange={(e) => {
+          onCheckedChange={(state) => {
             setCreateTable((prev) => {
-              prev.columns[props.columnIndex].unique = e.target.checked;
+              prev.columns[columnIndex].unique = !!state;
               return {
                 ...prev,
               };
             });
           }}
         />
-      </td>
-      <td>
+      </TableCell>
+      <TableCell>
         <Input
+          className="w-20"
           type="text"
-          className="form-input"
           name="default"
           placeholder="null"
           defaultValue={column.default}
           onChange={(e) => {
             setCreateTable((prev) => {
-              prev.columns[props.columnIndex].default = e.target.value;
+              prev.columns[columnIndex].default = e.target.value;
               return {
                 ...prev,
               };
             });
           }}
         />
-      </td>
-      <td>
-        <i
-          onClick={(e) => {
-            e.preventDefault();
-          }}
-          className="fa-solid fa-x remove-column-x"
-        ></i>
-      </td>
-      <RemoveColumn columnIndex={props.columnIndex} />
-    </tr>
+      </TableCell>
+      <TableCell>
+        <RemoveColumn columnIndex={columnIndex} />
+      </TableCell>
+    </TableRow>
   );
 }
