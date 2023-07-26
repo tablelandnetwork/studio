@@ -8,6 +8,7 @@ import { access, readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
 
 import * as schema from "@/db/schema";
+import { databaseAliases } from "@/db/api/db";
 import { Tables, tablesJson } from "@/lib/drizzle";
 
 config({ path: resolve(process.cwd(), process.argv[2] || ".env.local") });
@@ -20,7 +21,11 @@ const wallet = new Wallet(process.env.PRIVATE_KEY);
 const provider = getDefaultProvider(process.env.PROVIDER_URL);
 const signer = wallet.connect(provider);
 
-const tbl = new Database({ signer, autoWait: true });
+const tbl = new Database({
+  signer,
+  autoWait: true,
+  aliases: databaseAliases
+});
 
 async function tables(chain: string) {
   const tablesJsonFile = tablesJson(chain);

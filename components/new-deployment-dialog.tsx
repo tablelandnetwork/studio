@@ -54,6 +54,9 @@ export default function NewProjectDialog({
         block: 0,
         chain: parseInt(chain),
         deployedBy: "",
+        // TODO: don't hard code this.  I think we want to separate creating the
+        //    deployment, and executing the deployment. Executing the deployment
+        //    will be when the table is created, and the uu_name is stored etc...
         tables: [
           {
             name: "something_5_2",

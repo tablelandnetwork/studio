@@ -35,18 +35,16 @@ export default function Body(props: TableDialogProps) {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  Deployment on{" "}
-                  {/* helpers.getChainInfo(deployment.chain).chainName */} at
-                  block {deployment.block}
+                  Deployment {deployment.title} of Project {deployment.projectId.name}
                 </CardTitle>
-                {/* <CardDescription>{table.description}</CardDescription> */}
+                <CardDescription>{deployment.projectId.description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul>
                   {deployment.tables.map((table: any) => {
                     return (
                       <li key={table.id}>
-                        <strong>{table.tableName}</strong>
+                        <strong>{table.tableName}</strong>: <em>{table.tableUuName}</em>
                         <p>{table.schema}</p>
                       </li>
                     );

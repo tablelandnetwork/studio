@@ -1,9 +1,8 @@
 import { InferModel } from "drizzle-orm";
 import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sqliteTable } from "drizzle-orm/sqlite-core";
 
-import { tablelandTable } from "@/lib/drizzle";
-
-export const users = tablelandTable(
+export const users = sqliteTable(
   "users",
   {
     address: text("address").primaryKey(),
@@ -13,7 +12,7 @@ export const users = tablelandTable(
   (users) => ({
     teamIdIdx: uniqueIndex("teamIdIdx").on(users.teamId),
   })
-)(process.env.CHAIN);
+);
 
 // export const usersRelations = relations(users, ({ one }) => ({
 //   personalTeam: one(teams, {
@@ -22,7 +21,7 @@ export const users = tablelandTable(
 //   }),
 // }));
 
-export const teams = tablelandTable(
+export const teams = sqliteTable(
   "teams",
   {
     id: text("id").primaryKey(),
@@ -34,14 +33,14 @@ export const teams = tablelandTable(
     nameIdx: uniqueIndex("nameIdx").on(teams.name),
     slugIdx: uniqueIndex("slugIdx").on(teams.slug),
   })
-)(process.env.CHAIN);
+);
 
 // export const teamsRelations = relations(teams, ({ many }) => ({
 //   teamProjects: many(teamProjects),
 //   teamMemberships: many(teamMemberships),
 // }));
 
-export const teamMemberships = tablelandTable(
+export const teamMemberships = sqliteTable(
   "team_memberships",
   {
     memberTeamId: text("member_team_id").notNull(),
@@ -56,7 +55,7 @@ export const teamMemberships = tablelandTable(
       ),
     };
   }
-)(process.env.CHAIN);
+);
 
 // export const teamMembershipsRelations = relations(
 //   teamMemberships,
@@ -72,34 +71,54 @@ export const teamMemberships = tablelandTable(
 //   })
 // );
 
-export const projects = tablelandTable("projects", {
+export const projects = sqliteTable("projects", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
   description: text("description"),
-})(process.env.CHAIN);
+});
 
-export const deployments = tablelandTable("deployment", {
+export const deployments = sqliteTable("deployments", {
   id: text("id").primaryKey(),
   projectId: text("project_id").notNull(),
+  title: text("title").notNull(),
+});
+
+export const deploymentTables = sqliteTable("deployment_tables", {
+  id: text("id").primaryKey(),
+  // foreign key to "tables" table
+  tableId: text("table_id").notNull(),
+  // TODO: not sure if we need tableName since we can join with tables table?
+  //    Seems like maybe we do need this since the `tableId.name` field could deviate from what was deployed...
+  tableName: text("table_name").notNull(),
+  tableUuName: text("table_uu_name").notNull(),
+  // TODO: should we add chain here? It's in the tableUuName, but queries might be easier this way.
+  chain: integer("chain").notNull(),
+  deploymentId: text("deployment_id").notNull(),
+  // most recent execution
+  // TODO: do we need to store it like this, or should we just find the deployment_executions row with highest block?
+  executionId: text("execution_id"),
+  // TODO: I think we decided to use the create statement that would be
+  //    needed to duplicate this table's schema at the indicated execution
+  schema: text("schema"),
+});
+
+export const deploymentExecutions = sqliteTable("deployment_executions", {
   block: integer("deployed_at").notNull(),
   deployedBy: text("deployed_by").notNull(), // Address
-  chain: integer("deployed_to").notNull(),
-  transactionHash: text("transaction_hash").notNull(),
-})(process.env.CHAIN);
-
-export const deploymentTables = tablelandTable("deployment_tables", {
+  // TODO: `deployment_tables` already has a "joinable" column `execution_id`, probably don't need this and that?
   deploymentId: text("deployment_id").notNull(),
-  tableId: text("table_id").notNull(), // Table's studio ID
-  tableName: text("table_name").notNull(), // Table's tableland prefix + chain + id.
-  schema: text("schema").notNull(), // The schema of the table at the time of deployment.
-})(process.env.CHAIN);
+  // comma separated list of hashes?
+  // TODO: I'm assuming that we are going to have deployments
+  //    that will require mulitple transactions
+  transactionHashes: text("transaction_hashes").notNull(),
+});
 
 // export const projectsRelations = relations(projects, ({ many }) => ({
 //   teamProjects: many(teamProjects),
 // }));
 
-export const teamProjects = tablelandTable(
+export const teamProjects = sqliteTable(
   "team_projects",
   {
     teamId: text("team_id").notNull(),
@@ -114,7 +133,7 @@ export const teamProjects = tablelandTable(
       ),
     };
   }
-)(process.env.CHAIN);
+);
 
 // export const teamProjectsRelations = relations(teamProjects, ({ one }) => ({
 //   project: one(projects, {
@@ -127,15 +146,15 @@ export const teamProjects = tablelandTable(
 //   }),
 // }));
 
-export const tables = tablelandTable("tables", {
+export const tables = sqliteTable("tables", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
   description: text("description"),
   schema: text("schema").notNull(),
-})(process.env.CHAIN);
+});
 
-export const projectTables = tablelandTable(
+export const projectTables = sqliteTable(
   "project_tables",
   {
     projectId: text("project_id").notNull(),
@@ -149,12 +168,12 @@ export const projectTables = tablelandTable(
       ),
     };
   }
-)(process.env.CHAIN);
+);
 
 export type Table = InferModel<typeof tables>;
 export type NewTable = InferModel<typeof tables, "insert">;
 
-export const teamInvites = tablelandTable("team_invites", {
+export const teamInvites = sqliteTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),
   sealed: text("sealed").notNull(),
@@ -162,7 +181,7 @@ export const teamInvites = tablelandTable("team_invites", {
   createdAt: text("created_at").notNull(),
   claimedByTeamId: text("claimed_by_team_id"),
   claimedAt: text("claimed_at"),
-})(process.env.CHAIN);
+});
 
 export type UserSealed = InferModel<typeof users>;
 export type NewUserSealed = InferModel<typeof users, "insert">;
