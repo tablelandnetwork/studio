@@ -2,14 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import { DeploymentsWithTables } from "@/db/api/deployments";
 import { Project, Table, Team } from "@/db/schema";
 import { DialogProps } from "@radix-ui/react-dialog";
 // import { helpers } from "@tableland/sdk";
-import React from "react";
-import NewDeploymentDialog from "./new-deployment-dialog";
+import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface TableDialogProps extends DialogProps {
@@ -19,10 +17,8 @@ interface TableDialogProps extends DialogProps {
   deployments: DeploymentsWithTables[];
 }
 
-export default function Body(props: TableDialogProps) {
+export default function BodyDeployments(props: TableDialogProps) {
   const { project, team, tables, deployments } = props;
-
-  const [showNewTableDialog, setShowNewTableDialog] = React.useState(false);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
@@ -35,16 +31,19 @@ export default function Body(props: TableDialogProps) {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  Deployment {deployment.title} of Project {deployment.projectId.name}
+                  Deployment on{" "}
+                  {/* helpers.getChainInfo(deployment.chain).chainName */} at
+                  block {deployment.block}
                 </CardTitle>
-                <CardDescription>{deployment.projectId.description}</CardDescription>
+                {/* <CardDescription>{table.description}</CardDescription> */}
               </CardHeader>
               <CardContent>
                 <ul>
                   {deployment.tables.map((table: any) => {
                     return (
-                      <li key={table.id}>
-                        <strong>{table.tableName}</strong>: <em>{table.tableUuName}</em>
+                      <li key={table}>
+                        <strong>{table.tableName}</strong>:{" "}
+                        <em>{table.tableUuName}</em>
                         <p>{table.schema}</p>
                       </li>
                     );
@@ -55,17 +54,18 @@ export default function Body(props: TableDialogProps) {
           </Link>
         ))}
       </div>
-      <Suspense fallback={<p>Loading wallet...</p>}>
-        <NewDeploymentDialog
-          {...props}
-          open={showNewTableDialog}
-          onOpenChange={setShowNewTableDialog}
-        >
-          <Button onClick={() => setShowNewTableDialog(true)}>
-            New Deployment
-          </Button>
-        </NewDeploymentDialog>
-      </Suspense>
+      <Card className="">
+        <CardHeader className="items-center">
+          <CardTitle>New Deployment</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center">
+          <Link href={`/${team.slug}/${project.slug}/new-deployment`}>
+            <Button variant={"ghost"}>
+              <Plus />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }
