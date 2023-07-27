@@ -8,65 +8,78 @@ import {
 } from "../schema";
 import { db, tbl } from "./db";
 
-// Feels like this should exist elsewhere
-interface TableData {
+interface TableDeployment {
+  id: string;
   tableId: string;
+  chain: number;
   name: string;
-  schema: string;
 }
 
 // Feels like this should exist elsewhere
 interface CreateDeployment {
   projectId: string;
-  chain: number;
-  transactionHash: string;
-  deployedBy: string;
-  block: number;
-  tables: TableData[];
+  title: string;
+  tables: TableDeployment[];
 }
+
+// export async function doDeploymentMigration({
+//   deploymentId,
+//   tables,
+// }) {
+//   const tablesPrepped = tables.map((table: TableData) => {
+//     const { tableId, schema, name: tableName } = table;
+//     const { sql: tableSql, params: tableParams } = db
+//       .insert(deploymentTables)
+//       .values({ deploymentId, tableId, schema, tableName })
+//       .toSQL();
+//     return tbl.prepare(tableSql).bind(tableParams);
+//   });
+
+//   await tbl.batch([...tablesPrepped]);
+
+// };
 
 export async function createDeployment({
   projectId,
-  chain,
+  title,
   tables,
-  block,
-  deployedBy,
-  transactionHash,
 }: CreateDeployment) {
   const deploymentId = randomUUID();
-  const { sql: deploymentSql, params: deploymentParams } = db
-    .insert(deployments)
-    .values({
-      id: deploymentId,
-      chain,
-      block,
-      projectId,
-      deployedBy,
-      transactionHash,
-    })
-    .toSQL();
-
-  const deploymentPrepped = tbl.prepare(deploymentSql).bind(deploymentParams);
-
-  const tablesPrepped = tables.map((table) => {
-    const { tableId, schema, name: tableName } = table;
-    const { sql: tableSql, params: tableParams } = db
-      .insert(deploymentTables)
-      .values({ deploymentId, tableId, schema, tableName })
-      .toSQL();
-    return tbl.prepare(tableSql).bind(tableParams);
-  });
-
-  await tbl.batch([deploymentPrepped, ...tablesPrepped]);
 
   const deployment: Deployment = {
     projectId,
-    chain,
-    block,
-    deployedBy,
-    transactionHash,
+    title,
     id: deploymentId,
   };
+
+  const { sql: deploymentSql, params: deploymentParams } = db
+    .insert(deployments)
+    .values(deployment)
+    .toSQL();
+
+  const tablesPrepped = tables.map((table: TableDeployment) => {
+    const tableId = randomUUID();
+    const { sql: tableSql, params: tableParams } = db
+      .insert(deploymentTables)
+      .values({
+        id: tableId,
+        tableId: table.id,
+        tableName: "",
+        tableUuName: null,
+        chain: table.chain,
+        deploymentId: deploymentId,
+        executionId: null,
+        schema: null,
+      })
+      .toSQL();
+
+    return tbl.prepare(tableSql).bind(tableParams);
+  });
+
+  await tbl.batch([...tablesPrepped]);
+
+  await tbl.prepare(deploymentSql).bind(deploymentParams).all();
+
   return deployment;
 }
 
@@ -83,7 +96,7 @@ export async function deploymentsByProjectId(projectId: string) {
       deploymentTables,
       eq(deployments.id, deploymentTables.deploymentId)
     )
-    .orderBy(deployments.block)
+    .orderBy(deployments.id)
     .all();
 
   function formatDeployments(data: any): DeploymentsWithTables[] {

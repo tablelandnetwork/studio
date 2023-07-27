@@ -98,7 +98,7 @@ export default function NewDeploymentForm({
 
   const onSubmit = () => {};
 
-  const [multiChain, setMultiChain] = React.useState(false);
+  const [singleChain, setSingleChain] = React.useState(true);
 
   return (
     <Form {...form}>
@@ -122,12 +122,12 @@ export default function NewDeploymentForm({
               <div className="flex items-center space-x-2">
                 <Switch
                   id="same-network"
-                  checked={multiChain}
+                  checked={singleChain}
                   onClick={() => {
-                    setMultiChain(!multiChain);
+                    setSingleChain(!singleChain);
                   }}
                 />
-                <Label htmlFor="same-network">Multi-chain deployment</Label>
+                <Label htmlFor="same-network">Single chain deployment</Label>
               </div>
               <Select
                 name="network"
@@ -137,7 +137,7 @@ export default function NewDeploymentForm({
                 }}
               >
                 <SelectTrigger
-                  className={`w-[220px] ${multiChain && "invisible"}`}
+                  className={`w-[220px] ${!singleChain && "invisible"}`}
                 >
                   <SelectValue placeholder="Select a blockchain network" />
                 </SelectTrigger>
@@ -170,7 +170,7 @@ export default function NewDeploymentForm({
                       }}
                     >
                       <SelectTrigger
-                        className={`w-[220px] ${!multiChain && "invisible"}`}
+                        className={`w-[220px] ${singleChain && "invisible"}`}
                       >
                         <SelectValue placeholder="Select a blockchain network" />
                       </SelectTrigger>

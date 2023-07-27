@@ -30,12 +30,7 @@ export default function BodyDeployments(props: TableDialogProps) {
           >
             <Card>
               <CardHeader>
-                <CardTitle>
-                  Deployment on{" "}
-                  {/* helpers.getChainInfo(deployment.chain).chainName */} at
-                  block {deployment.block}
-                </CardTitle>
-                {/* <CardDescription>{table.description}</CardDescription> */}
+                <CardTitle>Deployment: {deployment.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul>

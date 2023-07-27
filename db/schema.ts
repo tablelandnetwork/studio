@@ -18,13 +18,6 @@ export const users = sqliteTable(
   })
 );
 
-// export const usersRelations = relations(users, ({ one }) => ({
-//   personalTeam: one(teams, {
-//     fields: [users.teamId],
-//     references: [teams.id],
-//   }),
-// }));
-
 export const teams = sqliteTable(
   "teams",
   {
@@ -38,11 +31,6 @@ export const teams = sqliteTable(
     slugIdx: uniqueIndex("slugIdx").on(teams.slug),
   })
 );
-
-// export const teamsRelations = relations(teams, ({ many }) => ({
-//   teamProjects: many(teamProjects),
-//   teamMemberships: many(teamMemberships),
-// }));
 
 export const teamMemberships = sqliteTable(
   "team_memberships",
@@ -61,20 +49,6 @@ export const teamMemberships = sqliteTable(
   }
 );
 
-// export const teamMembershipsRelations = relations(
-//   teamMemberships,
-//   ({ one }) => ({
-//     team: one(teams, {
-//       fields: [teamMemberships.teamId],
-//       references: [teams.id],
-//     }),
-//     memberTeam: one(teams, {
-//       fields: [teamMemberships.memberTeamId],
-//       references: [teams.id],
-//     }),
-//   })
-// );
-
 export const projects = sqliteTable("projects", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -90,37 +64,22 @@ export const deployments = sqliteTable("deployments", {
 
 export const deploymentTables = sqliteTable("deployment_tables", {
   id: text("id").primaryKey(),
-  // foreign key to "tables" table
   tableId: text("table_id").notNull(),
-  // TODO: not sure if we need tableName since we can join with tables table?
-  //    Seems like maybe we do need this since the `tableId.name` field could deviate from what was deployed...
   tableName: text("table_name").notNull(),
-  tableUuName: text("table_uu_name").notNull(),
-  // TODO: should we add chain here? It's in the tableUuName, but queries might be easier this way.
+  tableUuName: text("table_uu_name"),
   chain: integer("chain").notNull(),
   deploymentId: text("deployment_id").notNull(),
-  // most recent execution
-  // TODO: do we need to store it like this, or should we just find the deployment_executions row with highest block?
   executionId: text("execution_id"),
-  // TODO: I think we decided to use the create statement that would be
-  //    needed to duplicate this table's schema at the indicated execution
-  schema: text("schema"),
+  schema: text("deployed_schema"),
 });
 
 export const deploymentExecutions = sqliteTable("deployment_executions", {
+  id: text("id").primaryKey(),
   block: integer("deployed_at").notNull(),
   deployedBy: text("deployed_by").notNull(), // Address
-  // TODO: `deployment_tables` already has a "joinable" column `execution_id`, probably don't need this and that?
   deploymentId: text("deployment_id").notNull(),
-  // comma separated list of hashes?
-  // TODO: I'm assuming that we are going to have deployments
-  //    that will require mulitple transactions
-  transactionHashes: text("transaction_hashes").notNull(),
+  transactionHashes: text("transaction_hashes").notNull(), // comma separated list of hashes
 });
-
-// export const projectsRelations = relations(projects, ({ many }) => ({
-//   teamProjects: many(teamProjects),
-// }));
 
 export const teamProjects = sqliteTable(
   "team_projects",
@@ -138,17 +97,6 @@ export const teamProjects = sqliteTable(
     };
   }
 );
-
-// export const teamProjectsRelations = relations(teamProjects, ({ one }) => ({
-//   project: one(projects, {
-//     fields: [teamProjects.projectId],
-//     references: [projects.id],
-//   }),
-//   team: one(teams, {
-//     fields: [teamProjects.teamId],
-//     references: [teams.id],
-//   }),
-// }));
 
 export const tables = sqliteTable("tables", {
   id: text("id").primaryKey(),
@@ -209,6 +157,12 @@ export type NewDeployment = InferModel<typeof deployments, "insert">;
 
 export type DeploymentTables = InferModel<typeof deploymentTables>;
 export type NewDeploymentTables = InferModel<typeof deploymentTables, "insert">;
+
+export type DeploymentExecutions = InferModel<typeof deploymentExecutions>;
+export type NewDeploymentExecutions = InferModel<
+  typeof deploymentExecutions,
+  "insert"
+>;
 
 export type TeamProject = InferModel<typeof teamProjects>;
 export type NewTeamProject = InferModel<typeof teamProjects, "insert">;
