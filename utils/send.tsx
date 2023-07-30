@@ -1,7 +1,7 @@
 import db from "@/db/api";
 import { TeamInvite } from "@/db/schema";
-import sendMail from "@/emails";
-import Invite from "@/emails/Invite";
+// import sendMail from "@/emails";
+// import Invite from "@/emails/Invite";
 import { sealData } from "iron-session";
 
 export async function sendInvite(invite: TeamInvite) {
@@ -17,15 +17,15 @@ export async function sendInvite(invite: TeamInvite) {
   const baseUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : `http://localhost:${process.env.PORT ?? 3000}`;
-  const res = await sendMail({
-    to: invite.email,
-    component: (
-      <Invite
-        inviterUsername={inviterTeam.name}
-        teamName={team.name}
-        link={`${baseUrl}/invite?seal=${seal}`}
-      />
-    ),
-  });
-  console.log("sendMail result:", res);
+  // const res = await sendMail({
+  //   to: invite.email,
+  //   component: (
+  //     <Invite
+  //       inviterUsername={inviterTeam.name}
+  //       teamName={team.name}
+  //       link={`${baseUrl}/invite?seal=${seal}`}
+  //     />
+  //   ),
+  // });
+  // console.log("sendMail result:", res);
 }
