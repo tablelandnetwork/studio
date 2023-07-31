@@ -1,8 +1,11 @@
 import db from "@/db/api";
 import { TeamInvite } from "@/db/schema";
-// import sendMail from "@/emails";
-// import Invite from "@/emails/Invite";
+import Invite from "@/emails/invite";
+import { render } from "@react-email/render";
 import { sealData } from "iron-session";
+import * as postmark from "postmark";
+
+const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY || "");
 
 export async function sendInvite(invite: TeamInvite) {
   const inviterTeam = await db.teams.teamById(invite.inviterTeamId);
@@ -17,15 +20,20 @@ export async function sendInvite(invite: TeamInvite) {
   const baseUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : `http://localhost:${process.env.PORT ?? 3000}`;
-  // const res = await sendMail({
-  //   to: invite.email,
-  //   component: (
-  //     <Invite
-  //       inviterUsername={inviterTeam.name}
-  //       teamName={team.name}
-  //       link={`${baseUrl}/invite?seal=${seal}`}
-  //     />
-  //   ),
-  // });
-  // console.log("sendMail result:", res);
+
+  const emailHtml = render(
+    Invite({
+      inviterUsername: inviterTeam.name,
+      teamName: team.name,
+      link: `${baseUrl}/invite?seal=${seal}`,
+    })
+  );
+
+  const res = await client.sendEmail({
+    From: "noreply@tableland.xyz",
+    To: invite.email,
+    Subject: "You've been invited to a team on Tableland Studio",
+    HtmlBody: emailHtml,
+  });
+  console.log("sendMail result:", res);
 }
