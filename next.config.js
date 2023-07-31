@@ -16,8 +16,6 @@ const nextConfig = {
       "utf-8-validate": "commonjs utf-8-validate",
       bufferutil: "commonjs bufferutil",
       "uglify-js": "uglify-js",
-      "mjml-core": "mjml-core",
-      "mailing-core": "mailing-core",
     });
     return config;
   },
