@@ -15,10 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Team } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 
 const schema = z.object({
@@ -27,10 +27,12 @@ const schema = z.object({
     .string()
     .optional()
     .transform((v) => (!v ? undefined : v)),
+  envs: z.array(z.string().min(3)),
 });
 
 export default function NewProjectForm({ team }: { team: Team }) {
   const [pending, startTransition] = useTransition();
+
   const router = useRouter();
 
   const form = useForm<z.infer<typeof schema>>({
@@ -38,12 +40,30 @@ export default function NewProjectForm({ team }: { team: Team }) {
     defaultValues: {
       name: "",
       description: "",
+      envs: ["cxzc"],
     },
   });
+
+  const {
+    handleSubmit,
+    register,
+    control,
+    formState: { isValid, errors, isValidating, isDirty },
+    reset,
+  } = form;
+
+  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
+    {
+      control: control,
+      name: "envs",
+      defaultValues: [""],
+    }
+  );
 
   function onSubmit(values: z.infer<typeof schema>) {
     startTransition(async () => {
       const res = await newProject(team.id, values.name, values.description);
+      // await Promise.all(envs.map(env => newEnvironment(res.id, env)));
       router.push(`/${team.slug}/${res.slug}`);
     });
   }
@@ -88,6 +108,52 @@ export default function NewProjectForm({ team }: { team: Team }) {
             </FormItem>
           )}
         />
+
+        <div>
+          <FormLabel className="text-lg">Environments</FormLabel>
+
+          <div className="pl-4 pt-3">
+            {fields.map((env, index) => (
+              <FormField
+                control={form.control}
+                name={`envs.${index}`}
+                key={env.id}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Environment {index + 1}</FormLabel>
+
+                    <FormControl key={index}>
+                      <div className="flex">
+                        <Input
+                          {...form.register(`envs.${index}`)}
+                          placeholder="Environment name"
+                        />
+                        <Button variant="outline" onClick={() => remove(index)}>
+                          <Trash2 />
+                        </Button>
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            ))}
+            <Button
+              className="my-4"
+              type="button"
+              variant="outline"
+              onClick={() => append("")}
+            >
+              <Plus className="mr-2" />
+              Add environment
+            </Button>
+          </div>
+        </div>
+
+        <FormDescription>
+          Enter environment names. You can add more by clicking Add more.
+        </FormDescription>
+        <FormMessage />
+
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit

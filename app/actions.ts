@@ -100,38 +100,56 @@ export async function newProject(
   return project;
 }
 
-interface TableMeta {
-  name: string;
-  schema: string;
-  tableId: string;
-}
-
-interface Deployment {
-  transactionHash: string;
-  block: number;
-  tables: TableMeta[];
-  projectId: string;
-  chain: number;
-  deployedBy: string;
-}
-
-export async function newDeployment(deploymentData: Deployment) {
+export async function newEnvironment(
+  projectId: string,
+  title: string
+): Promise<{ id: string }> {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
-    // TODO: Proper error return.
     throw new Error("Not authenticated");
   }
-
-  const deployment = db.deployments.createDeployment({
-    projectId: deploymentData.projectId,
-    chain: deploymentData.chain,
-    block: deploymentData.block,
-    deployedBy: deploymentData.deployedBy,
-    transactionHash: deploymentData.transactionHash,
-    tables: deploymentData.tables,
+  const team = await db.projects.projectTeamByProjectId(projectId);
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    throw new Error("Not authorized");
+  }
+  const environment = await db.environments.createEnvironment({
+    projectId,
+    title,
   });
 
-  return deployment;
+  revalidatePath(`/${team.slug}/${projectId}`);
+  return environment;
+}
+
+export async function newTableInstance(
+  tableId: string,
+  environmentId: string,
+  chain: number,
+  schema: string,
+  tableUuName?: string
+) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const team = await db.projects.projectTeamByProjectId(id);
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    throw new Error("Not authorized");
+  }
+  const tableInstance = await db.table_instances.createTableInstance(
+    tableId,
+    environmentId,
+    chain,
+    schema,
+    tableUuName
+  );
+
+  revalidatePath(`/${team.slug}/${projectId}`);
+  return tableInstance;
 }
 
 export async function newTable(

@@ -20,12 +20,19 @@ import { createTableAtom } from "@/store/create-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import SchemaBuilder, {
   createTableStatementFromObject,
 } from "./schema-builder";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 const schema = z.object({
   name: z.string(),
@@ -33,6 +40,7 @@ const schema = z.object({
     .string()
     .optional()
     .transform((v) => (!v ? undefined : v)),
+  table: z.string(),
 });
 
 interface Props {
@@ -68,6 +76,25 @@ export default function NewTable({ project, team }: Props) {
       setCreateTable({ columns: [] });
     });
   }
+
+  const envs = ["staging", "production"];
+
+  // Initial state for chain selections is an object where the keys are the
+  // environment names and the values are the chain selections.
+  const initialChainSelections = envs.reduce((acc: any, env) => {
+    acc[env] = "";
+    return acc;
+  }, {});
+  const [chainSelections, setChainSelections] = useState(
+    initialChainSelections
+  );
+
+  const handleChainChange = (env, value) => {
+    setChainSelections((prev) => ({
+      ...prev,
+      [env]: value,
+    }));
+  };
 
   return (
     <Form {...form}>
@@ -112,6 +139,40 @@ export default function NewTable({ project, team }: Props) {
           <FormLabel>Columns</FormLabel>
           <SchemaBuilder />
           <pre>{createTableStatementFromObject(createTable, name)}</pre>
+        </div>
+
+        <div className="space-y-2">
+          <FormField
+            control={form.control}
+            name="table"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Table Deployments</FormLabel>
+                {envs.map((env) => (
+                  <div key={env}>
+                    <label>{env}</label>
+                    <Select
+                      defaultValue={chainSelections[env]}
+                      onValueChange={(value) => handleChainChange(env, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a chain" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="arbitrum">Arbitrum</SelectItem>
+                        <SelectItem value="maticmum">Maticmum</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+                <FormDescription>
+                  Select a chain for each environment where the table will be
+                  deployed.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}

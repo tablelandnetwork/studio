@@ -1,16 +1,16 @@
-import fs from "fs";
-import path from "path";
-import { config } from "dotenv";
 import { NonceManager } from "@ethersproject/experimental";
 import { Database, helpers } from "@tableland/sdk";
+import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/d1";
 import { Wallet, getDefaultProvider } from "ethers";
+import fs from "fs";
+import path from "path";
 import * as schema from "../schema";
 import {
-  deploymentTables,
-  deployments,
+  environments,
   projectTables,
   projects,
+  table_instances,
   tables,
   teamInvites,
   teamMemberships,
@@ -38,11 +38,15 @@ const signer = new NonceManager(baseSigner);
 
 export const databaseAliases = {
   read: async function () {
-    const jsonBuf = fs.readFileSync(path.join(process.cwd(), "meta-tables.json"));
+    const jsonBuf = fs.readFileSync(
+      path.join(process.cwd(), "meta-tables.json")
+    );
     return JSON.parse(jsonBuf.toString());
   },
   write: async function (nameMap: NameMapping) {
-    const jsonBuf = fs.readFileSync(path.join(process.cwd(), "meta-tables.json"));
+    const jsonBuf = fs.readFileSync(
+      path.join(process.cwd(), "meta-tables.json")
+    );
     const jsonObj = { ...JSON.parse(jsonBuf.toString()), ...nameMap };
     fs.writeFileSync(
       path.join(process.cwd(), "meta-tables.json"),
@@ -59,10 +63,10 @@ export const tbl = new Database({
 export const db = drizzle(tbl, { logger: false, schema });
 
 export {
-  deploymentTables,
-  deployments,
+  environments,
   projectTables,
   projects,
+  table_instances,
   tables,
   teamInvites,
   teamMemberships,

@@ -56,31 +56,6 @@ export const projects = sqliteTable("projects", {
   description: text("description"),
 });
 
-export const deployments = sqliteTable("deployments", {
-  id: text("id").primaryKey(),
-  projectId: text("project_id").notNull(),
-  title: text("title").notNull(),
-});
-
-export const deploymentTables = sqliteTable("deployment_tables", {
-  id: text("id").primaryKey(),
-  tableId: text("table_id").notNull(),
-  tableName: text("table_name").notNull(),
-  tableUuName: text("table_uu_name"),
-  chain: integer("chain").notNull(),
-  deploymentId: text("deployment_id").notNull(),
-  executionId: text("execution_id"),
-  schema: text("deployed_schema"),
-});
-
-export const deploymentExecutions = sqliteTable("deployment_executions", {
-  id: text("id").primaryKey(),
-  block: integer("deployed_at").notNull(),
-  deployedBy: text("deployed_by").notNull(), // Address
-  deploymentId: text("deployment_id").notNull(),
-  transactionHashes: text("transaction_hashes").notNull(), // comma separated list of hashes
-});
-
 export const teamProjects = sqliteTable(
   "team_projects",
   {
@@ -122,6 +97,37 @@ export const projectTables = sqliteTable(
   }
 );
 
+export const environments = sqliteTable("environments", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id").notNull(),
+  title: text("title").notNull(),
+});
+
+export const table_instances = sqliteTable("table_instances", {
+  id: text("id").primaryKey(),
+  tableId: text("table_id").notNull(),
+  environmentId: text("environment_id").notNull(),
+  tableUuName: text("table_uu_name"),
+  chain: integer("chain").notNull(),
+  schema: text("schema").notNull(),
+});
+
+// export const migrations = sqliteTable("migrations", {
+//   id: text("id").primaryKey(),
+//   environmentId: text("environment_id").notNull(),
+//   timestamp: integer("timestamp").notNull(),
+// });
+
+// export const migrationLog = sqliteTable("migration_log", {
+//   id: text("id").primaryKey(),
+//   tableInstanceId: text("table_instance_id").notNull(),
+//   migrationId: text("migration_id").notNull(),
+//   block: integer("deployed_at").notNull(),
+//   deployedBy: text("deployed_by").notNull(), // Address
+//   transactionHash: text("transaction_hash").notNull(),
+//   mutation: text("mutation").notNull()
+// });
+
 export type Table = InferModel<typeof tables>;
 export type NewTable = InferModel<typeof tables, "insert">;
 
@@ -152,17 +158,17 @@ export type NewTeamMembership = InferModel<typeof teamMemberships, "insert">;
 export type Project = InferModel<typeof projects>;
 export type NewProject = InferModel<typeof projects, "insert">;
 
-export type Deployment = InferModel<typeof deployments>;
-export type NewDeployment = InferModel<typeof deployments, "insert">;
+export type Environments = InferModel<typeof environments>;
+export type NewEnvironments = InferModel<typeof environments, "insert">;
 
-export type DeploymentTables = InferModel<typeof deploymentTables>;
-export type NewDeploymentTables = InferModel<typeof deploymentTables, "insert">;
+export type TableInstances = InferModel<typeof table_instances>;
+export type NewTableInstances = InferModel<typeof table_instances, "insert">;
 
-export type DeploymentExecutions = InferModel<typeof deploymentExecutions>;
-export type NewDeploymentExecutions = InferModel<
-  typeof deploymentExecutions,
-  "insert"
->;
+// export type Migration = InferModel<typeof migrations>;
+// export type NewMigration = InferModel<typeof migrations, "insert">;
+
+// export type MigrationLog = InferModel<typeof migrationLog>;
+// export type NewMigrationLog = InferModel<typeof migrationLog, "insert">;
 
 export type TeamProject = InferModel<typeof teamProjects>;
 export type NewTeamProject = InferModel<typeof teamProjects, "insert">;
