@@ -4,9 +4,9 @@ import { JotaiProvider } from "@/components/jotai-provider";
 import MesaSvg from "@/components/mesa-svg";
 import { NavPrimary } from "@/components/nav-primary";
 import PrimaryHeaderItem from "@/components/primary-header-item";
-import UserActions from "@/components/user-actions";
 import db from "@/db/api";
 import Session from "@/lib/session";
+import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -29,6 +29,11 @@ export const metadata = {
   description:
     "Discover, design, deploy, and manage data driven web3 apps on Tableland.",
 };
+
+const UserActions = dynamic(
+  () => import("@/components/user-actions").then((res) => res.default),
+  { ssr: false }
+);
 
 export default async function RootLayout({
   children,
