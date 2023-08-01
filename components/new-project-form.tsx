@@ -1,6 +1,6 @@
 "use client";
 
-import { newProject } from "@/app/actions";
+import { newEnvironment, newProject } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -40,7 +40,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
     defaultValues: {
       name: "",
       description: "",
-      envs: ["cxzc"],
+      envs: ["staging", "production"],
     },
   });
 
@@ -63,7 +63,8 @@ export default function NewProjectForm({ team }: { team: Team }) {
   function onSubmit(values: z.infer<typeof schema>) {
     startTransition(async () => {
       const res = await newProject(team.id, values.name, values.description);
-      // await Promise.all(envs.map(env => newEnvironment(res.id, env)));
+      // TODO: Should probably do this within "new project action"
+      await Promise.all(values.envs.map((env) => newEnvironment(res.id, env)));
       router.push(`/${team.slug}/${res.slug}`);
     });
   }

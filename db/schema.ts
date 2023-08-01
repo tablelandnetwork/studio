@@ -158,8 +158,8 @@ export type NewTeamMembership = InferModel<typeof teamMemberships, "insert">;
 export type Project = InferModel<typeof projects>;
 export type NewProject = InferModel<typeof projects, "insert">;
 
-export type Environments = InferModel<typeof environments>;
-export type NewEnvironments = InferModel<typeof environments, "insert">;
+export type Environment = InferModel<typeof environments>;
+export type NewEnvironment = InferModel<typeof environments, "insert">;
 
 export type TableInstances = InferModel<typeof table_instances>;
 export type NewTableInstances = InferModel<typeof table_instances, "insert">;

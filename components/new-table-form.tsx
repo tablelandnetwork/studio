@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Project, Team } from "@/db/schema";
+import { Environment, Project, Team } from "@/db/schema";
 import { createTableAtom } from "@/store/create-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtom } from "jotai";
@@ -46,9 +46,10 @@ const schema = z.object({
 interface Props {
   team: Team;
   project: Project;
+  envs: Environment[];
 }
 
-export default function NewTable({ project, team }: Props) {
+export default function NewTable({ project, team, envs }: Props) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -77,24 +78,23 @@ export default function NewTable({ project, team }: Props) {
     });
   }
 
-  const envs = ["staging", "production"];
-
   // Initial state for chain selections is an object where the keys are the
   // environment names and the values are the chain selections.
   const initialChainSelections = envs.reduce((acc: any, env) => {
-    acc[env] = "";
+    acc[env.id] = "";
     return acc;
   }, {});
   const [chainSelections, setChainSelections] = useState(
     initialChainSelections
   );
 
-  const handleChainChange = (env, value) => {
-    setChainSelections((prev) => ({
+  const handleChainChange = (env: string, value: string) => {
+    setChainSelections((prev: any) => ({
       ...prev,
       [env]: value,
     }));
   };
+  console.log(envs);
 
   return (
     <Form {...form}>
@@ -149,11 +149,13 @@ export default function NewTable({ project, team }: Props) {
               <FormItem>
                 <FormLabel>Table Deployments</FormLabel>
                 {envs.map((env) => (
-                  <div key={env}>
-                    <label>{env}</label>
+                  <div key={env.id}>
+                    <FormLabel>{env.title}</FormLabel>
                     <Select
-                      defaultValue={chainSelections[env]}
-                      onValueChange={(value) => handleChainChange(env, value)}
+                      defaultValue={chainSelections[env.id]}
+                      onValueChange={(value) =>
+                        handleChainChange(env.id, value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a chain" />
