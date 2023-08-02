@@ -7,10 +7,10 @@ import fs from "fs";
 import path from "path";
 import * as schema from "../schema";
 import {
+  deployments,
   environments,
   projectTables,
   projects,
-  table_instances,
   tables,
   teamInvites,
   teamMemberships,
@@ -63,10 +63,10 @@ export const tbl = new Database({
 export const db = drizzle(tbl, { logger: false, schema });
 
 export {
+  deployments,
   environments,
   projectTables,
   projects,
-  table_instances,
   tables,
   teamInvites,
   teamMemberships,

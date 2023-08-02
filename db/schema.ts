@@ -103,7 +103,7 @@ export const environments = sqliteTable("environments", {
   title: text("title").notNull(),
 });
 
-export const table_instances = sqliteTable("table_instances", {
+export const deployments = sqliteTable("deployments", {
   id: text("id").primaryKey(),
   tableId: text("table_id").notNull(),
   environmentId: text("environment_id").notNull(),
@@ -161,8 +161,8 @@ export type NewProject = InferModel<typeof projects, "insert">;
 export type Environment = InferModel<typeof environments>;
 export type NewEnvironment = InferModel<typeof environments, "insert">;
 
-export type TableInstances = InferModel<typeof table_instances>;
-export type NewTableInstances = InferModel<typeof table_instances, "insert">;
+export type Deployments = InferModel<typeof deployments>;
+export type NewDeployments = InferModel<typeof deployments, "insert">;
 
 // export type Migration = InferModel<typeof migrations>;
 // export type NewMigration = InferModel<typeof migrations, "insert">;

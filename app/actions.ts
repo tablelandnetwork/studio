@@ -140,7 +140,7 @@ export async function newTableInstance(
   ) {
     throw new Error("Not authorized");
   }
-  const tableInstance = await db.table_instances.createTableInstance(
+  const tableInstance = await db.deployments.createTableInstance(
     tableId,
     environmentId,
     chain,
