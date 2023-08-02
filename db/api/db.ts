@@ -29,10 +29,7 @@ const provider = getDefaultProvider(process.env.PROVIDER_URL);
 const baseSigner = wallet.connect(provider);
 const signer = new NonceManager(baseSigner);
 
-export const tbl = new Database({
-  signer,
-  autoWait: true,
-});
+export const tbl = new Database({ signer, autoWait: true });
 export const db = drizzle(tbl, { logger: false, schema });
 
 export {

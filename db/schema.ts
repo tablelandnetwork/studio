@@ -1,6 +1,7 @@
-import { tablelandTable } from "@/lib/drizzle";
 import { InferModel } from "drizzle-orm";
 import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+
+import { tablelandTable } from "@/lib/drizzle";
 
 export const users = tablelandTable(
   "users",

@@ -1,5 +1,3 @@
-import * as schema from "@/db/schema";
-import { Tables, tablesJson } from "@/lib/drizzle";
 import { Database, helpers } from "@tableland/sdk";
 import { createHash } from "crypto";
 import { config } from "dotenv";
@@ -8,6 +6,9 @@ import { Wallet, getDefaultProvider } from "ethers";
 import { PathLike, constants } from "fs";
 import { access, readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
+
+import * as schema from "@/db/schema";
+import { Tables, tablesJson } from "@/lib/drizzle";
 
 config({ path: resolve(process.cwd(), process.argv[2] || ".env.local") });
 
@@ -19,10 +20,7 @@ const wallet = new Wallet(process.env.PRIVATE_KEY);
 const provider = getDefaultProvider(process.env.PROVIDER_URL);
 const signer = wallet.connect(provider);
 
-const tbl = new Database({
-  signer,
-  autoWait: true,
-});
+const tbl = new Database({ signer, autoWait: true });
 
 async function tables(chain: string) {
   const tablesJsonFile = tablesJson(chain);
@@ -78,6 +76,7 @@ async function tables(chain: string) {
       delete tables[tableName];
     }
   }
+
   await writeFile(tablesJsonFile, JSON.stringify(tables, null, 2));
 }
 
