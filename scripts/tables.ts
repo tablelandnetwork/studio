@@ -1,14 +1,10 @@
-import { Database, helpers } from "@tableland/sdk";
-import { createHash } from "crypto";
+import { databaseAliases } from "@/db/api/db";
+import * as schema from "@/db/schema";
+import { Database } from "@tableland/sdk";
 import { config } from "dotenv";
 import { getTableConfig } from "drizzle-orm/sqlite-core";
 import { Wallet, getDefaultProvider } from "ethers";
-import { PathLike, constants } from "fs";
-import { access, readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
-
-import * as schema from "@/db/schema";
-import { Tables, tablesJson } from "@/lib/drizzle";
 
 config({ path: resolve(process.cwd(), process.argv[2] || ".env.local") });
 
@@ -20,33 +16,21 @@ const wallet = new Wallet(process.env.PRIVATE_KEY);
 const provider = getDefaultProvider(process.env.PROVIDER_URL);
 const signer = wallet.connect(provider);
 
-const tbl = new Database({ signer, autoWait: true });
+const tbl = new Database({ signer, autoWait: true, aliases: databaseAliases });
 
-async function tables(chain: string) {
-  const tablesJsonFile = tablesJson(chain);
-  if (!(await exists(tablesJsonFile))) {
-    const tables = {};
-    await writeFile(tablesJsonFile, JSON.stringify(tables, null, 2));
-  }
-  const b = await readFile(tablesJsonFile);
-  const tables: Tables = JSON.parse(b.toString());
-
+async function tables() {
+  // TODO: Now that we're relying on the Aliases feature of the SDK,
+  // we need to figure out how to either store create stmt hashes in
+  // the alias write function, continue discarding and re-creating tables
+  // when the hash changes, and reference those hashses here like we used to
+  //
+  // OR
+  //
+  // we need to figure out proper migrations for the tables in the alias store.
   const values = Object.values(schema);
   for (const value of values) {
     const config = getTableConfig(value);
     const create = createStmt(config);
-    const normalizedStatement = await helpers.normalize(create);
-    const normalized = normalizedStatement.statements[0];
-    const hash = createHash("sha256").update(normalized).digest("hex");
-    if (!tables[config.name]) {
-      tables[config.name] = {};
-    }
-    if (
-      tables[config.name][chain] &&
-      tables[config.name][chain].hash === hash
-    ) {
-      continue;
-    }
     const res = await tbl.exec(create);
     if (res.error) {
       console.log(`Error creating table ${config.name}: ${res.error}`);
@@ -62,22 +46,7 @@ async function tables(chain: string) {
       console.log(`No table name found after creating table ${config.name}`);
       continue;
     }
-    tables[config.name][chain] = {
-      table: res.meta.txn?.name,
-      hash,
-      createStmt: normalized,
-    };
   }
-
-  const tableNames = Object.keys(tables);
-  const schemaNames = Object.values(schema).map((i) => getTableConfig(i).name);
-  for (const tableName of tableNames) {
-    if (!schemaNames.includes(tableName)) {
-      delete tables[tableName];
-    }
-  }
-
-  await writeFile(tablesJsonFile, JSON.stringify(tables, null, 2));
 }
 
 function createStmt(config: ReturnType<typeof getTableConfig>) {
@@ -127,13 +96,4 @@ function createStmt(config: ReturnType<typeof getTableConfig>) {
   return create;
 }
 
-async function exists(path: PathLike): Promise<boolean> {
-  return await access(path, constants.F_OK)
-    .then(() => true)
-    .catch(() => false);
-}
-
-if (!process.env.CHAIN) {
-  throw new Error("Must provide CHAIN env var.");
-}
-tables(process.env.CHAIN);
+tables();
