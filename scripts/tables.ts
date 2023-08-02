@@ -1,3 +1,5 @@
+import * as schema from "@/db/schema";
+import { Tables, tablesJson } from "@/lib/drizzle";
 import { Database, helpers } from "@tableland/sdk";
 import { createHash } from "crypto";
 import { config } from "dotenv";
@@ -6,10 +8,6 @@ import { Wallet, getDefaultProvider } from "ethers";
 import { PathLike, constants } from "fs";
 import { access, readFile, writeFile } from "fs/promises";
 import { resolve } from "path";
-
-import { databaseAliases } from "@/db/api/db";
-import * as schema from "@/db/schema";
-import { Tables, tablesJson } from "@/lib/drizzle";
 
 config({ path: resolve(process.cwd(), process.argv[2] || ".env.local") });
 
@@ -24,12 +22,7 @@ const signer = wallet.connect(provider);
 const tbl = new Database({
   signer,
   autoWait: true,
-  aliases: databaseAliases,
 });
-
-interface Aliases {
-  [key: string]: any;
-}
 
 async function tables(chain: string) {
   const tablesJsonFile = tablesJson(chain);
@@ -39,7 +32,6 @@ async function tables(chain: string) {
   }
   const b = await readFile(tablesJsonFile);
   const tables: Tables = JSON.parse(b.toString());
-  const aliases: Aliases = {};
 
   const values = Object.values(schema);
   for (const value of values) {
@@ -77,7 +69,6 @@ async function tables(chain: string) {
       hash,
       createStmt: normalized,
     };
-    aliases[config.name] = res.meta.txn?.name;
   }
 
   const tableNames = Object.keys(tables);
@@ -87,7 +78,6 @@ async function tables(chain: string) {
       delete tables[tableName];
     }
   }
-  await writeFile("./meta-tables.json", JSON.stringify(aliases, null, 2));
   await writeFile(tablesJsonFile, JSON.stringify(tables, null, 2));
 }
 
