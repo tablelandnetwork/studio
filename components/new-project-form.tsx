@@ -27,7 +27,7 @@ const schema = z.object({
     .string()
     .optional()
     .transform((v) => (!v ? undefined : v)),
-  envs: z.array(z.string().min(3)),
+  envs: z.array(z.object({ env: z.string().min(3) })),
 });
 
 export default function NewProjectForm({ team }: { team: Team }) {
@@ -40,7 +40,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
     defaultValues: {
       name: "",
       description: "",
-      envs: ["staging", "production"],
+      envs: [{ env: "staging" }, { env: "production" }],
     },
   });
 
@@ -56,7 +56,6 @@ export default function NewProjectForm({ team }: { team: Team }) {
     {
       control: control,
       name: "envs",
-      defaultValues: [""],
     }
   );
 
@@ -64,7 +63,9 @@ export default function NewProjectForm({ team }: { team: Team }) {
     startTransition(async () => {
       const res = await newProject(team.id, values.name, values.description);
       // TODO: Should probably do this within "new project action"
-      await Promise.all(values.envs.map((env) => newEnvironment(res.id, env)));
+      await Promise.all(
+        values.envs.map((obj) => newEnvironment(res.id, obj.env))
+      );
       router.push(`/${team.slug}/${res.slug}`);
     });
   }
@@ -126,7 +127,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
                     <FormControl key={index}>
                       <div className="flex">
                         <Input
-                          {...form.register(`envs.${index}`)}
+                          {...form.register(`envs.${index}.env`)}
                           placeholder="Environment name"
                         />
                         <Button variant="outline" onClick={() => remove(index)}>
@@ -142,7 +143,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
               className="my-4"
               type="button"
               variant="outline"
-              onClick={() => append("")}
+              onClick={() => append({ env: "" })}
             >
               <Plus className="mr-2" />
               Add environment
