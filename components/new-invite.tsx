@@ -40,7 +40,6 @@ export default function NewInvite({ team }: { team: Team }) {
   }
 
   function onSubmit(values: z.infer<typeof schema>) {
-    console.log(values);
     startTransition(async () => {
       await inviteEmails(team, [values.email]);
       setShowForm(false);

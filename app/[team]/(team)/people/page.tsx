@@ -5,9 +5,10 @@ import db from "@/db/api";
 import Session from "@/lib/session";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import { Info, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import Info from "./_components/info";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -87,8 +88,16 @@ export default async function People({ params }: { params: { team: string } }) {
                 numCharacters={7}
               />
             </div>
-            <div className="ml-auto text-muted-foreground">owner</div>
-            <Info className="ml-10" />
+            <div className="m-auto text-muted-foreground">
+              {person.membership.isOwner ? "owner" : "member"}
+            </div>
+            <Info
+              className="ml-auto"
+              team={team}
+              inviter={person.claimedInvite?.inviter}
+              invite={person.claimedInvite?.invite}
+              membership={person.membership}
+            />
             <MoreHorizontal className="ml-4" />
           </div>
         ))}

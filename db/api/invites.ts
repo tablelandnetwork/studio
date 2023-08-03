@@ -75,6 +75,7 @@ export const acceptInvite = cache(async function (
       teamId: invite.teamId,
       memberTeamId: personalTeam.id,
       isOwner: 0,
+      joinedAt: new Date().toISOString(),
     })
     .toSQL();
   await tbl.batch([
