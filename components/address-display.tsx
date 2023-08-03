@@ -1,5 +1,6 @@
 "use client";
 
+import { useToast } from "@/components/ui/use-toast";
 import { Copy } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -18,8 +19,15 @@ export default function AddressDisplay({
   numCharacters?: number;
   copy?: boolean;
 }) {
+  const { toast } = useToast();
+
   const handleCopy = () => {
     navigator.clipboard.writeText(address);
+    toast({
+      title: "Done!",
+      description: "The address has been copied to your clipboard.",
+      duration: 2000,
+    });
   };
 
   return (

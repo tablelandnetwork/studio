@@ -4,6 +4,7 @@ import { JotaiProvider } from "@/components/jotai-provider";
 import MesaSvg from "@/components/mesa-svg";
 import { NavPrimary } from "@/components/nav-primary";
 import PrimaryHeaderItem from "@/components/primary-header-item";
+import { Toaster } from "@/components/ui/toaster";
 import db from "@/db/api";
 import Session from "@/lib/session";
 import dynamic from "next/dynamic";
@@ -65,6 +66,7 @@ export default async function RootLayout({
           </header>
           <div className="flex flex-1 flex-col">{children}</div>
           <Footer />
+          <Toaster />
         </body>
       </html>
     </JotaiProvider>
