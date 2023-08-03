@@ -40,7 +40,7 @@ export default function Info({
           <Cake />
           <div>
             <p className="text-xs text-muted-foreground">Founded team</p>
-            <p className="text-lg">
+            <p className="text-sm">
               {timeAgo.format(new Date(membership.joinedAt))}
             </p>
           </div>
@@ -53,21 +53,21 @@ export default function Info({
             <UserPlus />
             <div>
               <p className="text-xs text-muted-foreground">Invited by</p>
-              <p className="text-base">{inviter.name}</p>
+              <p className="text-sm">{inviter.name}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <MailQuestion />
             <div>
               <p className="text-xs text-muted-foreground">Invited at</p>
-              <p className="text-base">{invite.email}</p>
+              <p className="text-sm">{invite.email}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <Merge />
             <div>
               <p className="text-xs text-muted-foreground">Joined</p>
-              <p className="text-base">
+              <p className="text-sm">
                 {timeAgo.format(new Date(membership.joinedAt))}
               </p>
             </div>
