@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Team } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, PlusIcon, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -27,7 +27,7 @@ const schema = z.object({
     .string()
     .optional()
     .transform((v) => (!v ? undefined : v)),
-  envs: z.array(z.object({ env: z.string().min(3) })),
+  environments: z.array(z.object({ name: z.string().min(3) })),
 });
 
 export default function NewProjectForm({ team }: { team: Team }) {
@@ -40,7 +40,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
     defaultValues: {
       name: "",
       description: "",
-      envs: [{ env: "staging" }, { env: "production" }],
+      environments: [{ name: "" }],
     },
   });
 
@@ -54,8 +54,8 @@ export default function NewProjectForm({ team }: { team: Team }) {
 
   const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
     {
-      control: control,
-      name: "envs",
+      control,
+      name: "environments",
     }
   );
 
@@ -64,7 +64,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
       const res = await newProject(team.id, values.name, values.description);
       // TODO: Should probably do this within "new project action"
       await Promise.all(
-        values.envs.map((obj) => newEnvironment(res.id, obj.env))
+        values.environments.map((env) => newEnvironment(res.id, env.name))
       );
       router.push(`/${team.slug}/${res.slug}`);
     });
@@ -118,7 +118,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
             {fields.map((env, index) => (
               <FormField
                 control={form.control}
-                name={`envs.${index}`}
+                name={`environments.${index}.name`}
                 key={env.id}
                 render={({ field }) => (
                   <FormItem>
@@ -127,10 +127,27 @@ export default function NewProjectForm({ team }: { team: Team }) {
                     <FormControl key={index}>
                       <div className="flex">
                         <Input
-                          {...form.register(`envs.${index}.env`)}
+                          {...form.register(`environments.${index}.name`)}
                           placeholder="Environment name"
                         />
-                        <Button variant="outline" onClick={() => remove(index)}>
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            append(
+                              { name: "" },
+                              {
+                                shouldFocus: true,
+                              }
+                            );
+                          }}
+                        >
+                          <PlusIcon />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          type="button"
+                          onClick={() => remove(index)}
+                        >
                           <Trash2 />
                         </Button>
                       </div>
@@ -143,7 +160,10 @@ export default function NewProjectForm({ team }: { team: Team }) {
               className="my-4"
               type="button"
               variant="outline"
-              onClick={() => append({ env: "" })}
+              onClick={(e) => {
+                e.preventDefault();
+                append({ name: "" });
+              }}
             >
               <Plus className="mr-2" />
               Add environment
