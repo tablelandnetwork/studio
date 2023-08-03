@@ -1,7 +1,7 @@
 "use server";
 
 import db from "@/db/api";
-import { Project, Team } from "@/db/schema";
+import { Project, Team, TeamInvite } from "@/db/schema";
 import Session, { Auth } from "@/lib/session";
 import { sendInvite } from "@/utils/send";
 import { unsealData } from "iron-session";
@@ -160,6 +160,24 @@ export async function inviteEmails(team: Team, emails: string[]) {
     emails
   );
   await Promise.all(invites.map((invite) => sendInvite(invite)));
+  revalidatePath(`/${team.slug}/people`);
+}
+
+export async function resendInvite(invite: TeamInvite) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  await sendInvite(invite);
+}
+
+export async function deleteInvite(invite: TeamInvite) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const team = await db.teams.teamById(invite.teamId);
+  await db.invites.deleteInvite(invite.id);
   revalidatePath(`/${team.slug}/people`);
 }
 

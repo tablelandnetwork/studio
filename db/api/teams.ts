@@ -186,5 +186,5 @@ export const isAuthorizedForTeam = cache(async function (
       )
     )
     .get();
-  return !!membership;
+  return membership ? membership : false;
 });

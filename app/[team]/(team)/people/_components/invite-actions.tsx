@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteInvite, resendInvite } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,16 +10,45 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TeamInvite } from "@/db/schema";
+import { useToast } from "@/components/ui/use-toast";
+import { Team, TeamInvite, TeamMembership } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { DropdownMenuTriggerProps } from "@radix-ui/react-dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 
 type Props = DropdownMenuTriggerProps & {
   invite: TeamInvite;
+  inviter: Team;
+  user: Team;
+  membership: TeamMembership;
 };
 
-export default function InviteActions({ className, invite, ...props }: Props) {
+export default function InviteActions({
+  className,
+  invite,
+  inviter,
+  user,
+  membership,
+  ...props
+}: Props) {
+  const { toast } = useToast();
+
+  async function onResendInvite() {
+    await resendInvite(invite);
+    toast({
+      title: "Done!",
+      description: "The invite has been re-sent.",
+    });
+  }
+
+  async function onDeleteInvite() {
+    await deleteInvite(invite);
+    toast({
+      title: "Done!",
+      description: "The invite has been deleted.",
+    });
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className={cn(className)} {...props} asChild>
@@ -29,12 +59,14 @@ export default function InviteActions({ className, invite, ...props }: Props) {
       <DropdownMenuContent>
         <DropdownMenuLabel>{invite.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={(e) => e.preventDefault()}>
-          Profile
+        <DropdownMenuItem onClick={onResendInvite}>
+          Re-send invite
         </DropdownMenuItem>
-        <DropdownMenuItem>Billing</DropdownMenuItem>
-        <DropdownMenuItem>Team</DropdownMenuItem>
-        <DropdownMenuItem>Subscription</DropdownMenuItem>
+        {(membership.isOwner || inviter.id === user.id) && (
+          <DropdownMenuItem onClick={onDeleteInvite}>
+            Delete invite
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

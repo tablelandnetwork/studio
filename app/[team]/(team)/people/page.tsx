@@ -25,9 +25,12 @@ export default async function People({ params }: { params: { team: string } }) {
     notFound();
   }
 
-  if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
-  ) {
+  const membership = await db.teams.isAuthorizedForTeam(
+    session.auth.personalTeam.id,
+    team.id
+  );
+
+  if (!membership) {
     notFound();
   }
 
@@ -102,29 +105,40 @@ export default async function People({ params }: { params: { team: string } }) {
             <UserActions className="ml-2" user={person.personalTeam} />
           </div>
         ))}
-        {binnedInvites.pending.map((i) => (
-          <div key={i.invite.id} className="flex items-center">
-            <Avatar>
-              <AvatarFallback>{i.invite.email.charAt(0)}</AvatarFallback>
-            </Avatar>
+        {binnedInvites.pending.map((i) => {
+          if (!session.auth) {
+            return null;
+          }
+          return (
+            <div key={i.invite.id} className="flex items-center">
+              <Avatar>
+                <AvatarFallback>{i.invite.email.charAt(0)}</AvatarFallback>
+              </Avatar>
 
-            <div className="ml-4">
-              <p className="text-sm font-medium leading-none">
-                {i.invite.email}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Invited by{" "}
-                <span className="font-medium">
-                  {i.inviter.id === session.auth?.personalTeam.id
-                    ? "you"
-                    : i.inviter.name}
-                </span>{" "}
-                {timeAgo.format(new Date(i.invite.createdAt))}
-              </p>
+              <div className="ml-4">
+                <p className="text-sm font-medium leading-none">
+                  {i.invite.email}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Invited by{" "}
+                  <span className="font-medium">
+                    {i.inviter.id === session.auth?.personalTeam.id
+                      ? "you"
+                      : i.inviter.name}
+                  </span>{" "}
+                  {timeAgo.format(new Date(i.invite.createdAt))}
+                </p>
+              </div>
+              <InviteActions
+                className="ml-auto"
+                invite={i.invite}
+                inviter={i.inviter}
+                user={session.auth.personalTeam}
+                membership={membership}
+              />
             </div>
-            <InviteActions className="ml-auto" invite={i.invite} />
-          </div>
-        ))}
+          );
+        })}
         <NewInvite team={team} />
       </div>
     </div>
