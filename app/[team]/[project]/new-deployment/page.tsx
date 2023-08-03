@@ -3,8 +3,6 @@ import Session from "@/lib/session";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
-import NewDeploymentForm from "@/components/new-deployment-form";
-
 export default async function NewProject({
   params,
 }: {
@@ -35,9 +33,5 @@ export default async function NewProject({
 
   const tables = await db.tables.tablesByProjectId(project.id);
 
-  return (
-    <div className="p-4">
-      <NewDeploymentForm team={team} project={project} tables={tables} />
-    </div>
-  );
+  return <div className="p-4">TBD</div>;
 }

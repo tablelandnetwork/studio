@@ -158,8 +158,8 @@ export type NewProject = InferModel<typeof projects, "insert">;
 export type Environment = InferModel<typeof environments>;
 export type NewEnvironment = InferModel<typeof environments, "insert">;
 
-export type Deployments = InferModel<typeof deployments>;
-export type NewDeployments = InferModel<typeof deployments, "insert">;
+export type Deployment = InferModel<typeof deployments>;
+export type NewDeployment = InferModel<typeof deployments, "insert">;
 
 // export type Migration = InferModel<typeof migrations>;
 // export type NewMigration = InferModel<typeof migrations, "insert">;

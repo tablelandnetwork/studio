@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { and, eq } from "drizzle-orm";
 import { cache } from "react";
-import { Project } from "../schema";
+import { Project, environments } from "../schema";
 import { db, projects, slugify, tbl, teamProjects, teams } from "./db";
 
 export const createProject = cache(async function (
@@ -80,4 +80,19 @@ export const isAuthorizedForProject = cache(async function (
     )
     .get();
   return !!authorized;
+});
+
+export const projectTeamByEnvironmentId = cache(async function (
+  environmentId: string
+) {
+  const projectTeam = await db
+    .select({ teams })
+    .from(environments)
+    .innerJoin(projects, eq(environments.projectId, projects.id))
+    .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
+    .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+    .where(eq(environments.id, environmentId))
+    .get();
+
+  return projectTeam.teams;
 });

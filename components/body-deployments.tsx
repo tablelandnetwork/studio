@@ -3,8 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-import { DeploymentsWithTables } from "@/db/api/deployments";
-import { Project, Table, Team } from "@/db/schema";
+import { Deployment, Project, Table, Team } from "@/db/schema";
 import { DialogProps } from "@radix-ui/react-dialog";
 // import { helpers } from "@tableland/sdk";
 import { Plus } from "lucide-react";
@@ -14,7 +13,7 @@ interface TableDialogProps extends DialogProps {
   project: Project;
   team: Team;
   tables: Table[];
-  deployments: DeploymentsWithTables[];
+  deployments: Deployment[];
 }
 
 export default function BodyDeployments(props: TableDialogProps) {
@@ -30,20 +29,12 @@ export default function BodyDeployments(props: TableDialogProps) {
           >
             <Card>
               <CardHeader>
-                <CardTitle>Deployment: {deployment.title}</CardTitle>
+                <CardTitle>Deployment: {deployment.tableUuName}</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul>
-                  {deployment.tables.map((table: any) => {
-                    return (
-                      <li key={table}>
-                        <strong>{table.tableName}</strong>:{" "}
-                        <em>{table.tableUuName}</em>
-                        <p>{table.schema}</p>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <strong>{deployment.tableUuName}</strong>:{" "}
+                <em>{deployment.tableUuName}</em>
+                <p>{deployment.schema}</p>
               </CardContent>
             </Card>
           </Link>

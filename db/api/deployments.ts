@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
-import { deployments } from "../schema";
+import { Deployment, deployments, projectTables } from "../schema";
 import { db, tbl } from "./db";
 
-export async function createTableInstance({
+export async function createDeployment({
   tableId,
   environmentId,
   chain,
@@ -37,7 +37,7 @@ export async function createTableInstance({
   return tableInstance;
 }
 
-export async function updateTableInstance({
+export async function updateDeployment({
   tableInstanceId,
   tableUuName,
 }: {
@@ -60,4 +60,16 @@ export async function updateTableInstance({
   }
 
   return tableInstance;
+}
+
+export async function deploymentsByProjectId(id: string) {
+  const { sql, params } = db
+    .select()
+    .from(deployments)
+    .leftJoin(projectTables, eq(deployments.tableId, projectTables.tableId))
+    .where(eq(projectTables.projectId, id))
+    .toSQL();
+
+  const res = await tbl.prepare(sql).bind(params).all();
+  return res.results as Deployment[];
 }

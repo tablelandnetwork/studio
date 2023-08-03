@@ -123,7 +123,7 @@ export async function newEnvironment(
   return environment;
 }
 
-export async function newTableInstance(
+export async function newDeployment(
   tableId: string,
   environmentId: string,
   chain: number,
@@ -134,22 +134,21 @@ export async function newTableInstance(
   if (!session.auth) {
     throw new Error("Not authenticated");
   }
-  const team = await db.projects.projectTeamByProjectId(id);
+  const team = await db.projects.projectTeamByEnvironmentId(environmentId);
   if (
     !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
   ) {
     throw new Error("Not authorized");
   }
-  const tableInstance = await db.deployments.createTableInstance(
+  const deployment = await db.deployments.createDeployment({
     tableId,
     environmentId,
     chain,
     schema,
-    tableUuName
-  );
+    tableUuName,
+  });
 
-  revalidatePath(`/${team.slug}/${projectId}`);
-  return tableInstance;
+  return deployment;
 }
 
 export async function newTable(
