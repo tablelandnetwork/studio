@@ -4,14 +4,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import db from "@/db/api";
 import Session from "@/lib/session";
 import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Info from "./_components/info";
 import InviteActions from "./_components/invite-actions";
 import UserActions from "./_components/user-actions";
 
-TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
 export default async function People({ params }: { params: { team: string } }) {
@@ -34,7 +32,6 @@ export default async function People({ params }: { params: { team: string } }) {
     notFound();
   }
 
-  // TODO: Update this query to return owner or not.
   const people = await db.teams.userTeamsForTeamId(team.id);
   const invites = await db.invites.invitesForTeam(team.id);
 
@@ -69,42 +66,53 @@ export default async function People({ params }: { params: { team: string } }) {
   return (
     <div className="mx-auto max-w-3xl p-4">
       <div className="flex flex-col space-y-6">
-        {peopleAugmented.map((person) => (
-          <div key={person.personalTeam.id} className="flex items-center">
-            <Avatar>
-              <AvatarImage
-                src={`https://avatar.vercel.sh/${person.personalTeam.slug}.png`}
-                alt={person.personalTeam.name}
+        {peopleAugmented.map((person) => {
+          if (!session.auth) {
+            return null;
+          }
+          return (
+            <div key={person.personalTeam.id} className="flex items-center">
+              <Avatar>
+                <AvatarImage
+                  src={`https://avatar.vercel.sh/${person.personalTeam.slug}.png`}
+                  alt={person.personalTeam.name}
+                />
+                <AvatarFallback>
+                  {person.personalTeam.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="ml-4">
+                <p className="text-sm font-medium leading-none">
+                  {person.personalTeam.name}
+                  {person.personalTeam.id === session.auth?.personalTeam.id &&
+                    " (You)"}
+                </p>
+                <AddressDisplay
+                  address={person.address}
+                  copy={true}
+                  numCharacters={7}
+                />
+              </div>
+              <div className="ml-auto text-muted-foreground">
+                {person.membership.isOwner ? "admin" : "member"}
+              </div>
+              <Info
+                className="ml-2"
+                team={team}
+                inviter={person.claimedInvite?.inviter}
+                invite={person.claimedInvite?.invite}
+                membership={person.membership}
               />
-              <AvatarFallback>
-                {person.personalTeam.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="ml-4">
-              <p className="text-sm font-medium leading-none">
-                {person.personalTeam.name}
-                {person.personalTeam.id === session.auth?.personalTeam.id &&
-                  " (You)"}
-              </p>
-              <AddressDisplay
-                address={person.address}
-                copy={true}
-                numCharacters={7}
+              <UserActions
+                className="ml-2"
+                user={session.auth?.personalTeam}
+                userMembership={membership}
+                member={person.personalTeam}
+                memberMembership={person.membership}
               />
             </div>
-            <div className="ml-auto text-muted-foreground">
-              {person.membership.isOwner ? "owner" : "member"}
-            </div>
-            <Info
-              className="ml-2"
-              team={team}
-              inviter={person.claimedInvite?.inviter}
-              invite={person.claimedInvite?.invite}
-              membership={person.membership}
-            />
-            <UserActions className="ml-2" user={person.personalTeam} />
-          </div>
-        ))}
+          );
+        })}
         {binnedInvites.pending.map((i) => {
           if (!session.auth) {
             return null;

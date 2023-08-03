@@ -6,7 +6,6 @@ import {
 import { Team, TeamInvite, TeamMembership } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
 import {
   Cake,
   InfoIcon,
@@ -16,7 +15,6 @@ import {
   UserPlus,
 } from "lucide-react";
 
-TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
 type Props = LucideProps & {

@@ -7,11 +7,15 @@ import PrimaryHeaderItem from "@/components/primary-header-item";
 import { Toaster } from "@/components/ui/toaster";
 import db from "@/db/api";
 import Session from "@/lib/session";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import "./globals.css";
+
+TimeAgo.addDefaultLocale(en);
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],

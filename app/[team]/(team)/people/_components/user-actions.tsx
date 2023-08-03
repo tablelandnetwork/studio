@@ -9,14 +9,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Team } from "@/db/schema";
+import { Team, TeamMembership } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { DropdownMenuTriggerProps } from "@radix-ui/react-dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 
-type Props = DropdownMenuTriggerProps & { user: Team };
+type Props = DropdownMenuTriggerProps & {
+  user: Team;
+  userMembership: TeamMembership;
+  member: Team;
+  memberMembership: TeamMembership;
+};
 
-export default function UserActions({ className, user, ...props }: Props) {
+export default function UserActions({
+  className,
+  user,
+  userMembership,
+  member,
+  memberMembership,
+  ...props
+}: Props) {
+  async function toggleAdmin() {}
+
+  async function removeUser() {}
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className={cn(className)} {...props} asChild>
@@ -25,14 +41,21 @@ export default function UserActions({ className, user, ...props }: Props) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+        <DropdownMenuLabel>{member.name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={(e) => e.preventDefault()}>
-          Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem>Billing</DropdownMenuItem>
-        <DropdownMenuItem>Team</DropdownMenuItem>
-        <DropdownMenuItem>Subscription</DropdownMenuItem>
+        {(!userMembership.isOwner || user.id === member.id) && (
+          <DropdownMenuItem disabled>No actions available</DropdownMenuItem>
+        )}
+        {userMembership.isOwner && user.id !== member.id && (
+          <>
+            <DropdownMenuItem onClick={toggleAdmin}>
+              {memberMembership.isOwner ? "Remove" : "Make"} admin
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={removeUser}>
+              Remove from team
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
