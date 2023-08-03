@@ -5,10 +5,11 @@ import db from "@/db/api";
 import Session from "@/lib/session";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import { MoreHorizontal } from "lucide-react";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Info from "./_components/info";
+import InviteActions from "./_components/invite-actions";
+import UserActions from "./_components/user-actions";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -88,17 +89,17 @@ export default async function People({ params }: { params: { team: string } }) {
                 numCharacters={7}
               />
             </div>
-            <div className="m-auto text-muted-foreground">
+            <div className="ml-auto text-muted-foreground">
               {person.membership.isOwner ? "owner" : "member"}
             </div>
             <Info
-              className="ml-auto"
+              className="ml-2"
               team={team}
               inviter={person.claimedInvite?.inviter}
               invite={person.claimedInvite?.invite}
               membership={person.membership}
             />
-            <MoreHorizontal className="ml-4" />
+            <UserActions className="ml-2" user={person.personalTeam} />
           </div>
         ))}
         {binnedInvites.pending.map((i) => (
@@ -121,7 +122,7 @@ export default async function People({ params }: { params: { team: string } }) {
                 {timeAgo.format(new Date(i.invite.createdAt))}
               </p>
             </div>
-            <MoreHorizontal className="ml-auto" />
+            <InviteActions className="ml-auto" invite={i.invite} />
           </div>
         ))}
         <NewInvite team={team} />
