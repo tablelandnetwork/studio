@@ -1,34 +1,16 @@
 import AddressDisplay from "@/components/address-display";
-import { Invites } from "@/components/invites";
-import { TeamMembers } from "@/components/team-members";
+import NewInvite from "@/components/new-invite";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import db from "@/db/api";
 import Session from "@/lib/session";
-import { cn } from "@/lib/utils";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import { CircleEllipsis, InfoIcon } from "lucide-react";
+import { Info, MoreHorizontal } from "lucide-react";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
-
-function Container({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-center [&>div]:w-full",
-        className
-      )}
-      {...props}
-    />
-  );
-}
 
 export default async function People({ params }: { params: { team: string } }) {
   const session = await Session.fromCookies(cookies());
@@ -81,21 +63,6 @@ export default async function People({ params }: { params: { team: string } }) {
 
   return (
     <div className="mx-auto max-w-3xl p-4">
-      <p>
-        people:{" "}
-        {peopleAugmented
-          .map(
-            (p) =>
-              `${p.personalTeam.name} ${
-                p.claimedInvite ? p.claimedInvite.invite.email : "none"
-              }`
-          )
-          .join(", ")}
-      </p>
-      <br />
-      <p>
-        invites: {binnedInvites.pending.map((i) => i.invite.email).join(", ")}
-      </p>
       <div className="flex flex-col space-y-6">
         {peopleAugmented.map((person) => (
           <div key={person.personalTeam.id} className="flex items-center">
@@ -108,7 +75,7 @@ export default async function People({ params }: { params: { team: string } }) {
                 {person.personalTeam.name.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="ml-4">
               <p className="text-sm font-medium leading-none">
                 {person.personalTeam.name}
                 {person.personalTeam.id === session.auth?.personalTeam.id &&
@@ -120,9 +87,9 @@ export default async function People({ params }: { params: { team: string } }) {
                 numCharacters={7}
               />
             </div>
-            <div className="ml-auto">owner</div>
-            <InfoIcon />
-            <CircleEllipsis />
+            <div className="ml-auto text-muted-foreground">owner</div>
+            <Info className="ml-10" />
+            <MoreHorizontal className="ml-4" />
           </div>
         ))}
         {binnedInvites.pending.map((i) => (
@@ -131,7 +98,7 @@ export default async function People({ params }: { params: { team: string } }) {
               <AvatarFallback>{i.invite.email.charAt(0)}</AvatarFallback>
             </Avatar>
 
-            <div>
+            <div className="ml-4">
               <p className="text-sm font-medium leading-none">
                 {i.invite.email}
               </p>
@@ -145,27 +112,10 @@ export default async function People({ params }: { params: { team: string } }) {
                 {timeAgo.format(new Date(i.invite.createdAt))}
               </p>
             </div>
-            <CircleEllipsis className="ml-auto" />
+            <MoreHorizontal className="ml-auto" />
           </div>
         ))}
-        <Button variant="outline" className="self-start">
-          New Invite
-        </Button>
-        <Container>
-          <TeamMembers
-            people={people}
-            personalTeam={session.auth.personalTeam}
-          />
-        </Container>
-      </div>
-      <div className="col-span-2 grid items-start gap-6 lg:col-span-1">
-        <Container>
-          <Invites
-            invites={invites}
-            personalTeam={session.auth.personalTeam}
-            team={team}
-          />
-        </Container>
+        <NewInvite team={team} />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { sealData, unsealData } from "iron-session";
 import { cache } from "react";
@@ -100,7 +100,7 @@ export const invitesForTeam = cache(async function invitesForTeam(
       eq(teamInvites.claimedByTeamId, claimedByTeams.id)
     )
     .where(eq(teamInvites.teamId, teamId))
-    .orderBy(desc(teamInvites.createdAt))
+    .orderBy(asc(teamInvites.createdAt))
     .all();
   const invites = await Promise.all(
     invitesSealed.map(
