@@ -1,72 +1,72 @@
 {
-  "projects": {
-    "arbitrum-goerli": {
-      "table": "projects_421613_17",
-      "hash": "952682729d94254c106e699e1407c9d3a54c2fe95292ab503849206e307f79d8",
-      "createStmt": "create table projects(id text primary key not null,name text not null,slug text not null,description text)"
-    }
-  },
-  "team_invites": {
-    "arbitrum-goerli": {
-      "table": "team_invites_421613_23",
-      "hash": "40e333d980b7012c6b9ef2ebf48a4cbceb72a0366dc81303a4ca497c2b830eb4",
-      "createStmt": "create table team_invites(id text primary key not null,team_id text not null,sealed text not null,inviter_team_id text not null,created_at text not null,claimed_by_team_id text,claimed_at text)"
-    }
-  },
-  "team_memberships": {
-    "arbitrum-goerli": {
-      "table": "team_memberships_421613_19",
-      "hash": "f2e34f270c7efb7cad65931a4e1c82c0f0d87966a2c256bcb0bcb551ddb5e107",
-      "createStmt": "create table team_memberships(member_team_id text not null,team_id text not null,is_owner integer not null,unique(member_team_id,team_id))"
-    }
-  },
-  "team_projects": {
-    "arbitrum-goerli": {
-      "table": "team_projects_421613_20",
-      "hash": "983a72b7e51d411df8b7aae57e7c6a54498b711120e4bcebdf9607168790f4f7",
-      "createStmt": "create table team_projects(team_id text not null,project_id text not null,is_owner integer not null,unique(team_id,project_id))"
-    }
-  },
-  "teams": {
-    "arbitrum-goerli": {
-      "table": "teams_421613_21",
-      "hash": "ff0a3030e6b4858b1a5b17613d34f6960b9e884eb070469ad56e43106750fc02",
-      "createStmt": "create table teams(id text primary key not null,name text not null,slug text not null,personal integer not null,unique(name),unique(slug))"
-    }
-  },
-  "users": {
-    "arbitrum-goerli": {
-      "table": "users_421613_24",
-      "hash": "180395d6c2d26472f04d5ddd326a9494da557b26df201b47f147cff440f00a1c",
-      "createStmt": "create table users(address text primary key not null,team_id text not null,sealed text not null,unique(team_id))"
-    }
-  },
-  "project_tables": {
-    "arbitrum-goerli": {
-      "table": "project_tables_421613_25",
-      "hash": "0600e4ad11bb8b8ce9e226853881b6fd17b32c761747e85500d15f6b8ad906a8",
-      "createStmt": "create table project_tables(project_id text not null,table_id text not null,unique(project_id,table_id))"
-    }
-  },
-  "tables": {
-    "arbitrum-goerli": {
-      "table": "tables_421613_26",
-      "hash": "35268f76eef7097bf5273a5254768d542b074e57f80e6fbb66a410415202d818",
-      "createStmt": "create table tables(id text primary key not null,slug text not null,name text not null,description text,schema text not null)"
-    }
-  },
   "deployments": {
     "arbitrum-goerli": {
-      "table": "deployments_421613_64",
+      "table": "deployments_421613_66",
       "hash": "38e052a4cd1d2029abab527dba4b0a6e454f2f0be52e171d2b90c54fd798e66d",
       "createStmt": "create table deployments(id text primary key not null,table_id text not null,environment_id text not null,table_uu_name text,chain integer not null,schema text not null)"
     }
   },
   "environments": {
     "arbitrum-goerli": {
-      "table": "environments_421613_65",
+      "table": "environments_421613_67",
       "hash": "46fd0023085074320fde1920203c62f9d3517e22648a3c4c17e431a5f1c19100",
       "createStmt": "create table environments(id text primary key not null,project_id text not null,title text not null)"
+    }
+  },
+  "project_tables": {
+    "arbitrum-goerli": {
+      "table": "project_tables_421613_68",
+      "hash": "0600e4ad11bb8b8ce9e226853881b6fd17b32c761747e85500d15f6b8ad906a8",
+      "createStmt": "create table project_tables(project_id text not null,table_id text not null,unique(project_id,table_id))"
+    }
+  },
+  "projects": {
+    "arbitrum-goerli": {
+      "table": "projects_421613_69",
+      "hash": "952682729d94254c106e699e1407c9d3a54c2fe95292ab503849206e307f79d8",
+      "createStmt": "create table projects(id text primary key not null,name text not null,slug text not null,description text)"
+    }
+  },
+  "tables": {
+    "arbitrum-goerli": {
+      "table": "tables_421613_70",
+      "hash": "35268f76eef7097bf5273a5254768d542b074e57f80e6fbb66a410415202d818",
+      "createStmt": "create table tables(id text primary key not null,slug text not null,name text not null,description text,schema text not null)"
+    }
+  },
+  "team_invites": {
+    "arbitrum-goerli": {
+      "table": "team_invites_421613_71",
+      "hash": "40e333d980b7012c6b9ef2ebf48a4cbceb72a0366dc81303a4ca497c2b830eb4",
+      "createStmt": "create table team_invites(id text primary key not null,team_id text not null,sealed text not null,inviter_team_id text not null,created_at text not null,claimed_by_team_id text,claimed_at text)"
+    }
+  },
+  "team_memberships": {
+    "arbitrum-goerli": {
+      "table": "team_memberships_421613_72",
+      "hash": "4dbacb50ca7c26b4b2860d96ec9e07d7a1e598193ac1164ea10d90249e16116b",
+      "createStmt": "create table team_memberships(member_team_id text not null,team_id text not null,is_owner integer not null,joined_at text not null,unique(member_team_id,team_id))"
+    }
+  },
+  "team_projects": {
+    "arbitrum-goerli": {
+      "table": "team_projects_421613_73",
+      "hash": "983a72b7e51d411df8b7aae57e7c6a54498b711120e4bcebdf9607168790f4f7",
+      "createStmt": "create table team_projects(team_id text not null,project_id text not null,is_owner integer not null,unique(team_id,project_id))"
+    }
+  },
+  "teams": {
+    "arbitrum-goerli": {
+      "table": "teams_421613_74",
+      "hash": "ff0a3030e6b4858b1a5b17613d34f6960b9e884eb070469ad56e43106750fc02",
+      "createStmt": "create table teams(id text primary key not null,name text not null,slug text not null,personal integer not null,unique(name),unique(slug))"
+    }
+  },
+  "users": {
+    "arbitrum-goerli": {
+      "table": "users_421613_75",
+      "hash": "180395d6c2d26472f04d5ddd326a9494da557b26df201b47f147cff440f00a1c",
+      "createStmt": "create table users(address text primary key not null,team_id text not null,sealed text not null,unique(team_id))"
     }
   }
 }
