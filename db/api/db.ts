@@ -4,6 +4,8 @@ import { drizzle } from "drizzle-orm/d1";
 import { Wallet, getDefaultProvider } from "ethers";
 import * as schema from "../schema";
 import {
+  deployments,
+  environments,
   projectTables,
   projects,
   tables,
@@ -31,6 +33,8 @@ export const tbl = new Database({ signer, autoWait: true });
 export const db = drizzle(tbl, { logger: false, schema });
 
 export {
+  deployments,
+  environments,
   projectTables,
   projects,
   tables,

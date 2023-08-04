@@ -26,12 +26,19 @@ export default async function NewProject({
     team.id,
     params.project
   );
+
+  if (!project) {
+    notFound();
+  }
+
+  const envs = await db.environments.getEnvironmentsByProjectId(project.id);
+
   if (!project) {
     notFound();
   }
   return (
     <div className="p-4">
-      <NewTableForm team={team} project={project} />
+      <NewTableForm team={team} project={project} envs={envs} />
     </div>
   );
 }

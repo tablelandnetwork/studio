@@ -15,13 +15,6 @@ export const users = tablelandTable(
   })
 )(process.env.CHAIN);
 
-// export const usersRelations = relations(users, ({ one }) => ({
-//   personalTeam: one(teams, {
-//     fields: [users.teamId],
-//     references: [teams.id],
-//   }),
-// }));
-
 export const teams = tablelandTable(
   "teams",
   {
@@ -35,11 +28,6 @@ export const teams = tablelandTable(
     slugIdx: uniqueIndex("slugIdx").on(teams.slug),
   })
 )(process.env.CHAIN);
-
-// export const teamsRelations = relations(teams, ({ many }) => ({
-//   teamProjects: many(teamProjects),
-//   teamMemberships: many(teamMemberships),
-// }));
 
 export const teamMemberships = tablelandTable(
   "team_memberships",
@@ -59,30 +47,12 @@ export const teamMemberships = tablelandTable(
   }
 )(process.env.CHAIN);
 
-// export const teamMembershipsRelations = relations(
-//   teamMemberships,
-//   ({ one }) => ({
-//     team: one(teams, {
-//       fields: [teamMemberships.teamId],
-//       references: [teams.id],
-//     }),
-//     memberTeam: one(teams, {
-//       fields: [teamMemberships.memberTeamId],
-//       references: [teams.id],
-//     }),
-//   })
-// );
-
 export const projects = tablelandTable("projects", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
   description: text("description"),
 })(process.env.CHAIN);
-
-// export const projectsRelations = relations(projects, ({ many }) => ({
-//   teamProjects: many(teamProjects),
-// }));
 
 export const teamProjects = tablelandTable(
   "team_projects",
@@ -100,17 +70,6 @@ export const teamProjects = tablelandTable(
     };
   }
 )(process.env.CHAIN);
-
-// export const teamProjectsRelations = relations(teamProjects, ({ one }) => ({
-//   project: one(projects, {
-//     fields: [teamProjects.projectId],
-//     references: [projects.id],
-//   }),
-//   team: one(teams, {
-//     fields: [teamProjects.teamId],
-//     references: [teams.id],
-//   }),
-// }));
 
 export const tables = tablelandTable("tables", {
   id: text("id").primaryKey(),
@@ -135,6 +94,37 @@ export const projectTables = tablelandTable(
     };
   }
 )(process.env.CHAIN);
+
+export const environments = tablelandTable("environments", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id").notNull(),
+  title: text("title").notNull(),
+})(process.env.CHAIN);
+
+export const deployments = tablelandTable("deployments", {
+  id: text("id").primaryKey(),
+  tableId: text("table_id").notNull(),
+  environmentId: text("environment_id").notNull(),
+  tableUuName: text("table_uu_name"),
+  chain: integer("chain").notNull(),
+  schema: text("schema").notNull(),
+})(process.env.CHAIN);
+
+// export const migrations = tablelandTable("migrations", {
+//   id: text("id").primaryKey(),
+//   environmentId: text("environment_id").notNull(),
+//   timestamp: integer("timestamp").notNull(),
+// })(process.env.CHAIN);
+
+// export const migrationLog = tablelandTable("migration_log", {
+//   id: text("id").primaryKey(),
+//   tableInstanceId: text("table_instance_id").notNull(),
+//   migrationId: text("migration_id").notNull(),
+//   block: integer("deployed_at").notNull(),
+//   deployedBy: text("deployed_by").notNull(), // Address
+//   transactionHash: text("transaction_hash").notNull(),
+//   mutation: text("mutation").notNull()
+// })(process.env.CHAIN);
 
 export type Table = InferModel<typeof tables>;
 export type NewTable = InferModel<typeof tables, "insert">;
@@ -165,6 +155,18 @@ export type NewTeamMembership = InferModel<typeof teamMemberships, "insert">;
 
 export type Project = InferModel<typeof projects>;
 export type NewProject = InferModel<typeof projects, "insert">;
+
+export type Environment = InferModel<typeof environments>;
+export type NewEnvironment = InferModel<typeof environments, "insert">;
+
+export type Deployment = InferModel<typeof deployments>;
+export type NewDeployment = InferModel<typeof deployments, "insert">;
+
+// export type Migration = InferModel<typeof migrations>;
+// export type NewMigration = InferModel<typeof migrations, "insert">;
+
+// export type MigrationLog = InferModel<typeof migrationLog>;
+// export type NewMigrationLog = InferModel<typeof migrationLog, "insert">;
 
 export type TeamProject = InferModel<typeof teamProjects>;
 export type NewTeamProject = InferModel<typeof teamProjects, "insert">;

@@ -1,10 +1,9 @@
-import BodyDeployments from "@/components/body-deployments";
 import db from "@/db/api";
 import Session from "@/lib/session";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
-export default async function Deployments({
+export default async function NewProject({
   params,
 }: {
   params: { team: string; project: string };
@@ -13,18 +12,15 @@ export default async function Deployments({
   if (!session.auth) {
     notFound();
   }
-
   const team = await db.teams.teamBySlug(params.team);
   if (!team) {
     notFound();
   }
-
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+    !(await db.teams.isAuthorizedForTeam(session.auth.user.teamId, team.id))
   ) {
     notFound();
   }
-
   const project = await db.projects.projectByTeamIdAndSlug(
     team.id,
     params.project
@@ -37,23 +33,5 @@ export default async function Deployments({
 
   const tables = await db.tables.tablesByProjectId(project.id);
 
-  return (
-    <>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-semibold">Project</h1>
-        <p className="text-lg text-gray-600">
-          {team.name} / {project.name}
-        </p>
-        <p>{project.description}</p>
-      </div>
-      <div className="mx-auto flex w-full max-w-3xl flex-col space-y-4 p-4">
-        <BodyDeployments
-          team={team}
-          project={project}
-          tables={tables}
-          deployments={deployments}
-        />
-      </div>
-    </>
-  );
+  return <div className="p-4">TBD</div>;
 }
