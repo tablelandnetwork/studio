@@ -18,13 +18,6 @@ export const users = sqliteTable(
   })
 );
 
-// export const usersRelations = relations(users, ({ one }) => ({
-//   personalTeam: one(teams, {
-//     fields: [users.teamId],
-//     references: [teams.id],
-//   }),
-// }));
-
 export const teams = sqliteTable(
   "teams",
   {
@@ -39,17 +32,13 @@ export const teams = sqliteTable(
   })
 );
 
-// export const teamsRelations = relations(teams, ({ many }) => ({
-//   teamProjects: many(teamProjects),
-//   teamMemberships: many(teamMemberships),
-// }));
-
 export const teamMemberships = sqliteTable(
   "team_memberships",
   {
     memberTeamId: text("member_team_id").notNull(),
     teamId: text("team_id").notNull(),
     isOwner: integer("is_owner").notNull(),
+    joinedAt: text("joined_at").notNull(),
   },
   (userTeams) => {
     return {
@@ -61,30 +50,12 @@ export const teamMemberships = sqliteTable(
   }
 );
 
-// export const teamMembershipsRelations = relations(
-//   teamMemberships,
-//   ({ one }) => ({
-//     team: one(teams, {
-//       fields: [teamMemberships.teamId],
-//       references: [teams.id],
-//     }),
-//     memberTeam: one(teams, {
-//       fields: [teamMemberships.memberTeamId],
-//       references: [teams.id],
-//     }),
-//   })
-// );
-
 export const projects = sqliteTable("projects", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
   description: text("description"),
 });
-
-// export const projectsRelations = relations(projects, ({ many }) => ({
-//   teamProjects: many(teamProjects),
-// }));
 
 export const teamProjects = sqliteTable(
   "team_projects",
@@ -102,17 +73,6 @@ export const teamProjects = sqliteTable(
     };
   }
 );
-
-// export const teamProjectsRelations = relations(teamProjects, ({ one }) => ({
-//   project: one(projects, {
-//     fields: [teamProjects.projectId],
-//     references: [projects.id],
-//   }),
-//   team: one(teams, {
-//     fields: [teamProjects.teamId],
-//     references: [teams.id],
-//   }),
-// }));
 
 export const tables = sqliteTable("tables", {
   id: text("id").primaryKey(),
@@ -137,6 +97,37 @@ export const projectTables = sqliteTable(
     };
   }
 );
+
+export const environments = sqliteTable("environments", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id").notNull(),
+  title: text("title").notNull(),
+});
+
+export const deployments = sqliteTable("deployments", {
+  id: text("id").primaryKey(),
+  tableId: text("table_id").notNull(),
+  environmentId: text("environment_id").notNull(),
+  tableUuName: text("table_uu_name"),
+  chain: integer("chain").notNull(),
+  schema: text("schema").notNull(),
+});
+
+// export const migrations = sqliteTable("migrations", {
+//   id: text("id").primaryKey(),
+//   environmentId: text("environment_id").notNull(),
+//   timestamp: integer("timestamp").notNull(),
+// });
+
+// export const migrationLog = sqliteTable("migration_log", {
+//   id: text("id").primaryKey(),
+//   tableInstanceId: text("table_instance_id").notNull(),
+//   migrationId: text("migration_id").notNull(),
+//   block: integer("deployed_at").notNull(),
+//   deployedBy: text("deployed_by").notNull(), // Address
+//   transactionHash: text("transaction_hash").notNull(),
+//   mutation: text("mutation").notNull()
+// });
 
 export type Table = InferModel<typeof tables>;
 export type NewTable = InferModel<typeof tables, "insert">;
@@ -167,6 +158,18 @@ export type NewTeamMembership = InferModel<typeof teamMemberships, "insert">;
 
 export type Project = InferModel<typeof projects>;
 export type NewProject = InferModel<typeof projects, "insert">;
+
+export type Environment = InferModel<typeof environments>;
+export type NewEnvironment = InferModel<typeof environments, "insert">;
+
+export type Deployment = InferModel<typeof deployments>;
+export type NewDeployment = InferModel<typeof deployments, "insert">;
+
+// export type Migration = InferModel<typeof migrations>;
+// export type NewMigration = InferModel<typeof migrations, "insert">;
+
+// export type MigrationLog = InferModel<typeof migrationLog>;
+// export type NewMigrationLog = InferModel<typeof migrationLog, "insert">;
 
 export type TeamProject = InferModel<typeof teamProjects>;
 export type NewTeamProject = InferModel<typeof teamProjects, "insert">;

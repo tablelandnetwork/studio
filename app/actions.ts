@@ -1,7 +1,7 @@
 "use server";
 
 import db from "@/db/api";
-import { Project, Team } from "@/db/schema";
+import { Project, Team, TeamInvite } from "@/db/schema";
 import Session, { Auth } from "@/lib/session";
 import { sendInvite } from "@/utils/send";
 import { unsealData } from "iron-session";
@@ -100,6 +100,57 @@ export async function newProject(
   return project;
 }
 
+export async function newEnvironment(
+  projectId: string,
+  title: string
+): Promise<{ id: string }> {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const team = await db.projects.projectTeamByProjectId(projectId);
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    throw new Error("Not authorized");
+  }
+  const environment = await db.environments.createEnvironment({
+    projectId,
+    title,
+  });
+
+  revalidatePath(`/${team.slug}/${projectId}`);
+  return environment;
+}
+
+export async function newDeployment(
+  tableId: string,
+  environmentId: string,
+  chain: number,
+  schema: string,
+  tableUuName?: string
+) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const team = await db.projects.projectTeamByEnvironmentId(environmentId);
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    throw new Error("Not authorized");
+  }
+  const deployment = await db.deployments.createDeployment({
+    tableId,
+    environmentId,
+    chain,
+    schema,
+    tableUuName,
+  });
+
+  return deployment;
+}
+
 export async function newTable(
   project: Project,
   name: string,
@@ -163,6 +214,24 @@ export async function inviteEmails(team: Team, emails: string[]) {
   revalidatePath(`/${team.slug}/people`);
 }
 
+export async function resendInvite(invite: TeamInvite) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  await sendInvite(invite);
+}
+
+export async function deleteInvite(invite: TeamInvite) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const team = await db.teams.teamById(invite.teamId);
+  await db.invites.deleteInvite(invite.id);
+  revalidatePath(`/${team.slug}/people`);
+}
+
 export async function acceptInvite(seal: string) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
@@ -194,4 +263,29 @@ export async function ignoreInvite(seal: string) {
     throw new Error("Invite has already been claimed");
   }
   await db.invites.deleteInvite(inviteId as string);
+}
+
+export async function toggleAdmin(team: Team, member: Team) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  await db.teams.toggleAdmin(team.id, member.id);
+  revalidatePath(`/${team.slug}/people`);
+}
+
+export async function removeTeamMember(
+  team: Team,
+  member: Team,
+  claimedInviteId?: string
+) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  await db.teams.removeTeamMember(team.id, member.id);
+  if (claimedInviteId) {
+    await db.invites.deleteInvite(claimedInviteId);
+  }
+  revalidatePath(`/${team.slug}/people`);
 }

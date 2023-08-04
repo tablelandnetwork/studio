@@ -28,7 +28,12 @@ export const createTeamByPersonalTeam = cache(async function (
     .toSQL();
   const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
     .insert(teamMemberships)
-    .values({ memberTeamId: personalTeamId, teamId, isOwner: 1 })
+    .values({
+      memberTeamId: personalTeamId,
+      teamId,
+      isOwner: 1,
+      joinedAt: new Date().toISOString(),
+    })
     .toSQL();
   const invites: TeamInvite[] = inviteEmails.map((email) => ({
     id: randomUUID(),
@@ -153,14 +158,18 @@ export const teamsByMemberId = cache(async function (memberId: string) {
 
 export const userTeamsForTeamId = cache(async function (teamId: string) {
   const res = await db
-    .select({ teams, users })
+    .select({ teams, users, teamMemberships })
     .from(users)
     .innerJoin(teamMemberships, eq(users.teamId, teamMemberships.memberTeamId))
     .innerJoin(teams, eq(users.teamId, teams.id))
     .where(eq(teamMemberships.teamId, teamId))
     .orderBy(teams.name)
     .all();
-  return res.map((r) => ({ address: r.users.address, personalTeam: r.teams }));
+  return res.map((r) => ({
+    address: r.users.address,
+    personalTeam: r.teams,
+    membership: r.teamMemberships,
+  }));
 });
 
 export const isAuthorizedForTeam = cache(async function (
@@ -177,5 +186,46 @@ export const isAuthorizedForTeam = cache(async function (
       )
     )
     .get();
-  return !!membership;
+  return membership ? membership : false;
+});
+
+export const toggleAdmin = cache(async function (
+  teamId: string,
+  memberId: string
+) {
+  const res = await db
+    .select({ isOwner: teamMemberships.isOwner })
+    .from(teamMemberships)
+    .where(
+      and(
+        eq(teamMemberships.teamId, teamId),
+        eq(teamMemberships.memberTeamId, memberId)
+      )
+    )
+    .get();
+  await db
+    .update(teamMemberships)
+    .set({ isOwner: res.isOwner ? 0 : 1 })
+    .where(
+      and(
+        eq(teamMemberships.teamId, teamId),
+        eq(teamMemberships.memberTeamId, memberId)
+      )
+    )
+    .run();
+});
+
+export const removeTeamMember = cache(async function (
+  teamId: string,
+  memberId: string
+) {
+  await db
+    .delete(teamMemberships)
+    .where(
+      and(
+        eq(teamMemberships.teamId, teamId),
+        eq(teamMemberships.memberTeamId, memberId)
+      )
+    )
+    .run();
 });
