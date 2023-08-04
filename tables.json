@@ -54,5 +54,19 @@
       "hash": "35268f76eef7097bf5273a5254768d542b074e57f80e6fbb66a410415202d818",
       "createStmt": "create table tables(id text primary key not null,slug text not null,name text not null,description text,schema text not null)"
     }
+  },
+  "deployments": {
+    "arbitrum-goerli": {
+      "table": "deployments_421613_64",
+      "hash": "38e052a4cd1d2029abab527dba4b0a6e454f2f0be52e171d2b90c54fd798e66d",
+      "createStmt": "create table deployments(id text primary key not null,table_id text not null,environment_id text not null,table_uu_name text,chain integer not null,schema text not null)"
+    }
+  },
+  "environments": {
+    "arbitrum-goerli": {
+      "table": "environments_421613_65",
+      "hash": "46fd0023085074320fde1920203c62f9d3517e22648a3c4c17e431a5f1c19100",
+      "createStmt": "create table environments(id text primary key not null,project_id text not null,title text not null)"
+    }
   }
 }
