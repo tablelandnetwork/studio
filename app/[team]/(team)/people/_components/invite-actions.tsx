@@ -62,7 +62,7 @@ export default function InviteActions({
         <DropdownMenuItem onClick={onResendInvite}>
           Re-send invite
         </DropdownMenuItem>
-        {(membership.isOwner || inviter.id === user.id) && (
+        {(!!membership.isOwner || inviter.id === user.id) && (
           <DropdownMenuItem onClick={onDeleteInvite}>
             Delete invite
           </DropdownMenuItem>

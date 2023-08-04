@@ -80,10 +80,10 @@ export default function UserActions({
         {(!userMembership.isOwner || user.id === member.id) && (
           <DropdownMenuItem disabled>No actions available</DropdownMenuItem>
         )}
-        {userMembership.isOwner && user.id !== member.id && (
+        {!!userMembership.isOwner && user.id !== member.id && (
           <>
             <DropdownMenuItem onClick={onToggleAdmin}>
-              {memberMembership.isOwner ? "Remove" : "Make"} admin
+              {!!memberMembership.isOwner ? "Remove" : "Make"} admin
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onRemoveUser}>
               Remove from team
