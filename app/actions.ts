@@ -213,3 +213,28 @@ export async function ignoreInvite(seal: string) {
   }
   await db.invites.deleteInvite(inviteId as string);
 }
+
+export async function toggleAdmin(team: Team, member: Team) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  await db.teams.toggleAdmin(team.id, member.id);
+  revalidatePath(`/${team.slug}/people`);
+}
+
+export async function removeTeamMember(
+  team: Team,
+  member: Team,
+  claimedInviteId?: string
+) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  await db.teams.removeTeamMember(team.id, member.id);
+  if (claimedInviteId) {
+    await db.invites.deleteInvite(claimedInviteId);
+  }
+  revalidatePath(`/${team.slug}/people`);
+}

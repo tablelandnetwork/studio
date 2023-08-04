@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import TimeAgo from "javascript-time-ago";
 import {
   Cake,
+  Hourglass,
   InfoIcon,
   LucideProps,
   MailQuestion,
@@ -21,7 +22,7 @@ type Props = LucideProps & {
   team: Team;
   inviter?: Team;
   invite?: TeamInvite;
-  membership: TeamMembership;
+  membership?: TeamMembership;
 };
 
 export default function Info({
@@ -32,7 +33,7 @@ export default function Info({
   ...props
 }: Props) {
   function content() {
-    if (!invite) {
+    if (membership && !invite) {
       return (
         <div className="flex items-center space-x-2">
           <Cake />
@@ -44,7 +45,7 @@ export default function Info({
           </div>
         </div>
       );
-    } else if (invite && inviter) {
+    } else if (membership && invite && inviter) {
       return (
         <div className="flex flex-col space-y-2">
           <div className="flex items-center space-x-2">
@@ -67,6 +68,27 @@ export default function Info({
               <p className="text-xs text-muted-foreground">Joined</p>
               <p className="text-sm">
                 {timeAgo.format(new Date(membership.joinedAt))}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (inviter && invite) {
+      return (
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center space-x-2">
+            <UserPlus />
+            <div>
+              <p className="text-xs text-muted-foreground">Invited by</p>
+              <p className="text-sm">{inviter.name}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Hourglass />
+            <div>
+              <p className="text-xs text-muted-foreground">Invited</p>
+              <p className="text-sm">
+                {timeAgo.format(new Date(invite.createdAt))}
               </p>
             </div>
           </div>

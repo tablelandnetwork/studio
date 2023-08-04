@@ -64,7 +64,7 @@ export default async function People({ params }: { params: { team: string } }) {
   });
 
   return (
-    <div className="mx-auto max-w-3xl p-4">
+    <div className="mx-auto max-w-2xl p-4">
       <div className="flex flex-col space-y-6">
         {peopleAugmented.map((person) => {
           if (!session.auth) {
@@ -72,7 +72,7 @@ export default async function People({ params }: { params: { team: string } }) {
           }
           return (
             <div key={person.personalTeam.id} className="flex items-center">
-              <Avatar>
+              <Avatar className="-z-10">
                 <AvatarImage
                   src={`https://avatar.vercel.sh/${person.personalTeam.slug}.png`}
                   alt={person.personalTeam.name}
@@ -93,8 +93,8 @@ export default async function People({ params }: { params: { team: string } }) {
                   numCharacters={7}
                 />
               </div>
-              <div className="ml-auto text-muted-foreground">
-                {person.membership.isOwner ? "admin" : "member"}
+              <div className="ml-auto text-sm text-muted-foreground">
+                {person.membership.isOwner ? "Admin" : "Member"}
               </div>
               <Info
                 className="ml-2"
@@ -105,10 +105,12 @@ export default async function People({ params }: { params: { team: string } }) {
               />
               <UserActions
                 className="ml-2"
+                team={team}
                 user={session.auth?.personalTeam}
                 userMembership={membership}
                 member={person.personalTeam}
                 memberMembership={person.membership}
+                claimedInviteId={person.claimedInvite?.invite.id}
               />
             </div>
           );
@@ -123,22 +125,20 @@ export default async function People({ params }: { params: { team: string } }) {
                 <AvatarFallback>{i.invite.email.charAt(0)}</AvatarFallback>
               </Avatar>
 
-              <div className="ml-4">
-                <p className="text-sm font-medium leading-none">
-                  {i.invite.email}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Invited by{" "}
-                  <span className="font-medium">
-                    {i.inviter.id === session.auth?.personalTeam.id
-                      ? "you"
-                      : i.inviter.name}
-                  </span>{" "}
-                  {timeAgo.format(new Date(i.invite.createdAt))}
-                </p>
+              <p className="ml-4 text-sm font-medium leading-none">
+                {i.invite.email}
+              </p>
+              <div className="ml-auto text-sm text-muted-foreground">
+                Pending
               </div>
+              <Info
+                className="ml-2"
+                team={team}
+                inviter={i.inviter}
+                invite={i.invite}
+              />
               <InviteActions
-                className="ml-auto"
+                className="ml-2"
                 invite={i.invite}
                 inviter={i.inviter}
                 user={session.auth.personalTeam}

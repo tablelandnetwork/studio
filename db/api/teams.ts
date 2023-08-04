@@ -188,3 +188,44 @@ export const isAuthorizedForTeam = cache(async function (
     .get();
   return membership ? membership : false;
 });
+
+export const toggleAdmin = cache(async function (
+  teamId: string,
+  memberId: string
+) {
+  const res = await db
+    .select({ isOwner: teamMemberships.isOwner })
+    .from(teamMemberships)
+    .where(
+      and(
+        eq(teamMemberships.teamId, teamId),
+        eq(teamMemberships.memberTeamId, memberId)
+      )
+    )
+    .get();
+  await db
+    .update(teamMemberships)
+    .set({ isOwner: res.isOwner ? 0 : 1 })
+    .where(
+      and(
+        eq(teamMemberships.teamId, teamId),
+        eq(teamMemberships.memberTeamId, memberId)
+      )
+    )
+    .run();
+});
+
+export const removeTeamMember = cache(async function (
+  teamId: string,
+  memberId: string
+) {
+  await db
+    .delete(teamMemberships)
+    .where(
+      and(
+        eq(teamMemberships.teamId, teamId),
+        eq(teamMemberships.memberTeamId, memberId)
+      )
+    )
+    .run();
+});
