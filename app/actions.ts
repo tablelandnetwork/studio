@@ -100,6 +100,57 @@ export async function newProject(
   return project;
 }
 
+export async function newEnvironment(
+  projectId: string,
+  title: string
+): Promise<{ id: string }> {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const team = await db.projects.projectTeamByProjectId(projectId);
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    throw new Error("Not authorized");
+  }
+  const environment = await db.environments.createEnvironment({
+    projectId,
+    title,
+  });
+
+  revalidatePath(`/${team.slug}/${projectId}`);
+  return environment;
+}
+
+export async function newDeployment(
+  tableId: string,
+  environmentId: string,
+  chain: number,
+  schema: string,
+  tableUuName?: string
+) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const team = await db.projects.projectTeamByEnvironmentId(environmentId);
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    throw new Error("Not authorized");
+  }
+  const deployment = await db.deployments.createDeployment({
+    tableId,
+    environmentId,
+    chain,
+    schema,
+    tableUuName,
+  });
+
+  return deployment;
+}
+
 export async function newTable(
   project: Project,
   name: string,
