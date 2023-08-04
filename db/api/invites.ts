@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto";
-import { desc, eq } from "drizzle-orm";
+import { createHash } from "crypto";
+import { asc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { sealData, unsealData } from "iron-session";
 import { cache } from "react";
@@ -12,7 +12,11 @@ export const inviteEmailsToTeam = cache(async function (
   emails: string[]
 ) {
   const invites: TeamInvite[] = emails.map((email) => ({
-    id: randomUUID(),
+    // Assure we don't allow duplicate invites per team/email. This is necessary
+    // because we don't store the email address in plaintext in the database.
+    id: createHash("sha256")
+      .update(teamId + email)
+      .digest("hex"),
     teamId,
     inviterTeamId,
     email,
@@ -71,6 +75,7 @@ export const acceptInvite = cache(async function (
       teamId: invite.teamId,
       memberTeamId: personalTeam.id,
       isOwner: 0,
+      joinedAt: new Date().toISOString(),
     })
     .toSQL();
   await tbl.batch([
@@ -96,7 +101,7 @@ export const invitesForTeam = cache(async function invitesForTeam(
       eq(teamInvites.claimedByTeamId, claimedByTeams.id)
     )
     .where(eq(teamInvites.teamId, teamId))
-    .orderBy(desc(teamInvites.createdAt))
+    .orderBy(asc(teamInvites.createdAt))
     .all();
   const invites = await Promise.all(
     invitesSealed.map(

@@ -29,7 +29,12 @@ export const createUserAndPersonalTeam = cache(async function (
     .toSQL();
   const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
     .insert(teamMemberships)
-    .values({ memberTeamId: teamId, teamId, isOwner: 1 })
+    .values({
+      memberTeamId: teamId,
+      teamId,
+      isOwner: 1,
+      joinedAt: new Date().toISOString(),
+    })
     .toSQL();
   await tbl.batch([
     tbl.prepare(usersSql).bind(usersParams),

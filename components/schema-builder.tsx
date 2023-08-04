@@ -25,7 +25,6 @@ function isValidColumnName(variable: string) {
   return columnNameRegex.test(variable);
 }
 
-
 export function createTableStatementFromObject(
   tableObj: CreateTable,
   name: string

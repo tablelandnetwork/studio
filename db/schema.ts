@@ -35,6 +35,7 @@ export const teamMemberships = tablelandTable(
     memberTeamId: text("member_team_id").notNull(),
     teamId: text("team_id").notNull(),
     isOwner: integer("is_owner").notNull(),
+    joinedAt: text("joined_at").notNull(),
   },
   (userTeams) => {
     return {
