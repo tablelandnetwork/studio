@@ -19,6 +19,7 @@ import {
 const timeAgo = new TimeAgo("en-US");
 
 type Props = LucideProps & {
+  user: Team;
   team: Team;
   inviter?: Team;
   invite?: TeamInvite;
@@ -27,6 +28,7 @@ type Props = LucideProps & {
 
 export default function Info({
   className,
+  user,
   invite,
   inviter,
   membership,
@@ -52,7 +54,10 @@ export default function Info({
             <UserPlus />
             <div>
               <p className="text-xs text-muted-foreground">Invited by</p>
-              <p className="text-sm">{inviter.name}</p>
+              <p className="text-sm">
+                {inviter.name}
+                {inviter.id === user.id && " (You)"}
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -80,7 +85,10 @@ export default function Info({
             <UserPlus />
             <div>
               <p className="text-xs text-muted-foreground">Invited by</p>
-              <p className="text-sm">{inviter.name}</p>
+              <p className="text-sm">
+                {inviter.name}
+                {inviter.id === user.id && " (You)"}
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">

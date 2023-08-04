@@ -133,6 +133,7 @@ export default async function People({ params }: { params: { team: string } }) {
               </div>
               <Info
                 className="ml-2"
+                user={session.auth.personalTeam}
                 team={team}
                 inviter={i.inviter}
                 invite={i.invite}

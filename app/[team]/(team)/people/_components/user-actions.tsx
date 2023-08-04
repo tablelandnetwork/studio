@@ -72,7 +72,10 @@ export default function UserActions({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>{member.name}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {member.name}
+          {user.id === member.id && " (You)"}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {(!userMembership.isOwner || user.id === member.id) && (
           <DropdownMenuItem disabled>No actions available</DropdownMenuItem>
