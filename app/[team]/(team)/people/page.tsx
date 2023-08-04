@@ -1,5 +1,4 @@
 import AddressDisplay from "@/components/address-display";
-import NewInvite from "@/components/new-invite";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import db from "@/db/api";
 import Session from "@/lib/session";
@@ -8,6 +7,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Info from "./_components/info";
 import InviteActions from "./_components/invite-actions";
+import NewInvite from "./_components/new-invite";
 import UserActions from "./_components/user-actions";
 
 const timeAgo = new TimeAgo("en-US");

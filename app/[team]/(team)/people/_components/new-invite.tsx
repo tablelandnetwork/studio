@@ -1,6 +1,8 @@
 "use client";
 
 import { inviteEmails } from "@/app/actions";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -8,15 +10,13 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Team } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 
 const schema = z.object({
   email: z.string().email(),
