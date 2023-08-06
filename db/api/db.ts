@@ -28,30 +28,35 @@ if (!process.env.PRIVATE_KEY) {
   throw new Error("Must provide PRIVATE_KEY env var.");
 }
 
-if (!process.env.CHAIN) {
-  throw new Error("Must provide CHAIN env var.");
-}
-
 const wallet = new Wallet(process.env.PRIVATE_KEY);
 const provider = getDefaultProvider(process.env.PROVIDER_URL);
 const baseSigner = wallet.connect(provider);
 const signer = new NonceManager(baseSigner);
 
-const tablesFile =
-  "tables" + process.env.CHAIN === "local-tableland" ? "_local" : "" + ".json";
+const tablesFile = new Promise<string>(async (resolve, reject) => {
+  try {
+    const { chainId } = await provider.getNetwork();
+    const file = path.join(process.cwd(), `tables_${chainId}.json`);
+    fs.access(file, fs.constants.F_OK, (err) => {
+      if (err) {
+        fs.writeFileSync(file, JSON.stringify({}, null, 4));
+      }
+      resolve(file);
+    });
+  } catch (e) {
+    reject(e);
+  }
+});
 
 export const databaseAliases = {
   read: async function () {
-    const jsonBuf = fs.readFileSync(path.join(process.cwd(), tablesFile));
-    return JSON.parse(jsonBuf.toString());
+    const jsonBuf = fs.readFileSync(await tablesFile);
+    return JSON.parse(jsonBuf.toString()) as NameMapping;
   },
   write: async function (nameMap: NameMapping) {
-    const jsonBuf = fs.readFileSync(path.join(process.cwd(), tablesFile));
+    const jsonBuf = fs.readFileSync(await tablesFile);
     const jsonObj = { ...JSON.parse(jsonBuf.toString()), ...nameMap };
-    fs.writeFileSync(
-      path.join(process.cwd(), tablesFile),
-      JSON.stringify(jsonObj, null, 4)
-    );
+    fs.writeFileSync(await tablesFile, JSON.stringify(jsonObj, null, 4));
   },
 };
 
@@ -60,6 +65,7 @@ export const tbl = new Database({
   autoWait: true,
   aliases: databaseAliases,
 });
+
 export const db = drizzle(tbl, { logger: false, schema });
 
 export {

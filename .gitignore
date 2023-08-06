@@ -35,5 +35,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-tables_local.json
+tables_31337.json
 .react-email
