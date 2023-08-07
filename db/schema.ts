@@ -1,9 +1,12 @@
 import { InferModel } from "drizzle-orm";
-import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
-import { tablelandTable } from "@/lib/drizzle";
-
-export const users = tablelandTable(
+export const users = sqliteTable(
   "users",
   {
     address: text("address").primaryKey(),
@@ -13,9 +16,9 @@ export const users = tablelandTable(
   (users) => ({
     teamIdIdx: uniqueIndex("teamIdIdx").on(users.teamId),
   })
-)(process.env.CHAIN);
+);
 
-export const teams = tablelandTable(
+export const teams = sqliteTable(
   "teams",
   {
     id: text("id").primaryKey(),
@@ -27,9 +30,9 @@ export const teams = tablelandTable(
     nameIdx: uniqueIndex("nameIdx").on(teams.name),
     slugIdx: uniqueIndex("slugIdx").on(teams.slug),
   })
-)(process.env.CHAIN);
+);
 
-export const teamMemberships = tablelandTable(
+export const teamMemberships = sqliteTable(
   "team_memberships",
   {
     memberTeamId: text("member_team_id").notNull(),
@@ -45,16 +48,16 @@ export const teamMemberships = tablelandTable(
       ),
     };
   }
-)(process.env.CHAIN);
+);
 
-export const projects = tablelandTable("projects", {
+export const projects = sqliteTable("projects", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
   description: text("description"),
-})(process.env.CHAIN);
+});
 
-export const teamProjects = tablelandTable(
+export const teamProjects = sqliteTable(
   "team_projects",
   {
     teamId: text("team_id").notNull(),
@@ -69,17 +72,17 @@ export const teamProjects = tablelandTable(
       ),
     };
   }
-)(process.env.CHAIN);
+);
 
-export const tables = tablelandTable("tables", {
+export const tables = sqliteTable("tables", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
   description: text("description"),
   schema: text("schema").notNull(),
-})(process.env.CHAIN);
+});
 
-export const projectTables = tablelandTable(
+export const projectTables = sqliteTable(
   "project_tables",
   {
     projectId: text("project_id").notNull(),
@@ -93,30 +96,30 @@ export const projectTables = tablelandTable(
       ),
     };
   }
-)(process.env.CHAIN);
+);
 
-export const environments = tablelandTable("environments", {
+export const environments = sqliteTable("environments", {
   id: text("id").primaryKey(),
   projectId: text("project_id").notNull(),
   title: text("title").notNull(),
-})(process.env.CHAIN);
+});
 
-export const deployments = tablelandTable("deployments", {
+export const deployments = sqliteTable("deployments", {
   id: text("id").primaryKey(),
   tableId: text("table_id").notNull(),
   environmentId: text("environment_id").notNull(),
   tableUuName: text("table_uu_name"),
   chain: integer("chain").notNull(),
   schema: text("schema").notNull(),
-})(process.env.CHAIN);
+});
 
-// export const migrations = tablelandTable("migrations", {
+// export const migrations = sqliteTable("migrations", {
 //   id: text("id").primaryKey(),
 //   environmentId: text("environment_id").notNull(),
 //   timestamp: integer("timestamp").notNull(),
-// })(process.env.CHAIN);
+// });
 
-// export const migrationLog = tablelandTable("migration_log", {
+// export const migrationLog = sqliteTable("migration_log", {
 //   id: text("id").primaryKey(),
 //   tableInstanceId: text("table_instance_id").notNull(),
 //   migrationId: text("migration_id").notNull(),
@@ -124,12 +127,12 @@ export const deployments = tablelandTable("deployments", {
 //   deployedBy: text("deployed_by").notNull(), // Address
 //   transactionHash: text("transaction_hash").notNull(),
 //   mutation: text("mutation").notNull()
-// })(process.env.CHAIN);
+// });
 
 export type Table = InferModel<typeof tables>;
 export type NewTable = InferModel<typeof tables, "insert">;
 
-export const teamInvites = tablelandTable("team_invites", {
+export const teamInvites = sqliteTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),
   sealed: text("sealed").notNull(),
@@ -137,7 +140,7 @@ export const teamInvites = tablelandTable("team_invites", {
   createdAt: text("created_at").notNull(),
   claimedByTeamId: text("claimed_by_team_id"),
   claimedAt: text("claimed_at"),
-})(process.env.CHAIN);
+});
 
 export type UserSealed = InferModel<typeof users>;
 export type NewUserSealed = InferModel<typeof users, "insert">;
