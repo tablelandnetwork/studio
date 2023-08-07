@@ -1,12 +1,11 @@
+import "./env";
+
 import { databaseAliases } from "@/db/api/db";
 import { Database } from "@tableland/sdk";
 import { createHash } from "crypto";
-import { config } from "dotenv";
 import { Wallet, getDefaultProvider } from "ethers";
 import { readFile, readdir, stat } from "fs/promises";
-import path, { resolve } from "path";
-
-config({ path: resolve(process.cwd(), process.argv[2] || ".env.local") });
+import path from "path";
 
 if (!process.env.PRIVATE_KEY) {
   throw new Error("Must provide PRIVATE_KEY env var.");

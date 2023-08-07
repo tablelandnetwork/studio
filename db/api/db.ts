@@ -1,6 +1,5 @@
 import { NonceManager } from "@ethersproject/experimental";
 import { Database, helpers } from "@tableland/sdk";
-import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/d1";
 import { Wallet, getDefaultProvider } from "ethers";
 import fs from "fs";
@@ -18,9 +17,6 @@ import {
   teams,
   users,
 } from "../schema";
-
-// TODO: Not sure why this is needed.
-config({ path: path.resolve(process.cwd(), process.argv[2] || ".env.local") });
 
 type NameMapping = helpers.NameMapping;
 
