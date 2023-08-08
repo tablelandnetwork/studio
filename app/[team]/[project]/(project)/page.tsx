@@ -45,7 +45,7 @@ export default async function Project({
   const tables = await db.tables.tablesByProjectId(project.id);
 
   return (
-    <div className="container m-auto grid grid-flow-row grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="container grid grid-flow-row grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {tables.map((table) => {
         return (
           <Link

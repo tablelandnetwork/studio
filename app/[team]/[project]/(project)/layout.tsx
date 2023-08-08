@@ -13,7 +13,7 @@ export default async function ProjectLayout({
   const { auth } = await Session.fromCookies(cookies());
   const teams = auth ? await db.teams.teamsByMemberId(auth.user.teamId) : [];
   return (
-    <div>
+    <div className="flex flex-1 flex-col">
       <CrumbProject teams={teams} className="px-4 pb-1 pt-3" />
       <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
         <div className="flex">
