@@ -34,6 +34,7 @@
     "@react-email/render": "0.0.7",
     "@tableland/sdk": "^4.4.2",
     "@tanstack/react-query": "^4.29.12",
+    "@tanstack/react-table": "^8.9.3",
     "@toruslabs/eccrypto": "^3.0.0",
     "@types/node": "20.2.5",
     "@types/react": "18.2.9",

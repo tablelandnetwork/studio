@@ -7,7 +7,7 @@ export default async function DeploymentsLayout({
 }) {
   return (
     <div className="flex">
-      <Sidebar className="sticky top-14 h-fit" />
+      <Sidebar className="sticky top-14 h-fit min-w-[200px]" />
       {children}
     </div>
   );
