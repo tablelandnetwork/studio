@@ -152,8 +152,8 @@ function CreateColumn({ columnIndex }: { columnIndex: number }) {
     <TableRow>
       <TableCell>
         <Input
-          className="w-24"
-          placeholder="name"
+          className="w-28"
+          placeholder="column_name"
           pattern="[a-zA-Z0-9_]*"
           name="name"
           title={
