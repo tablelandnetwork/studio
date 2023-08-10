@@ -3,11 +3,13 @@ import { TablelandTables__factory } from "@tableland/evm";
 import { Database } from "@tableland/sdk";
 import { ethers } from "ethers";
 
-export default function SmartAccountDatabase(
+export default function SponsoredTransactionsDatabase(
   smartAccount: SmartAccount
 ): Database {
   const { signer } = smartAccount;
 
+  // NOTE: This only needs to be used for gasless transactions
+  // Otherwise, use the tableland directly with the smart account signer
   const signAndSendOverride = async ({
     signer,
     contractAddress,
