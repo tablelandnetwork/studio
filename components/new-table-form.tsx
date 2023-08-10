@@ -23,7 +23,9 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
-import { createTableStatementFromObject } from "./schema-builder";
+import SchemaBuilder, {
+  createTableStatementFromObject,
+} from "./schema-builder";
 import {
   Select,
   SelectContent,
@@ -131,7 +133,7 @@ export default function NewTable({ project, team, envs }: Props) {
         />
         <div className="space-y-2">
           <FormLabel>Columns</FormLabel>
-          {/* <SchemaBuilder /> */}
+          <SchemaBuilder />
           <pre>{createTableStatementFromObject(createTable, name)}</pre>
         </div>
         <div className="space-y-2">
@@ -143,8 +145,8 @@ export default function NewTable({ project, team, envs }: Props) {
           </FormDescription>
           {fields.map((deployment, index) => {
             return (
-              <div key={index.toString()}>
-                {/* <FormField
+              <div key={index}>
+                <FormField
                   control={control}
                   name={`deployments.${index}.env`}
                   render={({ field }) => (
@@ -159,8 +161,9 @@ export default function NewTable({ project, team, envs }: Props) {
                       </FormControl>
                     </FormItem>
                   )}
-                /> */}
+                />
                 <FormField
+                  key={deployment.id}
                   control={control}
                   name={`deployments.${index}.chain`}
                   render={({ field }) => (
@@ -170,10 +173,12 @@ export default function NewTable({ project, team, envs }: Props) {
                         key={deployment.id}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        {...register(`deployments.${index}.chain`)}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-auto">
+                          <SelectTrigger
+                            className="w-auto"
+                            {...register(`deployments.${index}.chain`)}
+                          >
                             <SelectValue placeholder="Select a chain to deploy to" />
                           </SelectTrigger>
                         </FormControl>
