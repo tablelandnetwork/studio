@@ -182,7 +182,7 @@ function CreateColumn({ columnIndex }: { columnIndex: number }) {
             });
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger className="gap-x-2">
             <SelectValue placeholder="Select a type" />
           </SelectTrigger>
           <SelectContent>

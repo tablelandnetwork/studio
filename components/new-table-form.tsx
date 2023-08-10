@@ -176,7 +176,7 @@ export default function NewTable({ project, team, envs }: Props) {
                       >
                         <FormControl>
                           <SelectTrigger
-                            className="w-auto"
+                            className="w-auto gap-x-2"
                             {...register(`deployments.${index}.chain`)}
                           >
                             <SelectValue placeholder="Select a chain to deploy to" />
