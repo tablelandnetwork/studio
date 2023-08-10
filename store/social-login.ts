@@ -181,7 +181,13 @@ const setupSmartAccount = atom(
 
     const smartAccount = new SmartAccount(provider, {
       activeNetworkId: ChainId.GOERLI,
-      supportedNetworksIds: [ChainId.GOERLI],
+      supportedNetworksIds: [ChainId.GOERLI, ChainId.POLYGON_MUMBAI],
+      networkConfig: [
+        {
+          chainId: ChainId.POLYGON_MUMBAI,
+          dappAPIKey: process.env.NEXT_PUBLIC_MATMICMUM_PAYMASTER_API_KEY,
+        },
+      ],
     });
     await smartAccount.init();
     const context = smartAccount.getSmartAccountContext();
