@@ -140,8 +140,8 @@ export default function NewTable({ project, team, envs }: Props) {
           <FormLabel>Deployments</FormLabel>
           <FormDescription>
             You can optionally deploy your new table to one or more of your
-            Project&apos;s Environments upon Table creation. You can always
-            chose to deploy the Table later on the Deployments screen.
+            Project&apos;s Environments upon Table creation. If not, you can
+            always deploy the Table later on the Deployments screen.
           </FormDescription>
           {fields.map((deployment, index) => {
             return (
