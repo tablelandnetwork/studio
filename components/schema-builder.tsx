@@ -127,22 +127,20 @@ export default function SchemaBuilder() {
 function RemoveColumn({ columnIndex }: { columnIndex: number }) {
   const [tbl, setAtom] = useAtom(createTableAtom);
   return (
-    <td>
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => {
-          setAtom((prev) => {
-            prev.columns.splice(columnIndex, 1);
-            return {
-              ...prev,
-            };
-          });
-        }}
-      >
-        <X />
-      </Button>
-    </td>
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={() => {
+        setAtom((prev) => {
+          prev.columns.splice(columnIndex, 1);
+          return {
+            ...prev,
+          };
+        });
+      }}
+    >
+      <X />
+    </Button>
   );
 }
 
