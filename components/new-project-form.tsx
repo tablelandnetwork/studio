@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Team } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, PlusIcon, Trash2 } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -40,7 +40,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
     defaultValues: {
       name: "",
       description: "",
-      environments: [{ name: "" }],
+      environments: [],
     },
   });
 
@@ -110,72 +110,70 @@ export default function NewProjectForm({ team }: { team: Team }) {
             </FormItem>
           )}
         />
-
         <div>
-          <FormLabel className="text-lg">Environments</FormLabel>
-
-          <div className="pl-4 pt-3">
-            {fields.map((env, index) => (
-              <FormField
-                control={form.control}
-                name={`environments.${index}.name`}
-                key={env.id}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Environment {index + 1}</FormLabel>
-
-                    <FormControl key={index}>
-                      <div className="flex">
-                        <Input
-                          {...form.register(`environments.${index}.name`)}
-                          placeholder="Environment name"
-                        />
-                        <Button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            append(
-                              { name: "" },
-                              {
-                                shouldFocus: true,
-                              }
-                            );
-                          }}
-                        >
-                          <PlusIcon />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          type="button"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash2 />
-                        </Button>
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            ))}
-            <Button
-              className="my-4"
-              type="button"
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                append({ name: "" });
-              }}
-            >
-              <Plus className="mr-2" />
-              Add environment
-            </Button>
-          </div>
+          <FormItem>
+            <FormLabel>Environments</FormLabel>
+            <FormDescription className="pb-2">
+              Environments provide logical groupings of tables you can use
+              however you&apos;d like. Optionally add environments here now, or
+              add them later in your Project&apos;s settings.
+            </FormDescription>
+          </FormItem>
+          {fields.map((env, index) => (
+            <FormField
+              control={form.control}
+              name={`environments.${index}.name`}
+              key={env.id}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel></FormLabel>
+                  <FormControl key={index}>
+                    <div className="flex gap-2">
+                      <Input
+                        {...form.register(`environments.${index}.name`)}
+                        placeholder="Environment name"
+                      />
+                      <Button
+                        className="hidden"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          append(
+                            { name: "" },
+                            {
+                              shouldFocus: true,
+                            }
+                          );
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        className="px-0"
+                        onClick={() => remove(index)}
+                      >
+                        <X />
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormDescription></FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending}
+            onClick={(e) => {
+              e.preventDefault();
+              append({ name: "" });
+            }}
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Add Environment
+          </Button>
         </div>
-
-        <FormDescription>
-          Enter environment names. You can add more by clicking Add more.
-        </FormDescription>
-        <FormMessage />
-
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { CreateTable, createTableAtom } from "@/store/create-table";
 import { useAtom } from "jotai";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
@@ -75,7 +75,7 @@ export function createTableStatementFromObject(
 export default function SchemaBuilder() {
   const [tbl, setCreateTable] = useAtom(createTableAtom);
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-start">
       <Table>
         {tbl.columns.length > 0 && (
           <TableHeader>
@@ -140,19 +140,13 @@ function RemoveColumn({ columnIndex }: { columnIndex: number }) {
           });
         }}
       >
-        <Trash2 />
+        <X />
       </Button>
     </td>
   );
 }
 
-function CreateColumn({
-  key,
-  columnIndex,
-}: {
-  key: number;
-  columnIndex: number;
-}) {
+function CreateColumn({ columnIndex }: { columnIndex: number }) {
   const [tbl, setCreateTable] = useAtom(createTableAtom);
   const column = tbl && tbl.columns[columnIndex];
 
