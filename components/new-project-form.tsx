@@ -125,8 +125,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
               name={`environments.${index}.name`}
               key={env.id}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel></FormLabel>
+                <FormItem className="pb-3">
                   <FormControl key={index}>
                     <div className="flex gap-2">
                       <Input
@@ -155,7 +154,6 @@ export default function NewProjectForm({ team }: { team: Team }) {
                       </Button>
                     </div>
                   </FormControl>
-                  <FormDescription></FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
