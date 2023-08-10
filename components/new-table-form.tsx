@@ -1,7 +1,5 @@
 "use client";
 
-import { Loader2, Trash2 } from "lucide-react";
-
 import { newTable } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +16,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Environment, Project, Team } from "@/db/schema";
 import { createTableAtom } from "@/store/create-table";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { helpers } from "@tableland/sdk";
 import { useAtom } from "jotai";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -34,18 +34,15 @@ import {
   SelectValue,
 } from "./ui/select";
 
+const supportedChains = Object.values(helpers.supportedChains);
+
 const schema = z.object({
   name: z.string(),
   description: z
     .string()
     .optional()
     .transform((v) => (!v ? undefined : v)),
-  deployments: z
-    .array(z.object({ environment: z.string().min(3), chain: z.string() }))
-    .refine((values) => {
-      const envs = values.map((v) => v.environment);
-      return new Set(envs).size === envs.length;
-    }, "Cannot deploy to the same environment twice"),
+  deployments: z.array(z.object({ env: z.string(), chain: z.string() })),
 });
 
 interface Props {
@@ -65,26 +62,18 @@ export default function NewTable({ project, team, envs }: Props) {
     defaultValues: {
       name: "",
       description: "",
-      deployments: [{ environment: "", chain: "0" }],
+      deployments: envs.map((env) => ({ env: env.title, chain: "no-deploy" })),
     },
   });
 
-  const {
-    handleSubmit,
-    register,
+  const { handleSubmit, register, control, watch } = form;
+
+  const { fields } = useFieldArray({
     control,
-    formState: { isValid, errors, isValidating, isDirty },
-    reset,
-  } = form;
+    name: "deployments",
+  });
 
-  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
-    {
-      control,
-      name: "deployments",
-    }
-  );
-
-  const name = form.watch("name");
+  const name = watch("name");
 
   function onSubmit(values: z.infer<typeof schema>) {
     console.log("values", values);
@@ -106,11 +95,11 @@ export default function NewTable({ project, team, envs }: Props) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit)}
         className="mx-auto max-w-2xl space-y-8"
       >
         <FormField
-          control={form.control}
+          control={control}
           name="name"
           render={({ field }) => (
             <FormItem>
@@ -126,7 +115,7 @@ export default function NewTable({ project, team, envs }: Props) {
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="description"
           render={({ field }) => (
             <FormItem>
@@ -147,94 +136,74 @@ export default function NewTable({ project, team, envs }: Props) {
           <SchemaBuilder />
           <pre>{createTableStatementFromObject(createTable, name)}</pre>
         </div>
-
         <div className="space-y-2">
+          <FormLabel>Deployments</FormLabel>
+          <FormDescription>
+            You can optionally deploy your new table to one or more of your
+            Project&apos;s Environments upon Table creation. If not, you can
+            always deploy the Table later on the Deployments screen.
+          </FormDescription>
           {fields.map((deployment, index) => {
             return (
-              <div key={deployment.id} className="flex">
+              <div key={index}>
                 <FormField
-                  control={form.control}
-                  name={`deployments.${index}.environment`}
+                  control={control}
+                  name={`deployments.${index}.env`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="hidden"
+                          id={index.toString()}
+                          value={deployment.env}
+                          {...register(`deployments.${index}.env`)}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  key={deployment.id}
+                  control={control}
+                  name={`deployments.${index}.chain`}
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-4">
+                      <FormLabel>{deployment.env}</FormLabel>
                       <Select
+                        key={deployment.id}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder=" -- select an environment -- " />
+                          <SelectTrigger
+                            className="w-auto gap-x-2"
+                            {...register(`deployments.${index}.chain`)}
+                          >
+                            <SelectValue placeholder="Select a chain to deploy to" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem disabled value="">
-                            {" "}
-                            -- select an environment --{" "}
+                          <SelectItem value="no-deploy">
+                            Don&apos;t deploy
                           </SelectItem>
-                          {envs.map((env) => (
-                            <SelectItem key={env.id} value={env.id}>
-                              {env.title}
+                          {supportedChains.map((chain) => (
+                            <SelectItem
+                              key={chain.chainName}
+                              value={chain.chainName}
+                            >
+                              {chain.chainName} ({chain.chainId})
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormDescription>
-                        Select an environment to which the table will be
-                        deployed.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name={`deployments.${index}.chain`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Chain</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder=" -- select a chain -- " />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem disabled value="">
-                            {" "}
-                            -- select a chain --{" "}
-                          </SelectItem>
-                          <SelectItem value="arb">Arbitrum</SelectItem>
-                        </SelectContent>
-                      </Select>
-
-                      <FormDescription>
-                        Select a chain for each environment where the table will
-                        be deployed.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => remove(index)}
-                >
-                  <Trash2 />
-                </Button>
               </div>
             );
           })}
-
-          <Button onClick={() => append({ environment: "", chain: "0" })}>
-            Add Deployment
-          </Button>
         </div>
-
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { CreateTable, createTableAtom } from "@/store/create-table";
 import { useAtom } from "jotai";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
@@ -75,7 +75,7 @@ export function createTableStatementFromObject(
 export default function SchemaBuilder() {
   const [tbl, setCreateTable] = useAtom(createTableAtom);
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-start">
       <Table>
         {tbl.columns.length > 0 && (
           <TableHeader>
@@ -127,32 +127,24 @@ export default function SchemaBuilder() {
 function RemoveColumn({ columnIndex }: { columnIndex: number }) {
   const [tbl, setAtom] = useAtom(createTableAtom);
   return (
-    <td>
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => {
-          setAtom((prev) => {
-            prev.columns.splice(columnIndex, 1);
-            return {
-              ...prev,
-            };
-          });
-        }}
-      >
-        <Trash2 />
-      </Button>
-    </td>
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={() => {
+        setAtom((prev) => {
+          prev.columns.splice(columnIndex, 1);
+          return {
+            ...prev,
+          };
+        });
+      }}
+    >
+      <X />
+    </Button>
   );
 }
 
-function CreateColumn({
-  key,
-  columnIndex,
-}: {
-  key: number;
-  columnIndex: number;
-}) {
+function CreateColumn({ columnIndex }: { columnIndex: number }) {
   const [tbl, setCreateTable] = useAtom(createTableAtom);
   const column = tbl && tbl.columns[columnIndex];
 
@@ -160,8 +152,8 @@ function CreateColumn({
     <TableRow>
       <TableCell>
         <Input
-          className="w-24"
-          placeholder="name"
+          className="w-28"
+          placeholder="column_name"
           pattern="[a-zA-Z0-9_]*"
           name="name"
           title={
@@ -190,7 +182,7 @@ function CreateColumn({
             });
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger className="gap-x-2">
             <SelectValue placeholder="Select a type" />
           </SelectTrigger>
           <SelectContent>
