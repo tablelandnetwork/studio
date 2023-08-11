@@ -13,9 +13,6 @@
     "email": "email dev"
   },
   "dependencies": {
-    "@biconomy/core-types": "^2.0.2",
-    "@biconomy/smart-account": "^2.0.2",
-    "@biconomy/web3-auth": "^2.0.0",
     "@ethersproject/experimental": "^5.7.0",
     "@hookform/resolvers": "^3.1.1",
     "@radix-ui/react-avatar": "^1.0.3",
