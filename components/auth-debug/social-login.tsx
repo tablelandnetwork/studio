@@ -8,7 +8,7 @@ export default function SocialLogin() {
   const socialLoginSDK = useAtomValue(socialLoginSDKAtom);
   return (
     <div>
-      <p>Social login client id: {socialLoginSDK.clientId}</p>
+      <p>Social login status: {socialLoginSDK.status}</p>
       <Button onClick={async () => await socialLoginSDK.logout()}>
         Force logout
       </Button>

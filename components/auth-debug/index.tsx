@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import Provider from "./provider";
-import SmartAccount from "./smart-account";
 import UserId from "./user-id";
 
 const SocialLogin = dynamic(
@@ -26,9 +25,6 @@ export default async function AuthDebug() {
       </Suspense>
       <Suspense fallback={<p>Loading provider...</p>}>
         <Provider />
-      </Suspense>
-      <Suspense fallback={<p>Loading smart account...</p>}>
-        <SmartAccount />
       </Suspense>
     </div>
   );

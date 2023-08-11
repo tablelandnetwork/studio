@@ -1,9 +1,7 @@
 import { authenticated, login, logout, nonce, register } from "@/app/actions";
 import { Auth } from "@/lib/session";
 import toChecksumAddress from "@/lib/toChecksumAddr";
-import { ChainId } from "@biconomy/core-types";
-import SmartAccount from "@biconomy/smart-account";
-import SocialLogin from "@biconomy/web3-auth";
+import { Web3Auth } from "@web3auth/modal";
 import { ethers } from "ethers";
 import { atom } from "jotai";
 import { SiweMessage } from "siwe";
@@ -13,24 +11,20 @@ import {
   loggingInAtom,
   providerAtom,
   scwAddressAtom,
-  scwLoadingAtom,
-  smartAccountAtom,
 } from "./wallet";
 
 export const socialLoginSDKAtom = atom(async () => {
-  const sdk = new SocialLogin();
-  let whitelistUrls: { [x: string]: string } = {};
-  if (!!process.env.NEXT_PUBLIC_SITE_URL) {
-    const sig = await sdk.whitelistUrl(process.env.NEXT_PUBLIC_SITE_URL);
-    whitelistUrls[process.env.NEXT_PUBLIC_SITE_URL] = sig;
-  }
-  if (!!process.env.NEXT_PUBLIC_VERCEL_URL) {
-    const url = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-    const sig = await sdk.whitelistUrl(url);
-    whitelistUrls[url] = sig;
-  }
-  await sdk.init({ whitelistUrls, chainId: ethers.utils.hexValue(80001) });
-  return sdk;
+  const web3auth = new Web3Auth({
+    clientId: process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID || "",
+    web3AuthNetwork: "testnet",
+    chainConfig: {
+      chainNamespace: "eip155",
+      // chainId: "0x31337", // Please use 0x5 for Goerli Testnet
+      // rpcTarget: "http://127.0.0.1:8545",
+    },
+  });
+  await web3auth.initModal();
+  return web3auth;
 });
 
 const loggedOutAtAtom = atom(new Date());
@@ -57,22 +51,17 @@ export const connectWeb3Atom = atom(
     // if (!socialLoginSDK.provider) {
     //   await set(logoutAtom);
     // }
-    if (!socialLoginSDK.provider && showWallet) {
-      socialLoginSDK.showWallet();
-    } else if (!socialLoginSDK.provider && !showWallet) {
+    if (showWallet || socialLoginSDK.connected) {
+      await socialLoginSDK.connect();
+    } else {
       set(loggingInAtom, false);
-      return { error: "No provider, but you don't want to show the wallet." };
+      return { error: "You must show the wallet." };
     }
     const provider = await get(blockUntilProvider);
-    // Moved this here because it seems like we don't need a separate effect for it.
-    socialLoginSDK.hideWallet();
     const web3Provider = new ethers.providers.Web3Provider(provider);
     set(providerAtom, web3Provider);
     const accounts = await web3Provider.listAccounts();
     set(accountAtom, accounts[0]);
-
-    // Kick off smart account setup.
-    set(setupSmartAccount, web3Provider);
 
     // Sign in with server
     const currentAuth = await authenticated();
@@ -121,13 +110,9 @@ export const registerAtom = atom(
 export const logoutAtom = atom(undefined, async (get, set) => {
   const socialLoginSDK = await get(socialLoginSDKAtom);
   await logout();
-  if (socialLoginSDK.web3auth) {
-    await socialLoginSDK.logout();
-    socialLoginSDK.hideWallet();
-  }
+  await socialLoginSDK.logout();
   set(providerAtom, null);
   set(accountAtom, null);
-  set(smartAccountAtom, null);
   set(scwAddressAtom, null);
   set(authAtom, null);
   set(loggedOutAtAtom, new Date());
@@ -172,21 +157,3 @@ export const autoConnectAtom = atom(undefined, async (get, set) => {
 //   console.log("auto connect on mount");
 //   setAtom();
 // };
-
-const setupSmartAccount = atom(
-  undefined,
-  async (get, set, provider: ethers.providers.Web3Provider) => {
-    set(scwAddressAtom, "");
-    set(scwLoadingAtom, true);
-
-    const smartAccount = new SmartAccount(provider, {
-      activeNetworkId: ChainId.GOERLI,
-      supportedNetworksIds: [ChainId.GOERLI],
-    });
-    await smartAccount.init();
-    const context = smartAccount.getSmartAccountContext();
-    set(scwAddressAtom, context.baseWallet.getAddress());
-    set(smartAccountAtom, smartAccount);
-    set(scwLoadingAtom, false);
-  }
-);

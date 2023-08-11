@@ -1,7 +1,5 @@
 "use client";
 
-import "@biconomy/web3-auth/dist/src/style.css";
-
 import {
   Dialog,
   DialogContent,

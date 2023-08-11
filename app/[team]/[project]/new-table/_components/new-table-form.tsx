@@ -22,11 +22,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Environment, Project, Team } from "@/db/schema";
 import { createTableAtom } from "@/store/create-table";
-import { smartAccountAtom } from "@/store/wallet";
+import { providerAtom } from "@/store/wallet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Database, helpers } from "@tableland/sdk";
 import { Signer, getDefaultProvider } from "ethers";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -58,7 +58,7 @@ export default function NewTable({ project, team, envs }: Props) {
   const router = useRouter();
 
   const [createTable, setCreateTable] = useAtom(createTableAtom);
-  const [smartAccount] = useAtom(smartAccountAtom);
+  const provider = useAtomValue(providerAtom);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -80,8 +80,8 @@ export default function NewTable({ project, team, envs }: Props) {
 
   function onSubmit(values: z.infer<typeof schema>) {
     console.log("values", values);
-    if (!smartAccount) {
-      console.log("No smart account");
+    if (!provider) {
+      console.log("No provider");
       return;
     }
     startTransition(async () => {
@@ -100,7 +100,7 @@ export default function NewTable({ project, team, envs }: Props) {
         console.log("deploying to", deployment.chain);
         const res = await deployTable(
           deployment.chain,
-          smartAccount.signer,
+          provider.getSigner(),
           statement
         );
         console.log("res", res);
