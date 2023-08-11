@@ -12,11 +12,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Environment, Project, Team } from "@/db/schema";
 import { createTableAtom } from "@/store/create-table";
+import { smartAccountAtom } from "@/store/wallet";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { helpers } from "@tableland/sdk";
+import { Database, helpers } from "@tableland/sdk";
+import { Signer, getDefaultProvider } from "ethers";
 import { useAtom } from "jotai";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -26,13 +35,6 @@ import * as z from "zod";
 import SchemaBuilder, {
   createTableStatementFromObject,
 } from "./schema-builder";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 
 const supportedChains = Object.values(helpers.supportedChains);
 
@@ -56,6 +58,7 @@ export default function NewTable({ project, team, envs }: Props) {
   const router = useRouter();
 
   const [createTable, setCreateTable] = useAtom(createTableAtom);
+  const [smartAccount] = useAtom(smartAccountAtom);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -77,6 +80,10 @@ export default function NewTable({ project, team, envs }: Props) {
 
   function onSubmit(values: z.infer<typeof schema>) {
     console.log("values", values);
+    if (!smartAccount) {
+      console.log("No smart account");
+      return;
+    }
     startTransition(async () => {
       const statement = createTableStatementFromObject(
         createTable,
@@ -86,8 +93,20 @@ export default function NewTable({ project, team, envs }: Props) {
         console.error("No statement");
         return;
       }
+      const deployments = values.deployments.filter(
+        (d) => d.chain !== "no-deploy"
+      );
+      for (const deployment of deployments) {
+        console.log("deploying to", deployment.chain);
+        const res = await deployTable(
+          deployment.chain,
+          smartAccount.signer,
+          statement
+        );
+        console.log("res", res);
+      }
       await newTable(project, values.name, statement, values.description);
-      router.replace(`/${team.slug}/${project.slug}`);
+      // router.replace(`/${team.slug}/${project.slug}`);
       setCreateTable({ columns: [] });
     });
   }
@@ -211,4 +230,18 @@ export default function NewTable({ project, team, envs }: Props) {
       </form>
     </Form>
   );
+}
+
+async function deployTable(
+  network: string,
+  signer: Signer,
+  createStmt: string
+) {
+  const provider = getDefaultProvider(
+    network.startsWith("local") ? "http://127.0.0.1:8545" : network
+  );
+  signer.connect(provider);
+  const db = new Database({ signer, autoWait: true });
+  const res = await db.exec(createStmt);
+  return res;
 }

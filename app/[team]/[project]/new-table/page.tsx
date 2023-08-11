@@ -1,8 +1,8 @@
-import NewTableForm from "@/components/new-table-form";
 import db from "@/db/api";
 import Session from "@/lib/session";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import NewTableForm from "./_components/new-table-form";
 
 export default async function NewProject({
   params,

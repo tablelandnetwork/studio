@@ -1,3 +1,13 @@
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -9,16 +19,6 @@ import {
 import { CreateTable, createTableAtom } from "@/store/create-table";
 import { useAtom } from "jotai";
 import { Plus, X } from "lucide-react";
-import { Button } from "./ui/button";
-import { Checkbox } from "./ui/checkbox";
-import { Input } from "./ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 
 function isValidColumnName(variable: string) {
   var columnNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
