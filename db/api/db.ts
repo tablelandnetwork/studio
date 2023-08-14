@@ -60,6 +60,7 @@ export const tbl = new Database({
   signer,
   autoWait: true,
   aliases: databaseAliases,
+  baseUrl: helpers.getBaseUrl(+(process.env.CHAIN_ID || "")),
 });
 
 export const db = drizzle(tbl, { logger: false, schema });

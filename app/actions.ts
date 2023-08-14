@@ -1,13 +1,17 @@
 "use server";
 
 import db from "@/db/api";
+import { tbl } from "@/db/api/db";
 import { Project, Team, TeamInvite } from "@/db/schema";
 import Session, { Auth } from "@/lib/session";
 import { sendInvite } from "@/utils/send";
+import { Validator } from "@tableland/sdk";
 import { unsealData } from "iron-session";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { SiweMessage, generateNonce } from "siwe";
+
+const validator = new Validator(tbl.config);
 
 export async function authenticated() {
   const session = await Session.fromCookies(cookies());
@@ -177,6 +181,50 @@ export async function newTable(
   );
   revalidatePath(`/${team.slug}/${project.slug}`);
   return table;
+}
+
+export async function importTable(
+  project: Project,
+  chainId: number,
+  tableId: string,
+  name: string,
+  environmentId: string,
+  description?: string
+) {
+  const session = await Session.fromCookies(cookies());
+  if (!session.auth) {
+    throw new Error("Not authenticated");
+  }
+  const team = await db.projects.projectTeamByProjectId(project.id);
+  if (
+    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+  ) {
+    // TODO: Proper error return.
+    throw new Error("Not authorized");
+  }
+
+  const tablelandTable = await validator.getTableById({ chainId, tableId });
+  console.log("env", environmentId);
+  console.log(JSON.stringify(tablelandTable, null, 2));
+
+  // TODO: Figure out a standard way of encoding schema for both Tables created in Studio and imported tables.
+  const table = await newTable(
+    project,
+    name,
+    JSON.stringify(tablelandTable.schema),
+    description
+  );
+
+  const deployment = await db.deployments.createDeployment({
+    tableId: table.id,
+    chain: chainId,
+    environmentId,
+    schema: JSON.stringify(tablelandTable.schema),
+    tableUuName: tablelandTable.name,
+  });
+
+  revalidatePath(`/${team.slug}/${project.slug}/deployments`);
+  return { table, deployment };
 }
 
 export async function newTeam(name: string, emailInvites: string[]) {

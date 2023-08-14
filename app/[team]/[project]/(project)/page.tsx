@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import db from "@/db/api";
 import Session from "@/lib/session";
-import { Plus } from "lucide-react";
+import { Import, Plus } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -66,12 +66,17 @@ export default async function Project({
       })}
       <Card className="">
         <CardHeader className="items-center">
-          <CardTitle>New Table</CardTitle>
+          <CardTitle>Add Table</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center">
           <Link href={`/${team.slug}/${project.slug}/new-table`}>
             <Button variant={"ghost"}>
               <Plus />
+            </Button>
+          </Link>
+          <Link href={`/${team.slug}/${project.slug}/import-table`}>
+            <Button variant={"ghost"}>
+              <Import />
             </Button>
           </Link>
         </CardContent>

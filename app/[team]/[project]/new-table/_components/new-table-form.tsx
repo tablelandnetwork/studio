@@ -1,6 +1,9 @@
 "use client";
 
 import { newTable } from "@/app/actions";
+import SchemaBuilder, {
+  createTableStatementFromObject,
+} from "@/components/schema-builder";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,6 +15,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Environment, Project, Team } from "@/db/schema";
 import { createTableAtom } from "@/store/create-table";
@@ -23,16 +33,6 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
-import SchemaBuilder, {
-  createTableStatementFromObject,
-} from "./schema-builder";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 
 const supportedChains = Object.values(helpers.supportedChains);
 
