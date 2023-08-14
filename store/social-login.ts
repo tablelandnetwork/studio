@@ -1,7 +1,9 @@
 import { authenticated, login, logout, nonce, register } from "@/app/actions";
 import { Auth } from "@/lib/session";
 import toChecksumAddress from "@/lib/toChecksumAddr";
-import { Web3Auth } from "@web3auth/modal";
+import { ParticleNetwork, WalletEntryPosition } from "@particle-network/auth";
+import { Ethereum } from "@particle-network/chains";
+import { ParticleProvider } from "@particle-network/provider";
 import { ethers } from "ethers";
 import { atom } from "jotai";
 import { SiweMessage } from "siwe";
@@ -14,31 +16,44 @@ import {
 } from "./wallet";
 
 export const socialLoginSDKAtom = atom(async () => {
-  const web3auth = new Web3Auth({
-    clientId: process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID || "",
-    web3AuthNetwork: "testnet",
-    authMode: "DAPP",
-    chainConfig: {
-      chainNamespace: "eip155",
-      chainId: "0x7A69", // Please use 0x5 for Goerli Testnet
-      rpcTarget: "http://127.0.0.1:8545",
-      blockExplorer: "https://goerli.etherscan.io/",
+  const particle = new ParticleNetwork({
+    projectId: "67bbb709-404e-405a-90e6-cbf09e9fdae5",
+    clientKey: "cL8wMwL549UHxglbwvhBvuHZkoWOKilMXXR8ho8P",
+    appId: "e6297699-f6f6-4620-8c10-38e3ed326fa5",
+    chainName: Ethereum.name, //optional: current chain name, default Ethereum.
+    chainId: Ethereum.id, //optional: current chain id, default 1.
+    wallet: {
+      //optional: by default, the wallet entry is displayed in the bottom right corner of the webpage.
+      displayWalletEntry: true, //show wallet entry when connect particle.
+      defaultWalletEntryPosition: WalletEntryPosition.BR, //wallet entry position
+      uiMode: "dark", //optional: light or dark, if not set, the default is the same as web auth.
+      supportChains: [
+        { id: 1, name: "Ethereum" },
+        { id: 5, name: "Ethereum" },
+      ], // optional: web wallet support chains.
+      customStyle: {}, //optional: custom wallet style
+    },
+    securityAccount: {
+      //optional: particle security account config
+      //prompt set payment password. 0: None, 1: Once(default), 2: Always
+      promptSettingWhenSign: 1,
+      //prompt set master password. 0: None(default), 1: Once, 2: Always
+      promptMasterPasswordSettingWhenLogin: 1,
     },
   });
-  await web3auth.initModal();
-  return web3auth;
+  return particle;
 });
 
 const loggedOutAtAtom = atom(new Date());
 
-const blockUntilProvider = atom(async (get) => {
-  get(loggedOutAtAtom);
-  const socialLoginSDK = await get(socialLoginSDKAtom);
-  while (!socialLoginSDK.provider) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-  return socialLoginSDK.provider;
-});
+// const blockUntilProvider = atom(async (get) => {
+//   get(loggedOutAtAtom);
+//   const socialLoginSDK = await get(socialLoginSDKAtom);
+//   while (!socialLoginSDK.provider) {
+//     await new Promise((resolve) => setTimeout(resolve, 500));
+//   }
+//   return socialLoginSDK.provider;
+// });
 
 export const connectWeb3Atom = atom(
   undefined,
@@ -53,14 +68,16 @@ export const connectWeb3Atom = atom(
     // if (!socialLoginSDK.provider) {
     //   await set(logoutAtom);
     // }
-    if (showWallet || socialLoginSDK.connected) {
-      await socialLoginSDK.connect();
+    if (showWallet || socialLoginSDK.auth.isLogin()) {
+      const userInfo = await socialLoginSDK.auth.login();
     } else {
       set(loggingInAtom, false);
       return { error: "You must show the wallet." };
     }
-    const provider = await get(blockUntilProvider);
-    const web3Provider = new ethers.providers.Web3Provider(provider);
+
+    // const provider = await get(blockUntilProvider);
+    const provider = new ParticleProvider(socialLoginSDK.auth);
+    const web3Provider = new ethers.providers.Web3Provider(provider, "any");
     set(providerAtom, web3Provider);
     const accounts = await web3Provider.listAccounts();
     set(accountAtom, accounts[0]);
@@ -112,7 +129,7 @@ export const registerAtom = atom(
 export const logoutAtom = atom(undefined, async (get, set) => {
   const socialLoginSDK = await get(socialLoginSDKAtom);
   await logout();
-  await socialLoginSDK.logout();
+  await socialLoginSDK.auth.logout();
   set(providerAtom, null);
   set(accountAtom, null);
   set(scwAddressAtom, null);

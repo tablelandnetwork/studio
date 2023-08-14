@@ -1,4 +1,3 @@
-import AutoLoginWrapper from "@/components/auto-login-wrapper";
 import Footer from "@/components/footer";
 import { JotaiProvider } from "@/components/jotai-provider";
 import MesaSvg from "@/components/mesa-svg";
@@ -40,6 +39,11 @@ const UserActions = dynamic(
   { ssr: false }
 );
 
+const ParticleProvider = dynamic(
+  () => import("@/components/particle-provider").then((res) => res.default),
+  { ssr: false }
+);
+
 export default async function RootLayout({
   children,
 }: {
@@ -54,8 +58,8 @@ export default async function RootLayout({
         lang="en"
         className={`${sourceSans3.variable} ${sourceCodePro.variable}`}
       >
+        {/* <ParticleProvider> */}
         <body className="flex min-h-screen flex-col">
-          <AutoLoginWrapper />
           <header className="flex items-center justify-between px-4 py-3">
             <div className="flex flex-row items-center gap-x-2">
               <Link href="/">
@@ -72,6 +76,7 @@ export default async function RootLayout({
           <Footer />
           <Toaster />
         </body>
+        {/* </ParticleProvider> */}
       </html>
     </JotaiProvider>
   );
