@@ -17,10 +17,12 @@ export const socialLoginSDKAtom = atom(async () => {
   const web3auth = new Web3Auth({
     clientId: process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID || "",
     web3AuthNetwork: "testnet",
+    authMode: "DAPP",
     chainConfig: {
       chainNamespace: "eip155",
-      // chainId: "0x31337", // Please use 0x5 for Goerli Testnet
-      // rpcTarget: "http://127.0.0.1:8545",
+      chainId: "0x7A69", // Please use 0x5 for Goerli Testnet
+      rpcTarget: "http://127.0.0.1:8545",
+      blockExplorer: "https://goerli.etherscan.io/",
     },
   });
   await web3auth.initModal();

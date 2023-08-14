@@ -25,7 +25,7 @@ import { createTableAtom } from "@/store/create-table";
 import { providerAtom } from "@/store/wallet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Database, helpers } from "@tableland/sdk";
-import { Signer, getDefaultProvider } from "ethers";
+import { Signer } from "ethers";
 import { useAtom, useAtomValue } from "jotai";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -96,6 +96,7 @@ export default function NewTable({ project, team, envs }: Props) {
       const deployments = values.deployments.filter(
         (d) => d.chain !== "no-deploy"
       );
+      console.log("deployments", deployments);
       for (const deployment of deployments) {
         console.log("deploying to", deployment.chain);
         const res = await deployTable(
@@ -237,10 +238,6 @@ async function deployTable(
   signer: Signer,
   createStmt: string
 ) {
-  const provider = getDefaultProvider(
-    network.startsWith("local") ? "http://127.0.0.1:8545" : network
-  );
-  signer.connect(provider);
   const db = new Database({ signer, autoWait: true });
   const res = await db.exec(createStmt);
   return res;
