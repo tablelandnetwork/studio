@@ -64,7 +64,6 @@ export default function ImportTableForm({ project, team, envs }: Props) {
   const { handleSubmit, control } = form;
 
   function onSubmit(values: z.infer<typeof schema>) {
-    console.log("values", values);
     startTransition(async () => {
       const res = await importTable(
         project,
@@ -74,7 +73,6 @@ export default function ImportTableForm({ project, team, envs }: Props) {
         values.environment,
         values.description
       );
-      console.log("res", res);
       router.replace(`/${team.slug}/${project.slug}`);
     });
   }

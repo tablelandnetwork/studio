@@ -205,8 +205,6 @@ export async function importTable(
   }
 
   const tablelandTable = await validator.getTableById({ chainId, tableId });
-  console.log("env", environmentId);
-  console.log(JSON.stringify(tablelandTable, null, 2));
 
   // TODO: Figure out a standard way of encoding schema for both Tables created in Studio and imported tables.
   const table = await newTable(
