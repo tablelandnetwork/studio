@@ -215,12 +215,20 @@ export async function importTable(
     description
   );
 
+  const createdAttr = tablelandTable.attributes?.find(
+    (attr) => attr.traitType === "created"
+  );
+  if (!createdAttr) {
+    throw new Error("No created attribute found");
+  }
+
   const deployment = await db.deployments.createDeployment({
     tableId: table.id,
     chain: chainId,
     environmentId,
     schema: JSON.stringify(tablelandTable.schema),
     tableUuName: tablelandTable.name,
+    createdAt: new Date(createdAttr.value * 1000),
   });
 
   revalidatePath(`/${team.slug}/${project.slug}/deployments`);

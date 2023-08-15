@@ -9,32 +9,35 @@ export async function createDeployment({
   chain,
   schema,
   tableUuName,
+  createdAt,
 }: {
   tableId: string;
   environmentId: string;
   chain: number;
   schema: string;
   tableUuName?: string;
+  createdAt: Date;
 }) {
   const tableInstanceId = randomUUID();
 
-  const tableInstance = {
+  const deployment = {
     id: tableInstanceId,
     tableId,
     environmentId,
     chain,
     schema,
     tableUuName,
+    createdAt: createdAt.toISOString(),
   };
 
-  const { sql, params } = db.insert(deployments).values(tableInstance).toSQL();
+  const { sql, params } = db.insert(deployments).values(deployment).toSQL();
 
   const res = await tbl.prepare(sql).bind(params).run();
   if (res.error) {
     throw new Error(res.error);
   }
 
-  return tableInstance;
+  return deployment;
 }
 
 export async function updateDeployment({
