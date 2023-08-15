@@ -150,6 +150,7 @@ export async function newDeployment(
     chain,
     schema,
     tableUuName,
+    createdAt: new Date(), // TODO: Use the created attribute from the table.
   });
 
   return deployment;
