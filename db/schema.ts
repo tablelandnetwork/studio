@@ -111,6 +111,7 @@ export const deployments = sqliteTable("deployments", {
   tableUuName: text("table_uu_name"),
   chain: integer("chain").notNull(),
   schema: text("schema").notNull(),
+  createdAt: text("created_at").notNull(),
 });
 
 // export const migrations = sqliteTable("migrations", {

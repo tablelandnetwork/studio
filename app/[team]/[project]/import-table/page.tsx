@@ -2,7 +2,7 @@ import db from "@/db/api";
 import Session from "@/lib/session";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import NewTableForm from "./_components/new-table-form";
+import ImportTableForm from "./_components/import-table-form";
 
 export default async function NewProject({
   params,
@@ -38,7 +38,7 @@ export default async function NewProject({
   }
   return (
     <div className="p-4">
-      <NewTableForm team={team} project={project} envs={envs} />
+      <ImportTableForm team={team} project={project} envs={envs} />
     </div>
   );
 }
