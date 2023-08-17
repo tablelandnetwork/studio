@@ -1,0 +1,59 @@
+{
+  "name": "@tableland/studio-cli",
+  "version": "0.0.0",
+  "description": "Tableland command line tools",
+  "repository": "https://github.com/tablelandnetwork/studio/cli",
+  "publishConfig": {
+    "access": "public"
+  },
+  "overrides": {
+    "ethereum-waffle": {
+      "@nomicfoundation/hardhat-chai-matchers": "*"
+    }
+  },
+  "keywords": [
+    "tableland",
+    "studio",
+    "sql",
+    "ethereum",
+    "cli",
+    "database"
+  ],
+  "type": "module",
+  "main": "./dist/cli.js",
+  "module": "./dist/cli.js",
+  "bin": {
+    "studio": "./dist/cli.js"
+  },
+  "files": [
+    "dist/**/*.js"
+  ],
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "test": "mocha",
+    "coverage": "TEST_TIMEOUT_FACTOR=3 c8 --100 --exclude test mocha --exit",
+    "coverage:report": "c8 report --reporter=html",
+    "clean": "rm -rf dist",
+    "build": "npx tsc && chmod +x dist/cli.js",
+    "studio": "node ./dist/cli.js"
+  },
+  "license": "MIT AND Apache-2.0",
+  "devDependencies": {
+  },
+  "dependencies": {
+    "@tableland/sdk": "^4.4.2",
+    "@tableland/sqlparser": "^1.3.0",
+    "@toruslabs/broadcast-channel": "^8.0.0",
+    "@toruslabs/openlogin-session-manager": "^2.0.0",
+    "@toruslabs/openlogin-utils": "^4.7.0",
+    "cli-select-2": "^2.0.0",
+    "cosmiconfig": "^8.0.0",
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.1",
+    "inquirer": "^9.1.2",
+    "js-yaml": "^4.1.0",
+    "readline": "^1.3.0",
+    "table": "^6.8.1",
+    "yargs": "^17.6.2"
+  }
+}
