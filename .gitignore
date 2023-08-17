@@ -7,14 +7,15 @@ packages/*/node_modules/*
 .pnp.js
 
 # testing
-/coverage
+packages/*//coverage
 
 # next.js
-app/.next/
+packages/app/.next/
 /out/
 
 # production
-/build
+packages/app/build
+packages/cli/dist
 
 # misc
 .DS_Store
