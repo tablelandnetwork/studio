@@ -1,6 +1,6 @@
 import type { Arguments } from "yargs";
 import yargs from "yargs";
-import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
+// import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
 import { logger, normalizePrivateKey } from "../utils.js";
 
@@ -67,16 +67,16 @@ export const builder = function (args: Yargs) {
         if (typeof personalTeamId !== "string")
           throw new Error("must provide personal team id");
         console.log("doing create by pId...");
-        const result = await createTeamByPersonalTeam(
-          name,
-          personalTeamId,
-          (invites ?? "")
-            .split(",")
-            .map((email) => email.trim())
-            .filter((i) => i)
-        );
-        console.log("doing logger.log");
-        logger.log(JSON.stringify(result));
+        // const result = await createTeamByPersonalTeam(
+        //   name,
+        //   personalTeamId,
+        //   (invites ?? "")
+        //     .split(",")
+        //     .map((email) => email.trim())
+        //     .filter((i) => i)
+        // );
+
+        //logger.log(JSON.stringify(result));
       }
     )
     .command(

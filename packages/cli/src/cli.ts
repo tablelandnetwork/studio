@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as dotenv from "dotenv";
-import fetch, { Headers, Request, Response } from "node-fetch";
+// import fetch, { Headers, Request, Response } from "node-fetch";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { cosmiconfigSync } from "cosmiconfig";
@@ -15,12 +15,12 @@ process.on("warning", (warning) => {
 });
 
 // eslint-disable-next-line
-if (!globalThis.fetch) {
-  (globalThis as any).fetch = fetch;
-  (globalThis as any).Headers = Headers;
-  (globalThis as any).Request = Request;
-  (globalThis as any).Response = Response;
-}
+// if (!globalThis.fetch) {
+//   (globalThis as any).fetch = fetch;
+//   (globalThis as any).Headers = Headers;
+//   (globalThis as any).Request = Request;
+//   (globalThis as any).Response = Response;
+// }
 
 // By default, check these places for an rc config
 const moduleName = "tableland";
