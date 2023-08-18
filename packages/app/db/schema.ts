@@ -15,7 +15,7 @@ export const users = sqliteTable(
   },
   (users) => ({
     teamIdIdx: uniqueIndex("teamIdIdx").on(users.teamId),
-  })
+  }),
 );
 
 export const teams = sqliteTable(
@@ -29,7 +29,7 @@ export const teams = sqliteTable(
   (teams) => ({
     nameIdx: uniqueIndex("nameIdx").on(teams.name),
     slugIdx: uniqueIndex("slugIdx").on(teams.slug),
-  })
+  }),
 );
 
 export const teamMemberships = sqliteTable(
@@ -44,10 +44,10 @@ export const teamMemberships = sqliteTable(
     return {
       memberTeamIdx: uniqueIndex("memberTeamIdx").on(
         userTeams.memberTeamId,
-        userTeams.teamId
+        userTeams.teamId,
       ),
     };
-  }
+  },
 );
 
 export const projects = sqliteTable("projects", {
@@ -68,10 +68,10 @@ export const teamProjects = sqliteTable(
     return {
       teamProjectIdx: uniqueIndex("teamProjectIdx").on(
         teamProjects.teamId,
-        teamProjects.projectId
+        teamProjects.projectId,
       ),
     };
-  }
+  },
 );
 
 export const tables = sqliteTable("tables", {
@@ -92,10 +92,10 @@ export const projectTables = sqliteTable(
     return {
       projectTablesIdx: uniqueIndex("projectTablesIdx").on(
         projectTables.projectId,
-        projectTables.tableId
+        projectTables.tableId,
       ),
     };
-  }
+  },
 );
 
 export const environments = sqliteTable("environments", {
