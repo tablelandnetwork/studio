@@ -6,6 +6,8 @@
     "packages/cli"
   ],
   "scripts": {
+    "test": "lerna run test",
+    "build": "lerna run build",
     "prepare": "husky install"
   },
   "devDependencies": {
