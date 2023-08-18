@@ -88,7 +88,7 @@ const TagInput = forwardRef<HTMLDivElement, Props>(
         />
       </div>
     );
-  }
+  },
 );
 TagInput.displayName = "TagInput";
 

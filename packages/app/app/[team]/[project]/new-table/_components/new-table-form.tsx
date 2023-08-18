@@ -80,7 +80,7 @@ export default function NewTable({ project, team, envs }: Props) {
     startTransition(async () => {
       const statement = createTableStatementFromObject(
         createTable,
-        values.name
+        values.name,
       );
       if (!statement) {
         console.error("No statement");

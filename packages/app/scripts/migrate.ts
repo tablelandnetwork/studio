@@ -28,7 +28,7 @@ async function migrate() {
   };
   if (!a["migrations"]) {
     const res = await tbl.exec(
-      "create table migrations (id integer primary key, file text not null unique, hash text not null);"
+      "create table migrations (id integer primary key, file text not null unique, hash text not null);",
     );
     if (res.error) {
       throw new Error(res.error);
@@ -37,7 +37,7 @@ async function migrate() {
   }
   const files = await readdir(migrationsFolder);
   const migrations = await tbl.exec<{ id: number; file: string; hash: string }>(
-    "select * from migrations order by id asc"
+    "select * from migrations order by id asc",
   );
   if (migrations.error) {
     throw new Error(migrations.error);

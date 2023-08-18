@@ -49,7 +49,7 @@ export const connectWeb3Atom = atom(
   async (
     get,
     set,
-    showWallet: boolean
+    showWallet: boolean,
   ): Promise<{ auth?: Auth; error?: string }> => {
     set(loggingInAtom, true);
     const socialLoginSDK = await get(socialLoginSDKAtom);
@@ -106,7 +106,7 @@ export const connectWeb3Atom = atom(
     set(authAtom, res.auth ? res.auth : null);
     set(loggingInAtom, false);
     return { auth: res.auth };
-  }
+  },
 );
 
 export const registerAtom = atom(
@@ -115,7 +115,7 @@ export const registerAtom = atom(
     const res = await register(username, email);
     set(authAtom, res.auth ? res.auth : null);
     return res;
-  }
+  },
 );
 
 export const logoutAtom = atom(undefined, async (get, set) => {
@@ -188,5 +188,5 @@ const setupSmartAccount = atom(
     set(scwAddressAtom, context.baseWallet.getAddress());
     set(smartAccountAtom, smartAccount);
     set(scwLoadingAtom, false);
-  }
+  },
 );

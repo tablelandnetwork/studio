@@ -1,10 +1,10 @@
+import openloginUtils from "@toruslabs/openlogin-utils";
 import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
-import openloginUtils from "@toruslabs/openlogin-utils";
 import type yargs from "yargs";
 import type { Arguments, CommandBuilder } from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { OpenLogin, LoginOptions } from "../open-login.js";
+import { LoginOptions, OpenLogin } from "../open-login.js";
 import { logger } from "../utils.js";
 
 // TODO: recovering the web3auth wallet still doesn't work because the `@toruslabs/broadcast-channel`
@@ -15,7 +15,7 @@ import { logger } from "../utils.js";
 const {
   OPENLOGIN_NETWORK,
   // @ts-ignore
-  OPENLOGIN_NETWORK_TYPE
+  OPENLOGIN_NETWORK_TYPE,
 } = openloginUtils;
 
 export interface CommandOptions extends GlobalOptions {
@@ -27,9 +27,10 @@ export interface CommandOptions extends GlobalOptions {
 export const command = "login";
 export const desc = "create a login session via Open Login";
 
-export const builder: CommandBuilder<Record<string, unknown>, CommandOptions> = (
-  yargs
-) =>
+export const builder: CommandBuilder<
+  Record<string, unknown>,
+  CommandOptions
+> = (yargs) =>
   yargs
     .option("url", {
       type: "string",
@@ -44,8 +45,9 @@ export const builder: CommandBuilder<Record<string, unknown>, CommandOptions> = 
       description: "path to file store to use for login session",
     }) as yargs.Argv<CommandOptions>;
 
-export const handler = async (argv: Arguments<CommandOptions>): Promise<void> => {
-
+export const handler = async (
+  argv: Arguments<CommandOptions>,
+): Promise<void> => {
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -59,7 +61,8 @@ export const handler = async (argv: Arguments<CommandOptions>): Promise<void> =>
     storePath: argv.store ?? join(process.cwd(), "studio-cli-session-store"),
     // @ts-ignore
     network: argv.network as OPENLOGIN_NETWORK_TYPE,
-    clientId: "BKUFrAxFsYPsF63ysXJ2EzCGo4kvLh7N3gPUQpc16eI3vAmTGncL9siwsB9wQ8RmMZycezTNxAzVp4jqxNEcnPY"// process.env.OPENLOGIN_CLIENT_ID as string
+    clientId:
+      "BKUFrAxFsYPsF63ysXJ2EzCGo4kvLh7N3gPUQpc16eI3vAmTGncL9siwsB9wQ8RmMZycezTNxAzVp4jqxNEcnPY", // process.env.OPENLOGIN_CLIENT_ID as string
   };
 
   if (argv.url) options.sdkUrl = argv.url;
@@ -69,11 +72,16 @@ export const handler = async (argv: Arguments<CommandOptions>): Promise<void> =>
   await openLogin.init();
 
   if (openLogin.privKey) {
-    return logger.log("you are already logged in, you can logout with the logout command");
+    return logger.log(
+      "you are already logged in, you can logout with the logout command",
+    );
   }
 
-  openLogin.login({
-    loginProvider: "email_passwordless"
-    //getWalletKey: true
-  }, email);
+  openLogin.login(
+    {
+      loginProvider: "email_passwordless",
+      //getWalletKey: true
+    },
+    email,
+  );
 };

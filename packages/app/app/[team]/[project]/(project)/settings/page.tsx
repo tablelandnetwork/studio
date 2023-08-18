@@ -26,7 +26,7 @@ export default async function ProjectSettings({
 
   const project = await db.projects.projectByTeamIdAndSlug(
     team.id,
-    params.project
+    params.project,
   );
   if (!project) {
     notFound();

@@ -24,7 +24,7 @@ export async function createEnvironment({
 }
 
 export async function getEnvironmentsByProjectId(
-  projectId: string
+  projectId: string,
 ): Promise<Environment[]> {
   const { sql, params } = db
     .select()

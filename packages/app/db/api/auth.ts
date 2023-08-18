@@ -7,12 +7,12 @@ import { db, slugify, tbl, teamMemberships, teams, users } from "./db";
 export const createUserAndPersonalTeam = cache(async function (
   address: string,
   teamName: string,
-  email?: string
+  email?: string,
 ) {
   const teamId = randomUUID();
   const sealed = await sealData(
     { email },
-    { password: process.env.DATA_SEAL_PASS as string, ttl: 0 }
+    { password: process.env.DATA_SEAL_PASS as string, ttl: 0 },
   );
   const { sql: usersSql, params: usersParams } = db
     .insert(users)
@@ -49,7 +49,7 @@ export const createUserAndPersonalTeam = cache(async function (
 });
 
 export const userAndPersonalTeamByAddress = cache(async function (
-  address: string
+  address: string,
 ) {
   const res = await db
     .select({

@@ -15,7 +15,7 @@ export async function sendInvite(invite: TeamInvite) {
     {
       password: process.env.DATA_SEAL_PASS as string,
       ttl: 0,
-    }
+    },
   );
   const baseUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -26,7 +26,7 @@ export async function sendInvite(invite: TeamInvite) {
       inviterUsername: inviterTeam.name,
       teamName: team.name,
       link: `${baseUrl}/invite?seal=${seal}`,
-    })
+    }),
   );
 
   const res = await client.sendEmail({
