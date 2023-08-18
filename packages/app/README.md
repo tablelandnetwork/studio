@@ -22,6 +22,7 @@ DATA_SEAL_PASS="secure password secure password secure password"
 8. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 **NOTE:** Steps 5 and 6 have to be preformed any time you stop and restart `local-tableland`.
+**NOTE:** if you see `ENOWORKSPACES` errors, they can potentially be ignored, or better, run `npx next telemetry disable`
 
 ## Learn More
 

@@ -2,18 +2,20 @@
 
 # dependencies
 /node_modules
+packages/*/node_modules/*
 /.pnp
 .pnp.js
 
 # testing
-/coverage
+packages/*//coverage
 
 # next.js
-/.next/
+packages/app/.next/
 /out/
 
 # production
-/build
+packages/app/build
+packages/cli/dist
 
 # misc
 .DS_Store
