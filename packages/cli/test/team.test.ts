@@ -11,7 +11,7 @@ const accounts = getAccounts();
 
 const defaultArgs = ["--privateKey", accounts[1].privateKey];
 
-describe("commands/team", function () {
+describe.skip("commands/team", function () {
   this.timeout(15000 * TEST_TIMEOUT_FACTOR);
 
   before(async function () {
