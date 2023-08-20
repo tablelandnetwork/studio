@@ -40,23 +40,23 @@ class Session {
 
   static async fromCookies(cookies: ReadonlyRequestCookies): Promise<Session> {
     const sessionCookie = cookies.get(
-      process.env.SESSION_COOKIE_NAME || SESSION_COOKIE_NAME
+      process.env.SESSION_COOKIE_NAME || SESSION_COOKIE_NAME,
     )?.value;
 
     if (!sessionCookie) return new Session();
     return new Session(
-      await unsealData<ISession>(sessionCookie, SESSION_OPTIONS)
+      await unsealData<ISession>(sessionCookie, SESSION_OPTIONS),
     );
   }
 
   static async fromRequest(req: NextRequest): Promise<Session> {
     const sessionCookie = req.cookies.get(
-      process.env.SESSION_COOKIE_NAME || SESSION_COOKIE_NAME
+      process.env.SESSION_COOKIE_NAME || SESSION_COOKIE_NAME,
     )?.value;
 
     if (!sessionCookie) return new Session();
     return new Session(
-      await unsealData<ISession>(sessionCookie, SESSION_OPTIONS)
+      await unsealData<ISession>(sessionCookie, SESSION_OPTIONS),
     );
   }
 
@@ -83,13 +83,13 @@ class Session {
       {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-      }
+      },
     );
   }
 }
 
 const isCookies = (
-  cookies: NextResponse | ResponseCookies
+  cookies: NextResponse | ResponseCookies,
 ): cookies is ResponseCookies => {
   return (cookies as ResponseCookies).set !== undefined;
 };
