@@ -1,3 +1,4 @@
+import { trpc } from "@tableland/studio-client";
 import openloginUtils from "@toruslabs/openlogin-utils";
 import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
@@ -52,6 +53,9 @@ export const handler = async (
     input: process.stdin,
     output: process.stdout,
   });
+
+  const user = await trpc.userById.query(2);
+  console.log("got an RPC response:", user);
 
   logger.log("logging in via passwordless email");
 

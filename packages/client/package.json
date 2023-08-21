@@ -1,0 +1,35 @@
+{
+  "name": "@tableland/studio-client",
+  "version": "0.0.0",
+  "description": "A tRPC client for Studio",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "scripts": {
+    "test": "mocha",
+    "build": "npx tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tablelandnetwork/studio.git"
+  },
+  "keywords": [
+    "tableland",
+    "studio",
+    "tRPC",
+    "sql",
+    "database",
+    "ethereum",
+    "evm"
+  ],
+  "author": "Tableland",
+  "license": "MIT AND Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/tablelandnetwork/studio/issues"
+  },
+  "homepage": "https://github.com/tablelandnetwork/studio#readme",
+  "dependencies": {
+    "@tableland/studio": "^0.0.0",
+    "@trpc/client": "^10.37.1"
+  }
+}

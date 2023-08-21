@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/app",
-    "packages/cli"
+    "packages/cli",
+    "packages/client"
   ],
   "scripts": {
     "test": "lerna run test",
