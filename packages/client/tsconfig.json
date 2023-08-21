@@ -9,8 +9,7 @@
     "strict": true,
     "allowJs": true,
     "skipLibCheck": true,
-    "declaration": true,
-    "declarationMap": true
+    "baseUrl": "./"
   },
   "include": ["src"]
 }

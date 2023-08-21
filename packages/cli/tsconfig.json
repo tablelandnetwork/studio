@@ -8,7 +8,10 @@
     "esModuleInterop": true,
     "strict": true,
     "allowJs": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@tableland/studio-client": ["../client/src"]
+    }
   },
   "include": ["src"]
 }
