@@ -2,10 +2,10 @@
 
 import * as dotenv from "dotenv";
 // import fetch, { Headers, Request, Response } from "node-fetch";
+import { type helpers } from "@tableland/sdk";
+import { cosmiconfigSync } from "cosmiconfig";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { cosmiconfigSync } from "cosmiconfig";
-import { type helpers } from "@tableland/sdk";
 import { commands } from "./commands/index.js";
 
 process.on("warning", (warning) => {

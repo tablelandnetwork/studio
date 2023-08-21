@@ -25,7 +25,7 @@ export default async function People({ params }: { params: { team: string } }) {
 
   const membership = await db.teams.isAuthorizedForTeam(
     session.auth.personalTeam.id,
-    team.id
+    team.id,
   );
 
   if (!membership) {
@@ -47,7 +47,7 @@ export default async function People({ params }: { params: { team: string } }) {
       }
       return acc;
     },
-    { pending: [], claimed: new Map<string, (typeof invites)[number]>() }
+    { pending: [], claimed: new Map<string, (typeof invites)[number]>() },
   );
 
   const peopleAugmented = people.map((person) => {

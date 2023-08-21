@@ -9,7 +9,7 @@ import { db, tbl, teamInvites, teamMemberships, teams } from "./db";
 export const inviteEmailsToTeam = cache(async function (
   teamId: string,
   inviterTeamId: string,
-  emails: string[]
+  emails: string[],
 ) {
   const invites: TeamInvite[] = emails.map((email) => ({
     // Assure we don't allow duplicate invites per team/email. This is necessary
@@ -32,9 +32,9 @@ export const inviteEmailsToTeam = cache(async function (
         {
           password: process.env.DATA_SEAL_PASS as string,
           ttl: 0,
-        }
+        },
       ),
-    }))
+    })),
   );
   await db.insert(teamInvites).values(sealedInvites).run();
   return invites;
@@ -59,7 +59,7 @@ export const inviteById = cache(async function (id: string) {
 
 export const acceptInvite = cache(async function (
   invite: TeamInvite,
-  personalTeam: Team
+  personalTeam: Team,
 ) {
   const { sql: invitesSql, params: invitesParams } = db
     .update(teamInvites)
@@ -89,7 +89,7 @@ export const deleteInvite = cache(async function (id: string) {
 });
 
 export const invitesForTeam = cache(async function invitesForTeam(
-  teamId: string
+  teamId: string,
 ) {
   const claimedByTeams = alias(teams, "claimed_by_teams");
   const invitesSealed = await db
@@ -98,7 +98,7 @@ export const invitesForTeam = cache(async function invitesForTeam(
     .innerJoin(teams, eq(teamInvites.inviterTeamId, teams.id))
     .leftJoin(
       claimedByTeams,
-      eq(teamInvites.claimedByTeamId, claimedByTeams.id)
+      eq(teamInvites.claimedByTeamId, claimedByTeams.id),
     )
     .where(eq(teamInvites.teamId, teamId))
     .orderBy(asc(teamInvites.createdAt))
@@ -114,8 +114,8 @@ export const invitesForTeam = cache(async function invitesForTeam(
           invite: { ...rest, email: email as string },
           claimedBy,
         };
-      }
-    )
+      },
+    ),
   );
   return invites;
 });

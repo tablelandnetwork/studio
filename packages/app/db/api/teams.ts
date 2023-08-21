@@ -17,7 +17,7 @@ import {
 export const createTeamByPersonalTeam = cache(async function (
   name: string,
   personalTeamId: string,
-  inviteEmails: string[]
+  inviteEmails: string[],
 ) {
   const teamId = randomUUID();
   const slug = slugify(name);
@@ -57,9 +57,9 @@ export const createTeamByPersonalTeam = cache(async function (
           {
             password: process.env.DATA_SEAL_PASS as string,
             ttl: 0,
-          }
+          },
         ),
-      }))
+      })),
     );
     const { sql: invitesSql, params: invitesParams } = db
       .insert(teamInvites)
@@ -123,7 +123,7 @@ export const teamsByMemberId = cache(async function (memberId: string) {
           slug: string;
           personal: number;
         }
-      >()
+      >(),
     )
     .values();
   return Array.from(iter);
@@ -174,7 +174,7 @@ export const userTeamsForTeamId = cache(async function (teamId: string) {
 
 export const isAuthorizedForTeam = cache(async function (
   memberTeamId: string,
-  teamId: string
+  teamId: string,
 ) {
   const membership = await db
     .select()
@@ -182,8 +182,8 @@ export const isAuthorizedForTeam = cache(async function (
     .where(
       and(
         eq(teamMemberships.teamId, teamId),
-        eq(teamMemberships.memberTeamId, memberTeamId)
-      )
+        eq(teamMemberships.memberTeamId, memberTeamId),
+      ),
     )
     .get();
   return membership ? membership : false;
@@ -191,7 +191,7 @@ export const isAuthorizedForTeam = cache(async function (
 
 export const toggleAdmin = cache(async function (
   teamId: string,
-  memberId: string
+  memberId: string,
 ) {
   const res = await db
     .select({ isOwner: teamMemberships.isOwner })
@@ -199,8 +199,8 @@ export const toggleAdmin = cache(async function (
     .where(
       and(
         eq(teamMemberships.teamId, teamId),
-        eq(teamMemberships.memberTeamId, memberId)
-      )
+        eq(teamMemberships.memberTeamId, memberId),
+      ),
     )
     .get();
   await db
@@ -209,23 +209,23 @@ export const toggleAdmin = cache(async function (
     .where(
       and(
         eq(teamMemberships.teamId, teamId),
-        eq(teamMemberships.memberTeamId, memberId)
-      )
+        eq(teamMemberships.memberTeamId, memberId),
+      ),
     )
     .run();
 });
 
 export const removeTeamMember = cache(async function (
   teamId: string,
-  memberId: string
+  memberId: string,
 ) {
   await db
     .delete(teamMemberships)
     .where(
       and(
         eq(teamMemberships.teamId, teamId),
-        eq(teamMemberships.memberTeamId, memberId)
-      )
+        eq(teamMemberships.memberTeamId, memberId),
+      ),
     )
     .run();
 });

@@ -29,7 +29,7 @@ export async function nonce() {
 
 export async function login(
   message: string,
-  signature: string
+  signature: string,
 ): Promise<{ auth?: Auth; error?: string }> {
   const session = await Session.fromCookies(cookies());
   try {
@@ -56,7 +56,7 @@ export async function login(
 
 export async function register(
   username: string,
-  email?: string
+  email?: string,
 ): Promise<{ auth?: Auth; error?: string }> {
   const session = await Session.fromCookies(cookies());
   if (!session.siweFields) {
@@ -65,7 +65,7 @@ export async function register(
   const auth = await db.auth.createUserAndPersonalTeam(
     session.siweFields.address,
     username,
-    email
+    email,
   );
   session.auth = auth;
   await session.persist(cookies());
@@ -81,7 +81,7 @@ export async function logout() {
 export async function newProject(
   teamId: string,
   name: string,
-  description?: string
+  description?: string,
 ) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
@@ -97,7 +97,7 @@ export async function newProject(
   const project = await db.projects.createProject(
     teamId,
     name,
-    description || null
+    description || null,
   );
   const team = await db.teams.teamById(teamId);
   revalidatePath(`/${team.slug}`);
@@ -106,7 +106,7 @@ export async function newProject(
 
 export async function newEnvironment(
   projectId: string,
-  title: string
+  title: string,
 ): Promise<{ id: string }> {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
@@ -132,7 +132,7 @@ export async function newDeployment(
   environmentId: string,
   chain: number,
   schema: string,
-  tableUuName?: string
+  tableUuName?: string,
 ) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
@@ -160,7 +160,7 @@ export async function newTable(
   project: Project,
   name: string,
   schema: string,
-  description?: string
+  description?: string,
 ) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
@@ -178,7 +178,7 @@ export async function newTable(
     project.id,
     name,
     description || null,
-    schema
+    schema,
   );
   revalidatePath(`/${team.slug}/${project.slug}`);
   return table;
@@ -190,7 +190,7 @@ export async function importTable(
   tableId: string,
   name: string,
   environmentId: string,
-  description?: string
+  description?: string,
 ) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
@@ -211,11 +211,11 @@ export async function importTable(
     project,
     name,
     JSON.stringify(tablelandTable.schema),
-    description
+    description,
   );
 
   const createdAttr = tablelandTable.attributes?.find(
-    (attr) => attr.traitType === "created"
+    (attr) => attr.traitType === "created",
   );
   if (!createdAttr) {
     throw new Error("No created attribute found");
@@ -242,7 +242,7 @@ export async function newTeam(name: string, emailInvites: string[]) {
   const { team, invites } = await db.teams.createTeamByPersonalTeam(
     name,
     session.auth.user.teamId,
-    emailInvites
+    emailInvites,
   );
   await Promise.all(invites.map((invite) => sendInvite(invite)));
   revalidatePath(`/${team.slug}`);
@@ -263,7 +263,7 @@ export async function inviteEmails(team: Team, emails: string[]) {
   const invites = await db.invites.inviteEmailsToTeam(
     team.id,
     session.auth.user.teamId,
-    emails
+    emails,
   );
   await Promise.all(invites.map((invite) => sendInvite(invite)));
   revalidatePath(`/${team.slug}/people`);
@@ -332,7 +332,7 @@ export async function toggleAdmin(team: Team, member: Team) {
 export async function removeTeamMember(
   team: Team,
   member: Team,
-  claimedInviteId?: string
+  claimedInviteId?: string,
 ) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {

@@ -8,6 +8,6 @@ export function atomWithRefresh<T>(fn: (get: Getter) => T) {
       get(refreshCounter);
       return fn(get);
     },
-    (_, set) => set(refreshCounter, (i) => i + 1)
+    (_, set) => set(refreshCounter, (i) => i + 1),
   );
 }

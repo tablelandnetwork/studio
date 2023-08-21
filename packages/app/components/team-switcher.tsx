@@ -94,7 +94,9 @@ export default function TeamSwitcher({
                       <Check
                         className={cn(
                           "ml-auto h-4 w-4",
-                          team.id === groupTeam.id ? "opacity-100" : "opacity-0"
+                          team.id === groupTeam.id
+                            ? "opacity-100"
+                            : "opacity-0",
                         )}
                       />
                     </CommandItem>

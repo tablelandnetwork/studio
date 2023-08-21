@@ -12,7 +12,7 @@ import { useTransition } from "react";
 
 const UserActions = dynamic(
   () => import("@/components/user-actions").then((res) => res.default),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function InviteHandler({

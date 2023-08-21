@@ -56,7 +56,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
     {
       control,
       name: "environments",
-    }
+    },
   );
 
   function onSubmit(values: z.infer<typeof schema>) {
@@ -64,7 +64,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
       const res = await newProject(team.id, values.name, values.description);
       // TODO: Should probably do this within "new project action"
       await Promise.all(
-        values.environments.map((env) => newEnvironment(res.id, env.name))
+        values.environments.map((env) => newEnvironment(res.id, env.name)),
       );
       router.push(`/${team.slug}/${res.slug}`);
     });
@@ -140,7 +140,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
                             { name: "" },
                             {
                               shouldFocus: true,
-                            }
+                            },
                           );
                         }}
                       />

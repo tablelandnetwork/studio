@@ -32,10 +32,10 @@ export default function NavTeam({
     (path: string) => {
       return cn(
         "text-sm font-medium transition-colors hover:text-primary",
-        pathname !== path && "text-muted-foreground"
+        pathname !== path && "text-muted-foreground",
       );
     },
-    [pathname]
+    [pathname],
   );
 
   const team = teams.find((team) => team.slug === teamSlug);

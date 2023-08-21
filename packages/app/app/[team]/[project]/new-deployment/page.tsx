@@ -23,7 +23,7 @@ export default async function NewProject({
   }
   const project = await db.projects.projectByTeamIdAndSlug(
     team.id,
-    params.project
+    params.project,
   );
   if (!project) {
     notFound();

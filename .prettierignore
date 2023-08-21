@@ -1,5 +1,4 @@
-.next
-build
-coverage
-.mailing
-components/ui
+**/build
+**/coverage
+packages/app/.next
+packages/app/components/ui

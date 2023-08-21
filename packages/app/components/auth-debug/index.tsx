@@ -9,7 +9,7 @@ import UserId from "./user-id";
 const SocialLogin = dynamic(
   () =>
     import("@/components/auth-debug/social-login").then((res) => res.default),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default async function AuthDebug() {

@@ -71,7 +71,7 @@ export default function ImportTableForm({ project, team, envs }: Props) {
         values.tableId,
         values.name,
         values.environment,
-        values.description
+        values.description,
       );
       router.replace(`/${team.slug}/${project.slug}`);
     });

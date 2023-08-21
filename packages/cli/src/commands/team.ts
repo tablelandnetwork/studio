@@ -2,7 +2,7 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
-import { logger, normalizePrivateKey } from "../utils.js";
+import { normalizePrivateKey } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -33,7 +33,7 @@ export const builder = function (args: Yargs) {
       async function (argv) {
         const { name } = argv;
         const privateKey = normalizePrivateKey(argv.privateKey);
-      }
+      },
     )
     .command(
       "create <name>",
@@ -77,7 +77,7 @@ export const builder = function (args: Yargs) {
         // );
 
         //logger.log(JSON.stringify(result));
-      }
+      },
     )
     .command(
       "add",
@@ -95,13 +95,13 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         const { team, user, privateKey, providerUrl } = argv;
-      }
+      },
     );
 };
 
 /* c8 ignore next 3 */
 export const handler = async (
-  argv: Arguments<CommandOptions>
+  argv: Arguments<CommandOptions>,
 ): Promise<void> => {
   //(args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
   // noop

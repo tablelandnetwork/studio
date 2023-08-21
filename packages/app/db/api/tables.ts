@@ -8,7 +8,7 @@ export const createTable = cache(async function (
   projectId: string,
   name: string,
   description: string | null,
-  schema: string
+  schema: string,
 ) {
   const tableId = randomUUID();
   const slug = slugify(name);

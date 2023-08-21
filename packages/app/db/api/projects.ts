@@ -7,7 +7,7 @@ import { db, projects, slugify, tbl, teamProjects, teams } from "./db";
 export const createProject = cache(async function (
   teamId: string,
   name: string,
-  description: string | null
+  description: string | null,
 ) {
   const projectId = randomUUID();
   const slug = slugify(name);
@@ -41,7 +41,7 @@ export const projectsByTeamId = cache(async function (teamId: string) {
 
 export const projectByTeamIdAndSlug = cache(async function (
   teamId: string,
-  slug: string
+  slug: string,
 ) {
   const res = await db
     .select({ projects })
@@ -67,7 +67,7 @@ export const projectTeamByProjectId = cache(async function (projectId: string) {
 
 export const isAuthorizedForProject = cache(async function (
   teamId: string,
-  projectId: string
+  projectId: string,
 ) {
   const authorized = await db
     .select()
@@ -75,15 +75,15 @@ export const isAuthorizedForProject = cache(async function (
     .where(
       and(
         eq(teamProjects.teamId, teamId),
-        eq(teamProjects.projectId, projectId)
-      )
+        eq(teamProjects.projectId, projectId),
+      ),
     )
     .get();
   return !!authorized;
 });
 
 export const projectTeamByEnvironmentId = cache(async function (
-  environmentId: string
+  environmentId: string,
 ) {
   const projectTeam = await db
     .select({ teams })

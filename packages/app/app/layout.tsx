@@ -37,7 +37,7 @@ export const metadata = {
 
 const UserActions = dynamic(
   () => import("@/components/user-actions").then((res) => res.default),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default async function RootLayout({

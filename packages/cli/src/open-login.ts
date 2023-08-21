@@ -1,23 +1,23 @@
-import { EventEmitter } from "node:events";
-import openLoginSession from "@toruslabs/openlogin-session-manager";
-import { type OpenloginSessionManager as OpenloginSessionManagerT }  from "@toruslabs/openlogin-session-manager";
-import {
+import { BroadcastChannel } from "@toruslabs/broadcast-channel";
+import openLoginSession, {
+  type OpenloginSessionManager as OpenloginSessionManagerT,
+} from "@toruslabs/openlogin-session-manager";
+import openLoginUtils, {
+  OpenloginSessionConfig,
+  OpenloginSessionData,
+  OpenloginUserInfo,
   type BaseLoginParams,
   type BaseRedirectParams,
   type LoginParams,
   type OPENLOGIN_NETWORK_TYPE,
   type OpenLoginOptions,
-  OpenloginSessionConfig,
-  OpenloginSessionData,
-  OpenloginUserInfo,
 } from "@toruslabs/openlogin-utils";
-import openLoginUtils from "@toruslabs/openlogin-utils";
-import { BroadcastChannel } from "@toruslabs/broadcast-channel";
-import { FileStorage, StoreInstance, logger, constructURL } from "./utils.js";
+import { EventEmitter } from "node:events";
+import { FileStorage, StoreInstance, constructURL, logger } from "./utils.js";
 
 const OPENLOGIN_NETWORK = openLoginUtils.OPENLOGIN_NETWORK;
 const jsonToBase64 = openLoginUtils.jsonToBase64;
-const OpenloginSessionManager = openLoginSession.OpenloginSessionManager
+const OpenloginSessionManager = openLoginSession.OpenloginSessionManager;
 // TODO: the @toruslabs code has the following comment, and includes the vesion as part of the build.
 //       I'm setting a default value that matches the current Open Login package.
 //       https://github.com/torusresearch/OpenLoginSdk/blob/master/packages/openlogin/package.json
@@ -36,11 +36,17 @@ export class OpenLogin {
 
   options: LoginOptions;
 
-  private versionSupportNetworks: OPENLOGIN_NETWORK_TYPE[] = [OPENLOGIN_NETWORK.MAINNET, OPENLOGIN_NETWORK.CYAN, OPENLOGIN_NETWORK.AQUA];
+  private versionSupportNetworks: OPENLOGIN_NETWORK_TYPE[] = [
+    OPENLOGIN_NETWORK.MAINNET,
+    OPENLOGIN_NETWORK.CYAN,
+    OPENLOGIN_NETWORK.AQUA,
+  ];
 
-  private sessionManager: OpenloginSessionManagerT<OpenloginSessionData> | undefined;
+  private sessionManager:
+    | OpenloginSessionManagerT<OpenloginSessionData>
+    | undefined;
 
-  private fileStore: FileStorage
+  private fileStore: FileStorage;
 
   private currentStorage: StoreInstance | undefined;
 
@@ -80,8 +86,8 @@ export class OpenLogin {
 
     this.fileStore = new FileStorage({
       // TODO: this default value should be determined somewhere else, probably in the command builder
-      storePath: options.storePath
-    })
+      storePath: options.storePath,
+    });
 
     this.options = options;
   }
@@ -95,13 +101,15 @@ export class OpenLogin {
   }
 
   get ed25519PrivKey(): string {
-    return this.state.ed25519PrivKey ? this.state.ed25519PrivKey.padStart(128, "0") : "";
+    return this.state.ed25519PrivKey
+      ? this.state.ed25519PrivKey.padStart(128, "0")
+      : "";
   }
 
   get coreKitEd25519Key(): string {
-    return this.state.coreKitEd25519PrivKey ?
-      this.state.coreKitEd25519PrivKey.padStart(128, "0") :
-      "";
+    return this.state.coreKitEd25519PrivKey
+      ? this.state.coreKitEd25519PrivKey.padStart(128, "0")
+      : "";
   }
 
   get sessionId(): string {
@@ -122,9 +130,7 @@ export class OpenLogin {
       ? `${this._storageBaseKey}_${this.options.sessionNamespace}`
       : this._storageBaseKey;
 
-    this.currentStorage = this.fileStore.getInstance(
-      storageKey
-    );
+    this.currentStorage = this.fileStore.getInstance(storageKey);
 
     const sessionId = this.currentStorage.get<string>("sessionId");
 
@@ -141,7 +147,7 @@ export class OpenLogin {
       // using console log because it shouldn't be affected by loglevel config
       // eslint-disable-next-line no-console
       logger.log(
-        "WARNING! You are on testnet. Please set network: 'mainnet' in production"
+        "WARNING! You are on testnet. Please set network: 'mainnet' in production",
       );
     }
 
@@ -168,22 +174,24 @@ export class OpenLogin {
 
   async login(
     params: LoginParams & Partial<BaseRedirectParams>,
-    email: string
+    email: string,
   ): Promise<{ privKey: string }> {
     if (!params.loginProvider) throw new Error("loginProvider is required");
     if (!email) throw new Error("email is required");
     if (!this.sessionManager) {
-      throw new Error("cannot login without first initializing session manager");
+      throw new Error(
+        "cannot login without first initializing session manager",
+      );
     }
 
     const loginParams: LoginParams = {
       ...params,
       extraLoginOptions: {
-        login_hint: email
+        login_hint: email,
       },
       // TODO: we are logging the url to the console, need to undertand if the this url can be
       //       copy/pastaed into a browser and still work as expected?  I think so, but want to be sure
-      redirectUrl: `${this.options.sdkUrl}/popup-window`
+      redirectUrl: `${this.options.sdkUrl}/popup-window`,
     };
 
     const base64url = this.getBaseUrl();
@@ -202,7 +210,7 @@ export class OpenLogin {
       });
       const loginFlow = new OpenLoginHandler({
         url: loginUrl,
-        timeout: this.options.timeout
+        timeout: this.options.timeout,
       });
 
       loginFlow.on("close", () => {
@@ -212,15 +220,14 @@ export class OpenLogin {
       loginFlow
         .listenOnChannel(loginId)
         .then((message: BroadcastMessage) => {
+          // TODO: login goes as expected, but this listener is never being notified.
+          //       there's a chance that the open login is blocking it...
 
-
-// TODO: login goes as expected, but this listener is never being notified.
-//       there's a chance that the open login is blocking it...
-
-
-console.log(message);
+          console.log(message);
           if (!this.sessionManager) {
-            throw new Error("cannot authorize session without first initializing session manager");
+            throw new Error(
+              "cannot authorize session without first initializing session manager",
+            );
           }
           this.sessionManager.sessionKey = message.sessionId;
           this.options.sessionNamespace = message.sessionNamespace;
@@ -230,7 +237,7 @@ console.log(message);
         })
         .then((sessionData: OpenloginSessionData) => {
           this.updateState(sessionData);
-console.log(sessionData);
+          console.log(sessionData);
           // TODO: this is the moment of truth here... The cli logging in hinges on
           //       getting this privKey value.
           return resolve({ privKey: this.state.privKey ?? "" });
@@ -238,7 +245,7 @@ console.log(sessionData);
         .catch(reject);
 
       logger.log(
-        `Passwordless email login flow started. Navigate to ${loginUrl}, and check your email.`
+        `Passwordless email login flow started. Navigate to ${loginUrl}, and check your email.`,
       );
     });
   }
@@ -286,7 +293,9 @@ console.log(sessionData);
     return this.state.userInfo;
   }
 
-  async getLoginId(loginParams: LoginParams & Partial<BaseRedirectParams>): Promise<string> {
+  async getLoginId(
+    loginParams: LoginParams & Partial<BaseRedirectParams>,
+  ): Promise<string> {
     if (!this.sessionManager) {
       throw new Error("must initialize session manager before login");
     }
@@ -296,12 +305,14 @@ console.log(sessionData);
     };
 
     const loginId = OpenloginSessionManager.generateRandomSessionKey();
-    const loginSessionMgr = new OpenloginSessionManager<OpenloginSessionConfig>({
-      sessionServerBaseUrl: this.options.storageServerUrl,
-      sessionNamespace: this.options.sessionNamespace,
-      sessionTime: 600, // each login key must be used with 10 mins (might be used at the end of popup redirect)
-      sessionId: loginId,
-    });
+    const loginSessionMgr = new OpenloginSessionManager<OpenloginSessionConfig>(
+      {
+        sessionServerBaseUrl: this.options.storageServerUrl,
+        sessionNamespace: this.options.sessionNamespace,
+        sessionTime: 600, // each login key must be used with 10 mins (might be used at the end of popup redirect)
+        sessionId: loginId,
+      },
+    );
 
     await loginSessionMgr.createSession(JSON.parse(JSON.stringify(dataObject)));
 
@@ -331,12 +342,13 @@ console.log(sessionData);
   }
 }
 
-
-export function getHashQueryParams(): { sessionId?: string; sessionNamespace?: string; error?: string } {
-
+export function getHashQueryParams(): {
+  sessionId?: string;
+  sessionNamespace?: string;
+  error?: string;
+} {
   // TODO: need to replace all this, or just delete it?
   return { sessionId: undefined };
-
 
   // const result: { sessionId?: string; sessionNamespace?: string; error?: string } = {};
 
@@ -417,29 +429,29 @@ class OpenLoginHandler extends EventEmitter {
   }
 
   async listenOnChannel(loginId: string): Promise<BroadcastMessage> {
-console.log("listenOnChannel loginId: ", loginId);
-    return new Promise<{ sessionId: string; sessionNamespace?: string }>((resolve, reject) => {
-      const bc = new BroadcastChannel<{ error?: string; data?: { sessionId: string; sessionNamespace?: string } }>(
-        loginId,
-        {
+    console.log("listenOnChannel loginId: ", loginId);
+    return new Promise<{ sessionId: string; sessionNamespace?: string }>(
+      (resolve, reject) => {
+        const bc = new BroadcastChannel<{
+          error?: string;
+          data?: { sessionId: string; sessionNamespace?: string };
+        }>(loginId, {
           webWorkerSupport: false,
           type: "server",
-        }
-      );
+        });
 
-console.log("listenOnChannel bc: ", bc);
-      bc.addEventListener("message", (eve: any) => {
-        bc.close();
-        if (eve.error) {
-          reject(new Error(eve.error));
-        } else {
-          resolve(eve.data as BroadcastMessage);
-        }
-      });
-    });
+        console.log("listenOnChannel bc: ", bc);
+        bc.addEventListener("message", (eve: any) => {
+          bc.close();
+          if (eve.error) {
+            reject(new Error(eve.error));
+          } else {
+            resolve(eve.data as BroadcastMessage);
+          }
+        });
+      },
+    );
   }
 }
-
-
 
 export default OpenLogin;

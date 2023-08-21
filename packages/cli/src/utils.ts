@@ -67,7 +67,7 @@ export function constructURL(params: {
   }
   if (hash) {
     const h = new URL(
-      constructURL({ baseURL, query: hash })
+      constructURL({ baseURL, query: hash }),
     ).searchParams.toString();
     url.hash = h;
   }
@@ -86,12 +86,12 @@ export function normalizePrivateKey(key: unknown): string {
 export const getChains = function (): typeof helpers.supportedChains {
   return Object.fromEntries(
     Object.entries(helpers.supportedChains).filter(
-      ([name]) => !name.includes("staging")
-    )
+      ([name]) => !name.includes("staging"),
+    ),
   ) as Record<helpers.ChainName, helpers.ChainInfo>;
 };
 export function getChainName(
-  chain: number | helpers.ChainName
+  chain: number | helpers.ChainName,
 ): helpers.ChainName {
   if (typeof chain === "number") {
     // convert chainId to chain name
@@ -181,7 +181,7 @@ export async function getWalletWithProvider({
     } catch (err: any) {
       // ethers.js only gives away default provider keys for some networks
       throw new Error(
-        "no default provider is available for this network, you must provide one via flag (`-p` or `--providerUrl`)"
+        "no default provider is available for this network, you must provide one via flag (`-p` or `--providerUrl`)",
       );
     }
   }
