@@ -1,8 +1,10 @@
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-import type { AppRouter } from '@tableland/studio/server';
-import { getUrl } from "./util"
- 
-const trpc = createTRPCProxyClient<AppRouter>({
+import { AppRouter } from "@tableland/studio/server/routers/_app";
+import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+import superjson from "superjson";
+import { getUrl } from "./util";
+
+const api = createTRPCProxyClient<AppRouter>({
+  transformer: superjson,
   links: [
     httpBatchLink({
       url: getUrl(),
@@ -10,4 +12,4 @@ const trpc = createTRPCProxyClient<AppRouter>({
   ],
 });
 
-export { getUrl, trpc }
+export { api, getUrl };

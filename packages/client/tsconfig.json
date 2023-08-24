@@ -9,7 +9,11 @@
     "strict": true,
     "allowJs": true,
     "skipLibCheck": true,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "paths": {
+      "@tableland/studio": ["../app"]
+    },
+    "noErrorTruncation": true
   },
   "include": ["src"]
 }

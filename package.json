@@ -55,5 +55,8 @@
     "ts-node": "^10.9.1",
     "tsx": "^3.12.7",
     "typescript": "^5.0.2"
+  },
+  "overrides": {
+    "@toruslabs/eccrypto": "^3.0.0"
   }
 }
