@@ -1,7 +1,7 @@
-import db from "@/db/api";
-import { router, teamAdminProcedure, teamProcedure } from "@/server/trpc";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import db from "../../db/api";
+import { router, teamAdminProcedure, teamProcedure } from "../trpc";
 
 export const projectsRouter = router({
   newProject: teamProcedure

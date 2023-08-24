@@ -1,7 +1,7 @@
-import db from "@/db/api";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { z } from "zod";
+import db from "../db/api";
 import { Context } from "./context";
 
 const t = initTRPC.context<Context>().create({ transformer: superjson });

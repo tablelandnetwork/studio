@@ -1,8 +1,8 @@
-import db from "@/db/api";
 import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
 import { generateNonce, SiweMessage } from "siwe";
 import { z } from "zod";
+import db from "../../db/api";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 
 export const authRouter = router({

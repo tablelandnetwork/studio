@@ -1,10 +1,10 @@
-import Session from "@/lib/session";
 import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import {
   RequestCookies,
   ResponseCookies,
 } from "next/dist/compiled/@edge-runtime/cookies";
 import { RequestCookiesAdapter } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import Session from "../lib/session";
 
 export async function createContext(opts?: FetchCreateContextFnOptions) {
   // TODO: Get session and add it to context
