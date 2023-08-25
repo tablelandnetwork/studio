@@ -61,6 +61,7 @@ export const tbl = new Database({
   autoWait: true,
   aliases: databaseAliases,
   baseUrl: helpers.getBaseUrl(+(process.env.CHAIN_ID || "")),
+  apiKey: process.env.VALIDATOR_API_KEY,
 });
 
 export const db = drizzle(tbl, { logger: false, schema });
