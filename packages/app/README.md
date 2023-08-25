@@ -10,6 +10,7 @@ The following instructions will get Studio running on your development machine.
 PRIVATE_KEY=0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356
 PROVIDER_URL=http://127.0.0.1:8545
 CHAIN=local-tableland
+CHAIN_ID=31337
 SESSION_COOKIE_NAME=STUDIO_SESSION
 SESSION_COOKIE_PASS="secure password secure password secure password"
 DATA_SEAL_PASS="secure password secure password secure password"

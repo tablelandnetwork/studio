@@ -1,17 +1,7 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es2020",
-    "module": "es2020",
     "outDir": "./dist",
-    "importHelpers": false,
-    "moduleResolution": "Node",
-    "esModuleInterop": true,
-    "strict": true,
-    "allowJs": true,
-    "skipLibCheck": true,
-    "paths": {
-      "@tableland/studio-client": ["../client/src"]
-    }
   },
   "include": ["src"]
 }
