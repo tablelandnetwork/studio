@@ -1,14 +1,14 @@
 "use client";
 
-import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { authAtom } from "@/store/wallet";
+import { schema } from "@tableland/studio-store";
 import { useAtomValue } from "jotai";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback } from "react";
 
-function links(team?: Team) {
+function links(team?: schema.Team) {
   const links = [
     { label: "Home", href: "/" },
     { label: "Tableland", href: "https://tableland.xyz" },

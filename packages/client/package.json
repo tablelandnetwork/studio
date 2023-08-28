@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/tablelandnetwork/studio#readme",
   "dependencies": {
-    "@tableland/studio": "^0.0.0",
+    "@tableland/studio-api": "^1.0.0",
     "@trpc/client": "^10.37.1"
   }
 }

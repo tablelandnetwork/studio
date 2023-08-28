@@ -11,16 +11,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
-import { Team, TeamInvite, TeamMembership } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { DropdownMenuTriggerProps } from "@radix-ui/react-dropdown-menu";
+import { schema } from "@tableland/studio-store";
 import { MoreHorizontal } from "lucide-react";
 
 type Props = DropdownMenuTriggerProps & {
-  invite: TeamInvite;
-  inviter: Team;
-  user: Team;
-  membership: TeamMembership;
+  invite: schema.TeamInvite;
+  inviter: schema.Team;
+  user: schema.Team;
+  membership: schema.TeamMembership;
 };
 
 export default function InviteActions({

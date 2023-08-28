@@ -3,8 +3,8 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Team, TeamInvite, TeamMembership } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { schema } from "@tableland/studio-store";
 import TimeAgo from "javascript-time-ago";
 import {
   Cake,
@@ -19,11 +19,11 @@ import {
 const timeAgo = new TimeAgo("en-US");
 
 type Props = LucideProps & {
-  user: Team;
-  team: Team;
-  inviter?: Team;
-  invite?: TeamInvite;
-  membership?: TeamMembership;
+  user: schema.Team;
+  team: schema.Team;
+  inviter?: schema.Team;
+  invite?: schema.TeamInvite;
+  membership?: schema.TeamMembership;
 };
 
 export default function Info({

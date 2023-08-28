@@ -1,5 +1,5 @@
 import NewTeamForm from "@/components/new-team-form";
-import Session from "@/lib/session";
+import { Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 

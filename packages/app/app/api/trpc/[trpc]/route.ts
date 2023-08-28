@@ -1,5 +1,5 @@
-import { createContext } from "@/server/context";
-import { appRouter } from "@/server/routers/_app";
+import { store } from "@/lib/store";
+import { appRouter, createContext } from "@tableland/studio-api";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 const handler = (req: Request) => {
@@ -7,7 +7,7 @@ const handler = (req: Request) => {
   return fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
-    router: appRouter,
+    router: appRouter(store),
     createContext,
   });
 };

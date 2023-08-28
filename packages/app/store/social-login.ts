@@ -1,9 +1,9 @@
 import { authenticated, login, logout, nonce, register } from "@/app/actions";
-import { Auth } from "@/lib/session";
 import toChecksumAddress from "@/lib/toChecksumAddr";
 import { ChainId } from "@biconomy/core-types";
 import SmartAccount from "@biconomy/smart-account";
 import SocialLogin from "@biconomy/web3-auth";
+import { Auth } from "@tableland/studio-api";
 import { ethers } from "ethers";
 import { atom } from "jotai";
 import { SiweMessage } from "siwe";

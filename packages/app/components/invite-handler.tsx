@@ -2,8 +2,8 @@
 
 import { acceptInvite, ignoreInvite } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { Team } from "@/db/schema";
 import { authAtom } from "@/store/wallet";
+import { schema } from "@tableland/studio-store";
 import { useAtomValue } from "jotai";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -20,7 +20,7 @@ export default function InviteHandler({
   targetTeam,
 }: {
   seal: string;
-  targetTeam: Team;
+  targetTeam: schema.Team;
 }) {
   const auth = useAtomValue(authAtom);
   const router = useRouter();

@@ -1,5 +1,5 @@
-import db from "@/db/api";
-import Session from "@/lib/session";
+import { store } from "@/lib/store";
+import { Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
@@ -13,13 +13,16 @@ export default async function TeamSettings({
     notFound();
   }
 
-  const team = await db.teams.teamBySlug(params.team);
+  const team = await store.teams.teamBySlug(params.team);
   if (!team) {
     notFound();
   }
 
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+    !(await store.teams.isAuthorizedForTeam(
+      session.auth.personalTeam.id,
+      team.id,
+    ))
   ) {
     notFound();
   }

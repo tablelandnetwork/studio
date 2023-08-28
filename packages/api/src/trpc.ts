@@ -1,7 +1,7 @@
+import { Store } from "@tableland/studio-store";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { z } from "zod";
-import db from "../db/api";
 import { Context } from "./context";
 
 const t = initTRPC.context<Context>().create({ transformer: superjson });
@@ -28,30 +28,31 @@ export const protectedProcedure = publicProcedure.use((opts) => {
     },
   });
 });
-// TODO: See if we can provide more procedures for things like team authorization and team admin.
-export const teamProcedure = protectedProcedure
-  .input(z.object({ teamId: z.string().nonempty() }))
-  .use(async (opts) => {
-    const membership = await db.teams.isAuthorizedForTeam(
-      opts.ctx.session.auth.user.teamId,
-      opts.input.teamId,
-    );
-    if (!membership) {
+export const teamProcedure = (store: Store) =>
+  protectedProcedure
+    .input(z.object({ teamId: z.string().nonempty() }))
+    .use(async (opts) => {
+      const membership = await store.teams.isAuthorizedForTeam(
+        opts.ctx.session.auth.user.teamId,
+        opts.input.teamId,
+      );
+      if (!membership) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "not authorized for team",
+        });
+      }
+      return opts.next({
+        ctx: { teamAuthorization: membership },
+      });
+    });
+export const teamAdminProcedure = (store: Store) =>
+  teamProcedure(store).use(async (opts) => {
+    if (!opts.ctx.teamAuthorization.isOwner) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: "not authorized for team",
+        message: "not authorized as team admin",
       });
     }
-    return opts.next({
-      ctx: { teamAuthorization: membership },
-    });
+    return opts.next();
   });
-export const teamAdminProcedure = teamProcedure.use(async (opts) => {
-  if (!opts.ctx.teamAuthorization.isOwner) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "not authorized as team admin",
-    });
-  }
-  return opts.next();
-});

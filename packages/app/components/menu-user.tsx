@@ -11,14 +11,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Team } from "@/db/schema";
 import { logoutAtom } from "@/store/social-login";
+import { schema } from "@tableland/studio-store";
 import { useSetAtom } from "jotai";
 import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-export default function MenuUser({ personalTeam }: { personalTeam: Team }) {
+export default function MenuUser({
+  personalTeam,
+}: {
+  personalTeam: schema.Team;
+}) {
   const router = useRouter();
 
   const logout = useSetAtom(logoutAtom);

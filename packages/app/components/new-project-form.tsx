@@ -13,15 +13,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Team } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { schema } from "@tableland/studio-store";
 import { Loader2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 
-const schema = z.object({
+const formSchema = z.object({
   name: z.string().min(3),
   description: z
     .string()
@@ -30,13 +30,13 @@ const schema = z.object({
   environments: z.array(z.object({ name: z.string().min(3) })),
 });
 
-export default function NewProjectForm({ team }: { team: Team }) {
+export default function NewProjectForm({ team }: { team: schema.Team }) {
   const [pending, startTransition] = useTransition();
 
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -59,7 +59,7 @@ export default function NewProjectForm({ team }: { team: Team }) {
     },
   );
 
-  function onSubmit(values: z.infer<typeof schema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       const res = await newProject(team.id, values.name, values.description);
       // TODO: Should probably do this within "new project action"

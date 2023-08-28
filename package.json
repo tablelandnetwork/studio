@@ -4,7 +4,9 @@
   "workspaces": [
     "packages/app",
     "packages/cli",
-    "packages/client"
+    "packages/client",
+    "packages/store",
+    "packages/api"
   ],
   "scripts": {
     "test": "lerna run test",

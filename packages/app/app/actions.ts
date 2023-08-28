@@ -1,11 +1,11 @@
 "use server";
 
-import db from "@/db/api";
-import { tbl } from "@/db/api/db";
-import { Project, Team, TeamInvite } from "@/db/schema";
-import Session, { Auth } from "@/lib/session";
+import { store } from "@/lib/store";
+import { tbl } from "@/lib/tbl";
 import { sendInvite } from "@/utils/send";
 import { Validator } from "@tableland/sdk";
+import { Auth, Session } from "@tableland/studio-api";
+import { schema } from "@tableland/studio-store";
 import { unsealData } from "iron-session";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -40,7 +40,9 @@ export async function login(
       // TODO: do we want to verify domain and time here?
     });
     session.siweFields = fields.data;
-    let info = await db.auth.userAndPersonalTeamByAddress(fields.data.address);
+    let info = await store.auth.userAndPersonalTeamByAddress(
+      fields.data.address,
+    );
     if (info) {
       session.auth = info;
     }
@@ -62,7 +64,7 @@ export async function register(
   if (!session.siweFields) {
     return { error: "No SIWE fields found in session" };
   }
-  const auth = await db.auth.createUserAndPersonalTeam(
+  const auth = await store.auth.createUserAndPersonalTeam(
     session.siweFields.address,
     username,
     email,
@@ -89,17 +91,20 @@ export async function newProject(
     throw new Error("Not authenticated");
   }
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, teamId))
+    !(await store.teams.isAuthorizedForTeam(
+      session.auth.personalTeam.id,
+      teamId,
+    ))
   ) {
     // TODO: Proper error return.
     throw new Error("Not authorized");
   }
-  const project = await db.projects.createProject(
+  const project = await store.projects.createProject(
     teamId,
     name,
     description || null,
   );
-  const team = await db.teams.teamById(teamId);
+  const team = await store.teams.teamById(teamId);
   revalidatePath(`/${team.slug}`);
   return project;
 }
@@ -112,13 +117,16 @@ export async function newEnvironment(
   if (!session.auth) {
     throw new Error("Not authenticated");
   }
-  const team = await db.projects.projectTeamByProjectId(projectId);
+  const team = await store.projects.projectTeamByProjectId(projectId);
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+    !(await store.teams.isAuthorizedForTeam(
+      session.auth.personalTeam.id,
+      team.id,
+    ))
   ) {
     throw new Error("Not authorized");
   }
-  const environment = await db.environments.createEnvironment({
+  const environment = await store.environments.createEnvironment({
     projectId,
     title,
   });
@@ -138,13 +146,16 @@ export async function newDeployment(
   if (!session.auth) {
     throw new Error("Not authenticated");
   }
-  const team = await db.projects.projectTeamByEnvironmentId(environmentId);
+  const team = await store.projects.projectTeamByEnvironmentId(environmentId);
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+    !(await store.teams.isAuthorizedForTeam(
+      session.auth.personalTeam.id,
+      team.id,
+    ))
   ) {
     throw new Error("Not authorized");
   }
-  const deployment = await db.deployments.createDeployment({
+  const deployment = await store.deployments.createDeployment({
     tableId,
     environmentId,
     chain,
@@ -157,7 +168,7 @@ export async function newDeployment(
 }
 
 export async function newTable(
-  project: Project,
+  project: schema.Project,
   name: string,
   schema: string,
   description?: string,
@@ -167,14 +178,17 @@ export async function newTable(
     // TODO: Proper error return.
     throw new Error("Not authenticated");
   }
-  const team = await db.projects.projectTeamByProjectId(project.id);
+  const team = await store.projects.projectTeamByProjectId(project.id);
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+    !(await store.teams.isAuthorizedForTeam(
+      session.auth.personalTeam.id,
+      team.id,
+    ))
   ) {
     // TODO: Proper error return.
     throw new Error("Not authorized");
   }
-  const table = await db.tables.createTable(
+  const table = await store.tables.createTable(
     project.id,
     name,
     description || null,
@@ -185,7 +199,7 @@ export async function newTable(
 }
 
 export async function importTable(
-  project: Project,
+  project: schema.Project,
   chainId: number,
   tableId: string,
   name: string,
@@ -196,9 +210,12 @@ export async function importTable(
   if (!session.auth) {
     throw new Error("Not authenticated");
   }
-  const team = await db.projects.projectTeamByProjectId(project.id);
+  const team = await store.projects.projectTeamByProjectId(project.id);
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.personalTeam.id, team.id))
+    !(await store.teams.isAuthorizedForTeam(
+      session.auth.personalTeam.id,
+      team.id,
+    ))
   ) {
     // TODO: Proper error return.
     throw new Error("Not authorized");
@@ -221,7 +238,7 @@ export async function importTable(
     throw new Error("No created attribute found");
   }
 
-  const deployment = await db.deployments.createDeployment({
+  const deployment = await store.deployments.createDeployment({
     tableId: table.id,
     chain: chainId,
     environmentId,
@@ -239,7 +256,7 @@ export async function newTeam(name: string, emailInvites: string[]) {
   if (!session.auth) {
     throw new Error("Not authenticated");
   }
-  const { team, invites } = await db.teams.createTeamByPersonalTeam(
+  const { team, invites } = await store.teams.createTeamByPersonalTeam(
     name,
     session.auth.user.teamId,
     emailInvites,
@@ -249,18 +266,18 @@ export async function newTeam(name: string, emailInvites: string[]) {
   return team;
 }
 
-export async function inviteEmails(team: Team, emails: string[]) {
+export async function inviteEmails(team: schema.Team, emails: string[]) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
     // TODO: Proper error return.
     throw new Error("Not authenticated");
   }
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.user.teamId, team.id))
+    !(await store.teams.isAuthorizedForTeam(session.auth.user.teamId, team.id))
   ) {
     throw new Error("You are not authorized for this team");
   }
-  const invites = await db.invites.inviteEmailsToTeam(
+  const invites = await store.invites.inviteEmailsToTeam(
     team.id,
     session.auth.user.teamId,
     emails,
@@ -269,7 +286,7 @@ export async function inviteEmails(team: Team, emails: string[]) {
   revalidatePath(`/${team.slug}/people`);
 }
 
-export async function resendInvite(invite: TeamInvite) {
+export async function resendInvite(invite: schema.TeamInvite) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
     throw new Error("Not authenticated");
@@ -277,13 +294,13 @@ export async function resendInvite(invite: TeamInvite) {
   await sendInvite(invite);
 }
 
-export async function deleteInvite(invite: TeamInvite) {
+export async function deleteInvite(invite: schema.TeamInvite) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
     throw new Error("Not authenticated");
   }
-  const team = await db.teams.teamById(invite.teamId);
-  await db.invites.deleteInvite(invite.id);
+  const team = await store.teams.teamById(invite.teamId);
+  await store.invites.deleteInvite(invite.id);
   revalidatePath(`/${team.slug}/people`);
 }
 
@@ -296,51 +313,51 @@ export async function acceptInvite(seal: string) {
   const { inviteId } = await unsealData(seal, {
     password: process.env.DATA_SEAL_PASS as string,
   });
-  const invite = await db.invites.inviteById(inviteId as string);
+  const invite = await store.invites.inviteById(inviteId as string);
   if (!invite) {
     throw new Error("Invite not found");
   }
   if (invite.claimedAt || invite.claimedByTeamId) {
     throw new Error("Invite has already been claimed");
   }
-  await db.invites.acceptInvite(invite, session.auth.personalTeam);
+  await store.invites.acceptInvite(invite, session.auth.personalTeam);
 }
 
 export async function ignoreInvite(seal: string) {
   const { inviteId } = await unsealData(seal, {
     password: process.env.DATA_SEAL_PASS as string,
   });
-  const invite = await db.invites.inviteById(inviteId as string);
+  const invite = await store.invites.inviteById(inviteId as string);
   if (!invite) {
     throw new Error("Invite not found");
   }
   if (invite.claimedAt || invite.claimedByTeamId) {
     throw new Error("Invite has already been claimed");
   }
-  await db.invites.deleteInvite(inviteId as string);
+  await store.invites.deleteInvite(inviteId as string);
 }
 
-export async function toggleAdmin(team: Team, member: Team) {
+export async function toggleAdmin(team: schema.Team, member: schema.Team) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
     throw new Error("Not authenticated");
   }
-  await db.teams.toggleAdmin(team.id, member.id);
+  await store.teams.toggleAdmin(team.id, member.id);
   revalidatePath(`/${team.slug}/people`);
 }
 
 export async function removeTeamMember(
-  team: Team,
-  member: Team,
+  team: schema.Team,
+  member: schema.Team,
   claimedInviteId?: string,
 ) {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
     throw new Error("Not authenticated");
   }
-  await db.teams.removeTeamMember(team.id, member.id);
+  await store.teams.removeTeamMember(team.id, member.id);
   if (claimedInviteId) {
-    await db.invites.deleteInvite(claimedInviteId);
+    await store.invites.deleteInvite(claimedInviteId);
   }
   revalidatePath(`/${team.slug}/people`);
 }

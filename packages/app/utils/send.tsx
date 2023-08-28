@@ -1,15 +1,15 @@
-import db from "@/db/api";
-import { TeamInvite } from "@/db/schema";
 import Invite from "@/emails/invite";
+import { store } from "@/lib/store";
 import { render } from "@react-email/render";
+import { schema } from "@tableland/studio-store";
 import { sealData } from "iron-session";
 import * as postmark from "postmark";
 
 const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY || "");
 
-export async function sendInvite(invite: TeamInvite) {
-  const inviterTeam = await db.teams.teamById(invite.inviterTeamId);
-  const team = await db.teams.teamById(invite.teamId);
+export async function sendInvite(invite: schema.TeamInvite) {
+  const inviterTeam = await store.teams.teamById(invite.inviterTeamId);
+  const team = await store.teams.teamById(invite.teamId);
   const seal = await sealData(
     { inviteId: invite.id },
     {

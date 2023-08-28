@@ -1,25 +1,14 @@
 import "./env";
 
-import { databaseAliases } from "@/db/api/db";
+import { databaseAliases } from "@/lib/aliases";
+import { signer } from "@/lib/wallet";
 import { Database } from "@tableland/sdk";
 import { createHash } from "crypto";
-import { Wallet, getDefaultProvider } from "ethers";
 import { readFile, readdir, stat } from "fs/promises";
 import path from "path";
 
-if (!process.env.PRIVATE_KEY) {
-  throw new Error("Must provide PRIVATE_KEY env var.");
-}
-
-if (!process.env.PROVIDER_URL) {
-  throw new Error("Must provide PROVIDER_URL env var.");
-}
-
 const migrationsFolder = "drizzle";
 
-const wallet = new Wallet(process.env.PRIVATE_KEY);
-const provider = getDefaultProvider(process.env.PROVIDER_URL);
-const signer = wallet.connect(provider);
 const tbl = new Database({ signer, autoWait: true, aliases: databaseAliases });
 
 async function migrate() {

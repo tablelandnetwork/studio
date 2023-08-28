@@ -1,4 +1,4 @@
-import type { AppRouter } from "@/server/routers/_app";
+import { AppRouter } from "@tableland/studio-api";
 import { getUrl } from "@tableland/studio-client/src/util";
 import { createTRPCProxyClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { experimental_createTRPCNextAppDirClient } from "@trpc/next/app-dir/client";

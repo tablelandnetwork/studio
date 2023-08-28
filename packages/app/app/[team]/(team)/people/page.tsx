@@ -1,7 +1,7 @@
 import AddressDisplay from "@/components/address-display";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import db from "@/db/api";
-import Session from "@/lib/session";
+import { store } from "@/lib/store";
+import { Session } from "@tableland/studio-api";
 import TimeAgo from "javascript-time-ago";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -18,12 +18,12 @@ export default async function People({ params }: { params: { team: string } }) {
     notFound();
   }
 
-  const team = await db.teams.teamBySlug(params.team);
+  const team = await store.teams.teamBySlug(params.team);
   if (!team) {
     notFound();
   }
 
-  const membership = await db.teams.isAuthorizedForTeam(
+  const membership = await store.teams.isAuthorizedForTeam(
     session.auth.personalTeam.id,
     team.id,
   );
@@ -32,8 +32,8 @@ export default async function People({ params }: { params: { team: string } }) {
     notFound();
   }
 
-  const people = await db.teams.userTeamsForTeamId(team.id);
-  const invites = await db.invites.invitesForTeam(team.id);
+  const people = await store.teams.userTeamsForTeamId(team.id);
+  const invites = await store.invites.invitesForTeam(team.id);
 
   const binnedInvites = invites.reduce<{
     pending: (typeof invites)[number][];

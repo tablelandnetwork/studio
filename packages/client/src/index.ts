@@ -1,4 +1,4 @@
-import type { AppRouter } from "@tableland/studio/server/routers/_app";
+import { AppRouter } from "@tableland/studio-api";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import { getUrl } from "./util";

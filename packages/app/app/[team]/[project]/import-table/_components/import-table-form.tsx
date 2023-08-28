@@ -20,15 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Environment, Project, Team } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const schema = z.object({
+const formSchema = z.object({
   chainId: z.coerce.number().gt(0),
   tableId: z.string().nonempty(),
   name: z.string().nonempty(),
@@ -41,17 +41,17 @@ const schema = z.object({
 });
 
 interface Props {
-  team: Team;
-  project: Project;
-  envs: Environment[];
+  team: schema.Team;
+  project: schema.Project;
+  envs: schema.Environment[];
 }
 
 export default function ImportTableForm({ project, team, envs }: Props) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       chainId: 0,
       tableId: "",
@@ -63,7 +63,7 @@ export default function ImportTableForm({ project, team, envs }: Props) {
 
   const { handleSubmit, control } = form;
 
-  function onSubmit(values: z.infer<typeof schema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       const res = await importTable(
         project,
