@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "cd ../../ && husky install packages/app/.husky",
-    "email": "email dev"
+    "email": "email dev",
+    "gen-migrate": "drizzle-kit generate:sqlite",
+    "exec-migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
     "@biconomy/core-types": "^2.0.2",

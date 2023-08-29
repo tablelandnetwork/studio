@@ -6,9 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "npx tsc",
-    "clean": "rm -rf dist",
-    "gen-migrate": "drizzle-kit generate:sqlite",
-    "exec-migrate": "tsx scripts/migrate.ts"
+    "clean": "rm -rf dist"
   },
   "keywords": [],
   "author": "",
