@@ -1,6 +1,6 @@
-import { Auth } from "@/lib/session";
 import SmartAccount from "@biconomy/smart-account";
 import { Web3Provider } from "@ethersproject/providers";
+import { Auth } from "@tableland/studio-api";
 import { atom } from "jotai";
 
 export const providerAtom = atom<Web3Provider | null>(null);

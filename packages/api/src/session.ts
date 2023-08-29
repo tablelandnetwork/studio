@@ -1,12 +1,13 @@
-import { Team, User } from "@/db/schema";
-import { SESSION_COOKIE_NAME } from "@/lib/consts";
+import { schema } from "@tableland/studio-store";
 import { sealData, unsealData } from "iron-session/edge";
 import { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";
 import { SiweMessage } from "siwe";
 
-export const SESSION_OPTIONS = {
+const SESSION_COOKIE_NAME = "STUDIO_SESSION";
+
+const SESSION_OPTIONS = {
   ttl: 60 * 60 * 24 * 30, // 30 days
   password: process.env.SESSION_COOKIE_PASS!,
 };
@@ -17,8 +18,8 @@ type SiweFields = Omit<
 >;
 
 export type Auth = {
-  user: User;
-  personalTeam: Team;
+  user: schema.User;
+  personalTeam: schema.Team;
 };
 
 export type ISession = {
@@ -27,7 +28,7 @@ export type ISession = {
   auth?: Auth;
 };
 
-class Session {
+export class Session {
   nonce?: string;
   siweFields?: SiweFields;
   auth?: Auth;
@@ -93,5 +94,3 @@ const isCookies = (
 ): cookies is ResponseCookies => {
   return (cookies as ResponseCookies).set !== undefined;
 };
-
-export default Session;

@@ -14,8 +14,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Team } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { schema } from "@tableland/studio-store";
 import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -25,8 +25,8 @@ type PopoverTriggerProps = React.ComponentPropsWithoutRef<
 >;
 
 interface TeamSwitcherProps extends PopoverTriggerProps {
-  team: Team;
-  teams: Team[];
+  team: schema.Team;
+  teams: schema.Team[];
 }
 
 export default function TeamSwitcher({
@@ -37,7 +37,7 @@ export default function TeamSwitcher({
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
-  const teamGroups: { label: string; teams: Team[] }[] = [
+  const teamGroups: { label: string; teams: schema.Team[] }[] = [
     {
       label: "Personal Team",
       teams: [],

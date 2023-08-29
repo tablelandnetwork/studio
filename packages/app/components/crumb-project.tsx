@@ -1,6 +1,6 @@
 "use client";
 
-import db from "@/db/api";
+import { store } from "@/lib/store";
 import { useParams, useRouter } from "next/navigation";
 import { Crumb } from "./crumb";
 
@@ -8,7 +8,7 @@ export function CrumbProject({
   teams,
   ...props
 }: React.HTMLAttributes<HTMLElement> & {
-  teams: Awaited<ReturnType<typeof db.teams.teamsByMemberId>>;
+  teams: Awaited<ReturnType<typeof store.teams.teamsByMemberId>>;
 }) {
   const { team: teamSlug, project: projectSlug } = useParams();
   const router = useRouter();

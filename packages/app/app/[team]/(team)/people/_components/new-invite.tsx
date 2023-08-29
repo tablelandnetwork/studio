@@ -11,23 +11,23 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Team } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { schema } from "@tableland/studio-store";
 import { Loader2, Plus } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const schema = z.object({
+const formSchema = z.object({
   email: z.string().email(),
 });
 
-export default function NewInvite({ team }: { team: Team }) {
+export default function NewInvite({ team }: { team: schema.Team }) {
   const [showForm, setShowForm] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
     },
@@ -39,7 +39,7 @@ export default function NewInvite({ team }: { team: Team }) {
     setShowForm(true);
   }
 
-  function onSubmit(values: z.infer<typeof schema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       await inviteEmails(team, [values.email]);
       setShowForm(false);

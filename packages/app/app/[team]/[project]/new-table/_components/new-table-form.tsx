@@ -23,10 +23,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Environment, Project, Team } from "@/db/schema";
 import { createTableAtom } from "@/store/create-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { helpers } from "@tableland/sdk";
+import { schema } from "@tableland/studio-store";
 import { useAtom } from "jotai";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -36,7 +36,7 @@ import * as z from "zod";
 
 const supportedChains = Object.values(helpers.supportedChains);
 
-const schema = z.object({
+const formSchema = z.object({
   name: z.string(),
   description: z
     .string()
@@ -46,9 +46,9 @@ const schema = z.object({
 });
 
 interface Props {
-  team: Team;
-  project: Project;
-  envs: Environment[];
+  team: schema.Team;
+  project: schema.Project;
+  envs: schema.Environment[];
 }
 
 export default function NewTable({ project, team, envs }: Props) {
@@ -57,8 +57,8 @@ export default function NewTable({ project, team, envs }: Props) {
 
   const [createTable, setCreateTable] = useAtom(createTableAtom);
 
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -75,7 +75,7 @@ export default function NewTable({ project, team, envs }: Props) {
 
   const name = watch("name");
 
-  function onSubmit(values: z.infer<typeof schema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     console.log("values", values);
     startTransition(async () => {
       const statement = createTableStatementFromObject(

@@ -1,5 +1,5 @@
-import db from "@/db/api";
-import Session from "@/lib/session";
+import { store } from "@/lib/store";
+import { Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
@@ -12,16 +12,16 @@ export default async function NewProject({
   if (!session.auth) {
     notFound();
   }
-  const team = await db.teams.teamBySlug(params.team);
+  const team = await store.teams.teamBySlug(params.team);
   if (!team) {
     notFound();
   }
   if (
-    !(await db.teams.isAuthorizedForTeam(session.auth.user.teamId, team.id))
+    !(await store.teams.isAuthorizedForTeam(session.auth.user.teamId, team.id))
   ) {
     notFound();
   }
-  const project = await db.projects.projectByTeamIdAndSlug(
+  const project = await store.projects.projectByTeamIdAndSlug(
     team.id,
     params.project,
   );
@@ -29,9 +29,11 @@ export default async function NewProject({
     notFound();
   }
 
-  const deployments = await db.deployments.deploymentsByProjectId(project.id);
+  const deployments = await store.deployments.deploymentsByProjectId(
+    project.id,
+  );
 
-  const tables = await db.tables.tablesByProjectId(project.id);
+  const tables = await store.tables.tablesByProjectId(project.id);
 
   return <div className="p-4">TBD</div>;
 }

@@ -1,4 +1,4 @@
-import Session from "@/lib/session";
+import { Session } from "@tableland/studio-api";
 import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import { Suspense } from "react";

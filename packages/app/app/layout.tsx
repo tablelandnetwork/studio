@@ -5,8 +5,8 @@ import MesaSvg from "@/components/mesa-svg";
 import { NavPrimary } from "@/components/nav-primary";
 import PrimaryHeaderItem from "@/components/primary-header-item";
 import { Toaster } from "@/components/ui/toaster";
-import db from "@/db/api";
-import Session from "@/lib/session";
+import { store } from "@/lib/store";
+import { Session } from "@tableland/studio-api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
@@ -46,7 +46,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const { auth } = await Session.fromCookies(cookies());
-  const teams = auth ? await db.teams.teamsByMemberId(auth.user.teamId) : [];
+  const teams = auth ? await store.teams.teamsByMemberId(auth.user.teamId) : [];
 
   return (
     <JotaiProvider>

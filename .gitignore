@@ -14,8 +14,8 @@ packages/app/.next/
 /out/
 
 # production
-packages/app/build
-packages/cli/dist
+**/build
+**/dist
 
 # misc
 .DS_Store

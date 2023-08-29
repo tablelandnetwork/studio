@@ -1,13 +1,13 @@
 "use client";
 
-import db from "@/db/api";
-import { Project, Team } from "@/db/schema";
+import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useCallback } from "react";
 
-function projectLinks(team: Team, project: Project) {
+function projectLinks(team: schema.Team, project: schema.Project) {
   return [
     { label: "Schema", href: `/${team.slug}/${project.slug}` },
     { label: "Deployments", href: `/${team.slug}/${project.slug}/deployments` },
@@ -20,7 +20,7 @@ export default function NavProject({
   teams,
   ...props
 }: React.HTMLAttributes<HTMLElement> & {
-  teams: Awaited<ReturnType<typeof db.teams.teamsByMemberId>>;
+  teams: Awaited<ReturnType<typeof store.teams.teamsByMemberId>>;
 }) {
   const pathname = usePathname();
   const { team: teamSlug, project: projectSlug } = useParams();

@@ -7,8 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import db from "@/db/api";
-import Session from "@/lib/session";
+import { store } from "@/lib/store";
+import { Session } from "@tableland/studio-api";
 import { unsealData } from "iron-session";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -26,7 +26,7 @@ export default async function Invite({
   const { inviteId } = await unsealData(searchParams.seal, {
     password: process.env.DATA_SEAL_PASS as string,
   });
-  const invite = await db.invites.inviteById(inviteId as string);
+  const invite = await store.invites.inviteById(inviteId as string);
   if (!invite) {
     notFound();
   }
@@ -34,8 +34,14 @@ export default async function Invite({
   if (invite.claimedByTeamId || invite.claimedAt) {
     notFound();
   }
-  const targetTeam = await db.teams.teamById(invite.teamId);
-  const inviterTeam = await db.teams.teamById(invite.inviterTeamId);
+  const targetTeam = await store.teams.teamById(invite.teamId);
+  if (!targetTeam) {
+    notFound();
+  }
+  const inviterTeam = await store.teams.teamById(invite.inviterTeamId);
+  if (!inviterTeam) {
+    notFound();
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-4">
