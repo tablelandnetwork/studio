@@ -1,4 +1,4 @@
 **/build
 **/coverage
-packages/app/.next
-packages/app/components/ui
+packages/web/.next
+packages/web/components/ui

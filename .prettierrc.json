@@ -3,5 +3,5 @@
     "prettier-plugin-organize-imports",
     "prettier-plugin-tailwindcss"
   ],
-  "tailwindConfig": "./packages/app/tailwind.config.js"
+  "tailwindConfig": "./packages/web/tailwind.config.js"
 }
