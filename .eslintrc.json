@@ -1,7 +1,7 @@
 {
   "settings": {
     "next": {
-      "rootDir": "packages/app"
+      "rootDir": "packages/web"
     }
   },
   "extends": ["next/core-web-vitals", "prettier"]

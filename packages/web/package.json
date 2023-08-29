@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "cd ../../ && husky install packages/app/.husky",
+    "prepare": "cd ../../ && husky install packages/web/.husky",
     "email": "email dev",
     "gen-migrate": "drizzle-kit generate:sqlite",
     "exec-migrate": "tsx scripts/migrate.ts"
