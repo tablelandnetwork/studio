@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
+    "clean": "rm -rf dist",
     "gen-migrate": "drizzle-kit generate:sqlite",
     "exec-migrate": "tsx scripts/migrate.ts"
   },
@@ -14,6 +15,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tableland/sdk": "^4.5.1"
+    "@tableland/sdk": "^4.5.1",
+    "drizzle-orm": "^0.28.5",
+    "iron-session": "^6.3.1"
   }
 }

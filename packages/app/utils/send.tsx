@@ -9,7 +9,13 @@ const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY || "");
 
 export async function sendInvite(invite: schema.TeamInvite) {
   const inviterTeam = await store.teams.teamById(invite.inviterTeamId);
+  if (!inviterTeam) {
+    throw new Error("Inviter team not found");
+  }
   const team = await store.teams.teamById(invite.teamId);
+  if (!team) {
+    throw new Error("Team not found");
+  }
   const seal = await sealData(
     { inviteId: invite.id },
     {

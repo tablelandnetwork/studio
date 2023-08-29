@@ -61,8 +61,7 @@ export function initProjects(
         .innerJoin(projects, eq(teamProjects.projectId, projects.id))
         .where(and(eq(teamProjects.teamId, teamId), eq(projects.slug, slug)))
         .get();
-      // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
-      return res.projects ? res.projects : undefined;
+      return res?.projects;
     },
 
     // TODO: Where does this belong?
@@ -74,7 +73,7 @@ export function initProjects(
         .where(eq(teamProjects.projectId, projectId))
         .orderBy(teams.name)
         .get();
-      return res.teams;
+      return res?.teams;
     },
 
     isAuthorizedForProject: async function (teamId: string, projectId: string) {
@@ -101,7 +100,7 @@ export function initProjects(
         .where(eq(environments.id, environmentId))
         .get();
 
-      return projectTeam.teams;
+      return projectTeam?.teams;
     },
   };
 }

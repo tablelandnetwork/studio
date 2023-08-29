@@ -6,6 +6,7 @@ import { sendInvite } from "@/utils/send";
 import { Validator } from "@tableland/sdk";
 import { Auth, Session } from "@tableland/studio-api";
 import { schema } from "@tableland/studio-store";
+import { TRPCError } from "@trpc/server";
 import { unsealData } from "iron-session";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -99,12 +100,19 @@ export async function newProject(
     // TODO: Proper error return.
     throw new Error("Not authorized");
   }
+  const team = await store.teams.teamById(teamId);
+  if (!team) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Team not found",
+    });
+  }
   const project = await store.projects.createProject(
     teamId,
     name,
     description || null,
   );
-  const team = await store.teams.teamById(teamId);
+
   revalidatePath(`/${team.slug}`);
   return project;
 }
@@ -118,6 +126,9 @@ export async function newEnvironment(
     throw new Error("Not authenticated");
   }
   const team = await store.projects.projectTeamByProjectId(projectId);
+  if (!team) {
+    throw new Error("Team not found");
+  }
   if (
     !(await store.teams.isAuthorizedForTeam(
       session.auth.personalTeam.id,
@@ -147,6 +158,9 @@ export async function newDeployment(
     throw new Error("Not authenticated");
   }
   const team = await store.projects.projectTeamByEnvironmentId(environmentId);
+  if (!team) {
+    throw new Error("Team not found");
+  }
   if (
     !(await store.teams.isAuthorizedForTeam(
       session.auth.personalTeam.id,
@@ -179,6 +193,9 @@ export async function newTable(
     throw new Error("Not authenticated");
   }
   const team = await store.projects.projectTeamByProjectId(project.id);
+  if (!team) {
+    throw new Error("Team not found");
+  }
   if (
     !(await store.teams.isAuthorizedForTeam(
       session.auth.personalTeam.id,
@@ -211,6 +228,9 @@ export async function importTable(
     throw new Error("Not authenticated");
   }
   const team = await store.projects.projectTeamByProjectId(project.id);
+  if (!team) {
+    throw new Error("Team not found");
+  }
   if (
     !(await store.teams.isAuthorizedForTeam(
       session.auth.personalTeam.id,
@@ -300,6 +320,9 @@ export async function deleteInvite(invite: schema.TeamInvite) {
     throw new Error("Not authenticated");
   }
   const team = await store.teams.teamById(invite.teamId);
+  if (!team) {
+    throw new Error("Team not found");
+  }
   await store.invites.deleteInvite(invite.id);
   revalidatePath(`/${team.slug}/people`);
 }

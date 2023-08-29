@@ -1,4 +1,5 @@
 import { Store } from "@tableland/studio-store";
+import { TRPCError } from "@trpc/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { router, teamAdminProcedure, teamProcedure } from "../trpc";
@@ -13,12 +14,19 @@ export function projectsRouter(store: Store) {
         }),
       )
       .mutation(async ({ input }) => {
+        const team = await store.teams.teamById(input.teamId);
+        if (!team) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Team not found",
+          });
+        }
         const project = await store.projects.createProject(
-          input.teamId,
+          team.id,
           input.name,
           input.description || null,
         );
-        const team = await store.teams.teamById(input.teamId);
+
         // TODO: See how revalidate works with tRPC actions tooling and maybe remove this and others.
         revalidatePath(`/${team.slug}`);
         return project;

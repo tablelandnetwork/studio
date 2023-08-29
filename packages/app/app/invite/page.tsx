@@ -35,7 +35,13 @@ export default async function Invite({
     notFound();
   }
   const targetTeam = await store.teams.teamById(invite.teamId);
+  if (!targetTeam) {
+    notFound();
+  }
   const inviterTeam = await store.teams.teamById(invite.inviterTeamId);
+  if (!inviterTeam) {
+    notFound();
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-4">

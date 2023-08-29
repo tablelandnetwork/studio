@@ -209,6 +209,9 @@ export function initTeams(db: DrizzleD1Database<typeof schema>, tbl: Database) {
           ),
         )
         .get();
+      if (!res) {
+        throw new Error("Team membership not found");
+      }
       await db
         .update(teamMemberships)
         .set({ isOwner: res.isOwner ? 0 : 1 })
