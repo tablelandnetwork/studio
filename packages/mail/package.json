@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "email dev --dir src/emails",
     "export": "email export --dir src/emails",
-    "build": "npx tsc",
+    "build": "tsc",
     "clean": "rm -rf dist"
   },
   "dependencies": {
