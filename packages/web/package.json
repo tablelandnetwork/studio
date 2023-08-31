@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "tsc",
-    "build:prod": "next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "prepare": "cd ../../ && husky install packages/web/.husky",
