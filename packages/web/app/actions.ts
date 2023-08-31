@@ -2,7 +2,7 @@
 
 import { store } from "@/lib/store";
 import { tbl } from "@/lib/tbl";
-import { sendInvite } from "@/utils/send";
+import { api } from "@/trpc/server-invoker";
 import { Validator } from "@tableland/sdk";
 import { Auth, Session } from "@tableland/studio-api";
 import { schema } from "@tableland/studio-store";
@@ -272,59 +272,31 @@ export async function importTable(
 }
 
 export async function newTeam(name: string, emailInvites: string[]) {
-  const session = await Session.fromCookies(cookies());
-  if (!session.auth) {
-    throw new Error("Not authenticated");
-  }
-  const { team, invites } = await store.teams.createTeamByPersonalTeam(
-    name,
-    session.auth.user.teamId,
-    emailInvites,
-  );
-  await Promise.all(invites.map((invite) => sendInvite(invite)));
-  revalidatePath(`/${team.slug}`);
+  const team = await api.teams.newTeam.mutate({ name, emailInvites });
+  await api.teams.userTeams.revalidate();
   return team;
 }
 
-export async function inviteEmails(team: schema.Team, emails: string[]) {
-  const session = await Session.fromCookies(cookies());
-  if (!session.auth) {
-    // TODO: Proper error return.
-    throw new Error("Not authenticated");
-  }
-  if (
-    !(await store.teams.isAuthorizedForTeam(session.auth.user.teamId, team.id))
-  ) {
-    throw new Error("You are not authorized for this team");
-  }
-  const invites = await store.invites.inviteEmailsToTeam(
-    team.id,
-    session.auth.user.teamId,
-    emails,
-  );
-  await Promise.all(invites.map((invite) => sendInvite(invite)));
-  revalidatePath(`/${team.slug}/people`);
+export async function inviteEmails(teamId: string, emails: string[]) {
+  await api.invites.inviteEmails.mutate({ teamId, emails });
+  await api.invites.invitesForTeam.revalidate({
+    teamId: teamId,
+  });
 }
 
 export async function resendInvite(invite: schema.TeamInvite) {
-  const session = await Session.fromCookies(cookies());
-  if (!session.auth) {
-    throw new Error("Not authenticated");
-  }
-  await sendInvite(invite);
+  await api.invites.resendInvite.mutate({
+    teamId: invite.teamId,
+    inviteId: invite.id,
+  });
 }
 
 export async function deleteInvite(invite: schema.TeamInvite) {
-  const session = await Session.fromCookies(cookies());
-  if (!session.auth) {
-    throw new Error("Not authenticated");
-  }
-  const team = await store.teams.teamById(invite.teamId);
-  if (!team) {
-    throw new Error("Team not found");
-  }
-  await store.invites.deleteInvite(invite.id);
-  revalidatePath(`/${team.slug}/people`);
+  await api.invites.deleteInvite.mutate({
+    inviteId: invite.id,
+    teamId: invite.teamId,
+  });
+  await api.invites.invitesForTeam.revalidate({ teamId: invite.teamId });
 }
 
 export async function acceptInvite(seal: string) {

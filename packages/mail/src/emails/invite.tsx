@@ -12,18 +12,19 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
+import * as React from "react";
 
-interface Props {
+export interface InviteProps {
   inviterUsername: string;
   teamName: string;
   link: string;
 }
 
-export const VercelInviteUserEmail = ({
+export const InviteUserEmail = ({
   inviterUsername = "user1",
   teamName = "Team",
   link = "https://example.com",
-}: Props) => {
+}: InviteProps) => {
   const previewText = `Join ${teamName} on Tableland Studio`;
 
   return (
@@ -80,4 +81,4 @@ export const VercelInviteUserEmail = ({
   );
 };
 
-export default VercelInviteUserEmail;
+export default InviteUserEmail;
