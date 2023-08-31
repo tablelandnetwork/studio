@@ -5,13 +5,11 @@ import MesaSvg from "@/components/mesa-svg";
 import { NavPrimary } from "@/components/nav-primary";
 import PrimaryHeaderItem from "@/components/primary-header-item";
 import { Toaster } from "@/components/ui/toaster";
-import { store } from "@/lib/store";
-import { Session } from "@tableland/studio-api";
+import { api } from "@/trpc/server-invoker";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
-import { cookies } from "next/headers";
 import Link from "next/link";
 import "./globals.css";
 
@@ -45,8 +43,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { auth } = await Session.fromCookies(cookies());
-  const teams = auth ? await store.teams.teamsByMemberId(auth.user.teamId) : [];
+  var teams: Awaited<ReturnType<typeof api.teams.userTeams.query>> = [];
+  try {
+    teams = await api.teams.userTeams.query();
+  } catch {
+    // This is fine, we just don't have any teams if the user
+    // is unauthorized or some other error happens.
+  }
 
   return (
     <JotaiProvider>

@@ -5,13 +5,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npx tsc",
+    "build": "tsc",
     "clean": "rm -rf dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tableland/studio-mail": "^0.0.0",
     "@tableland/studio-store": "^1.0.0",
     "@trpc/server": "^10.37.1",
     "iron-session": "^6.3.1",

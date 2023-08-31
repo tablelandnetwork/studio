@@ -14,6 +14,7 @@ env:
   PRIVATE_KEY: "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
   CHAIN: "arbitrum-goerli"
   CHAIN_ID: "421613"
+  POSTMARK_API_KEY: ${{ secrets.POSTMARK_API_KEY }}
 
 jobs:
   build:

@@ -6,7 +6,8 @@
     "packages/web",
     "packages/cli",
     "packages/client",
-    "packages/store"
+    "packages/store",
+    "packages/mail"
   ],
   "scripts": {
     "test": "lerna run test",
