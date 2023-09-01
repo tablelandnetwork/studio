@@ -164,7 +164,7 @@ export default function ImportTableForm({ project, team, envs }: Props) {
                 <SelectContent>
                   {envs.map((env) => (
                     <SelectItem key={env.id} value={env.id}>
-                      {env.title}
+                      {env.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

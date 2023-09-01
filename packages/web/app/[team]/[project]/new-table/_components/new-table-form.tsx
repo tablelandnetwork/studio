@@ -62,7 +62,7 @@ export default function NewTable({ project, team, envs }: Props) {
     defaultValues: {
       name: "",
       description: "",
-      deployments: envs.map((env) => ({ env: env.title, chain: "no-deploy" })),
+      deployments: envs.map((env) => ({ env: env.name, chain: "no-deploy" })),
     },
   });
 

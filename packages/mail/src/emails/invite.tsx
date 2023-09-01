@@ -51,7 +51,7 @@ export const InviteUserEmail = ({
               Hi there,
             </Text>
             <Text className="text-[14px] leading-[24px] text-black">
-              <strong>{inviterUsername}</strong> has invited you to the{" "}
+              User <strong>{inviterUsername}</strong> has invited you to the{" "}
               <strong>{teamName}</strong> team on{" "}
               <strong>Tableland Studio</strong>.
             </Text>

@@ -101,7 +101,7 @@ export const projectTables = sqliteTable(
 export const environments = sqliteTable("environments", {
   id: text("id").primaryKey(),
   projectId: text("project_id").notNull(),
-  title: text("title").notNull(),
+  name: text("name").notNull(),
 });
 
 export const deployments = sqliteTable("deployments", {
