@@ -1,39 +1,16 @@
-import { store } from "@/lib/store";
-import { Session } from "@tableland/studio-api";
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
+import { api } from "@/trpc/server-invoker";
 
 export default async function ProjectSettings({
   params,
 }: {
   params: { team: string; project: string };
 }) {
-  const session = await Session.fromCookies(cookies());
-  if (!session.auth) {
-    notFound();
-  }
+  const team = await api.teams.teamBySlug.query({ slug: params.team });
 
-  const team = await store.teams.teamBySlug(params.team);
-  if (!team) {
-    notFound();
-  }
-
-  if (
-    !(await store.teams.isAuthorizedForTeam(
-      session.auth.personalTeam.id,
-      team.id,
-    ))
-  ) {
-    notFound();
-  }
-
-  const project = await store.projects.projectByTeamIdAndSlug(
-    team.id,
-    params.project,
-  );
-  if (!project) {
-    notFound();
-  }
+  const project = await api.projects.projectByTeamIdAndSlug.query({
+    teamId: team.id,
+    slug: params.project,
+  });
 
   return (
     <div>

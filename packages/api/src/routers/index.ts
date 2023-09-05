@@ -18,7 +18,12 @@ export function appRouter(
   dataSealPass: string,
 ) {
   const mailApi = initMailApi(mailApiKey);
-  const sendInvite = createSendInvite(store, createInviteLink, mailApi);
+  const sendInvite = createSendInvite(
+    store,
+    dataSealPass,
+    createInviteLink,
+    mailApi,
+  );
   return router({
     auth: authRouter(store),
     projects: projectsRouter(store),

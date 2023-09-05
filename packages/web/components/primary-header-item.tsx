@@ -1,13 +1,13 @@
 "use client";
 
-import { store } from "@/lib/store";
+import { api } from "@/trpc/server-invoker";
 import { useParams } from "next/navigation";
 import TeamSwitcher from "./team-switcher";
 
 export default function PrimaryHeaderItem({
   teams,
 }: {
-  teams: Awaited<ReturnType<typeof store.teams.teamsByMemberId>>;
+  teams: Awaited<ReturnType<typeof api.teams.userTeams.query>>;
 }) {
   // NOTE: The team param can be undefined depending on the url.
   const { team: teamSlug } = useParams();

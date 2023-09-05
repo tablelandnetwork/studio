@@ -15,7 +15,7 @@ export default async function People({ params }: { params: { team: string } }) {
     notFound();
   }
 
-  const team = await api.teams.teamBySlug.query(params.team);
+  const team = await api.teams.teamBySlug.query({ slug: params.team });
   const people = await api.teams.usersForTeam.query({
     teamId: team.id,
   });

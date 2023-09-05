@@ -42,6 +42,33 @@ export function invitesRouter(
         }
         return await sendInvite(invite);
       }),
+    inviteFromSeal: publicProcedure
+      .input(z.object({ seal: z.string() }))
+      .query(async ({ input }) => {
+        const { inviteId } = await unsealData(input.seal, {
+          password: dataSealPass,
+        });
+        const invite = await store.invites.inviteById(inviteId as string);
+        if (!invite) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Invite not found",
+          });
+        }
+        return invite;
+      }),
+    inviteById: publicProcedure
+      .input(z.object({ inviteId: z.string() }))
+      .query(async ({ input }) => {
+        const invite = await store.invites.inviteById(input.inviteId);
+        if (!invite) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Invite not found",
+          });
+        }
+        return invite;
+      }),
     acceptInvite: protectedProcedure
       .input(z.object({ seal: z.string() }))
       .mutation(async ({ input, ctx }) => {

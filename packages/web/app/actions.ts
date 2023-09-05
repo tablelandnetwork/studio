@@ -1,13 +1,9 @@
 "use server";
 
-import { tbl } from "@/lib/tbl";
 import { api } from "@/trpc/server-invoker";
-import { Validator } from "@tableland/sdk";
 import { Auth } from "@tableland/studio-api";
 import { schema } from "@tableland/studio-store";
 import { revalidatePath } from "next/cache";
-
-const validator = new Validator(tbl.config);
 
 export async function authenticated() {
   return await api.auth.authenticated.query();

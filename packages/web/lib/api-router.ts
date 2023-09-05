@@ -8,7 +8,7 @@ const baseUrl = getBaseUrl();
 export const apiRouter = appRouter(
   store,
   validator,
-  process.env.POSTMARK_API_KEY || "",
+  process.env.POSTMARK_API_KEY!,
   (seal) => `${baseUrl}/invite?seal=${seal}`,
-  process.env.DATA_SEAL_PASS || "",
+  process.env.DATA_SEAL_PASS!,
 );

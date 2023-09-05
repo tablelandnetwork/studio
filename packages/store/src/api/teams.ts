@@ -17,7 +17,11 @@ import {
 } from "../schema";
 import { slugify } from "./utils";
 
-export function initTeams(db: DrizzleD1Database<typeof schema>, tbl: Database) {
+export function initTeams(
+  db: DrizzleD1Database<typeof schema>,
+  tbl: Database,
+  dataSealPass: string,
+) {
   return {
     createTeamByPersonalTeam: async function (
       name: string,
@@ -60,7 +64,7 @@ export function initTeams(db: DrizzleD1Database<typeof schema>, tbl: Database) {
             sealed: await sealData(
               { email },
               {
-                password: process.env.DATA_SEAL_PASS as string,
+                password: dataSealPass,
                 ttl: 0,
               },
             ),

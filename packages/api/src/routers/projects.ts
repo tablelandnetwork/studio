@@ -1,4 +1,5 @@
 import { Store } from "@tableland/studio-store";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { router, teamProcedure } from "../trpc";
 
@@ -8,6 +9,21 @@ export function projectsRouter(store: Store) {
       .input(z.object({}))
       .query(async ({ input }) => {
         return await store.projects.projectsByTeamId(input.teamId);
+      }),
+    projectByTeamIdAndSlug: teamProcedure(store)
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const project = await store.projects.projectByTeamIdAndSlug(
+          input.teamId,
+          input.slug,
+        );
+        if (!project) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Project not found",
+          });
+        }
+        return project;
       }),
     newProject: teamProcedure(store)
       .input(
