@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { DropdownMenuTriggerProps } from "@radix-ui/react-dropdown-menu";
 import { schema } from "@tableland/studio-store";
 import { MoreHorizontal } from "lucide-react";
+import { useTransition } from "react";
 
 type Props = DropdownMenuTriggerProps & {
   team: schema.Team;
@@ -36,39 +37,44 @@ export default function UserActions({
   ...props
 }: Props) {
   const { toast } = useToast();
+  const [pending, startTransition] = useTransition();
 
   async function onToggleAdmin() {
-    await toggleAdmin(team, member);
-    toast({
-      title: "Success!",
-      description: (
-        <p>
-          <span className="font-semibold text-black">{member.name}</span> is{" "}
-          {memberMembership.isOwner ? "no longer" : "now"} an admin.
-        </p>
-      ),
+    startTransition(async () => {
+      await toggleAdmin(team, member);
+      toast({
+        title: "Success!",
+        description: (
+          <p>
+            <span className="font-semibold text-black">{member.name}</span> is{" "}
+            {memberMembership.isOwner ? "no longer" : "now"} an admin.
+          </p>
+        ),
+      });
     });
   }
 
   async function onRemoveUser() {
-    await removeTeamMember(team, member);
-    toast({
-      title: "Success!",
-      description: (
-        <p>
-          <span className="font-semibold text-black">{member.name}</span> has
-          been removed from{" "}
-          <span className="font-semibold text-black">{team.name}</span>.
-        </p>
-      ),
+    startTransition(async () => {
+      await removeTeamMember(team, member);
+      toast({
+        title: "Success!",
+        description: (
+          <p>
+            <span className="font-semibold text-black">{member.name}</span> has
+            been removed from{" "}
+            <span className="font-semibold text-black">{team.name}</span>.
+          </p>
+        ),
+      });
     });
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className={cn(className)} {...props} asChild>
-        <Button variant="ghost">
-          <MoreHorizontal />
+        <Button variant="ghost" disabled={pending}>
+          <MoreHorizontal className={cn(pending && "animate-pulse")} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

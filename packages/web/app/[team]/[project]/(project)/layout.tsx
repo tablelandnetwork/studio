@@ -1,17 +1,17 @@
 import { CrumbProject } from "@/components/crumb-project";
 import NavProject from "@/components/nav-project";
 import { Search } from "@/components/search";
-import { store } from "@/lib/store";
-import { Session } from "@tableland/studio-api";
-import { cookies } from "next/headers";
+import { api } from "@/trpc/server-invoker";
 
 export default async function ProjectLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { auth } = await Session.fromCookies(cookies());
-  const teams = auth ? await store.teams.teamsByMemberId(auth.user.teamId) : [];
+  var teams: Awaited<ReturnType<typeof api.teams.userTeams.query>> = [];
+  try {
+    teams = await api.teams.userTeams.query();
+  } catch {}
   return (
     <div className="flex flex-1 flex-col">
       <CrumbProject teams={teams} className="px-4 pb-1 pt-3" />

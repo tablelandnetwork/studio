@@ -12,16 +12,16 @@ export function initEnvironments(
   return {
     createEnvironment: async function ({
       projectId,
-      title,
+      name,
     }: {
       projectId: string;
-      title: string;
+      name: string;
     }) {
       const id = randomUUID();
       const environment = {
         id,
         projectId,
-        title,
+        name,
       };
       const { sql, params } = db
         .insert(environments)

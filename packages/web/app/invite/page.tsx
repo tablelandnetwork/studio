@@ -7,9 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { store } from "@/lib/store";
+import { api } from "@/trpc/server-invoker";
 import { Session } from "@tableland/studio-api";
-import { unsealData } from "iron-session";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
@@ -18,30 +17,22 @@ export default async function Invite({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const session = await Session.fromCookies(cookies());
-
   if (typeof searchParams.seal !== "string") {
     notFound();
   }
-  const { inviteId } = await unsealData(searchParams.seal, {
-    password: process.env.DATA_SEAL_PASS as string,
+  const invite = await api.invites.inviteFromSeal.query({
+    seal: searchParams.seal,
   });
-  const invite = await store.invites.inviteById(inviteId as string);
-  if (!invite) {
-    notFound();
-  }
   // TODO: Return not found if invite is expired
   if (invite.claimedByTeamId || invite.claimedAt) {
     notFound();
   }
-  const targetTeam = await store.teams.teamById(invite.teamId);
-  if (!targetTeam) {
-    notFound();
-  }
-  const inviterTeam = await store.teams.teamById(invite.inviterTeamId);
-  if (!inviterTeam) {
-    notFound();
-  }
+  const targetTeam = await api.teams.teamById.query({ teamId: invite.teamId });
+  const inviterTeam = await api.teams.teamById.query({
+    teamId: invite.inviterTeamId,
+  });
+
+  const session = await Session.fromCookies(cookies());
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-4">

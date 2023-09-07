@@ -17,7 +17,11 @@ import {
 } from "../schema";
 import { slugify } from "./utils";
 
-export function initTeams(db: DrizzleD1Database<typeof schema>, tbl: Database) {
+export function initTeams(
+  db: DrizzleD1Database<typeof schema>,
+  tbl: Database,
+  dataSealPass: string,
+) {
   return {
     createTeamByPersonalTeam: async function (
       name: string,
@@ -60,7 +64,7 @@ export function initTeams(db: DrizzleD1Database<typeof schema>, tbl: Database) {
             sealed: await sealData(
               { email },
               {
-                password: process.env.DATA_SEAL_PASS as string,
+                password: dataSealPass,
                 ttl: 0,
               },
             ),
@@ -225,7 +229,7 @@ export function initTeams(db: DrizzleD1Database<typeof schema>, tbl: Database) {
     },
 
     removeTeamMember: async function (teamId: string, memberId: string) {
-      await db
+      const { sql: membershipsSql, params: membershipsParams } = db
         .delete(teamMemberships)
         .where(
           and(
@@ -233,7 +237,16 @@ export function initTeams(db: DrizzleD1Database<typeof schema>, tbl: Database) {
             eq(teamMemberships.memberTeamId, memberId),
           ),
         )
-        .run();
+        .toSQL();
+      const { sql: invitesSql, params: invitesParams } = db
+        .delete(teamInvites)
+        .where(eq(teamInvites.claimedByTeamId, memberId))
+        .toSQL();
+      const batch = [
+        tbl.prepare(membershipsSql).bind(membershipsParams),
+        tbl.prepare(invitesSql).bind(invitesParams),
+      ];
+      await tbl.batch(batch);
     },
   };
 }

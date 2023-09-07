@@ -9,6 +9,7 @@ const t = initTRPC.context<Context>().create({ transformer: superjson });
 export const middleware = t.middleware;
 export const router = t.router;
 export const publicProcedure = t.procedure;
+
 export const protectedProcedure = publicProcedure.use((opts) => {
   const { session } = opts.ctx;
   if (!session.auth) {
@@ -28,6 +29,7 @@ export const protectedProcedure = publicProcedure.use((opts) => {
     },
   });
 });
+
 export const teamProcedure = (store: Store) =>
   protectedProcedure
     .input(z.object({ teamId: z.string().nonempty() }))
@@ -46,6 +48,7 @@ export const teamProcedure = (store: Store) =>
         ctx: { teamAuthorization: membership },
       });
     });
+
 export const teamAdminProcedure = (store: Store) =>
   teamProcedure(store).use(async (opts) => {
     if (!opts.ctx.teamAuthorization.isOwner) {
@@ -56,3 +59,31 @@ export const teamAdminProcedure = (store: Store) =>
     }
     return opts.next();
   });
+
+export const projectProcedure = (store: Store) =>
+  protectedProcedure
+    .input(z.object({ projectId: z.string().nonempty() }))
+    .use(async (opts) => {
+      const team = await store.projects.projectTeamByProjectId(
+        opts.input.projectId,
+      );
+      if (!team) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "no team for project id found",
+        });
+      }
+      const membership = await store.teams.isAuthorizedForTeam(
+        opts.ctx.session.auth.user.teamId,
+        team.id,
+      );
+      if (!membership) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "not authorized for team",
+        });
+      }
+      return opts.next({
+        ctx: { teamAuthorization: membership },
+      });
+    });

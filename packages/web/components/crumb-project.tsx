@@ -1,6 +1,6 @@
 "use client";
 
-import { store } from "@/lib/store";
+import { api } from "@/trpc/server-invoker";
 import { useParams, useRouter } from "next/navigation";
 import { Crumb } from "./crumb";
 
@@ -8,7 +8,7 @@ export function CrumbProject({
   teams,
   ...props
 }: React.HTMLAttributes<HTMLElement> & {
-  teams: Awaited<ReturnType<typeof store.teams.teamsByMemberId>>;
+  teams: Awaited<ReturnType<typeof api.teams.userTeams.query>>;
 }) {
   const { team: teamSlug, project: projectSlug } = useParams();
   const router = useRouter();

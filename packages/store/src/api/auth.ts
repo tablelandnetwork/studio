@@ -7,7 +7,11 @@ import * as schema from "../schema";
 import { teamMemberships, teams, users } from "../schema";
 import { slugify } from "./utils";
 
-export function auth(db: DrizzleD1Database<typeof schema>, tbl: Database) {
+export function auth(
+  db: DrizzleD1Database<typeof schema>,
+  tbl: Database,
+  dataSealPass: string,
+) {
   async function userAndPersonalTeamByAddress(address: string) {
     const res = await db
       .select({
@@ -23,7 +27,7 @@ export function auth(db: DrizzleD1Database<typeof schema>, tbl: Database) {
     }
     const { sealed, ...rest } = res.user;
     const { email } = await unsealData(sealed, {
-      password: process.env.DATA_SEAL_PASS as string,
+      password: dataSealPass,
     });
     return {
       user: {
@@ -43,7 +47,7 @@ export function auth(db: DrizzleD1Database<typeof schema>, tbl: Database) {
       const teamId = randomUUID();
       const sealed = await sealData(
         { email },
-        { password: process.env.DATA_SEAL_PASS as string, ttl: 0 },
+        { password: dataSealPass, ttl: 0 },
       );
       const { sql: usersSql, params: usersParams } = db
         .insert(users)

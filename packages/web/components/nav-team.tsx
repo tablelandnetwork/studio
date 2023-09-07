@@ -1,7 +1,7 @@
 "use client";
 
-import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { api } from "@/trpc/server-invoker";
 import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -24,7 +24,7 @@ export default function NavTeam({
   teams,
   ...props
 }: React.HTMLAttributes<HTMLElement> & {
-  teams: Awaited<ReturnType<typeof store.teams.teamsByMemberId>>;
+  teams: Awaited<ReturnType<typeof api.teams.userTeams.query>>;
 }) {
   const pathname = usePathname();
   const { team: teamSlug, project: projectSlug } = useParams();

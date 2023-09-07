@@ -14,7 +14,11 @@ import {
   teams,
 } from "../schema";
 
-export function invites(db: DrizzleD1Database<typeof schema>, tbl: Database) {
+export function invites(
+  db: DrizzleD1Database<typeof schema>,
+  tbl: Database,
+  dataSealPass: string,
+) {
   return {
     inviteEmailsToTeam: async function (
       teamId: string,
@@ -40,7 +44,7 @@ export function invites(db: DrizzleD1Database<typeof schema>, tbl: Database) {
           sealed: await sealData(
             { email },
             {
-              password: process.env.DATA_SEAL_PASS as string,
+              password: dataSealPass,
               ttl: 0,
             },
           ),
@@ -59,7 +63,7 @@ export function invites(db: DrizzleD1Database<typeof schema>, tbl: Database) {
       if (!invite) return undefined;
       const { sealed, ...rest } = invite;
       const { email } = await unsealData(sealed, {
-        password: process.env.DATA_SEAL_PASS as string,
+        password: dataSealPass,
       });
       return {
         ...rest,
@@ -116,7 +120,7 @@ export function invites(db: DrizzleD1Database<typeof schema>, tbl: Database) {
         invitesSealed.map(
           async ({ inviter, invite: { sealed, ...rest }, claimedBy }) => {
             const { email } = await unsealData(sealed, {
-              password: process.env.DATA_SEAL_PASS as string,
+              password: dataSealPass,
             });
             return {
               inviter,

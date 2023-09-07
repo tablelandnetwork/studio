@@ -6,35 +6,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { store } from "@/lib/store";
-import { Session } from "@tableland/studio-api";
+import { api } from "@/trpc/server-invoker";
 import { Plus } from "lucide-react";
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
 export default async function Projects({
   params,
 }: {
   params: { team: string };
 }) {
-  const session = await Session.fromCookies(cookies());
-  if (!session.auth) {
-    notFound();
-  }
-
-  const team = await store.teams.teamBySlug(params.team);
-  if (!team) {
-    notFound();
-  }
-
-  if (
-    !(await store.teams.isAuthorizedForTeam(session.auth.user.teamId, team.id))
-  ) {
-    notFound();
-  }
-
-  const projects = await store.projects.projectsByTeamId(team.id);
+  const team = await api.teams.teamBySlug.query({ slug: params.team });
+  const projects = await api.projects.teamProjects.query({ teamId: team.id });
 
   return (
     <div className="container m-auto grid grid-flow-row grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
