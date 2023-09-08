@@ -40,9 +40,15 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         const { name } = argv;
+        if (typeof name !== "string" || name.trim() === "") {
+          throw new Error("must provide valid team");
+        }
         const privateKey = normalizePrivateKey(argv.privateKey);
 
-        const teams = await api.teams.teamById.query({ teamId: name });
+        // TODO: `name` needs to be converted to teamId for this to work.
+        //       Alternatively we could create a new rpc endpoint that takes
+        //       wallet or email or whatever account identifier we want.
+        const teams = await api.teams.userTeams.query({ teamId: name });
 
         logger.table(teams);
       },
