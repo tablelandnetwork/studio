@@ -67,21 +67,25 @@ const _argv = yargs(hideBin(process.argv))
   // custom options are in alphabetical order
   .option("baseUrl", {
     type: "string",
+    default: "",
     description: "The URL of your Tableland validator",
   })
   .option("chain", {
     alias: "c",
     type: "string",
+    default: "",
     description: "The EVM chain to target",
   })
   .option("privateKey", {
     alias: "k",
     type: "string",
+    default: "",
     description: "Private key string",
   })
   .option("providerUrl", {
     alias: "p",
     type: "string",
+    default: "",
     description:
       "JSON RPC API provider URL. (e.g., https://eth-rinkeby.alchemyapi.io/v2/123abc123a...)",
   })

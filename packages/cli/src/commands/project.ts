@@ -1,16 +1,8 @@
 import type { Arguments } from "yargs";
 import yargs from "yargs";
-
-import superjson from "superjson";
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-
-import { init } from "@tableland/studio-store";
-import { AppRouter, Session } from "@tableland/studio-api";
-import { api } from "@tableland/studio-client";
-import { initMailApi } from "@tableland/studio-mail";
-
+// import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
-import { logger, normalizePrivateKey } from "../utils.js";
+import { normalizePrivateKey } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -28,8 +20,8 @@ export interface CommandOptions extends GlobalOptions {
 export const builder = function (args: Yargs) {
   return args
     .command(
-      "ls <name|address|email>",
-      "Get a list of teams for a user",
+      "ls <name>",
+      "Get the current controller address for a table",
       function (args) {
         return args.positional("name", {
           type: "string",
@@ -41,10 +33,6 @@ export const builder = function (args: Yargs) {
       async function (argv) {
         const { name } = argv;
         const privateKey = normalizePrivateKey(argv.privateKey);
-
-        const teams = await api.teams.teamById.query({ teamId: name });
-
-        logger.table(teams);
       },
     )
     .command(
@@ -76,9 +64,8 @@ export const builder = function (args: Yargs) {
         const privateKey = normalizePrivateKey(argv.privateKey);
 
         if (typeof name !== "string") throw new Error("must provide team name");
-        if (typeof personalTeamId !== "string") {
+        if (typeof personalTeamId !== "string")
           throw new Error("must provide personal team id");
-        }
         console.log("doing create by pId...");
         // const result = await createTeamByPersonalTeam(
         //   name,

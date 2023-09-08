@@ -19,6 +19,7 @@ export function authRouter(store: Store) {
       .input(z.object({ message: z.string(), signature: z.string() }))
       .mutation(async ({ input, ctx }) => {
         try {
+console.log("doing `login`: " + input.message);
           const siweMessage = new SiweMessage(input.message);
           const fields = await siweMessage.verify({
             signature: input.signature,
@@ -48,6 +49,7 @@ export function authRouter(store: Store) {
     register: publicProcedure
       .input(z.object({ username: z.string(), email: z.string().optional() }))
       .mutation(async ({ input, ctx }) => {
+console.log("doing `register`: " + JSON.stringify(input));
         if (!ctx.session.siweFields) {
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
