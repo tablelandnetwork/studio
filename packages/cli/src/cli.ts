@@ -89,5 +89,12 @@ const _argv = yargs(hideBin(process.argv))
     description:
       "JSON RPC API provider URL. (e.g., https://eth-rinkeby.alchemyapi.io/v2/123abc123a...)",
   })
+  .option("apiUrl", {
+    alias: "p",
+    type: "string",
+    default: "https://studio.tableland.xyz",
+    description:
+      "RPC URL for the Studio API",
+  })
   .demandCommand(1, "")
   .strict().argv;

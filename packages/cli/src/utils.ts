@@ -2,6 +2,8 @@ import { helpers } from "@tableland/sdk";
 import { Wallet, getDefaultProvider, providers } from "ethers";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import createKeccakHash from "keccak";
+
 
 export interface FileStoreOptions {
   storePath: string;
@@ -203,6 +205,21 @@ export async function getWalletWithProvider({
 
   /* c8 ignore stop */
   return wallet.connect(provider);
+}
+
+// TODO: this helper is used by multiple packages. We should probably create a utils packages.
+export function toChecksumAddress(address: string) {
+  address = address.toLowerCase().replace("0x", "");
+  var hash = createKeccakHash("keccak256").update(address).digest("hex");
+  var ret = "0x";
+  for (var i = 0; i < address.length; i++) {
+    if (parseInt(hash[i], 16) >= 8) {
+      ret += address[i].toUpperCase();
+    } else {
+      ret += address[i];
+    }
+  }
+  return ret;
 }
 
 // Wrap any direct calls to console.log, so that test spies can distinguise between

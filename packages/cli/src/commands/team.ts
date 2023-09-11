@@ -28,14 +28,14 @@ export interface CommandOptions extends GlobalOptions {
 export const builder = function (args: Yargs) {
   return args
     .command(
-      "ls <name|address|email>",
+      "ls <name|address|email|id>",
       "Get a list of teams for a user",
       function (args) {
         return args.positional("name", {
           type: "string",
           default: "",
           description:
-            "optional team name, if not provided all teams are returned",
+            "optional team identifier, if not provided the current user's session is used",
         });
       },
       async function (argv) {
