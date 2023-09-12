@@ -3,7 +3,6 @@
 import { api } from "@/trpc/server-invoker";
 import { Auth } from "@tableland/studio-api";
 import { schema } from "@tableland/studio-store";
-import { revalidatePath } from "next/cache";
 
 export async function authenticated() {
   return await api.auth.authenticated.query();
@@ -19,6 +18,7 @@ export async function login(
 ): Promise<{ auth?: Auth; error?: string }> {
   try {
     const auth = await api.auth.login.mutate({ message, signature });
+    await api.auth.authenticated.revalidate(undefined);
     return { auth };
   } catch (e: any) {
     return { error: e.message };
@@ -31,6 +31,7 @@ export async function register(
 ): Promise<{ auth?: Auth; error?: string }> {
   try {
     const auth = await api.auth.register.mutate({ username, email });
+    await api.auth.authenticated.revalidate(undefined);
     return { auth };
   } catch (e: any) {
     return { error: e.message };
@@ -39,7 +40,7 @@ export async function register(
 
 export async function logout() {
   await api.auth.logout.mutate();
-  revalidatePath("/");
+  await api.auth.authenticated.revalidate(undefined);
 }
 
 export async function newProject(
