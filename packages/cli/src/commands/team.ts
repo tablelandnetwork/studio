@@ -7,9 +7,7 @@ import { init } from "@tableland/studio-store";
 import { AppRouter, Session } from "@tableland/studio-api";
 import { initMailApi } from "@tableland/studio-mail";
 import { type GlobalOptions } from "../cli.js";
-import { logger, normalizePrivateKey, getApi } from "../utils.js";
-
-const api = getApi();
+import { logger, normalizePrivateKey, getApi, FileStore } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -17,9 +15,8 @@ export const command = "team <sub>";
 export const desc = "manage studio teams";
 
 export interface CommandOptions extends GlobalOptions {
-  ls?: string;
-  create?: string;
   name?: string;
+  identifier?: string;
   personalTeamId?: string;
   invites?: string;
 }
@@ -27,27 +24,28 @@ export interface CommandOptions extends GlobalOptions {
 export const builder = function (args: Yargs) {
   return args
     .command(
-      "ls <name|address|email|id>",
+      "ls [identifier]",
       "Get a list of teams for a user",
       function (args) {
-        return args.positional("name", {
+        return args.positional("identifier", {
           type: "string",
-          default: "",
           description:
-            "optional team identifier, if not provided the current user's session is used",
+            "Optional team identifier. Can be team id, email, wallet address, or username. If not provided the current user's session is used",
         });
       },
       async function (argv) {
-        const { name } = argv;
-        if (typeof name !== "string" || name.trim() === "") {
-          throw new Error("must provide valid team");
-        }
-        const privateKey = normalizePrivateKey(argv.privateKey);
+        const { identifier, store } = argv;
+        const api = getApi(new FileStore(store as string));
 
-        // TODO: `name` needs to be converted to teamId for this to work.
-        //       Alternatively we could create a new rpc endpoint that takes
-        //       wallet or email or whatever account identifier we want.
-        const teams = await api.teams.userTeams.query({ teamId: name });
+        let query;
+        if (typeof identifier === "string" && identifier.trim() !== "") {
+          // TODO: `identifier` needs to be converted to teamId for this to work.
+          //       Alternatively we could create a new rpc endpoint that takes
+          //       wallet or email or whatever account identifier we want.
+          query = { teamId: identifier }
+        }
+
+        const teams = await api.teams.userTeams.query(query);
 
         logger.table(teams);
       },
@@ -77,7 +75,9 @@ export const builder = function (args: Yargs) {
       },
       async function (argv: CommandOptions) {
         console.log("trying to create team...");
-        const { name, personalTeamId, invites } = argv;
+        const { name, personalTeamId, invites, store } = argv;
+
+        const api = getApi(new FileStore(store));
         const privateKey = normalizePrivateKey(argv.privateKey);
 
         if (typeof name !== "string") throw new Error("must provide team name");
@@ -112,7 +112,9 @@ export const builder = function (args: Yargs) {
           });
       },
       async function (argv) {
-        const { team, user, privateKey, providerUrl } = argv;
+        const { team, user, privateKey, providerUrl, store } = argv;
+        const api = getApi(new FileStore(store));
+
       },
     );
 };

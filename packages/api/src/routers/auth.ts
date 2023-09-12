@@ -8,7 +8,6 @@ import { protectedProcedure, publicProcedure, router } from "../trpc";
 export function authRouter(store: Store) {
   return router({
     authenticated: publicProcedure.input(z.void()).query(({ ctx }) => {
-console.log("checking authenticated: " + JSON.stringify(ctx));
       return ctx.session.auth;
     }),
     nonce: publicProcedure.input(z.void()).mutation(async ({ ctx }) => {
@@ -20,7 +19,6 @@ console.log("checking authenticated: " + JSON.stringify(ctx));
       .input(z.object({ message: z.string(), signature: z.string() }))
       .mutation(async ({ input, ctx }) => {
         try {
-console.log("doing `login`: " + input.message);
           const siweMessage = new SiweMessage(input.message);
           const fields = await siweMessage.verify({
             signature: input.signature,
@@ -32,7 +30,6 @@ console.log("doing `login`: " + input.message);
             fields.data.address,
           );
           if (info) {
-console.log("got info: " + JSON.stringify(info));
             ctx.session.auth = info;
           }
           return ctx.session.auth;
@@ -51,7 +48,6 @@ console.log("got info: " + JSON.stringify(info));
     register: publicProcedure
       .input(z.object({ username: z.string(), email: z.string().optional() }))
       .mutation(async ({ input, ctx }) => {
-console.log("doing `register`: " + JSON.stringify(input));
         if (!ctx.session.siweFields) {
           throw new TRPCError({
             code: "PRECONDITION_FAILED",

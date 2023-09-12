@@ -2,17 +2,19 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
-import { normalizePrivateKey } from "../utils.js";
+import { normalizePrivateKey, getApi, FileStore, logger } from "../utils.js";
 
 type Yargs = typeof yargs;
 
-export const command = "team <sub>";
+export const command = "project <sub>";
 export const desc = "manage studio teams";
 
 export interface CommandOptions extends GlobalOptions {
-  ls?: string;
-  create?: string;
+  teamId?: string;
   name?: string;
+  description?: string;
+  team?: string;
+  user?: string;
   personalTeamId?: string;
   invites?: string;
 }
@@ -20,63 +22,60 @@ export interface CommandOptions extends GlobalOptions {
 export const builder = function (args: Yargs) {
   return args
     .command(
-      "ls <name>",
-      "Get the current controller address for a table",
+      "ls [teamId]",
+      "list the projects for the given id, or if no id is given, for currenlty logged in user",
       function (args) {
-        return args.positional("name", {
+        return args.positional("teamId", {
           type: "string",
-          default: "",
           description:
-            "optional team name, if not provided all teams are returned",
+            "optional team id",
         });
       },
       async function (argv) {
-        const { name } = argv;
-        const privateKey = normalizePrivateKey(argv.privateKey);
+        const { teamId, store } = argv;
+        const api = getApi(new FileStore(store as string));
+
+        let query;
+        if (typeof teamId === "string" && teamId.trim() !== "") {
+          query = { teamId };
+        }
+
+        const projects = await api.projects.teamProjects.query(query);
+        logger.table(projects);
       },
     )
     .command(
-      "create <name>",
-      "create a team with the given name",
+      "create <name> [description]",
+      "create a team with the given name, and optional description",
       function (args) {
         return args
           .positional("name", {
             type: "string",
-            description:
-              "optional team name, if not provided all teams are returned",
+            description: "the team name",
           })
-          .option("personalTeamId", {
-            // TODO: can we look this up instead of asking for it as an option?
+          .option("description", {
             type: "string",
-            default: "",
-            description: "id of your personal team",
+            description: "the team description",
           })
-          .option("invites", {
+          .option("teamId", {
             type: "string",
-            default: "",
-            description:
-              "comma separated list of emails to be invited to the team",
+            description: "the team associated with the project",
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
-        console.log("trying to create team...");
-        const { name, personalTeamId, invites } = argv;
-        const privateKey = normalizePrivateKey(argv.privateKey);
+        const { name, teamId, description, store } = argv;
+        const api = getApi(new FileStore(store as string));
 
-        if (typeof name !== "string") throw new Error("must provide team name");
-        if (typeof personalTeamId !== "string")
-          throw new Error("must provide personal team id");
-        console.log("doing create by pId...");
-        // const result = await createTeamByPersonalTeam(
-        //   name,
-        //   personalTeamId,
-        //   (invites ?? "")
-        //     .split(",")
-        //     .map((email) => email.trim())
-        //     .filter((i) => i)
-        // );
+        if (typeof name !== "string") throw new Error("must provide project name");
+        if (typeof teamId !== "string") throw new Error("must provide team for project");
 
-        //logger.log(JSON.stringify(result));
+        const result = await api.projects.newProject.mutate({
+          teamId,
+          name,
+          description,
+        });
+
+        logger.log(JSON.stringify(result));
       },
     )
     .command(

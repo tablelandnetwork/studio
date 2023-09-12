@@ -18,7 +18,12 @@ export const getApi = function (fileStore?: FileStore) {
       return res;
     },
     headers: function () {
-      return { cookie: fileStore.get(sessionKey) };
+      const cookie = fileStore.get(sessionKey);
+
+      if (typeof cookie === "string") {
+        return { cookie };
+      }
+      return {};
     }
   } : undefined);
 };

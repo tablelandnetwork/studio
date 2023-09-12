@@ -38,6 +38,9 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
       .query(async ({ input, ctx }) => {
         const teamId = input?.teamId || ctx.session.auth?.user.teamId;
 
+console.log("teamId:", teamId);
+console.log("ctx:", JSON.stringify(ctx, null, 4));
+
         if (typeof teamId !== "string" || teamId.trim() === "") {
           throw new TRPCError({
             code: "BAD_REQUEST",
