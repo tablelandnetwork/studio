@@ -1,10 +1,10 @@
-import AutoLoginWrapper from "@/components/auto-login-wrapper";
 import Footer from "@/components/footer";
 import { JotaiProvider } from "@/components/jotai-provider";
 import MesaSvg from "@/components/mesa-svg";
 import { NavPrimary } from "@/components/nav-primary";
 import PrimaryHeaderItem from "@/components/primary-header-item";
 import { Toaster } from "@/components/ui/toaster";
+import WagmiProvider from "@/components/wagmi-provider";
 import { api } from "@/trpc/server-invoker";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
@@ -38,6 +38,11 @@ const UserActions = dynamic(
   { ssr: false },
 );
 
+const Profile = dynamic(
+  () => import("@/components/profile").then((res) => res.default),
+  { ssr: false },
+);
+
 export default async function RootLayout({
   children,
 }: {
@@ -52,30 +57,31 @@ export default async function RootLayout({
   }
 
   return (
-    <JotaiProvider>
-      <html
-        lang="en"
-        className={`${sourceSans3.variable} ${sourceCodePro.variable}`}
-      >
-        <body className="flex min-h-screen flex-col">
-          <AutoLoginWrapper />
-          <header className="flex items-center justify-between px-4 py-3">
-            <div className="flex flex-row items-center gap-x-2">
-              <Link href="/">
-                <MesaSvg />
-              </Link>
-              <PrimaryHeaderItem teams={teams} />
-            </div>
-            <div className="ml-auto flex items-center space-x-4">
-              <NavPrimary />
-              <UserActions />
-            </div>
-          </header>
-          <div className="flex flex-1 flex-col">{children}</div>
-          <Footer />
-          <Toaster />
-        </body>
-      </html>
-    </JotaiProvider>
+    <WagmiProvider>
+      <JotaiProvider>
+        <html
+          lang="en"
+          className={`${sourceSans3.variable} ${sourceCodePro.variable}`}
+        >
+          <body className="flex min-h-screen flex-col">
+            <header className="flex items-center justify-between px-4 py-3">
+              <div className="flex flex-row items-center gap-x-2">
+                <Link href="/">
+                  <MesaSvg />
+                </Link>
+                <PrimaryHeaderItem teams={teams} />
+              </div>
+              <div className="ml-auto flex items-center space-x-4">
+                <NavPrimary />
+                <Profile />
+              </div>
+            </header>
+            <div className="flex flex-1 flex-col">{children}</div>
+            <Footer />
+            <Toaster />
+          </body>
+        </html>
+      </JotaiProvider>
+    </WagmiProvider>
   );
 }
