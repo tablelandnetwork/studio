@@ -15,13 +15,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { createTableAtom } from "@/store/create-table";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -136,7 +129,7 @@ export default function NewTable({ project, team, envs }: Props) {
           <SchemaBuilder />
           <pre>{createTableStatementFromObject(createTable, name)}</pre>
         </div>
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <FormLabel>Deployments</FormLabel>
           <FormDescription>
             You can optionally deploy your new table to one or more of your
@@ -203,7 +196,7 @@ export default function NewTable({ project, team, envs }: Props) {
               </div>
             );
           })}
-        </div>
+        </div> */}
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit

@@ -9,7 +9,7 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            Staging
+            Tables
           </h2>
           <div className="flex flex-col space-y-1">
             <Button variant="secondary" className="w-full justify-start">
@@ -23,7 +23,7 @@ export function Sidebar({ className }: SidebarProps) {
             </Button>
           </div>
         </div>
-        <div className="px-3 py-2">
+        {/* <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
             Production
           </h2>
@@ -41,7 +41,7 @@ export function Sidebar({ className }: SidebarProps) {
               receipts
             </Button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

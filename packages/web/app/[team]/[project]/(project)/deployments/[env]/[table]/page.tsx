@@ -1,13 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Coins, Hash, Rocket, Table2 } from "lucide-react";
 import { Payment, columns } from "./columns";
 import { DataTable } from "./data-table";
@@ -126,7 +117,7 @@ export default async function Deployment({
     <div className="flex-1 space-y-4 p-4 pl-0">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-medium">users</h1>
-        <Select>
+        {/* <Select>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Staging" />
           </SelectTrigger>
@@ -137,7 +128,7 @@ export default async function Deployment({
               <SelectItem value="production">Production</SelectItem>
             </SelectGroup>
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
       <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <Card>
