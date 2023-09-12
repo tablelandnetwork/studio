@@ -12,13 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schema } from "@tableland/studio-store";
@@ -154,7 +147,10 @@ export default function ImportTableForm({ project, team, envs }: Props) {
           name="environment"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Environment</FormLabel>
+              <FormControl>
+                <Input type="hidden" {...field} value={envs[0].id} />
+              </FormControl>
+              {/* <FormLabel>Environment</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger className="w-auto gap-x-2">
@@ -174,7 +170,7 @@ export default function ImportTableForm({ project, team, envs }: Props) {
                 deploy the resulting Project Table to other Environments at a
                 later time on the Deployments screen.
               </FormDescription>
-              <FormMessage />
+              <FormMessage /> */}
             </FormItem>
           )}
         />

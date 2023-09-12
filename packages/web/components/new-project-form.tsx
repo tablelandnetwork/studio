@@ -1,6 +1,6 @@
 "use client";
 
-import { newEnvironment, newProject } from "@/app/actions";
+import { newProject } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schema } from "@tableland/studio-store";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -61,11 +61,13 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
+      // TODO: A default env is being created in the store when the Project is created.
+      // Undo this later.
       const res = await newProject(team.id, values.name, values.description);
       // TODO: Should probably do this within "new project action"
-      await Promise.all(
-        values.environments.map((env) => newEnvironment(res.id, env.name)),
-      );
+      // await Promise.all(
+      //   values.environments.map((env) => newEnvironment(res.id, env.name)),
+      // );
       router.push(`/${team.slug}/${res.slug}`);
     });
   }
@@ -110,7 +112,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
             </FormItem>
           )}
         />
-        <div>
+        {/* <div>
           <FormItem>
             <FormLabel>Environments</FormLabel>
             <FormDescription className="pb-2">
@@ -171,7 +173,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
             <Plus className="mr-2 h-5 w-5" />
             Add Environment
           </Button>
-        </div>
+        </div> */}
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit

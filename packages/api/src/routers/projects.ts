@@ -38,6 +38,11 @@ export function projectsRouter(store: Store) {
           input.name,
           input.description || null,
         );
+        // TODO: This is temporary to make sure all projects have a default environment.
+        await store.environments.createEnvironment({
+          projectId: project.id,
+          name: "default",
+        });
         return project;
       }),
   });
