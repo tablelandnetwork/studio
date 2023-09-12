@@ -5,36 +5,24 @@ import type yargs from "yargs";
 import type { Arguments, CommandBuilder } from "yargs";
 import { SiweMessage } from "siwe";
 import { Auth } from "@tableland/studio-api";
-import { api } from "@tableland/studio-client";
 import { type GlobalOptions } from "../cli.js";
 import {
   logger,
   getWalletWithProvider,
   normalizePrivateKey,
   toChecksumAddress,
+  getApi,
+  FileStore,
 } from "../utils.js";
-
-export interface CommandOptions extends GlobalOptions {
-  store?: string;
-}
 
 export const command = "login";
 export const desc = "create a login session via private key";
 
-export const builder: CommandBuilder<
-  Record<string, unknown>,
-  CommandOptions
-> = (yargs) =>
-  yargs
-    .option("store", {
-      type: "string",
-      default: ".studioclisession.json",
-      description: "path to file store to use for login session",
-    }) as yargs.Argv<CommandOptions>;
-
 export const handler = async (
-  argv: Arguments<CommandOptions>,
+  argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
+  const { chain, providerUrl, apiUrl, store } = argv;
+  const api = getApi(new FileStore(store));
 
   const user = await api.auth.authenticated.query();
   console.log("checking for existing authentication:", user);
@@ -43,22 +31,8 @@ export const handler = async (
     return;
   }
 
-  // TODO: we're logging in via privKey, but someday we might do so via email
-  // const { email, password } = await collectCredentials();
-
-  // logger.log("logging in via email");
-
-  // console.log("email:", email);
-  // console.log("password:", password);
-
-  const { chain, providerUrl, apiUrl } = argv;
-
-  if (typeof apiUrl !== "string") {
-    throw new Error("must provide apiUrl to login")
-  }
-
   const host = new URL(apiUrl).host;
-  // TODO: the `web` package has this chainId hard coded to 80001.
+  // TODO: looks like the `web` package has this chainId hard coded to 80001.
   //       Not sure why this is the case, but we can't do that here
   // const chain = 80001;
   const privateKey = normalizePrivateKey(argv.privateKey);
@@ -67,9 +41,7 @@ export const handler = async (
     chain,
     providerUrl,
   });
-console.log("getting nonce");
-  const nonce = await api.auth.nonce.mutate();
-console.log("got nonce: " + nonce);
+
   const rawMessage = new SiweMessage({
     // TODO: decide on how to handle domain
     domain: host,
@@ -80,32 +52,17 @@ console.log("got nonce: " + nonce);
     uri: apiUrl,
     version: "1",
     chainId: await wallet.getChainId(),
-    nonce,
+    nonce: await api.auth.nonce.mutate(),
   });
   const message = rawMessage.prepareMessage();
   const signature = await wallet.signMessage(message);
 
-  const res = await login(message, signature);
-console.log("res", res);
-
-  if (res.error) {
-    return logger.error(`login failed: ${res.error}`);
-  }
+  // note: the api handles session cookie storage
+  const res = await api.auth.login.mutate({ message, signature });
+console.log("login res:", res);
 
   logger.log(`You are logged in with address: ${wallet.address}`);
 };
-
-async function login(
-  message: string,
-  signature: string,
-): Promise<{ auth?: Auth; error?: string }> {
-  try {
-    const auth = await api.auth.login.mutate({ message, signature });
-    return { auth };
-  } catch (e: any) {
-    return { error: e.message };
-  }
-}
 
 // TODO: Don't need this unless we enable email+password login
 const collectCredentials = async function () {

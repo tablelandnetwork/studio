@@ -8,6 +8,7 @@ import { protectedProcedure, publicProcedure, router } from "../trpc";
 export function authRouter(store: Store) {
   return router({
     authenticated: publicProcedure.input(z.void()).query(({ ctx }) => {
+console.log("checking authenticated: " + JSON.stringify(ctx));
       return ctx.session.auth;
     }),
     nonce: publicProcedure.input(z.void()).mutation(async ({ ctx }) => {
@@ -31,6 +32,7 @@ console.log("doing `login`: " + input.message);
             fields.data.address,
           );
           if (info) {
+console.log("got info: " + JSON.stringify(info));
             ctx.session.auth = info;
           }
           return ctx.session.auth;

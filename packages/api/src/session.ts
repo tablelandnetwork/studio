@@ -75,8 +75,11 @@ export class Session {
 
   async persist(res: NextResponse | ResponseCookies): Promise<void> {
     let cookies: ResponseCookies;
-    if (isCookies(res)) cookies = res;
-    else cookies = res.cookies;
+    if (isCookies(res)) {
+      cookies = res;
+    } else {
+      cookies = res.cookies;
+    }
 
     cookies.set(
       process.env.SESSION_COOKIE_NAME || SESSION_COOKIE_NAME,

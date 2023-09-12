@@ -3,14 +3,13 @@ import yargs from "yargs";
 
 import superjson from "superjson";
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-
 import { init } from "@tableland/studio-store";
 import { AppRouter, Session } from "@tableland/studio-api";
-import { api } from "@tableland/studio-client";
 import { initMailApi } from "@tableland/studio-mail";
-
 import { type GlobalOptions } from "../cli.js";
-import { logger, normalizePrivateKey } from "../utils.js";
+import { logger, normalizePrivateKey, getApi } from "../utils.js";
+
+const api = getApi();
 
 type Yargs = typeof yargs;
 
