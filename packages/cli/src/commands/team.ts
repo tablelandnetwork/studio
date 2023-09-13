@@ -1,13 +1,8 @@
 import type { Arguments } from "yargs";
 import yargs from "yargs";
 
-import superjson from "superjson";
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-import { init } from "@tableland/studio-store";
-import { AppRouter, Session } from "@tableland/studio-api";
-import { initMailApi } from "@tableland/studio-mail";
 import { type GlobalOptions } from "../cli.js";
-import { logger, normalizePrivateKey, getApi, FileStore } from "../utils.js";
+import { FileStore, getApi, logger, normalizePrivateKey } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -42,7 +37,7 @@ export const builder = function (args: Yargs) {
           // TODO: `identifier` needs to be converted to teamId for this to work.
           //       Alternatively we could create a new rpc endpoint that takes
           //       wallet or email or whatever account identifier we want.
-          query = { teamId: identifier }
+          query = { userTeamId: identifier };
         }
 
         const teams = await api.teams.userTeams.query(query);
@@ -114,7 +109,6 @@ export const builder = function (args: Yargs) {
       async function (argv) {
         const { team, user, privateKey, providerUrl, store } = argv;
         const api = getApi(new FileStore(store));
-
       },
     );
 };
