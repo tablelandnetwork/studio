@@ -30,27 +30,17 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         }
         return team;
       }),
-    // TODO: I think this is a read, which should be public, right?
-    //       maybe we just need a separate rpc endpoint for requesting
-    //       teams by "userId"
     userTeams: publicProcedure
-      .input(z.union([z.object({ teamId: z.string() }), z.void()]))
+      .input(z.object({ teamId: z.string().nonempty() }).or(z.void()))
       .query(async ({ input, ctx }) => {
         const teamId = input?.teamId || ctx.session.auth?.user.teamId;
-
-console.log("teamId:", teamId);
-console.log("ctx:", JSON.stringify(ctx, null, 4));
-
-        if (typeof teamId !== "string" || teamId.trim() === "") {
+        if (!teamId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Team ID must be provided as input or session context"
+            message: "Team ID must be provided as input or session context",
           });
         }
-
-        return await store.teams.teamsByMemberId(
-          teamId
-        );
+        return await store.teams.teamsByMemberId(teamId);
       }),
     newTeam: protectedProcedure
       .input(z.object({ name: z.string(), emailInvites: z.array(z.string()) }))
