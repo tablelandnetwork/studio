@@ -31,9 +31,9 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return team;
       }),
     userTeams: publicProcedure
-      .input(z.object({ teamId: z.string().nonempty() }).or(z.void()))
+      .input(z.object({ userTeamId: z.string().nonempty() }).or(z.void()))
       .query(async ({ input, ctx }) => {
-        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
+        const teamId = input?.userTeamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
