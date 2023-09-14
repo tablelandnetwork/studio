@@ -1,14 +1,21 @@
 import { Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { router, teamProcedure } from "../trpc";
+import { publicProcedure, router, teamProcedure } from "../trpc";
 
 export function projectsRouter(store: Store) {
   return router({
-    teamProjects: teamProcedure(store)
-      .input(z.object({}))
-      .query(async ({ input }) => {
-        return await store.projects.projectsByTeamId(input.teamId);
+    teamProjects: publicProcedure
+      .input(z.object({ teamId: z.string().nonempty() }).or(z.void()))
+      .query(async ({ ctx, input }) => {
+        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
+        if (!teamId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Team ID must be provided as input or session context",
+          });
+        }
+        return await store.projects.projectsByTeamId(teamId);
       }),
     projectByTeamIdAndSlug: teamProcedure(store)
       .input(z.object({ slug: z.string() }))

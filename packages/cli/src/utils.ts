@@ -1,46 +1,57 @@
-import { helpers } from "@tableland/sdk";
-import { Wallet, getDefaultProvider, providers } from "ethers";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { Wallet, getDefaultProvider, providers } from "ethers";
+import createKeccakHash from "keccak";
+import { helpers } from "@tableland/sdk";
+import { api } from "@tableland/studio-client";
 
-export interface FileStoreOptions {
-  storePath: string;
-}
+const sessionKey = "session-cookie";
 
-export class FileStorage {
-  readonly storePath: string;
-  readonly options: FileStoreOptions;
+export const getApi = function (fileStore?: FileStore) {
+  return api(fileStore ? {
+    fetch: function (res) {
+      const setCookie = res.headers.get("set-cookie");
+      if (setCookie) {
+        fileStore.set(sessionKey, setCookie.split(";").shift());
+        fileStore.save();
+      }
+      return res;
+    },
+    headers: function () {
+      const cookie = fileStore.get(sessionKey);
 
-  constructor(options: FileStoreOptions) {
-    if (!options.storePath) {
-      throw new Error("you must provide path to the file store");
+      if (typeof cookie === "string") {
+        return { cookie };
+      }
+      return {};
     }
+  } : undefined);
+};
 
-    this.storePath = options.storePath;
-    this.options = options;
-  }
-
-  getInstance(storageKey: string) {
-    const storeFilePath = join(this.storePath, storageKey + ".json");
-    try {
-      const fileBuf = readFileSync(storeFilePath);
-      const fullStorage = JSON.parse(fileBuf.toString());
-      return new StoreInstance(fullStorage);
-    } catch (err: any) {
-      // TODO: figure out when to throw
-      if (err.message !== "ENOENT") throw err;
-    }
-
-    writeFileSync(storeFilePath, "{}");
-    return new StoreInstance({});
-  }
-}
-
-export class StoreInstance {
+export class FileStore {
   readonly data: Record<string, any>;
+  readonly filePath: string;
 
-  constructor(data: Record<string, any>) {
-    this.data = data;
+  constructor(filePath: string) {
+    this.filePath = filePath;
+    this.data = this.findOrCreate(this.filePath);
+  }
+
+  findOrCreate(filePath: string) {
+    try {
+      const fileBuf = readFileSync(filePath);
+      return JSON.parse(fileBuf.toString());
+    }  catch (err: any) {
+      // TODO: figure out when to throw
+      if (err.code !== "ENOENT") throw err;
+    }
+
+    writeFileSync(filePath, "{}");
+    return {}
+  }
+
+  save() {
+    writeFileSync(this.filePath, JSON.stringify(this.data, null, 4));
   }
 
   get<T>(key: string): T {
@@ -203,6 +214,21 @@ export async function getWalletWithProvider({
 
   /* c8 ignore stop */
   return wallet.connect(provider);
+}
+
+// TODO: this helper is used by multiple packages. We should probably create a utils packages.
+export function toChecksumAddress(address: string) {
+  address = address.toLowerCase().replace("0x", "");
+  var hash = createKeccakHash("keccak256").update(address).digest("hex");
+  var ret = "0x";
+  for (var i = 0; i < address.length; i++) {
+    if (parseInt(hash[i], 16) >= 8) {
+      ret += address[i].toUpperCase();
+    } else {
+      ret += address[i];
+    }
+  }
+  return ret;
 }
 
 // Wrap any direct calls to console.log, so that test spies can distinguise between

@@ -1,8 +1,8 @@
 import type { Arguments } from "yargs";
 import yargs from "yargs";
-// import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
+
 import { type GlobalOptions } from "../cli.js";
-import { normalizePrivateKey } from "../utils.js";
+import { FileStore, getApi, logger, normalizePrivateKey } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -10,9 +10,8 @@ export const command = "team <sub>";
 export const desc = "manage studio teams";
 
 export interface CommandOptions extends GlobalOptions {
-  ls?: string;
-  create?: string;
   name?: string;
+  identifier?: string;
   personalTeamId?: string;
   invites?: string;
 }
@@ -20,19 +19,30 @@ export interface CommandOptions extends GlobalOptions {
 export const builder = function (args: Yargs) {
   return args
     .command(
-      "ls <name>",
-      "Get the current controller address for a table",
+      "ls [identifier]",
+      "Get a list of teams for a user",
       function (args) {
-        return args.positional("name", {
+        return args.positional("identifier", {
           type: "string",
-          default: "",
           description:
-            "optional team name, if not provided all teams are returned",
+            "Optional team identifier. Can be team id, email, wallet address, or username. If not provided the current user's session is used",
         });
       },
       async function (argv) {
-        const { name } = argv;
-        const privateKey = normalizePrivateKey(argv.privateKey);
+        const { identifier, store } = argv;
+        const api = getApi(new FileStore(store as string));
+
+        let query;
+        if (typeof identifier === "string" && identifier.trim() !== "") {
+          // TODO: `identifier` needs to be converted to teamId for this to work.
+          //       Alternatively we could create a new rpc endpoint that takes
+          //       wallet or email or whatever account identifier we want.
+          query = { userTeamId: identifier };
+        }
+
+        const teams = await api.teams.userTeams.query(query);
+
+        logger.table(teams);
       },
     )
     .command(
@@ -60,12 +70,15 @@ export const builder = function (args: Yargs) {
       },
       async function (argv: CommandOptions) {
         console.log("trying to create team...");
-        const { name, personalTeamId, invites } = argv;
+        const { name, personalTeamId, invites, store } = argv;
+
+        const api = getApi(new FileStore(store));
         const privateKey = normalizePrivateKey(argv.privateKey);
 
         if (typeof name !== "string") throw new Error("must provide team name");
-        if (typeof personalTeamId !== "string")
+        if (typeof personalTeamId !== "string") {
           throw new Error("must provide personal team id");
+        }
         console.log("doing create by pId...");
         // const result = await createTeamByPersonalTeam(
         //   name,
@@ -94,7 +107,8 @@ export const builder = function (args: Yargs) {
           });
       },
       async function (argv) {
-        const { team, user, privateKey, providerUrl } = argv;
+        const { team, user, privateKey, providerUrl, store } = argv;
+        const api = getApi(new FileStore(store));
       },
     );
 };

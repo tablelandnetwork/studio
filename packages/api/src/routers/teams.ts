@@ -30,12 +30,18 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         }
         return team;
       }),
-    userTeams: protectedProcedure.input(z.void()).query(async ({ ctx }) => {
-      const teams = await store.teams.teamsByMemberId(
-        ctx.session.auth.user.teamId,
-      );
-      return teams;
-    }),
+    userTeams: publicProcedure
+      .input(z.object({ userTeamId: z.string().nonempty() }).or(z.void()))
+      .query(async ({ input, ctx }) => {
+        const teamId = input?.userTeamId || ctx.session.auth?.user.teamId;
+        if (!teamId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Team ID must be provided as input or session context",
+          });
+        }
+        return await store.teams.teamsByMemberId(teamId);
+      }),
     newTeam: protectedProcedure
       .input(z.object({ name: z.string(), emailInvites: z.array(z.string()) }))
       .mutation(async ({ ctx, input }) => {

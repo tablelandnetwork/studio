@@ -42,6 +42,7 @@ export default function UserActions() {
     startTransition(async () => {
       const res = await connectWeb3(true);
       if (res.error) {
+        console.log("handleSignIn connectWeb3 Error:", res.error);
         // TODO: Display error.
       } else if (res.auth) {
         if (pathnameSnapshot === "/invite") {

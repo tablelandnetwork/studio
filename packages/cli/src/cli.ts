@@ -40,13 +40,12 @@ dotenv.config();
 
 // TODO: this is a copy/pasta from tableland cli. Replace these values.
 export interface GlobalOptions {
-  privateKey: string;
-  chain: helpers.ChainName | number;
-  providerUrl: string;
+  apiUrl: string;
   baseUrl: string;
-  verbose: boolean;
-  ensProviderUrl?: string;
-  enableEnsExperiment?: boolean;
+  chain: helpers.ChainName | number;
+  privateKey: string;
+  providerUrl: string;
+  store: string;
 }
 
 const _argv = yargs(hideBin(process.argv))
@@ -65,25 +64,41 @@ const _argv = yargs(hideBin(process.argv))
   })
   .alias("version", "V")
   // custom options are in alphabetical order
+  .option("apiUrl", {
+    alias: "a",
+    type: "string",
+    default: "https://studio.tableland.xyz",
+    description:
+      "RPC URL for the Studio API",
+  })
   .option("baseUrl", {
     type: "string",
+    default: "",
     description: "The URL of your Tableland validator",
   })
   .option("chain", {
     alias: "c",
     type: "string",
+    default: "",
     description: "The EVM chain to target",
   })
   .option("privateKey", {
     alias: "k",
     type: "string",
+    default: "",
     description: "Private key string",
   })
   .option("providerUrl", {
     alias: "p",
     type: "string",
+    default: "",
     description:
       "JSON RPC API provider URL. (e.g., https://eth-rinkeby.alchemyapi.io/v2/123abc123a...)",
+  })
+  .option("store", {
+    type: "string",
+    default: ".studioclisession.json",
+    description: "path to file store to use for login session",
   })
   .demandCommand(1, "")
   .strict().argv;
