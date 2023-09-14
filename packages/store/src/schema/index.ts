@@ -1,4 +1,4 @@
-import { InferModel } from "drizzle-orm";
+import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
   integer,
   sqliteTable,
@@ -108,7 +108,7 @@ export const deployments = sqliteTable("deployments", {
   id: text("id").primaryKey(),
   tableId: text("table_id").notNull(),
   environmentId: text("environment_id").notNull(),
-  tableUuName: text("table_uu_name"),
+  tableUuName: text("table_uu_name").notNull(),
   chain: integer("chain").notNull(),
   schema: text("schema").notNull(),
   createdAt: text("created_at").notNull(),
@@ -130,9 +130,6 @@ export const deployments = sqliteTable("deployments", {
 //   mutation: text("mutation").notNull()
 // });
 
-export type Table = InferModel<typeof tables>;
-export type NewTable = InferModel<typeof tables, "insert">;
-
 export const teamInvites = sqliteTable("team_invites", {
   id: text("id").primaryKey(),
   teamId: text("team_id").notNull(),
@@ -143,40 +140,43 @@ export const teamInvites = sqliteTable("team_invites", {
   claimedAt: text("claimed_at"),
 });
 
-export type UserSealed = InferModel<typeof users>;
-export type NewUserSealed = InferModel<typeof users, "insert">;
+export type Table = InferSelectModel<typeof tables>;
+export type NewTable = InferInsertModel<typeof tables>;
+
+export type UserSealed = InferSelectModel<typeof users>;
+export type NewUserSealed = InferInsertModel<typeof users>;
 
 export type User = Omit<UserSealed, "sealed"> & { email?: string };
 export type NewUser = Omit<NewUserSealed, "sealed"> & {
   email?: string;
 };
 
-export type Team = InferModel<typeof teams>;
-export type NewTeam = InferModel<typeof teams, "insert">;
+export type Team = InferSelectModel<typeof teams>;
+export type NewTeam = InferInsertModel<typeof teams>;
 
-export type TeamMembership = InferModel<typeof teamMemberships>;
-export type NewTeamMembership = InferModel<typeof teamMemberships, "insert">;
+export type TeamMembership = InferSelectModel<typeof teamMemberships>;
+export type NewTeamMembership = InferInsertModel<typeof teamMemberships>;
 
-export type Project = InferModel<typeof projects>;
-export type NewProject = InferModel<typeof projects, "insert">;
+export type Project = InferSelectModel<typeof projects>;
+export type NewProject = InferInsertModel<typeof projects>;
 
-export type Environment = InferModel<typeof environments>;
-export type NewEnvironment = InferModel<typeof environments, "insert">;
+export type Environment = InferSelectModel<typeof environments>;
+export type NewEnvironment = InferInsertModel<typeof environments>;
 
-export type Deployment = InferModel<typeof deployments>;
-export type NewDeployment = InferModel<typeof deployments, "insert">;
+export type Deployment = InferSelectModel<typeof deployments>;
+export type NewDeployment = InferInsertModel<typeof deployments>;
 
-// export type Migration = InferModel<typeof migrations>;
-// export type NewMigration = InferModel<typeof migrations, "insert">;
+// export type Migration = InferSelectModel<typeof migrations>;
+// export type NewMigration = InferInsertModel<typeof migrations>;
 
-// export type MigrationLog = InferModel<typeof migrationLog>;
-// export type NewMigrationLog = InferModel<typeof migrationLog, "insert">;
+// export type MigrationLog = InferSelectModel<typeof migrationLog>;
+// export type NewMigrationLog = InferInsertModel<typeof migrationLog>;
 
-export type TeamProject = InferModel<typeof teamProjects>;
-export type NewTeamProject = InferModel<typeof teamProjects, "insert">;
+export type TeamProject = InferSelectModel<typeof teamProjects>;
+export type NewTeamProject = InferInsertModel<typeof teamProjects>;
 
-export type TeamInviteSealed = InferModel<typeof teamInvites>;
-export type NewTeamInviteSealed = InferModel<typeof teamInvites, "insert">;
+export type TeamInviteSealed = InferSelectModel<typeof teamInvites>;
+export type NewTeamInviteSealed = InferInsertModel<typeof teamInvites>;
 export type TeamInvite = Omit<TeamInviteSealed, "sealed"> & { email: string };
 export type NewTeamInvite = Omit<NewTeamInviteSealed, "sealed"> & {
   email: string;

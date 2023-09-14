@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { and, eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema";
-import { Table, projectTables, tables } from "../schema";
+import { Table, projectTables, tables, teamProjects, teams } from "../schema";
 import { slugify } from "./utils";
 
 export function initTables(
@@ -45,6 +45,21 @@ export function initTables(
         .all();
       const mapped = res.map((r) => r.tables);
       return mapped;
+    },
+
+    tableTeam: async function (tableId: string) {
+      const res = await db
+        .select({ teams })
+        .from(projectTables)
+        .innerJoin(
+          teamProjects,
+          eq(projectTables.projectId, teamProjects.projectId),
+        )
+        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .where(and(eq(tables.id, tableId)))
+        .orderBy(tables.name)
+        .get();
+      return res?.teams;
     },
   };
 }
