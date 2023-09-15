@@ -10,8 +10,8 @@ export async function createContext(opts?: FetchCreateContextFnOptions) {
   // TODO: Get session and add it to context
   // const session = await auth();
 
-  var session: Session;
-  var responseCookies: ResponseCookies;
+  let session: Session;
+  let responseCookies: ResponseCookies;
   if (opts) {
     const readonlyRequestCookies = RequestCookiesAdapter.seal(
       new RequestCookies(opts.req.headers),

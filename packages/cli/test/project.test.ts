@@ -11,7 +11,7 @@ const accounts = getAccounts();
 
 const defaultArgs = ["--privateKey", accounts[1].privateKey];
 
-describe.skip("commands/team", function () {
+describe.skip("commands/project", function () {
   this.timeout(15000 * TEST_TIMEOUT_FACTOR);
 
   before(async function () {
@@ -23,15 +23,27 @@ describe.skip("commands/team", function () {
   });
 
   // happy first
-  test("can list team", async function () {
+  test("can create a project", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["team", "ls"]).command(mod).parse();
+    await yargs(["project", "create", "projectfoo"]).command(mod).parse();
 
     const res = consoleLog.getCall(0).firstArg;
-    equal(res.startsWith("team: "), true);
+    equal(res.startsWith("created project: "), true);
 
     const value = JSON.parse(res.slice(14));
-    equal(value.name, "teamfoo");
+    equal(value.name, "projectfoo");
+    // TODO: what other assertions?
+  });
+
+  test("can list projects", async function () {
+    const consoleLog = spy(logger, "log");
+    await yargs(["project", "ls"]).command(mod).parse();
+
+    const res = consoleLog.getCall(0).firstArg;
+    equal(res.startsWith("project: "), true);
+
+    const value = JSON.parse(res.slice(14));
+    equal(value.name, "projectfoo");
     // TODO: what other assertions?
   });
 });

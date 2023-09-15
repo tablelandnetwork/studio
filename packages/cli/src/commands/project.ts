@@ -34,12 +34,9 @@ export const builder = function (args: Yargs) {
         const { teamId, store } = argv;
         const api = getApi(new FileStore(store as string));
 
-        let query;
-        if (typeof teamId === "string" && teamId.trim() !== "") {
-          query = { teamId };
-        }
-
+        const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
         const projects = await api.projects.teamProjects.query(query);
+
         logger.table(projects);
       },
     )

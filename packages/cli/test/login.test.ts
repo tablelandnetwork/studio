@@ -5,13 +5,26 @@ import { equal, match } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 
+import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/login.js";
 import { logger, wait } from "../src/utils.js";
 import { TEST_TIMEOUT_FACTOR } from "./setup";
 
 const accounts = getAccounts();
+const defaultArgs = [
+  "--store",
+  ".studioclisession.json",
+  "--privateKey",
+  "0xf214f2b2cd398c806f84e317254e0f0b801d0643303237d97a22a48e01628897",
+  "--chain",
+  "local-tableland",
+  "--providerUrl",
+  "http://127.0.0.1:8545/",
+  "--apiUrl",
+  "http://localhost:3000"
+];
 
-describe.skip("commands/login", function () {
+describe("commands/login", function () {
   this.timeout(15000 * TEST_TIMEOUT_FACTOR);
 
   before(async function () {
@@ -22,41 +35,9 @@ describe.skip("commands/login", function () {
     restore();
   });
 
-  test("throws with invalid network", async function () {
-    const consoleError = spy(logger, "error");
-    await yargs(["login", "--network", "acme"]).command(mod).parse();
-
-    const value = consoleError.getCall(0).firstArg;
-    equal(value, "unsupported network");
-  });
-
-  test("throws with missing file", async function () {
-    const consoleError = spy(logger, "error");
-    await yargs(["login", "--file", "missing.json"]).command(mod).parse();
-
-    const value = consoleError.getCall(0).firstArg;
-    match(value, /ENOENT: no such file or directory/i);
-  });
-
-  test("throws with empty email", async function () {
-    const stdin = mockStd.stdin();
-    const consoleError = spy(logger, "error");
-    setTimeout(() => {
-      stdin.send("\n").end();
-    }, 500);
-    await yargs(["login"]).command(mod).parse();
-
-    const value = consoleError.getCall(0).firstArg;
-    equal(value, "invalid email address");
-  });
-
-  test("can login with passwordless email", async function () {
-    const stdin = mockStd.stdin();
+  test("can login with wallet", async function () {
     const consoleLog = spy(logger, "log");
-    setTimeout(() => {
-      stdin.send("test@textile.io").end();
-    }, 500);
-    await yargs(["login"]).command(mod).parse();
+    await yargs(["login", ...defaultArgs]).command<GlobalOptions>(mod).parse();
 
     const res = consoleLog.getCall(0).firstArg;
 

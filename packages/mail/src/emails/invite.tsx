@@ -1,4 +1,7 @@
-import {
+import * as reactEmailComponents from "@react-email/components";
+import * as React from "react";
+
+const {
   Body,
   Button,
   Container,
@@ -11,8 +14,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "@react-email/components";
-import * as React from "react";
+} = reactEmailComponents;
 
 export interface InviteProps {
   inviterUsername: string;
