@@ -1,6 +1,8 @@
 import { api } from "@/trpc/server-invoker";
 import { schema } from "@tableland/studio-store";
 import { notFound } from "next/navigation";
+import Deployment from "./_components/deployment";
+import ExecDeployment from "./_components/exec-deployment";
 import { Sidebar } from "./_components/sidebar";
 
 export default async function Deployments({
@@ -26,9 +28,17 @@ export default async function Deployments({
   const deployments = await api.deployments.projectDeployments.query({
     projectId: project.id,
   });
+  const deploymentsMap = deployments.reduce((acc, deployment) => {
+    if (!acc.has(deployment.environmentId)) {
+      acc.set(deployment.environmentId, new Map<string, schema.Deployment>());
+    }
+    acc.get(deployment.environmentId)?.set(deployment.tableId, deployment);
+    return acc;
+  }, new Map<string, Map<string, schema.Deployment>>());
 
   let selectedEnvironment: schema.Environment | undefined;
   let selectedTable: schema.Table | undefined;
+  let deployment: schema.Deployment | undefined;
   if (params.slug && params.slug.length > 0) {
     const envSlug = params.slug[0];
     const tableSlug = params.slug[1];
@@ -39,6 +49,9 @@ export default async function Deployments({
     if (!selectedEnvironment || !selectedTable) {
       notFound();
     }
+    deployment = deploymentsMap
+      .get(selectedEnvironment.id)
+      ?.get(selectedTable.id);
   }
 
   return (
@@ -49,15 +62,25 @@ export default async function Deployments({
         selectedEnvironment={selectedEnvironment}
         tables={tables}
         selectedTable={selectedTable}
-        deployments={deployments}
+        deploymentsMap={deploymentsMap}
         teamSlug={params.team}
         projectSlug={params.project}
       />
       {selectedEnvironment && selectedTable ? (
-        <p>
-          Deployment for env: {selectedEnvironment.name} table:{" "}
-          {selectedTable.name}
-        </p>
+        deployment ? (
+          <Deployment
+            environment={selectedEnvironment}
+            table={selectedTable}
+            deployment={deployment}
+          />
+        ) : (
+          <ExecDeployment
+            team={team}
+            project={project}
+            environment={selectedEnvironment}
+            table={selectedTable}
+          />
+        )
       ) : (
         <p>
           Deployments overview {params.team} {params.project}

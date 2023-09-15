@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { schema } from "@tableland/studio-store";
-import { BoxSelect, CheckSquare } from "lucide-react";
+import { CheckCircle2, CircleDashed } from "lucide-react";
 import Link from "next/link";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -9,7 +9,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   selectedEnvironment?: schema.Environment;
   tables: schema.Table[];
   selectedTable?: schema.Table;
-  deployments: schema.Deployment[];
+  deploymentsMap: Map<string, Map<string, schema.Deployment>>;
   teamSlug: string;
   projectSlug: string;
 }
@@ -20,17 +20,10 @@ export function Sidebar({
   selectedEnvironment,
   tables,
   selectedTable,
-  deployments,
+  deploymentsMap,
   teamSlug,
   projectSlug,
 }: SidebarProps) {
-  const depolymentsMap = deployments.reduce((acc, deployment) => {
-    if (!acc.has(deployment.environmentId)) {
-      acc.set(deployment.environmentId, new Map<string, schema.Deployment>());
-    }
-    return acc;
-  }, new Map<string, Map<string, schema.Deployment>>());
-
   return (
     <div className={cn("pb-12", className)}>
       <div className="px-3 py-2">
@@ -68,10 +61,10 @@ export function Sidebar({
                   className="w-full"
                 >
                   <span>{table.name}</span>
-                  {depolymentsMap.get(environment.id)?.get(table.id) ? (
-                    <CheckSquare className="ml-auto text-green-400" />
+                  {deploymentsMap.get(environment.id)?.get(table.id) ? (
+                    <CheckCircle2 className="ml-auto text-green-400" />
                   ) : (
-                    <BoxSelect className="ml-auto text-red-400" />
+                    <CircleDashed className="ml-auto text-red-400" />
                   )}
                 </Button>
               </Link>

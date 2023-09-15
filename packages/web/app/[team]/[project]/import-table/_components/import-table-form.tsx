@@ -54,9 +54,10 @@ export default function ImportTableForm({ project, team, envs }: Props) {
     },
   });
 
-  const { handleSubmit, control } = form;
+  const { handleSubmit, control, register } = form;
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("onSubmit", values);
     startTransition(async () => {
       const res = await importTable(
         project,
@@ -146,32 +147,35 @@ export default function ImportTableForm({ project, team, envs }: Props) {
           control={control}
           name="environment"
           render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input type="hidden" {...field} value={envs[0].id} />
-              </FormControl>
-              {/* <FormLabel>Environment</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-auto gap-x-2">
-                    <SelectValue placeholder="Select Environment" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {envs.map((env) => (
-                    <SelectItem key={env.id} value={env.id}>
-                      {env.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                You must choose an Environment to import the Table to. You can
-                deploy the resulting Project Table to other Environments at a
-                later time on the Deployments screen.
-              </FormDescription>
-              <FormMessage /> */}
-            </FormItem>
+            <Input
+              type="hidden"
+              {...field}
+              {...register("environment")}
+              value={envs[0].id}
+            />
+            // <FormItem>
+            //   <FormLabel>Environment</FormLabel>
+            //   <Select onValueChange={field.onChange} defaultValue={field.value}>
+            //     <FormControl>
+            //       <SelectTrigger className="w-auto gap-x-2">
+            //         <SelectValue placeholder="Select Environment" />
+            //       </SelectTrigger>
+            //     </FormControl>
+            //     <SelectContent>
+            //       {envs.map((env) => (
+            //         <SelectItem key={env.id} value={env.id}>
+            //           {env.name}
+            //         </SelectItem>
+            //       ))}
+            //     </SelectContent>
+            //   </Select>
+            //   <FormDescription>
+            //     You must choose an Environment to import the Table to. You can
+            //     deploy the resulting Project Table to other Environments at a
+            //     later time on the Deployments screen.
+            //   </FormDescription>
+            //   <FormMessage />
+            // </FormItem>
           )}
         />
         <Button type="submit" disabled={pending}>

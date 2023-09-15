@@ -69,7 +69,6 @@ export default function NewTable({ project, team, envs }: Props) {
   const name = watch("name");
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("values", values);
     startTransition(async () => {
       const statement = createTableStatementFromObject(
         createTable,

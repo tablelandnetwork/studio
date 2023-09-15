@@ -85,6 +85,28 @@ export async function newTable(
   return table;
 }
 
+export async function recordDeployment(
+  projectId: string,
+  environmentId: string,
+  tableId: string,
+  tableUuName: string,
+  chain: number,
+  schema: string,
+  createdAt: Date,
+) {
+  await api.deployments.recordDeployment.mutate({
+    tableId,
+    schema,
+    createdAt,
+    tableUuName,
+    environmentId,
+    chain,
+  });
+  await api.deployments.projectDeployments.revalidate({
+    projectId: projectId,
+  });
+}
+
 export async function importTable(
   project: schema.Project,
   chainId: number,
