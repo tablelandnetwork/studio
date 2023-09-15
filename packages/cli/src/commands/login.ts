@@ -23,7 +23,7 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const { chain, providerUrl, apiUrl, store } = argv;
-    const api = getApi(new FileStore(store));
+    const api = getApi(new FileStore(store), apiUrl);
 
     console.log("checking for existing authentication...");
     const user = await api.auth.authenticated.query();

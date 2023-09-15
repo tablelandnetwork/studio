@@ -1,34 +1,35 @@
-import { helpers } from "@tableland/sdk";
-import { API, api } from "@tableland/studio-client";
+import { readFileSync, writeFileSync } from "node:fs";
 import { Wallet, getDefaultProvider, providers } from "ethers";
 import createKeccakHash from "keccak";
-import { readFileSync, writeFileSync } from "node:fs";
+import { helpers } from "@tableland/sdk";
+import { API, api, ClientConfig } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
 
-export const getApi = function (fileStore?: FileStore): API {
-  return api(
-    fileStore
-      ? {
-          fetch: function (res) {
-            const setCookie = res.headers.get("set-cookie");
-            if (setCookie) {
-              fileStore.set(sessionKey, setCookie.split(";").shift());
-              fileStore.save();
-            }
-            return res;
-          },
-          headers: function () {
-            const cookie = fileStore.get(sessionKey);
+export const getApi = function (fileStore?: FileStore, apiUrl?: string) {
+  const apiArgs: ClientConfig = {};
 
-            if (typeof cookie === "string") {
-              return { cookie };
-            }
-            return {};
-          },
-        }
-      : undefined,
-  );
+  if (fileStore) {
+    apiArgs.fetch = function (res) {
+      const setCookie = res.headers.get("set-cookie");
+      if (setCookie) {
+        fileStore.set(sessionKey, setCookie.split(";").shift());
+        fileStore.save();
+      }
+      return res;
+    };
+    apiArgs.headers = function () {
+      const cookie = fileStore.get(sessionKey);
+
+      if (typeof cookie === "string") {
+        return { cookie };
+      }
+      return {};
+    };
+  }
+  if (apiUrl) apiArgs.url = apiUrl;
+
+  return api(apiArgs);
 };
 
 export class FileStore {
