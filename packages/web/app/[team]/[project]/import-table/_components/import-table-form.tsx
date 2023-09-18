@@ -57,9 +57,8 @@ export default function ImportTableForm({ project, team, envs }: Props) {
   const { handleSubmit, control, register } = form;
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("onSubmit", values);
     startTransition(async () => {
-      const res = await importTable(
+      await importTable(
         project,
         values.chainId,
         values.tableId,
