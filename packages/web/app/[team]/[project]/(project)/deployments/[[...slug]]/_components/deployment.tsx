@@ -1,116 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { helpers } from "@tableland/sdk";
+import { Database, helpers } from "@tableland/sdk";
 import { schema } from "@tableland/studio-store";
+import { ColumnDef } from "@tanstack/react-table";
 import TimeAgo from "javascript-time-ago";
 import { Blocks, Coins, Hash, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
-import { Payment, columns } from "./columns";
 import { DataTable } from "./data-table";
 
 const timeAgo = new TimeAgo("en-US");
-
-async function getData(): Promise<Payment[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    // ...
-  ];
-}
 
 const blockExplorers = new Map<
   number,
@@ -284,11 +181,18 @@ export default async function Deployment({
   table: schema.Table;
   deployment: schema.Deployment;
 }) {
-  const data = await getData();
-
   const chainInfo = helpers.getChainInfo(deployment.chainId);
   const blockExplorer = blockExplorers.get(deployment.chainId);
   const openSeaLink = openSeaLinks.get(deployment.chainId);
+
+  const tbl = new Database({ baseUrl: helpers.getBaseUrl(deployment.chainId) });
+  const data = await tbl.exec(`SELECT * FROM ${deployment.tableName};`);
+  const columns: ColumnDef<unknown>[] = data.results.length
+    ? Object.keys(data.results[0] as object).map((col) => ({
+        accessorKey: col,
+        header: col,
+      }))
+    : [];
 
   return (
     <div className="flex-1 space-y-4 p-4 pl-0">
@@ -400,7 +304,7 @@ export default async function Deployment({
           </Card>
         )}
       </div>
-      <DataTable columns={columns} data={data} />
+      <DataTable columns={columns} data={data.results} />
     </div>
   );
 }
