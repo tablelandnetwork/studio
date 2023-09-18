@@ -1,6 +1,7 @@
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
   integer,
+  primaryKey,
   sqliteTable,
   text,
   uniqueIndex,
@@ -104,15 +105,24 @@ export const environments = sqliteTable("environments", {
   name: text("name").notNull(),
 });
 
-export const deployments = sqliteTable("deployments", {
-  id: text("id").primaryKey(),
-  tableId: text("table_id").notNull(),
-  environmentId: text("environment_id").notNull(),
-  tableUuName: text("table_uu_name").notNull(),
-  chain: integer("chain").notNull(),
-  schema: text("schema").notNull(),
-  createdAt: text("created_at").notNull(),
-});
+export const deployments = sqliteTable(
+  "deployments",
+  {
+    tableId: text("table_id").notNull(),
+    environmentId: text("environment_id").notNull(),
+    tableName: text("table_name").notNull(),
+    chainId: integer("chain_id").notNull(),
+    tokenId: text("token_id").notNull(),
+    blockNumber: integer("block_number"),
+    txnHash: text("txn_hash"),
+    createdAt: text("created_at").notNull(),
+  },
+  (deployments) => {
+    return {
+      pk: primaryKey(deployments.tableId, deployments.environmentId),
+    };
+  },
+);
 
 // export const migrations = sqliteTable("migrations", {
 //   id: text("id").primaryKey(),

@@ -87,20 +87,24 @@ export async function newTable(
 
 export async function recordDeployment(
   projectId: string,
-  environmentId: string,
   tableId: string,
-  tableUuName: string,
-  chain: number,
-  schema: string,
+  environmentId: string,
+  tableName: string,
+  chainId: number,
+  tokenId: string,
   createdAt: Date,
+  blockNumber?: number,
+  txnHash?: string,
 ) {
   await api.deployments.recordDeployment.mutate({
-    tableId,
-    schema,
-    createdAt,
-    tableUuName,
+    tableId: tableId,
     environmentId,
-    chain,
+    tableName,
+    chainId,
+    tokenId,
+    blockNumber,
+    txnHash,
+    createdAt,
   });
   await api.deployments.projectDeployments.revalidate({
     projectId: projectId,

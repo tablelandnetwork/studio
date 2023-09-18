@@ -7,21 +7,26 @@ export function deploymentsRouter(store: Store) {
     recordDeployment: tableProcedure(store)
       .input(
         z.object({
-          schema: z.string().nonempty(),
-          tableUuName: z.string().nonempty(),
+          tableId: z.string().uuid(),
           environmentId: z.string().uuid(),
-          chain: z.number().int(),
+          tableName: z.string().nonempty(),
+          chainId: z.number().int().nonnegative(),
+          tokenId: z.string().nonempty(),
+          blockNumber: z.number().int().nonnegative().optional(),
+          txnHash: z.string().nonempty().optional(),
           createdAt: z.date(),
         }),
       )
       .mutation(async ({ input }) => {
         const res = await store.deployments.recordDeployment({
           tableId: input.tableId,
-          schema: input.schema,
-          tableUuName: input.tableUuName,
           environmentId: input.environmentId,
-          chain: input.chain,
-          createdAt: input.createdAt.toISOString(),
+          tableName: input.tableName,
+          chainId: input.chainId,
+          tokenId: input.tokenId,
+          blockNumber: input.blockNumber,
+          txnHash: input.txnHash,
+          createdAt: input.createdAt,
         });
         return res;
       }),

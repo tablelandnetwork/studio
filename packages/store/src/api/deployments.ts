@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema";
@@ -9,19 +8,22 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
     recordDeployment: async function ({
       tableId,
       environmentId,
-      chain,
-      schema,
-      tableUuName,
+      chainId,
+      tableName,
+      tokenId,
+      blockNumber,
+      txnHash,
       createdAt,
-    }: Omit<schema.NewDeployment, "id">) {
-      const deployment = {
-        id: randomUUID(),
+    }: Omit<schema.NewDeployment, "createdAt"> & { createdAt: Date }) {
+      const deployment: schema.Deployment = {
         tableId,
         environmentId,
-        chain,
-        schema,
-        tableUuName,
-        createdAt,
+        chainId,
+        tableName,
+        tokenId,
+        blockNumber: blockNumber || null,
+        txnHash: txnHash || null,
+        createdAt: createdAt.toISOString(),
       };
       await db.insert(deployments).values(deployment).run();
       return deployment;

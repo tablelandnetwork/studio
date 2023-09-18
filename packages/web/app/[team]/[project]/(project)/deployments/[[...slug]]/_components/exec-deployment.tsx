@@ -108,6 +108,7 @@ export default function ExecDeployment({
           baseUrl: helpers.getBaseUrl(chainId),
           autoWait: false,
         });
+        // TODO: Table.schema will be JSON, convert it to SQL create table statement.
         const res = await tbl.exec(table.schema);
         if (res.error) {
           throw new Error(res.error);
@@ -153,12 +154,14 @@ export default function ExecDeployment({
       try {
         await recordDeployment(
           project.id,
-          environment.id,
           table.id,
+          environment.id,
           txn.name,
-          chainId,
-          table.schema,
+          txn.chainId,
+          txn.tableId,
           new Date(),
+          txn.blockNumber,
+          txn.transactionHash,
         );
       } catch (error) {
         setRecordDeploymentState(

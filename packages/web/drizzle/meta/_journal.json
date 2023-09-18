@@ -22,6 +22,20 @@
       "when": 1693600808702,
       "tag": "0002_adorable_wither",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1695055892357,
+      "tag": "0003_curvy_shadow_king",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1695055901123,
+      "tag": "0004_damp_iceman",
+      "breakpoints": true
     }
   ]
 }

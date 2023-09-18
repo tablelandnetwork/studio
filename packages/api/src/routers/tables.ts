@@ -63,11 +63,11 @@ export function tablesRouter(store: Store, validator: Validator) {
 
         const deployment = await store.deployments.recordDeployment({
           tableId: table.id,
-          chain: input.chainId,
           environmentId: input.environmentId,
-          schema: JSON.stringify(tablelandTable.schema),
-          tableUuName: tablelandTable.name,
-          createdAt: new Date(createdAttr.value * 1000).toISOString(),
+          tableName: tablelandTable.name,
+          chainId: input.chainId,
+          tokenId: input.tableId,
+          createdAt: new Date(createdAttr.value * 1000),
         });
         return { table, deployment };
       }),
