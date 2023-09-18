@@ -9,7 +9,7 @@ import { useCallback } from "react";
 
 function projectLinks(team: schema.Team, project: schema.Project) {
   return [
-    { label: "Schema", href: `/${team.slug}/${project.slug}` },
+    { label: "Blueprint", href: `/${team.slug}/${project.slug}` },
     { label: "Deployments", href: `/${team.slug}/${project.slug}/deployments` },
     { label: "Settings", href: `/${team.slug}/${project.slug}/settings` },
   ];

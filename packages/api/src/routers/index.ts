@@ -4,6 +4,7 @@ import { Store } from "@tableland/studio-store";
 import { router } from "../trpc";
 import { createSendInvite } from "../utils/sendInvite";
 import { authRouter } from "./auth";
+import { deploymentsRouter } from "./deployments";
 import { environmentsRouter } from "./environments";
 import { invitesRouter } from "./invites";
 import { projectsRouter } from "./projects";
@@ -31,6 +32,7 @@ export function appRouter(
     tables: tablesRouter(store, validator),
     invites: invitesRouter(store, sendInvite, dataSealPass),
     environments: environmentsRouter(store),
+    deployments: deploymentsRouter(store),
   });
 }
 

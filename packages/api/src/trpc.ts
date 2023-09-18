@@ -87,3 +87,29 @@ export const projectProcedure = (store: Store) =>
         ctx: { teamAuthorization: membership },
       });
     });
+
+export const tableProcedure = (store: Store) =>
+  protectedProcedure
+    .input(z.object({ tableId: z.string().uuid() }))
+    .use(async (opts) => {
+      const team = await store.tables.tableTeam(opts.input.tableId);
+      if (!team) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "no team for table id found",
+        });
+      }
+      const membership = await store.teams.isAuthorizedForTeam(
+        opts.ctx.session.auth.user.teamId,
+        team.id,
+      );
+      if (!membership) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "not authorized for team",
+        });
+      }
+      return opts.next({
+        ctx: { teamAuthorization: membership },
+      });
+    });

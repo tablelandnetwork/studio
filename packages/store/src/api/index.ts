@@ -18,6 +18,6 @@ export function init(tbl: Database, dataSealPass: string) {
     tables: initTables(db, tbl),
     teams: initTeams(db, tbl, dataSealPass),
     environments: initEnvironments(db, tbl),
-    deployments: initDeployments(db, tbl),
+    deployments: initDeployments(db),
   };
 }

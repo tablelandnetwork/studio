@@ -91,6 +91,7 @@ export default function Profile() {
   const onRegisterSuccess = (auth: Auth) => {
     setAuth(auth);
     setShowRegisterDialog(false);
+    router.push(`/${auth.personalTeam.slug}`);
   };
 
   const onRegisterCancel = () => {

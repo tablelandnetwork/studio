@@ -1,9 +1,9 @@
 import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema";
-import { Table, projectTables, tables } from "../schema";
+import { Table, projectTables, tables, teamProjects, teams } from "../schema";
 import { slugify } from "./utils";
 
 export function initTables(
@@ -40,11 +40,27 @@ export function initTables(
         .select({ tables })
         .from(projectTables)
         .innerJoin(tables, eq(projectTables.tableId, tables.id))
-        .where(and(eq(projectTables.projectId, projectId)))
+        .where(eq(projectTables.projectId, projectId))
         .orderBy(tables.name)
         .all();
       const mapped = res.map((r) => r.tables);
       return mapped;
+    },
+
+    tableTeam: async function (tableId: string) {
+      const res = await db
+        .select({ teams })
+        .from(tables)
+        .innerJoin(projectTables, eq(tables.id, projectTables.tableId))
+        .innerJoin(
+          teamProjects,
+          eq(projectTables.projectId, teamProjects.projectId),
+        )
+        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .where(eq(tables.id, tableId))
+        .orderBy(tables.name)
+        .get();
+      return res?.teams;
     },
   };
 }

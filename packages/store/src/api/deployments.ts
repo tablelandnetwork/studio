@@ -1,87 +1,46 @@
-import { Database } from "@tableland/sdk";
-import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema";
-import { Deployment, deployments, projectTables } from "../schema";
+import { deployments, projectTables } from "../schema";
 
-export function initDeployments(
-  db: DrizzleD1Database<typeof schema>,
-  tbl: Database,
-) {
+export function initDeployments(db: DrizzleD1Database<typeof schema>) {
   return {
-    createDeployment: async function ({
+    recordDeployment: async function ({
       tableId,
       environmentId,
-      chain,
-      schema,
-      tableUuName,
+      chainId,
+      tableName,
+      tokenId,
+      blockNumber,
+      txnHash,
       createdAt,
-    }: {
-      tableId: string;
-      environmentId: string;
-      chain: number;
-      schema: string;
-      tableUuName?: string;
-      createdAt: Date;
-    }) {
-      const tableInstanceId = randomUUID();
-
-      const deployment = {
-        id: tableInstanceId,
+    }: Omit<schema.NewDeployment, "createdAt"> & { createdAt: Date }) {
+      const deployment: schema.Deployment = {
         tableId,
         environmentId,
-        chain,
-        schema,
-        tableUuName,
+        chainId,
+        tableName,
+        tokenId,
+        blockNumber: blockNumber || null,
+        txnHash: txnHash || null,
         createdAt: createdAt.toISOString(),
       };
-
-      const { sql, params } = db.insert(deployments).values(deployment).toSQL();
-
-      const res = await tbl.prepare(sql).bind(params).run();
-      if (res.error) {
-        throw new Error(res.error);
-      }
-
+      await db.insert(deployments).values(deployment).run();
       return deployment;
     },
 
-    updateDeployment: async function ({
-      tableInstanceId,
-      tableUuName,
-    }: {
-      tableInstanceId: string;
-      tableUuName?: string;
-    }) {
-      const tableInstance = {
-        tableUuName,
-      };
-
-      const { sql, params } = db
-        .update(deployments)
-        .set(tableInstance)
-        .where(eq(deployments.id, tableInstanceId))
-        .toSQL();
-
-      const res = await tbl.prepare(sql).bind(params).run();
-      if (res.error) {
-        throw new Error(res.error);
-      }
-
-      return tableInstance;
-    },
-
-    deploymentsByProjectId: async function (id: string) {
-      const { sql, params } = db
-        .select()
+    deploymentsByProjectId: async function (
+      projectId: string,
+    ): Promise<schema.Deployment[]> {
+      const res = await db
+        .select({ deployments })
         .from(deployments)
         .leftJoin(projectTables, eq(deployments.tableId, projectTables.tableId))
-        .where(eq(projectTables.projectId, id))
-        .toSQL();
+        .where(eq(projectTables.projectId, projectId))
+        .all();
 
-      const res = await tbl.prepare(sql).bind(params).all();
-      return res.results as Deployment[];
+      const mapped = res.map((r) => r.deployments);
+      return mapped;
     },
   };
 }

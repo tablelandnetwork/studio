@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { schema } from "@tableland/studio-store";
 import { Coins, Hash, Rocket, Table2 } from "lucide-react";
 import { Payment, columns } from "./columns";
 import { DataTable } from "./data-table";
@@ -107,16 +108,20 @@ async function getData(): Promise<Payment[]> {
 }
 
 export default async function Deployment({
-  params,
+  environment,
+  table,
+  deployment,
 }: {
-  params: { env: string; table: string };
+  environment: schema.Environment;
+  table: schema.Table;
+  deployment: schema.Deployment;
 }) {
   const data = await getData();
 
   return (
     <div className="flex-1 space-y-4 p-4 pl-0">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-medium">users</h1>
+        <h1 className="text-3xl font-medium">{table.name}</h1>
         {/* <Select>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Staging" />
