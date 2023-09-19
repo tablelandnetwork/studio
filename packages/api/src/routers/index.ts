@@ -1,4 +1,3 @@
-import { Validator } from "@tableland/sdk";
 import { initMailApi } from "@tableland/studio-mail";
 import { Store } from "@tableland/studio-store";
 import { router } from "../trpc";
@@ -13,7 +12,6 @@ import { teamsRouter } from "./teams";
 
 export function appRouter(
   store: Store,
-  validator: Validator,
   mailApiKey: string,
   createInviteLink: (seal: string) => string,
   dataSealPass: string,
@@ -29,7 +27,7 @@ export function appRouter(
     auth: authRouter(store),
     projects: projectsRouter(store),
     teams: teamsRouter(store, sendInvite),
-    tables: tablesRouter(store, validator),
+    tables: tablesRouter(store),
     invites: invitesRouter(store, sendInvite, dataSealPass),
     environments: environmentsRouter(store),
     deployments: deploymentsRouter(store),

@@ -1,10 +1,10 @@
-import { type Validator } from "@tableland/sdk";
+import { Validator, helpers } from "@tableland/sdk";
 import { Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { projectProcedure, router } from "../trpc";
 
-export function tablesRouter(store: Store, validator: Validator) {
+export function tablesRouter(store: Store) {
   return router({
     projectTables: projectProcedure(store)
       .input(z.object({}))
@@ -38,6 +38,9 @@ export function tablesRouter(store: Store, validator: Validator) {
         }),
       )
       .mutation(async ({ input }) => {
+        const validator = new Validator({
+          baseUrl: helpers.getBaseUrl(input.chainId),
+        });
         // TODO: Execute different table inserts in a batch txn.
         const tablelandTable = await validator.getTableById({
           chainId: input.chainId,

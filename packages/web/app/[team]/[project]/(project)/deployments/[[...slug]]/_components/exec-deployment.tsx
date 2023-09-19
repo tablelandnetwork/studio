@@ -177,12 +177,18 @@ export default function ExecDeployment({
   };
 
   const handleCancel = () => {
-    setShowDialog(false);
-    router.replace(`/${team.slug}/${project.slug}/deployments`);
+    handleOnOpenChange(false);
+  };
+
+  const handleOnOpenChange = (open: boolean) => {
+    setShowDialog(open);
+    if (!open) {
+      router.replace(`/${team.slug}/${project.slug}/deployments`);
+    }
   };
 
   return (
-    <Dialog open={showDialog} onOpenChange={setShowDialog}>
+    <Dialog open={showDialog} onOpenChange={handleOnOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Deploy Table: {table.name}</DialogTitle>
