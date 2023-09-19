@@ -1,1 +1,0 @@
-SELECT 'dummy for drop table deployments' from `users`;

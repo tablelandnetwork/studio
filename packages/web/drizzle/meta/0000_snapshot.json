@@ -1,19 +1,12 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "18b37826-7f6d-44c8-8df5-b17204a6d139",
+  "id": "d530d97c-03c8-4810-b07b-c53fc8191c57",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "deployments": {
       "name": "deployments",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
         "table_id": {
           "name": "table_id",
           "type": "text",
@@ -28,22 +21,43 @@
           "notNull": true,
           "autoincrement": false
         },
-        "table_uu_name": {
-          "name": "table_uu_name",
+        "table_name": {
+          "name": "table_name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "chain": {
-          "name": "chain",
+        "chain_id": {
+          "name": "chain_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "schema": {
-          "name": "schema",
+        "token_id": {
+          "name": "token_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "block_number": {
+          "name": "block_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "txn_hash": {
+          "name": "txn_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -52,7 +66,11 @@
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "deployments_table_id_environment_id_pk": {
+          "columns": ["environment_id", "table_id"]
+        }
+      },
       "uniqueConstraints": {}
     },
     "environments": {
@@ -72,8 +90,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "title": {
-          "name": "title",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

@@ -1,1 +1,0 @@
-ALTER TABLE `environments` RENAME COLUMN `title` TO `name`;
