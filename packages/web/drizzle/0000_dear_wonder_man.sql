@@ -1,16 +1,19 @@
 CREATE TABLE `deployments` (
-	`id` text PRIMARY KEY NOT NULL,
 	`table_id` text NOT NULL,
 	`environment_id` text NOT NULL,
-	`table_uu_name` text,
-	`chain` integer NOT NULL,
-	`schema` text NOT NULL
+	`table_name` text NOT NULL,
+	`chain_id` integer NOT NULL,
+	`token_id` text NOT NULL,
+	`block_number` integer,
+	`txn_hash` text,
+	`created_at` text NOT NULL,
+	PRIMARY KEY(`environment_id`, `table_id`)
 );
 --> statement-breakpoint
 CREATE TABLE `environments` (
 	`id` text PRIMARY KEY NOT NULL,
 	`project_id` text NOT NULL,
-	`title` text NOT NULL
+	`name` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `project_tables` (
@@ -49,25 +52,25 @@ CREATE TABLE `team_memberships` (
 	`team_id` text NOT NULL,
 	`is_owner` integer NOT NULL,
 	`joined_at` text NOT NULL,
-	UNIQUE(`member_team_id`,`team_id`)
+	UNIQUE (`member_team_id`,`team_id`)
 );
 --> statement-breakpoint
 CREATE TABLE `team_projects` (
 	`team_id` text NOT NULL,
 	`project_id` text NOT NULL,
 	`is_owner` integer NOT NULL,
-	UNIQUE(`team_id`,`project_id`)
+	UNIQUE (`team_id`,`project_id`)
 );
 --> statement-breakpoint
 CREATE TABLE `teams` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL UNIQUE,
-	`slug` text NOT NULL UNIQUE,
+	`name` text UNIQUE NOT NULL,
+	`slug` text UNIQUE NOT NULL,
 	`personal` integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
 	`address` text PRIMARY KEY NOT NULL,
-	`team_id` text NOT NULL UNIQUE,
+	`team_id` text UNIQUE NOT NULL,
 	`sealed` text NOT NULL
 );

@@ -1,1 +1,0 @@
-ALTER TABLE deployments ADD `created_at` text NOT NULL;

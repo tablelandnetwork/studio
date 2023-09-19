@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1691362113539,
-      "tag": "0000_cloudy_slapstick",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1692135732385,
-      "tag": "0001_certain_dorian_gray",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1693600808702,
-      "tag": "0002_adorable_wither",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1695055892357,
-      "tag": "0003_curvy_shadow_king",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1695055901123,
-      "tag": "0004_damp_iceman",
+      "when": 1695150144932,
+      "tag": "0000_dear_wonder_man",
       "breakpoints": true
     }
   ]
