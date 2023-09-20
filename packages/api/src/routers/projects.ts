@@ -17,8 +17,8 @@ export function projectsRouter(store: Store) {
         }
         return await store.projects.projectsByTeamId(teamId);
       }),
-    projectByTeamIdAndSlug: teamProcedure(store)
-      .input(z.object({ slug: z.string() }))
+    projectByTeamIdAndSlug: publicProcedure
+      .input(z.object({ teamId: z.string(), slug: z.string() }))
       .query(async ({ input }) => {
         const project = await store.projects.projectByTeamIdAndSlug(
           input.teamId,

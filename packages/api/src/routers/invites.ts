@@ -57,18 +57,6 @@ export function invitesRouter(
         }
         return invite;
       }),
-    inviteById: publicProcedure
-      .input(z.object({ inviteId: z.string() }))
-      .query(async ({ input }) => {
-        const invite = await store.invites.inviteById(input.inviteId);
-        if (!invite) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Invite not found",
-          });
-        }
-        return invite;
-      }),
     acceptInvite: protectedProcedure
       .input(z.object({ seal: z.string() }))
       .mutation(async ({ input, ctx }) => {

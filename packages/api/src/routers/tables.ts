@@ -2,12 +2,12 @@ import { Validator, helpers } from "@tableland/sdk";
 import { Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { projectProcedure, router } from "../trpc";
+import { projectProcedure, publicProcedure, router } from "../trpc";
 
 export function tablesRouter(store: Store) {
   return router({
-    projectTables: projectProcedure(store)
-      .input(z.object({}))
+    projectTables: publicProcedure
+      .input(z.object({ projectId: z.string() }))
       .query(async ({ input }) => {
         return await store.tables.tablesByProjectId(input.projectId);
       }),

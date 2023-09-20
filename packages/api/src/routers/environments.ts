@@ -1,11 +1,11 @@
 import { Store } from "@tableland/studio-store";
 import { z } from "zod";
-import { projectProcedure, router } from "../trpc";
+import { projectProcedure, publicProcedure, router } from "../trpc";
 
 export function environmentsRouter(store: Store) {
   return router({
-    projectEnvironments: projectProcedure(store)
-      .input(z.object({}))
+    projectEnvironments: publicProcedure
+      .input(z.object({ projectId: z.string() }))
       .query(async ({ input }) => {
         return await store.environments.getEnvironmentsByProjectId(
           input.projectId,
