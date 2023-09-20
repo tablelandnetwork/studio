@@ -23,10 +23,7 @@ import * as z from "zod";
 
 const formSchema = z.object({
   name: z.string().min(3),
-  description: z
-    .string()
-    .optional()
-    .transform((v) => (!v ? undefined : v)),
+  description: z.string().nonempty(),
   environments: z.array(z.object({ name: z.string().min(3) })),
 });
 
@@ -105,8 +102,8 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
                 <Textarea placeholder="Project description" {...field} />
               </FormControl>
               <FormDescription>
-                This is the description for your new Project and it&apos;s
-                optional.
+                Provide a description of your Project so others can understand
+                what you&apos;re up to.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -150,6 +147,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
                         variant="ghost"
                         type="button"
                         className="px-0"
+                        size="sm"
                         onClick={() => remove(index)}
                       >
                         <X />

@@ -6,17 +6,33 @@ import { schema } from "@tableland/studio-store";
 import { useAtomValue } from "jotai";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback } from "react";
 
-function links(team?: schema.Team) {
+function links(
+  team?: schema.Team,
+): { label: string; href: string; isActive: (pathname: string) => boolean }[] {
   const links = [
-    { label: "Home", href: "/" },
-    { label: "Tableland", href: "https://tableland.xyz" },
-    { label: "Docs", href: "https://docs.tableland.xyz" },
-    { label: "Studio", href: `/${team?.slug}` },
+    {
+      label: "Home",
+      href: "/",
+      isActive: (pathname: string) => pathname === "/",
+    },
+    {
+      label: "Tableland",
+      href: "https://tableland.xyz",
+      isActive: () => false,
+    },
+    {
+      label: "Docs",
+      href: "https://docs.tableland.xyz",
+      isActive: () => false,
+    },
   ];
-  if (!team) {
-    links.pop();
+  if (team) {
+    links.push({
+      label: "Studio",
+      href: `/${team?.slug}`,
+      isActive: (pathname: string) => pathname.includes(`/${team.slug}`),
+    });
   }
   return links;
 }
@@ -27,15 +43,6 @@ export function NavPrimary({
 }: React.HTMLAttributes<HTMLElement>) {
   const auth = useAtomValue(authAtom);
   const pathname = usePathname();
-  const navItemClassName = useCallback(
-    (path: string) => {
-      return cn(
-        "text-sm font-medium transition-colors hover:text-primary",
-        pathname !== path && "text-muted-foreground",
-      );
-    },
-    [pathname],
-  );
 
   return (
     <nav
@@ -46,7 +53,10 @@ export function NavPrimary({
         <Link
           key={link.href}
           href={link.href}
-          className={navItemClassName(link.href)}
+          className={cn(
+            "text-sm font-medium transition-colors hover:text-primary",
+            !link.isActive(pathname) && "text-muted-foreground",
+          )}
         >
           {link.label}
         </Link>

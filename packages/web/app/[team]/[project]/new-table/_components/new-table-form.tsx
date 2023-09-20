@@ -30,11 +30,14 @@ import * as z from "zod";
 const supportedChains = Object.values(helpers.supportedChains);
 
 const formSchema = z.object({
-  name: z.string(),
-  description: z
+  name: z
     .string()
-    .optional()
-    .transform((v) => (!v ? undefined : v)),
+    .nonempty()
+    .regex(
+      /^(?!\d)[a-z0-9_]+$/,
+      "Table name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
+    ),
+  description: z.string().nonempty(),
   deployments: z.array(z.object({ env: z.string(), chain: z.string() })),
 });
 
@@ -116,8 +119,8 @@ export default function NewTable({ project, team, envs }: Props) {
                 <Textarea placeholder="Table description" {...field} />
               </FormControl>
               <FormDescription>
-                This is the description for your new Table and it&apos;s
-                optional.
+                Provide a description of your new Table so others can understand
+                the role it plays in your Project Blueprint.
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -16,14 +16,14 @@ export function tablesRouter(store: Store) {
         z.object({
           name: z.string(),
           schema: z.string(),
-          description: z.string().optional(),
+          description: z.string().nonempty(),
         }),
       )
       .mutation(async ({ input }) => {
         return await store.tables.createTable(
           input.projectId,
           input.name,
-          input.description || null,
+          input.description,
           input.schema,
         );
       }),
@@ -34,7 +34,7 @@ export function tablesRouter(store: Store) {
           tableId: z.string(),
           name: z.string(),
           environmentId: z.string(),
-          description: z.string().optional(),
+          description: z.string().nonempty(),
         }),
       )
       .mutation(async ({ input }) => {
@@ -51,7 +51,7 @@ export function tablesRouter(store: Store) {
         const table = await store.tables.createTable(
           input.projectId,
           input.name,
-          input.description || null,
+          input.description,
           JSON.stringify(tablelandTable.schema),
         );
         const createdAttr = tablelandTable.attributes?.find(

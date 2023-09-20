@@ -14,7 +14,7 @@ export function initTables(
     createTable: async function (
       projectId: string,
       name: string,
-      description: string | null,
+      description: string,
       schema: string,
     ) {
       const tableId = randomUUID();

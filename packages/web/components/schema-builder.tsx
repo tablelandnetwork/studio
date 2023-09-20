@@ -100,6 +100,7 @@ export default function SchemaBuilder() {
         className="my-4"
         type="button"
         variant="outline"
+        size="sm"
         onClick={() => {
           setCreateTable((prev) => {
             const newColumn = {
@@ -130,6 +131,7 @@ function RemoveColumn({ columnIndex }: { columnIndex: number }) {
     <Button
       type="button"
       variant="ghost"
+      size="sm"
       onClick={() => {
         setAtom((prev) => {
           prev.columns.splice(columnIndex, 1);

@@ -55,7 +55,7 @@ export const projects = sqliteTable("projects", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull(),
-  description: text("description"),
+  description: text("description").notNull(),
 });
 
 export const teamProjects = sqliteTable(
@@ -79,7 +79,7 @@ export const tables = sqliteTable("tables", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
-  description: text("description"),
+  description: text("description").notNull(),
   schema: text("schema").notNull(),
 });
 
