@@ -103,7 +103,7 @@ export const connectWeb3Atom = atom(
       set(loggingInAtom, false);
       return { error: res.error };
     }
-    set(authAtom, res.auth ? res.auth : null);
+    set(authAtom, res.auth);
     set(loggingInAtom, false);
     return { auth: res.auth };
   },
@@ -113,7 +113,7 @@ export const registerAtom = atom(
   undefined,
   async (get, set, username: string, email?: string) => {
     const res = await register(username, email);
-    set(authAtom, res.auth ? res.auth : null);
+    set(authAtom, res.auth);
     return res;
   },
 );
@@ -129,7 +129,7 @@ export const logoutAtom = atom(undefined, async (get, set) => {
   set(accountAtom, null);
   set(smartAccountAtom, null);
   set(scwAddressAtom, null);
-  set(authAtom, null);
+  set(authAtom, undefined);
   set(loggedOutAtAtom, new Date());
 });
 

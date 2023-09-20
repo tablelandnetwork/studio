@@ -126,7 +126,7 @@ export function initTeams(
             {
               projects: {
                 name: string;
-                description: string | null;
+                description: string;
                 id: string;
                 slug: string;
               }[];
