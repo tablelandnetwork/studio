@@ -32,9 +32,7 @@ export default async function Project({
     acc.set(deployment.tableId, deployment);
     return acc;
   }, new Map<string, schema.Deployment>());
-
-  console.log(tables);
-  console.log(deploymentsMap);
+  const authorized = await api.teams.isAuthorized.query({ teamId: team.id });
 
   return (
     <main className="container p-4">
@@ -75,9 +73,7 @@ export default async function Project({
                           deployment ? "text-green-500" : "text-red-500"
                         }
                       />
-                      <p className="text-xl">
-                        {!deployment && `Not `}Deplployed
-                      </p>
+                      <p className="text-xl">{!deployment && `Not `}Deployed</p>
                       {deployment && (
                         <p className="text-sm text-muted-foreground">
                           {helpers.getChainInfo(deployment.chainId).chainName}
@@ -91,18 +87,22 @@ export default async function Project({
           );
         })}
       </div>
-      <Link href={`/${team.slug}/${project.slug}/new-table`}>
-        <Button variant="ghost" className="mr-2 mt-4">
-          <Plus className="mr-2" />
-          New Table
-        </Button>
-      </Link>
-      <Link href={`/${team.slug}/${project.slug}/import-table`}>
-        <Button variant="ghost" className="mt-4">
-          <Import className="mr-2" />
-          Import Table
-        </Button>
-      </Link>
+      {authorized && (
+        <>
+          <Link href={`/${team.slug}/${project.slug}/new-table`}>
+            <Button variant="ghost" className="mr-2 mt-4">
+              <Plus className="mr-2" />
+              New Table
+            </Button>
+          </Link>
+          <Link href={`/${team.slug}/${project.slug}/import-table`}>
+            <Button variant="ghost" className="mt-4">
+              <Import className="mr-2" />
+              Import Table
+            </Button>
+          </Link>
+        </>
+      )}
     </main>
   );
 }

@@ -15,6 +15,7 @@ export default async function Deployments({
   }
 
   const team = await api.teams.teamBySlug.query({ slug: params.team });
+  const authorized = await api.teams.isAuthorized.query({ teamId: team.id });
   const project = await api.projects.projectByTeamIdAndSlug.query({
     teamId: team.id,
     slug: params.project,
@@ -65,6 +66,7 @@ export default async function Deployments({
         deploymentsMap={deploymentsMap}
         teamSlug={params.team}
         projectSlug={params.project}
+        isAuthorized={!!authorized}
       />
       {selectedEnvironment && selectedTable ? (
         deployment ? (

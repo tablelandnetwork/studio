@@ -18,6 +18,8 @@ export default async function Projects({
   // TODO: Make some high level API call to return a summary of all projects.
   const team = await api.teams.teamBySlug.query({ slug: params.team });
   const projects = await api.projects.teamProjects.query({ teamId: team.id });
+  const authorized = await api.teams.isAuthorized.query({ teamId: team.id });
+
   const tables = await Promise.all(
     projects.map(
       async (project) =>
@@ -73,12 +75,14 @@ export default async function Projects({
           );
         })}
       </div>
-      <Link href={`/${team.slug}/new-project`}>
-        <Button variant="ghost" className="mt-4">
-          <Plus className="mr-2" />
-          New Project
-        </Button>
-      </Link>
+      {authorized && (
+        <Link href={`/${team.slug}/new-project`}>
+          <Button variant="ghost" className="mt-4">
+            <Plus className="mr-2" />
+            New Project
+          </Button>
+        </Link>
+      )}
     </main>
   );
 }
