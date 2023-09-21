@@ -20,11 +20,13 @@ type ProxyClient = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
 const api = function (
   config: ClientConfig = {}
 ) {
+  const apiUrl = typeof config.url === "string" ? getUrl(config.url) : getUrl();
+
   return createTRPCProxyClient<AppRouter>({
     transformer: superjson,
     links: [
       httpBatchLink({
-        url: typeof config.url === "string" ? config.url : getUrl(),
+        url: apiUrl,
         fetch: async function (url, options) {
           const res = await fetch(url, options);
 

@@ -34,9 +34,6 @@ export const handler = async (
     }
 
     const host = new URL(apiUrl).host;
-    // TODO: looks like the `web` package has this chainId hard coded to 80001.
-    //       Not sure why this is the case, but we can't do that here
-    // const chain = 80001;
     const privateKey = normalizePrivateKey(argv.privateKey);
     const wallet = await getWalletWithProvider({
       privateKey,
@@ -45,12 +42,10 @@ export const handler = async (
     });
 
     const rawMessage = new SiweMessage({
-      // TODO: decide on how to handle domain
       domain: host,
       address: toChecksumAddress(await wallet.getAddress()),
       statement:
         "Sign in to Studio with your wallet address. This only requires a signature, no transaction will be sent.",
-      // TODO: decide on how to handle uri
       uri: apiUrl,
       version: "1",
       chainId: await wallet.getChainId(),
@@ -61,7 +56,6 @@ export const handler = async (
 
     // note: the api handles session cookie storage
     const res = await api.auth.login.mutate({ message, signature });
-  console.log("login res:", res);
 
     logger.log(`You are logged in with address: ${wallet.address}`);
   } catch (err: any) {

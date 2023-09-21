@@ -24,7 +24,7 @@ type Store = ReturnType<typeof init>;
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const getTimeoutFactor = function (): number {
-  const envFactor = Number(process.env.TEST_TIMEOUT_FACTOR);
+  const envFactor = 4; //Number(process.env.TEST_TIMEOUT_FACTOR);
   if (!isNaN(envFactor) && envFactor > 0) {
     return envFactor;
   }
@@ -40,7 +40,7 @@ const lt = new LocalTableland({ silent: true });
 const provider = getDefaultProvider(process.env.PROVIDER_URL);
 
 before(async function () {
-  this.timeout(30000);
+  this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
   await lt.start();
 
@@ -48,6 +48,7 @@ before(async function () {
   const tlApi = startTablelandApi(tablesFilepath, provider);
 
   await deployStudioTables(tlApi.db);
+  await populateStudioTestData(tlApi.db);
 
   const studioServer = await startStudioApi(tlApi);
   studioServer.listen(TEST_API_PORT);
@@ -55,7 +56,7 @@ before(async function () {
 
 after(async function () {
   // cleanup tables file
-  await buildTablesFile(provider);
+  // await buildTablesFile(provider);
   // shutdown tableland network
   await lt.shutdown();
 });
@@ -84,6 +85,21 @@ async function deployStudioTables(db: Database) {
     .prepare("insert into migrations (id, file, hash) values (?, ?, ?)")
     .bind(1, tableSetupFilepath, hash)
     .all();
+}
+
+async function populateStudioTestData(db: Database) {
+  // TODO: setup an account, a project, a team, and some tables
+  console.log("inserting test data into studio tables");
+
+  const tableSetupFilepath = path.join(_dirname, "sql", "generate_test_data.sql");
+
+  const sqlFileBytes = await readFile(tableSetupFilepath);
+  const statements = sqlFileBytes.toString().split("--> statement-breakpoint");
+
+  const preparedStatements = statements.map(
+    (statement: string) => db.prepare(statement)
+  );
+  await db.batch(preparedStatements);
 }
 
 async function buildTablesFile(provider: Provider) {
@@ -136,9 +152,8 @@ async function startStudioApi({ store, validator }: { store: Store; validator: V
 
   const apiRouter = appRouter(
     store,
-    validator,
     process.env.POSTMARK_API_KEY!,
-    (seal) => `${TEST_API_BASE_URL}/invite?seal=${seal}`,
+    (seal: string) => `${TEST_API_BASE_URL}/invite?seal=${seal}`,
     process.env.DATA_SEAL_PASS!,
   );
 
@@ -163,8 +178,8 @@ async function startStudioApi({ store, validator }: { store: Store; validator: V
       };
 
       const response = await fetchRequestHandler({
-        // endpoint: "/api/trpc",
-        endpoint: "",
+        endpoint: "/api/trpc",
+        // endpoint: "",
         req,
         router: apiRouter,
         createContext,

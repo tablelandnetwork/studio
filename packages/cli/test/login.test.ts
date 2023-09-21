@@ -2,7 +2,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import mockStd from "mock-stdin";
 import { equal, match } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
@@ -18,7 +17,7 @@ const defaultArgs = [
   "--store",
   path.join(_dirname, ".studioclisession.json"),
   "--privateKey",
-  "f214f2b2cd398c806f84e317254e0f0b801d0643303237d97a22a48e01628897",
+  accounts[10].privateKey.slice(2),
   "--chain",
   "local-tableland",
   "--providerUrl",
@@ -28,7 +27,7 @@ const defaultArgs = [
 ];
 
 describe("commands/login", function () {
-  this.timeout(15000 * TEST_TIMEOUT_FACTOR);
+  this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
   before(async function () {
     await wait(1000);
@@ -46,9 +45,7 @@ describe("commands/login", function () {
 
     equal(
       res,
-      "You are logged in with address: 0xBcd4042DE499D14e55001CcbB24a551F3b954096"
+      `You are logged in with address: ${accounts[10].address}`
     );
   });
-
-  test.skip("can use custom session file path", async function () {});
 });

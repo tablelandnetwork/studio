@@ -32,6 +32,8 @@ export function authRouter(store: Store) {
           if (info) {
             ctx.session.auth = info;
           }
+          await ctx.session.persist(ctx.responseCookies);
+
           return ctx.session.auth;
         } catch (e: any) {
           ctx.session.auth = undefined;
@@ -41,8 +43,6 @@ export function authRouter(store: Store) {
             message: e.message,
             cause: e,
           });
-        } finally {
-          await ctx.session.persist(ctx.responseCookies);
         }
       }),
     register: publicProcedure

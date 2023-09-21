@@ -4,6 +4,6 @@ export function getBaseUrl() {
   return "http://localhost:3000";
 }
 
-export function getUrl() {
-  return getBaseUrl() + "/api/trpc";
+export function getUrl(baseUrl?: string) {
+  return (baseUrl || getBaseUrl()) + "/api/trpc";
 }
