@@ -45,6 +45,7 @@ before(async function () {
   await lt.start();
 
   const tablesFilepath = await buildTablesFile(provider);
+  buildSessionFile();
   const tlApi = startTablelandApi(tablesFilepath, provider);
 
   await deployStudioTables(tlApi.db);
@@ -109,6 +110,12 @@ async function buildTablesFile(provider: Provider) {
   fs.writeFileSync(file, JSON.stringify({}, null, 4));
 
   return file;
+}
+
+function buildSessionFile() {
+  const file = path.join(_dirname, `.studioclisession.json`);
+  // this affectively deletes any existing file so tests start from a clean slate
+  fs.writeFileSync(file, JSON.stringify({}, null, 4));
 }
 
 function getAliases(tablesFile: string) {
@@ -185,7 +192,9 @@ async function startStudioApi({ store, validator }: { store: Store; validator: V
         createContext,
       });
 
-      res.writeHead(response.status, response.headers);
+      const responseHeaders = Object.fromEntries(response.headers.entries())
+
+      res.writeHead(response.status, responseHeaders);
       // using `as unknown as` because of https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/62651
       const body = response.body ? await streamToString(response.body as unknown as NodeJS.ReadableStream) : "";
       res.end(body);

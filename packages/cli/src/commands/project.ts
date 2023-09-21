@@ -80,7 +80,7 @@ export const builder = function (args: Yargs) {
             description,
           });
 
-          logger.log(JSON.stringify(result));
+          logger.log(JSON.stringify(result, null, 4));
         } catch (err: any) {
           logger.error(err);
         }

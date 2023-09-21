@@ -12,12 +12,11 @@ import * as mod from "../src/commands/project.js";
 import { logger, wait } from "../src/utils.js";
 import { TEST_TIMEOUT_FACTOR, TEST_API_BASE_URL } from "./setup";
 
-const _dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const _dirname = path.dirname(fileURLToPath(import.meta.url));
 const accounts = getAccounts();
 
-console.log("Project Test with account:", accounts[10].address);
-
+const TEST_TEAM_ID = "01a2d24d-3805-4a14-8059-7041f8b69afc";
 const defaultArgs = [
   "--store",
   path.join(_dirname, ".studioclisession.json"),
@@ -49,36 +48,61 @@ describe("commands/project", function () {
     restore();
   });
 
+  // TODO: need to fix the fact that all the tests rely on the previous tests.
+  const description = "testing project create";
+  const projectName = "projectfoo";
+
   // happy first
   test("can create a project", async function () {
     const consoleLog = spy(logger, "log");
+
     await yargs([
       "project",
       "create",
-      "projectfoo",
+      projectName,
+      "--description",
+      description,
       "--teamId",
-      "teamfoo",
+      TEST_TEAM_ID,
       ...defaultArgs
     ]).command(mod).parse();
 
     const res = consoleLog.getCall(0).firstArg;
-    equal(res.startsWith("created project: "), true);
+    const value = JSON.parse(res);
 
-    const value = JSON.parse(res.slice(14));
-    equal(value.name, "projectfoo");
-    // TODO: what other assertions?
+    // assert id format
+    const idParts = value.id.split("-");
+    equal(idParts.length, 5);
+    equal(idParts[0].length, 8);
+    equal(idParts[1].length, 4);
+    equal(idParts[2].length, 4);
+    equal(idParts[3].length, 4);
+    equal(idParts[4].length, 12);
+
+    equal(value.name, projectName);
+    equal(value.description, description);
+    equal(value.slug, projectName);
+
   });
 
   test("can list projects", async function () {
-    const consoleLog = spy(logger, "log");
-    await yargs(["project", "ls", ...defaultArgs]).command(mod).parse();
+    const consoleTable = spy(logger, "table");
+    await yargs(["project", "ls", TEST_TEAM_ID, ...defaultArgs]).command(mod).parse();
 
-    const res = consoleLog.getCall(0).firstArg;
-    equal(res.startsWith("project: "), true);
+    const table = consoleTable.getCall(0).firstArg;
 
-    // TODO: this test relies on the project create test
-    const value = JSON.parse(res.slice(14));
-    equal(value.name, "projectfoo");
-    // TODO: what other assertions?
+    equal(table.length, 1);
+    const project = table[0];
+    const idParts = project.id.split("-");
+    equal(idParts.length, 5);
+    equal(idParts[0].length, 8);
+    equal(idParts[1].length, 4);
+    equal(idParts[2].length, 4);
+    equal(idParts[3].length, 4);
+    equal(idParts[4].length, 12);
+
+    equal(project.name, projectName);
+    equal(project.description, description);
+    equal(project.slug, projectName);
   });
 });

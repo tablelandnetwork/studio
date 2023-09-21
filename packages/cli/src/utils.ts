@@ -12,6 +12,7 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string) {
   if (fileStore) {
     apiArgs.fetch = function (res) {
       const setCookie = res.headers.get("set-cookie");
+
       if (setCookie) {
         fileStore.set(sessionKey, setCookie.split(";").shift());
         fileStore.save();
