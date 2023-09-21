@@ -86,8 +86,7 @@ export function initTeams(
         .from(teams)
         .where(eq(teams.slug, slug))
         .get();
-      // TODO: Figure out how drizzle handles not found even though the return type isn't optional.
-      return team ? team : undefined;
+      return team;
     },
 
     teamById: async function (id: string) {
@@ -127,7 +126,7 @@ export function initTeams(
             {
               projects: {
                 name: string;
-                description: string | null;
+                description: string;
                 id: string;
                 slug: string;
               }[];

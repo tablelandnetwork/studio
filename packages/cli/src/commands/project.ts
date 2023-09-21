@@ -2,7 +2,7 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
-import { normalizePrivateKey, getApi, FileStore, logger } from "../utils.js";
+import { FileStore, getApi, logger } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -12,7 +12,7 @@ export const desc = "manage studio teams";
 export interface CommandOptions extends GlobalOptions {
   teamId?: string;
   name?: string;
-  description?: string;
+  description: string;
   team?: string;
   user?: string;
   personalTeamId?: string;
@@ -27,8 +27,7 @@ export const builder = function (args: Yargs) {
       function (args) {
         return args.positional("teamId", {
           type: "string",
-          description:
-            "optional team id",
+          description: "optional team id",
         });
       },
       async function (argv) {
@@ -66,8 +65,12 @@ export const builder = function (args: Yargs) {
         const { name, teamId, description, store } = argv;
         const api = getApi(new FileStore(store as string));
 
-        if (typeof name !== "string") throw new Error("must provide project name");
-        if (typeof teamId !== "string") throw new Error("must provide team for project");
+        if (typeof name !== "string")
+          throw new Error("must provide project name");
+        if (typeof teamId !== "string")
+          throw new Error("must provide team for project");
+        if (typeof description !== "string")
+          throw new Error("must provide project description");
 
         const result = await api.projects.newProject.mutate({
           teamId,

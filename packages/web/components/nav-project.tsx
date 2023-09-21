@@ -5,13 +5,23 @@ import { api } from "@/trpc/server-invoker";
 import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { useCallback } from "react";
 
-function projectLinks(team: schema.Team, project: schema.Project) {
+function projectLinks(
+  team: schema.Team,
+  project: schema.Project,
+): { label: string; href: string; isActive: (pathname: string) => boolean }[] {
   return [
-    { label: "Blueprint", href: `/${team.slug}/${project.slug}` },
-    { label: "Deployments", href: `/${team.slug}/${project.slug}/deployments` },
-    { label: "Settings", href: `/${team.slug}/${project.slug}/settings` },
+    {
+      label: "Blueprint",
+      href: `/${team.slug}/${project.slug}`,
+      isActive: (pathname) => pathname === `/${team.slug}/${project.slug}`,
+    },
+    {
+      label: "Deployments",
+      href: `/${team.slug}/${project.slug}/deployments`,
+      isActive: (pathname) =>
+        pathname.includes(`/${team.slug}/${project.slug}/deployments`),
+    },
   ];
 }
 
@@ -24,16 +34,6 @@ export default function NavProject({
 }) {
   const pathname = usePathname();
   const { team: teamSlug, project: projectSlug } = useParams();
-  const navItemClassName = useCallback(
-    (path: string) => {
-      return cn(
-        "text-sm font-medium transition-colors hover:text-primary",
-        pathname !== path && "text-muted-foreground",
-      );
-    },
-    [pathname],
-  );
-
   const team = teams.find((team) => team.slug === teamSlug);
   if (!team) {
     return null;
@@ -50,9 +50,12 @@ export default function NavProject({
     >
       {projectLinks(team, project).map((link) => (
         <Link
-          key={link.href}
+          key={link.label}
           href={link.href}
-          className={navItemClassName(link.href)}
+          className={cn(
+            "text-sm font-medium transition-colors hover:text-primary",
+            !link.isActive(pathname) && "text-muted-foreground",
+          )}
         >
           {link.label}
         </Link>

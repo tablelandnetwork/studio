@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "d530d97c-03c8-4810-b07b-c53fc8191c57",
+  "id": "e257e58b-057a-4051-ae5f-1cd05d36d9d1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "deployments": {
@@ -160,7 +160,7 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
@@ -197,7 +197,7 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "schema": {

@@ -24,8 +24,14 @@ import * as z from "zod";
 const formSchema = z.object({
   chainId: z.coerce.number().gt(0),
   tableId: z.string().nonempty(),
-  name: z.string().nonempty(),
-  description: z.string().optional(),
+  name: z
+    .string()
+    .nonempty()
+    .regex(
+      /^(?!\d)[a-z0-9_]+$/,
+      "Table name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
+    ),
+  description: z.string().nonempty(),
   environment: z
     .string()
     .optional()
@@ -135,8 +141,8 @@ export default function ImportTableForm({ project, team, envs }: Props) {
                 <Textarea placeholder="Table description" {...field} />
               </FormControl>
               <FormDescription>
-                This is the description for your imported Table and it&apos;s
-                optional. It is only used in Studio.
+                Provide a description for the imported Table so others can
+                understand the role it plays in your Project Blueprint.
               </FormDescription>
               <FormMessage />
             </FormItem>

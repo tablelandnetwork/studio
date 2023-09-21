@@ -11,7 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { authAtom } from "@/store/wallet";
 import { Auth } from "@tableland/studio-api";
+import { useAtom } from "jotai";
 import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -31,7 +33,7 @@ export default function Profile() {
     isLoading,
     reset,
   } = useConnect();
-  const [auth, setAuth] = useState<Auth | undefined>(undefined);
+  const [auth, setAuth] = useAtom(authAtom);
   const [signInError, setSignInError] = useState<Error | undefined>(undefined);
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
   const { toast } = useToast();
@@ -51,7 +53,7 @@ export default function Profile() {
     // 2. window is focused (in case user logs out of another window)
     window.addEventListener("focus", handler);
     return () => window.removeEventListener("focus", handler);
-  }, []);
+  }, [setAuth]);
 
   useEffect(() => {
     if (walletConnectorError) {

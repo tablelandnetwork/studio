@@ -20,7 +20,7 @@ export function initProjects(
     createProject: async function (
       teamId: string,
       name: string,
-      description: string | null,
+      description: string,
     ) {
       const projectId = randomUUID();
       const slug = slugify(name);

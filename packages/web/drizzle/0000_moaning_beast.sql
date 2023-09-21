@@ -26,14 +26,14 @@ CREATE TABLE `projects` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
-	`description` text
+	`description` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `tables` (
 	`id` text PRIMARY KEY NOT NULL,
 	`slug` text NOT NULL,
 	`name` text NOT NULL,
-	`description` text,
+	`description` text NOT NULL,
 	`schema` text NOT NULL
 );
 --> statement-breakpoint

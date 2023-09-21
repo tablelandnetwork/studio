@@ -36,14 +36,14 @@ export function projectsRouter(store: Store) {
       .input(
         z.object({
           name: z.string(),
-          description: z.string().optional(),
+          description: z.string().nonempty(),
         }),
       )
       .mutation(async ({ input }) => {
         const project = await store.projects.createProject(
           input.teamId,
           input.name,
-          input.description || null,
+          input.description,
         );
         // TODO: This is temporary to make sure all projects have a default environment.
         await store.environments.createEnvironment({

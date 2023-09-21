@@ -9,4 +9,4 @@ export const smartAccountAtom = atom<SmartAccount | null>(null);
 export const scwAddressAtom = atom<string | null>(null);
 export const scwLoadingAtom = atom(false);
 export const loggingInAtom = atom(false);
-export const authAtom = atom<Auth | null>(null);
+export const authAtom = atom<Auth | undefined>(undefined);

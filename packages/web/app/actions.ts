@@ -46,7 +46,7 @@ export async function logout() {
 export async function newProject(
   teamId: string,
   name: string,
-  description?: string,
+  description: string,
 ) {
   const project = await api.projects.newProject.mutate({
     teamId,
@@ -73,7 +73,7 @@ export async function newTable(
   project: schema.Project,
   name: string,
   schema: string,
-  description?: string,
+  description: string,
 ) {
   const table = api.tables.newTable.mutate({
     projectId: project.id,
@@ -117,7 +117,7 @@ export async function importTable(
   tableId: string,
   name: string,
   environmentId: string,
-  description?: string,
+  description: string,
 ) {
   const res = await api.tables.importTable.mutate({
     projectId: project.id,
@@ -129,7 +129,9 @@ export async function importTable(
   });
 
   await api.tables.projectTables.revalidate({ projectId: project.id });
-  // TODO: Revalidate whatever API function provides list of deployments.
+  await api.deployments.projectDeployments.revalidate({
+    projectId: project.id,
+  });
   return res;
 }
 
