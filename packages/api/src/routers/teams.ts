@@ -6,7 +6,6 @@ import {
   publicProcedure,
   router,
   teamAdminProcedure,
-  teamProcedure,
 } from "../trpc";
 import { SendInviteFunc } from "../utils/sendInvite";
 
@@ -53,10 +52,12 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         await Promise.all(invites.map((invite) => sendInvite(invite)));
         return team;
       }),
-    usersForTeam: teamProcedure(store).query(async ({ input }) => {
-      const people = await store.teams.userTeamsForTeamId(input.teamId);
-      return people;
-    }),
+    usersForTeam: publicProcedure
+      .input(z.object({ teamId: z.string() }))
+      .query(async ({ input }) => {
+        const people = await store.teams.userTeamsForTeamId(input.teamId);
+        return people;
+      }),
     toggleAdmin: teamAdminProcedure(store)
       .input(z.object({ userId: z.string() }))
       .mutation(async ({ input }) => {
