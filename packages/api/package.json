@@ -15,7 +15,7 @@
     "@tableland/sdk": "^4.5.1",
     "@tableland/studio-mail": "^0.0.0",
     "@tableland/studio-store": "^1.0.0",
-    "@trpc/server": "^10.37.1",
+    "@trpc/server": "^10.38.4",
     "iron-session": "^6.3.1",
     "next": "13.4.9",
     "siwe": "^2.1.4",
