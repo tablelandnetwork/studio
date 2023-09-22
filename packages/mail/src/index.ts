@@ -2,8 +2,8 @@ import { render } from "@react-email/render";
 import * as postmark from "postmark";
 import Invite from "./emails/invite";
 
-export function initMailApi(apiKey: string) {
-  const client = new postmark.ServerClient(apiKey);
+export function initMailApi(apiKey?: string) {
+  const client = getClient(apiKey);
   return {
     sendInvite: async (
       to: string,
@@ -21,6 +21,17 @@ export function initMailApi(apiKey: string) {
       return res;
     },
   };
+}
+
+const getClient = function (apiKey?: string) {
+  if (typeof apiKey !== "string" || apiKey.trim() === "") {
+    return {
+      sendEmail: function (data: any) {
+        console.log("Development Mode Email:", JSON.stringify(data, null, 4));
+      }
+    };
+  }
+  return new postmark.ServerClient(apiKey);
 }
 
 export type MailApi = ReturnType<typeof initMailApi>;
