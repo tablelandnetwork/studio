@@ -10,6 +10,8 @@ import { getBaseUrl, getUrl } from "./util.js";
 
 type NonEmptyArray<TItem> = [TItem, ...TItem[]];
 
+type ProxyClient = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
+
 const api = function (
   config: {
     fetch?: (res: Response) => Response;
@@ -19,7 +21,7 @@ const api = function (
           opList: NonEmptyArray<Operation>;
         }) => HTTPHeaders | Promise<HTTPHeaders>);
   } = {},
-) {
+): ProxyClient {
   return createTRPCProxyClient<AppRouter>({
     transformer: superjson,
     links: [
