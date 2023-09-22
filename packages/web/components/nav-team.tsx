@@ -2,7 +2,6 @@
 
 import { teamBySlug } from "@/app/actions";
 import { cn } from "@/lib/utils";
-import { api } from "@/trpc/server-invoker";
 import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -32,11 +31,8 @@ function teamLinks(team: schema.Team) {
 
 export default function NavTeam({
   className,
-  teams,
   ...props
-}: React.HTMLAttributes<HTMLElement> & {
-  teams: Awaited<ReturnType<typeof api.teams.userTeams.query>>;
-}) {
+}: React.HTMLAttributes<HTMLElement> & {}) {
   const pathname = usePathname();
   const { team: teamSlug } = useParams<{ team: string }>();
   const [team, setTeam] = useState<schema.Team | undefined>(undefined);
