@@ -1,13 +1,14 @@
 import { api } from "@/trpc/server-invoker";
+import { cache } from "react";
 
 export default async function ProjectSettings({
   params,
 }: {
   params: { team: string; project: string };
 }) {
-  const team = await api.teams.teamBySlug.query({ slug: params.team });
+  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
 
-  const project = await api.projects.projectByTeamIdAndSlug.query({
+  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
     teamId: team.id,
     slug: params.project,
   });

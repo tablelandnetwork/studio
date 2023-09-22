@@ -1,6 +1,7 @@
 import { api } from "@/trpc/server-invoker";
 import { schema } from "@tableland/studio-store";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import Deployment from "./_components/deployment";
 import ExecDeployment from "./_components/exec-deployment";
 import { Sidebar } from "./_components/sidebar";
@@ -14,19 +15,21 @@ export default async function Deployments({
     notFound();
   }
 
-  const team = await api.teams.teamBySlug.query({ slug: params.team });
-  const authorized = await api.teams.isAuthorized.query({ teamId: team.id });
-  const project = await api.projects.projectByTeamIdAndSlug.query({
+  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
+  const authorized = await cache(api.teams.isAuthorized.query)({
+    teamId: team.id,
+  });
+  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
     teamId: team.id,
     slug: params.project,
   });
-  const environments = await api.environments.projectEnvironments.query({
+  const environments = await cache(api.environments.projectEnvironments.query)({
     projectId: project.id,
   });
-  const tables = await api.tables.projectTables.query({
+  const tables = await cache(api.tables.projectTables.query)({
     projectId: project.id,
   });
-  const deployments = await api.deployments.projectDeployments.query({
+  const deployments = await cache(api.deployments.projectDeployments.query)({
     projectId: project.id,
   });
   const deploymentsMap = deployments.reduce((acc, deployment) => {

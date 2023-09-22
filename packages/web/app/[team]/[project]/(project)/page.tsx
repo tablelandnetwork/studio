@@ -11,28 +11,31 @@ import { helpers } from "@tableland/sdk";
 import { schema } from "@tableland/studio-store";
 import { Import, Plus, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
+import { cache } from "react";
 
 export default async function Project({
   params,
 }: {
   params: { team: string; project: string };
 }) {
-  const team = await api.teams.teamBySlug.query({ slug: params.team });
-  const project = await api.projects.projectByTeamIdAndSlug.query({
+  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
+  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
     teamId: team.id,
     slug: params.project,
   });
-  const tables = await api.tables.projectTables.query({
+  const tables = await cache(api.tables.projectTables.query)({
     projectId: project.id,
   });
-  const deployments = await api.deployments.projectDeployments.query({
+  const deployments = await cache(api.deployments.projectDeployments.query)({
     projectId: project.id,
   });
   const deploymentsMap = deployments.reduce((acc, deployment) => {
     acc.set(deployment.tableId, deployment);
     return acc;
   }, new Map<string, schema.Deployment>());
-  const authorized = await api.teams.isAuthorized.query({ teamId: team.id });
+  const authorized = await cache(api.teams.isAuthorized.query)({
+    teamId: team.id,
+  });
 
   return (
     <main className="container p-4">

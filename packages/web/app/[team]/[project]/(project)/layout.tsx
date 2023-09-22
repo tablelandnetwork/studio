@@ -1,6 +1,7 @@
 import { CrumbProject } from "@/components/crumb-project";
 import NavProject from "@/components/nav-project";
 import { api } from "@/trpc/server-invoker";
+import { cache } from "react";
 
 export default async function ProjectLayout({
   children,
@@ -9,7 +10,7 @@ export default async function ProjectLayout({
 }) {
   var teams: Awaited<ReturnType<typeof api.teams.userTeams.query>> = [];
   try {
-    teams = await api.teams.userTeams.query();
+    teams = await cache(api.teams.userTeams.query)();
   } catch {}
   return (
     <div className="flex flex-1 flex-col">

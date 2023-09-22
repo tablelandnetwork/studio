@@ -1,4 +1,5 @@
 import { api } from "@/trpc/server-invoker";
+import { cache } from "react";
 import NewTableForm from "./_components/new-table-form";
 
 export default async function NewProject({
@@ -6,12 +7,12 @@ export default async function NewProject({
 }: {
   params: { team: string; project: string };
 }) {
-  const team = await api.teams.teamBySlug.query({ slug: params.team });
-  const project = await api.projects.projectByTeamIdAndSlug.query({
+  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
+  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
     teamId: team.id,
     slug: params.project,
   });
-  const envs = await api.environments.projectEnvironments.query({
+  const envs = await cache(api.environments.projectEnvironments.query)({
     projectId: project.id,
   });
 

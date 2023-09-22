@@ -11,6 +11,7 @@ import { api } from "@/trpc/server-invoker";
 import { Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 export default async function Invite({
   searchParams,
@@ -20,15 +21,17 @@ export default async function Invite({
   if (typeof searchParams.seal !== "string") {
     notFound();
   }
-  const invite = await api.invites.inviteFromSeal.query({
+  const invite = await cache(api.invites.inviteFromSeal.query)({
     seal: searchParams.seal,
   });
   // TODO: Return not found if invite is expired
   if (invite.claimedByTeamId || invite.claimedAt) {
     notFound();
   }
-  const targetTeam = await api.teams.teamById.query({ teamId: invite.teamId });
-  const inviterTeam = await api.teams.teamById.query({
+  const targetTeam = await cache(api.teams.teamById.query)({
+    teamId: invite.teamId,
+  });
+  const inviterTeam = await cache(api.teams.teamById.query)({
     teamId: invite.inviterTeamId,
   });
 

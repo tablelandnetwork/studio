@@ -11,6 +11,7 @@ import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import Link from "next/link";
+import { cache } from "react";
 import "./globals.css";
 
 TimeAgo.addDefaultLocale(en);
@@ -50,7 +51,7 @@ export default async function RootLayout({
 }) {
   var teams: Awaited<ReturnType<typeof api.teams.userTeams.query>> = [];
   try {
-    teams = await api.teams.userTeams.query();
+    teams = await cache(api.teams.userTeams.query)();
   } catch {
     // This is fine, we just don't have any teams if the user
     // is unauthorized or some other error happens.

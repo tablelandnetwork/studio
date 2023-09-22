@@ -1,5 +1,6 @@
 import NavTeam from "@/components/nav-team";
 import { api } from "@/trpc/server-invoker";
+import { cache } from "react";
 
 export default async function LayoutTeam({
   children,
@@ -8,7 +9,7 @@ export default async function LayoutTeam({
 }) {
   var teams: Awaited<ReturnType<typeof api.teams.userTeams.query>> = [];
   try {
-    teams = await api.teams.userTeams.query();
+    teams = await cache(api.teams.userTeams.query)();
   } catch {}
 
   return (

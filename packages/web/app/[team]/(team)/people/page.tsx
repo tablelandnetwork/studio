@@ -4,6 +4,7 @@ import { api } from "@/trpc/server-invoker";
 import { Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import Info from "./_components/info";
 import InviteActions from "./_components/invite-actions";
 import NewInvite from "./_components/new-invite";
@@ -15,15 +16,15 @@ export default async function People({ params }: { params: { team: string } }) {
     notFound();
   }
 
-  const team = await api.teams.teamBySlug.query({ slug: params.team });
-  const people = await api.teams.usersForTeam.query({
+  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
+  const people = await cache(api.teams.usersForTeam.query)({
     teamId: team.id,
   });
-  const { invites, teamAuthorization } = await api.invites.invitesForTeam.query(
-    {
-      teamId: team.id,
-    },
-  );
+  const { invites, teamAuthorization } = await cache(
+    api.invites.invitesForTeam.query,
+  )({
+    teamId: team.id,
+  });
 
   const binnedInvites = invites.reduce<{
     pending: (typeof invites)[number][];
