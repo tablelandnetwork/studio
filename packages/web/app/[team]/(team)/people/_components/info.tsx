@@ -19,7 +19,8 @@ import {
 const timeAgo = new TimeAgo("en-US");
 
 type Props = LucideProps & {
-  user: schema.Team;
+  user?: schema.Team;
+  userMembership?: schema.TeamMembership;
   team: schema.Team;
   inviter?: schema.Team;
   invite?: schema.TeamInvite;
@@ -29,6 +30,7 @@ type Props = LucideProps & {
 export default function Info({
   className,
   user,
+  userMembership,
   invite,
   inviter,
   membership,
@@ -56,17 +58,19 @@ export default function Info({
               <p className="text-xs text-muted-foreground">Invited by</p>
               <p className="text-sm">
                 {inviter.name}
-                {inviter.id === user.id && " (You)"}
+                {inviter.id === user?.id && " (You)"}
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <MailQuestion />
-            <div>
-              <p className="text-xs text-muted-foreground">Invited at</p>
-              <p className="text-sm">{invite.email}</p>
+          {userMembership && (
+            <div className="flex items-center space-x-2">
+              <MailQuestion />
+              <div>
+                <p className="text-xs text-muted-foreground">Invited at</p>
+                <p className="text-sm">{invite.email}</p>
+              </div>
             </div>
-          </div>
+          )}
           <div className="flex items-center space-x-2">
             <Merge />
             <div>
@@ -87,7 +91,7 @@ export default function Info({
               <p className="text-xs text-muted-foreground">Invited by</p>
               <p className="text-sm">
                 {inviter.name}
-                {inviter.id === user.id && " (You)"}
+                {inviter.id === user?.id && " (You)"}
               </p>
             </div>
           </div>
