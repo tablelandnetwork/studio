@@ -2,21 +2,20 @@
 
 import { projectByTeamIdAndSlug, teamBySlug } from "@/app/actions";
 import { schema } from "@tableland/studio-store";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Crumb } from "./crumb";
+import Crumb from "./crumb";
 
-// TODO: Consolidate this with nav-project and make it the new breadcrumb design.
-export function CrumbProject({
-  ...props
-}: React.HTMLAttributes<HTMLElement> & {}) {
+export default function NavNewTable({
+  crumbTitle,
+  className,
+}: React.HTMLAttributes<HTMLElement> & { crumbTitle: string }) {
   const { team: teamSlug, project: projectSlug } = useParams<{
     team: string;
     project: string;
   }>();
   const [team, setTeam] = useState<schema.Team | undefined>(undefined);
   const [project, setProject] = useState<schema.Project | undefined>(undefined);
-  const router = useRouter();
 
   useEffect(() => {
     const getTeam = async () => {
@@ -40,16 +39,15 @@ export function CrumbProject({
     return null;
   }
 
-  const handleBack = () => {
-    router.push(`/${team.slug}`);
-  };
-
   return (
-    <Crumb
-      title={project.name}
-      subtitle={project.description}
-      onBack={handleBack}
-      {...props}
-    />
+    <div className={className}>
+      <Crumb
+        title={crumbTitle}
+        items={[
+          { label: team.name, href: `/${team.slug}` },
+          { label: project.name, href: `/${team.slug}/${project.slug}` },
+        ]}
+      />
+    </div>
   );
 }

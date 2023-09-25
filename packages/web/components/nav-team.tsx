@@ -6,6 +6,7 @@ import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Crumb from "./crumb";
 
 function teamLinks(team: schema.Team) {
   const links: {
@@ -49,22 +50,25 @@ export default function NavTeam({
   }
 
   return (
-    <nav
-      className={cn("flex items-center space-x-4 lg:space-x-6", className)}
-      {...props}
-    >
-      {teamLinks(team).map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            !link.isActive(pathname) && "text-muted-foreground",
-          )}
-        >
-          {link.label}
-        </Link>
-      ))}
-    </nav>
+    <div>
+      <Crumb title={team.name} className="mb-2" />
+      <nav
+        className={cn("flex items-center space-x-4 lg:space-x-6", className)}
+        {...props}
+      >
+        {teamLinks(team).map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              !link.isActive(pathname) && "text-muted-foreground",
+            )}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+    </div>
   );
 }

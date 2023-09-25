@@ -6,7 +6,7 @@ import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import Crumb from "./crumb-new";
+import Crumb from "./crumb";
 
 function projectLinks(
   team: schema.Team,
@@ -66,6 +66,7 @@ export default function NavProject({
       <Crumb
         title={project.name}
         items={[{ label: team.name, href: `/${team.slug}` }]}
+        className="mb-2"
       />
       <nav
         className={cn("flex items-center space-x-4 lg:space-x-6", className)}
