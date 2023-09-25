@@ -21,10 +21,10 @@ export default function PrimaryHeaderItem({
       const team = await teamBySlug(slug);
       setTeam(team);
     };
-    if (!!teams.length && !team && teamSlug) {
+    if (!!teams.length && teamSlug) {
       getTeam(teamSlug);
     }
-  }, [team, teamSlug, teams.length]);
+  }, [teamSlug, teams.length]);
 
   if (!teams.length || !team) {
     return (
