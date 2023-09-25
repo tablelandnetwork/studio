@@ -6,7 +6,7 @@ import { API, api, ClientConfig } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
 
-export const getApi = function (fileStore?: FileStore, apiUrl?: string) {
+export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
 
   if (fileStore) {

@@ -19,7 +19,7 @@ type ProxyClient = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
 
 const api = function (
   config: ClientConfig = {}
-) {
+): ProxyClient {
   const apiUrl = typeof config.url === "string" ? getUrl(config.url) : getUrl();
 
   return createTRPCProxyClient<AppRouter>({
@@ -40,6 +40,8 @@ const api = function (
     ],
   });
 };
+
+type API = ReturnType<typeof api>;
 
 export { api, API, getBaseUrl, getUrl, ClientConfig };
 

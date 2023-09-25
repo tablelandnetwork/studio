@@ -38,6 +38,9 @@ export function authRouter(store: Store) {
         } catch (e: any) {
           ctx.session.auth = undefined;
           ctx.session.nonce = undefined;
+
+          await ctx.session.persist(ctx.responseCookies);
+
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
             message: e.message,
