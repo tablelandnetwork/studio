@@ -12,6 +12,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   deploymentsMap: Map<string, Map<string, schema.Deployment>>;
   teamSlug: string;
   projectSlug: string;
+  isAuthorized: boolean;
 }
 
 export function Sidebar({
@@ -23,6 +24,7 @@ export function Sidebar({
   deploymentsMap,
   teamSlug,
   projectSlug,
+  isAuthorized,
 }: SidebarProps) {
   return (
     <div className={cn("pb-12", className)}>
@@ -46,11 +48,11 @@ export function Sidebar({
             {/* {environment.name} */}
           </h2>
           <div className="flex flex-col space-y-1">
-            {tables.map((table) => (
-              <Link
-                key={table.id}
-                href={`/${teamSlug}/${projectSlug}/deployments/${environment.name}/${table.name}`}
-              >
+            {tables.map((table) => {
+              const deployment = deploymentsMap
+                .get(environment.id)
+                ?.get(table.id);
+              const button = (
                 <Button
                   variant={
                     environment.id === selectedEnvironment?.id &&
@@ -59,16 +61,27 @@ export function Sidebar({
                       : "ghost"
                   }
                   className="w-full"
+                  disabled={!isAuthorized && !deployment}
                 >
                   <span>{table.name}</span>
-                  {deploymentsMap.get(environment.id)?.get(table.id) ? (
+                  {deployment ? (
                     <CheckCircle2 className="ml-auto text-green-400" />
                   ) : (
                     <CircleDashed className="ml-auto text-red-400" />
                   )}
                 </Button>
-              </Link>
-            ))}
+              );
+              return isAuthorized || deployment ? (
+                <Link
+                  key={table.id}
+                  href={`/${teamSlug}/${projectSlug}/deployments/${environment.name}/${table.name}`}
+                >
+                  {button}
+                </Link>
+              ) : (
+                button
+              );
+            })}
           </div>
         </div>
       ))}

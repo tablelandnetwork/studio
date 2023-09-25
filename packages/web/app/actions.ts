@@ -43,6 +43,14 @@ export async function logout() {
   await api.auth.authenticated.revalidate(undefined);
 }
 
+export async function teamBySlug(slug: string) {
+  return await api.teams.teamBySlug.query({ slug });
+}
+
+export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
+  return await api.projects.projectByTeamIdAndSlug.query({ teamId, slug });
+}
+
 export async function newProject(
   teamId: string,
   name: string,

@@ -1,10 +1,11 @@
 "use client";
 
+import { projectByTeamIdAndSlug, teamBySlug } from "@/app/actions";
 import { cn } from "@/lib/utils";
-import { api } from "@/trpc/server-invoker";
 import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function projectLinks(
   team: schema.Team,
@@ -27,19 +28,35 @@ function projectLinks(
 
 export default function NavProject({
   className,
-  teams,
   ...props
-}: React.HTMLAttributes<HTMLElement> & {
-  teams: Awaited<ReturnType<typeof api.teams.userTeams.query>>;
-}) {
+}: React.HTMLAttributes<HTMLElement> & {}) {
+  const { team: teamSlug, project: projectSlug } = useParams<{
+    team: string;
+    project: string;
+  }>();
+  const [team, setTeam] = useState<schema.Team | undefined>(undefined);
+  const [project, setProject] = useState<schema.Project | undefined>(undefined);
   const pathname = usePathname();
-  const { team: teamSlug, project: projectSlug } = useParams();
-  const team = teams.find((team) => team.slug === teamSlug);
-  if (!team) {
-    return null;
-  }
-  const project = team.projects.find((project) => project.slug === projectSlug);
-  if (!project) {
+
+  useEffect(() => {
+    const getTeam = async () => {
+      const team = await teamBySlug(teamSlug);
+      setTeam(team);
+    };
+    getTeam();
+  }, [teamSlug]);
+
+  useEffect(() => {
+    const getProject = async (teamId: string) => {
+      const project = await projectByTeamIdAndSlug(teamId, projectSlug);
+      setProject(project);
+    };
+    if (team) {
+      getProject(team.id);
+    }
+  }, [projectSlug, team]);
+
+  if (!team || !project) {
     return null;
   }
 

@@ -9,6 +9,7 @@ import {
 import { api } from "@/trpc/server-invoker";
 import { Plus, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
+import { cache } from "react";
 
 export default async function Projects({
   params,
@@ -16,18 +17,24 @@ export default async function Projects({
   params: { team: string };
 }) {
   // TODO: Make some high level API call to return a summary of all projects.
-  const team = await api.teams.teamBySlug.query({ slug: params.team });
-  const projects = await api.projects.teamProjects.query({ teamId: team.id });
+  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
+  const projects = await cache(api.projects.teamProjects.query)({
+    teamId: team.id,
+  });
+  const authorized = await cache(api.teams.isAuthorized.query)({
+    teamId: team.id,
+  });
+
   const tables = await Promise.all(
     projects.map(
       async (project) =>
-        await api.tables.projectTables.query({ projectId: project.id }),
+        await cache(api.tables.projectTables.query)({ projectId: project.id }),
     ),
   );
   const deployments = await Promise.all(
     projects.map(
       async (project) =>
-        await api.deployments.projectDeployments.query({
+        await cache(api.deployments.projectDeployments.query)({
           projectId: project.id,
         }),
     ),
@@ -73,12 +80,14 @@ export default async function Projects({
           );
         })}
       </div>
-      <Link href={`/${team.slug}/new-project`}>
-        <Button variant="ghost" className="mt-4">
-          <Plus className="mr-2" />
-          New Project
-        </Button>
-      </Link>
+      {authorized && (
+        <Link href={`/${team.slug}/new-project`}>
+          <Button variant="ghost" className="mt-4">
+            <Plus className="mr-2" />
+            New Project
+          </Button>
+        </Link>
+      )}
     </main>
   );
 }

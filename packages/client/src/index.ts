@@ -7,15 +7,21 @@ import {
 } from "@trpc/client";
 import superjson from "superjson";
 import { getBaseUrl, getUrl } from "./util.js";
- 
+
 type NonEmptyArray<TItem> = [TItem, ...TItem[]];
+
+type ProxyClient = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
 
 const api = function (
   config: {
     fetch?: (res: Response) => Response;
-    headers?: HTTPHeaders | ((opts: { opList: NonEmptyArray<Operation>; }) => HTTPHeaders | Promise<HTTPHeaders>);
-  } = {}
-) {
+    headers?:
+      | HTTPHeaders
+      | ((opts: {
+          opList: NonEmptyArray<Operation>;
+        }) => HTTPHeaders | Promise<HTTPHeaders>);
+  } = {},
+): ProxyClient {
   return createTRPCProxyClient<AppRouter>({
     transformer: superjson,
     links: [
@@ -35,4 +41,6 @@ const api = function (
   });
 };
 
-export { api, getBaseUrl, getUrl };
+type API = ReturnType<typeof api>;
+
+export { api, API, getBaseUrl, getUrl };

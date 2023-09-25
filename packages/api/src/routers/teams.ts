@@ -11,6 +11,17 @@ import { SendInviteFunc } from "../utils/sendInvite";
 
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
   return router({
+    isAuthorized: publicProcedure
+      .input(z.object({ teamId: z.string() }))
+      .query(async ({ ctx, input }) => {
+        if (!ctx.session.auth) {
+          return false;
+        }
+        return await store.teams.isAuthorizedForTeam(
+          ctx.session.auth.user.teamId,
+          input.teamId,
+        );
+      }),
     teamById: publicProcedure
       .input(z.object({ teamId: z.string() }))
       .query(async ({ input }) => {

@@ -11,30 +11,31 @@ import { helpers } from "@tableland/sdk";
 import { schema } from "@tableland/studio-store";
 import { Import, Plus, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
+import { cache } from "react";
 
 export default async function Project({
   params,
 }: {
   params: { team: string; project: string };
 }) {
-  const team = await api.teams.teamBySlug.query({ slug: params.team });
-  const project = await api.projects.projectByTeamIdAndSlug.query({
+  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
+  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
     teamId: team.id,
     slug: params.project,
   });
-  const tables = await api.tables.projectTables.query({
+  const tables = await cache(api.tables.projectTables.query)({
     projectId: project.id,
   });
-  const deployments = await api.deployments.projectDeployments.query({
+  const deployments = await cache(api.deployments.projectDeployments.query)({
     projectId: project.id,
   });
   const deploymentsMap = deployments.reduce((acc, deployment) => {
     acc.set(deployment.tableId, deployment);
     return acc;
   }, new Map<string, schema.Deployment>());
-
-  console.log(tables);
-  console.log(deploymentsMap);
+  const authorized = await cache(api.teams.isAuthorized.query)({
+    teamId: team.id,
+  });
 
   return (
     <main className="container p-4">
@@ -75,9 +76,7 @@ export default async function Project({
                           deployment ? "text-green-500" : "text-red-500"
                         }
                       />
-                      <p className="text-xl">
-                        {!deployment && `Not `}Deplployed
-                      </p>
+                      <p className="text-xl">{!deployment && `Not `}Deployed</p>
                       {deployment && (
                         <p className="text-sm text-muted-foreground">
                           {helpers.getChainInfo(deployment.chainId).chainName}
@@ -91,18 +90,22 @@ export default async function Project({
           );
         })}
       </div>
-      <Link href={`/${team.slug}/${project.slug}/new-table`}>
-        <Button variant="ghost" className="mr-2 mt-4">
-          <Plus className="mr-2" />
-          New Table
-        </Button>
-      </Link>
-      <Link href={`/${team.slug}/${project.slug}/import-table`}>
-        <Button variant="ghost" className="mt-4">
-          <Import className="mr-2" />
-          Import Table
-        </Button>
-      </Link>
+      {authorized && (
+        <>
+          <Link href={`/${team.slug}/${project.slug}/new-table`}>
+            <Button variant="ghost" className="mr-2 mt-4">
+              <Plus className="mr-2" />
+              New Table
+            </Button>
+          </Link>
+          <Link href={`/${team.slug}/${project.slug}/import-table`}>
+            <Button variant="ghost" className="mt-4">
+              <Import className="mr-2" />
+              Import Table
+            </Button>
+          </Link>
+        </>
+      )}
     </main>
   );
 }
