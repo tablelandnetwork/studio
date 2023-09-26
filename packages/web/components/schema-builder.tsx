@@ -221,10 +221,10 @@ export default function SchemaBuilder() {
         <TableCell>
           <Checkbox
             name="primaryKey"
-            checked={column.primaryKey}
+            checked={hasPrimaryKey(column)}
             onCheckedChange={(state) => {
-              setCreateTable((prev) => {
-                prev.columns[columnIndex].primaryKey = !!state;
+              setSchema((prev) => {
+                setPrimaryKey(prev.columns[columnIndex], !!state);
                 return {
                   ...prev,
                 };
@@ -235,10 +235,10 @@ export default function SchemaBuilder() {
         <TableCell>
           <Checkbox
             name="unique"
-            checked={column.unique}
+            checked={hasUnique(column)}
             onCheckedChange={(state) => {
-              setCreateTable((prev) => {
-                prev.columns[columnIndex].unique = !!state;
+              setSchema((prev) => {
+                setUnique(prev.columns[columnIndex], !!state);
                 return {
                   ...prev,
                 };
@@ -280,5 +280,41 @@ function setNotNull(column: Schema["columns"][number], value: boolean) {
     column.constraints?.push("NOT NULL");
   } else {
     column.constraints?.splice(column.constraints.indexOf("NOT NULL"), 1);
+  }
+}
+
+function hasPrimaryKey(column: Schema["columns"][number]) {
+  return column.constraints?.includes("PRIMARY KEY");
+}
+
+function setPrimaryKey(column: Schema["columns"][number], value: boolean) {
+  if (value) {
+    column.constraints?.push("PRIMARY KEY");
+  } else {
+    column.constraints?.splice(column.constraints.indexOf("PRIMARY KEY"), 1);
+  }
+}
+
+function hasUnique(column: Schema["columns"][number]) {
+  return column.constraints?.includes("UNIQUE");
+}
+
+function setUnique(column: Schema["columns"][number], value: boolean) {
+  if (value) {
+    column.constraints?.push("UNIQUE");
+  } else {
+    column.constraints?.splice(column.constraints.indexOf("UNIQUE"), 1);
+  }
+}
+
+function hasDefault(column: Schema["columns"][number]) {
+  return column.constraints?.includes("UNIQUE");
+}
+
+function setDefault(column: Schema["columns"][number], value: any) {
+  if (value) {
+    column.constraints?.push("UNIQUE");
+  } else {
+    column.constraints?.splice(column.constraints.indexOf("UNIQUE"), 1);
   }
 }
