@@ -30,13 +30,6 @@ const defaultArgs = [
   TEST_API_BASE_URL
 ];
 
-// TODO: remove this.  just using it to debug
-// const wallet = accounts[10];
-// const provider = getDefaultProvider(process.env.PROVIDER_URL);
-// const signer = wallet.connect(provider);
-// const db = new Database({ signer, autoWait: true });
-
-
 describe("commands/project", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 

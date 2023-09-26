@@ -29,20 +29,24 @@ export const builder = function (args: Yargs) {
         });
       },
       async function (argv) {
-        const { identifier, store } = argv;
-        const api = getApi(new FileStore(store as string));
+        try {
+          const { identifier, store, apiUrl } = argv;
+          const api = getApi(new FileStore(store as string), apiUrl as string);
 
-        let query;
-        if (typeof identifier === "string" && identifier.trim() !== "") {
-          // TODO: `identifier` needs to be converted to teamId for this to work.
-          //       Alternatively we could create a new rpc endpoint that takes
-          //       wallet or email or whatever account identifier we want.
-          query = { userTeamId: identifier };
+          let query;
+          if (typeof identifier === "string" && identifier.trim() !== "") {
+            // TODO: `identifier` needs to be converted to teamId for this to work.
+            //       Alternatively we could create a new rpc endpoint that takes
+            //       wallet or email or whatever account identifier we want.
+            query = { userTeamId: identifier };
+          }
+
+          const teams = await api.teams.userTeams.query(query);
+
+          logger.table(teams);
+        } catch (err) {
+          logger.error(err);
         }
-
-        const teams = await api.teams.userTeams.query(query);
-
-        logger.table(teams);
       },
     )
     .command(

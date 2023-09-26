@@ -57,7 +57,9 @@ before(async function () {
 
 after(async function () {
   // cleanup tables file
-  // await buildTablesFile(provider);
+  const { chainId } = await provider.getNetwork();
+  fs.unlinkSync(path.join(_dirname, `tables_${chainId}.json`));
+
   // shutdown tableland network
   await lt.shutdown();
 });
