@@ -1,4 +1,4 @@
-import CrumbBack from "@/components/crumb-back";
+import NavNewProject from "@/components/nav-new-project";
 
 export default async function NewProjectLayout({
   children,
@@ -8,7 +8,7 @@ export default async function NewProjectLayout({
   return (
     <div>
       <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
-        <CrumbBack title="New Project" />
+        <NavNewProject />
       </header>
       {children}
     </div>

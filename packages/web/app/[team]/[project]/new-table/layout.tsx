@@ -1,4 +1,4 @@
-import CrumbBack from "@/components/crumb-back";
+import NavNewTable from "@/components/nav-new-table";
 
 export default async function NewTableLayout({
   children,
@@ -8,7 +8,7 @@ export default async function NewTableLayout({
   return (
     <div>
       <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
-        <CrumbBack title="New Table" />
+        <NavNewTable crumbTitle="New Table" />
       </header>
       {children}
     </div>

@@ -1,27 +1,32 @@
 import { cn } from "@/lib/utils";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "./ui/button";
+import Link from "next/link";
 
-export function Crumb({
+export default function Crumb({
   className,
   title,
-  subtitle,
-  onBack,
-  ...props
+  items = [],
 }: React.HTMLAttributes<HTMLElement> & {
   title: string;
-  subtitle?: string;
-  onBack: () => void;
+  items?: {
+    label: string;
+    href: string;
+  }[];
 }) {
   return (
-    <div className={cn("flex flex-col", className)} {...props}>
-      <div className="flex items-center space-x-1">
-        <Button variant="ghost" size="sm" className="px-0" onClick={onBack}>
-          <ChevronLeft />
-        </Button>
-        <h1 className="text-xl">{title}</h1>
-      </div>
-      {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+    <div className={cn("flex", className)}>
+      {items.map((item, index) => (
+        <>
+          <Link
+            key={item.label}
+            href={item.href}
+            className="text-lg text-muted-foreground hover:text-primary"
+          >
+            {item.label}
+          </Link>
+          <span className="mx-2 text-lg text-muted-foreground">/</span>
+        </>
+      ))}
+      <p className="text-lg">{title}</p>
     </div>
   );
 }
