@@ -23,7 +23,7 @@ env:
   POSTMARK_API_KEY: ${{ secrets.POSTMARK_API_KEY }}
 
 jobs:
-  build:
+  review:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -38,5 +38,6 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npx lerna run lint
-      - run: npx lerna run build
+      - run: npx lerna run build --scope=@tableland/studio-api
+      - run: npx lerna run build --scope=@tableland/studio-client
       - run: npx lerna run test
