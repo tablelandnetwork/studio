@@ -31,16 +31,17 @@ export const builder = function (args: Yargs) {
         });
       },
       async function (argv) {
-        const { teamId, store } = argv;
-        const api = getApi(new FileStore(store as string));
+        try {
+          const { teamId, store, apiUrl } = argv;
+          const api = getApi(new FileStore(store as string), apiUrl as string);
 
-        let query;
-        if (typeof teamId === "string" && teamId.trim() !== "") {
-          query = { teamId };
+          const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
+          const projects = await api.projects.teamProjects.query(query);
+
+          logger.table(projects);
+        } catch (err: any) {
+          logger.error(err);
         }
-
-        const projects = await api.projects.teamProjects.query(query);
-        logger.table(projects);
       },
     )
     .command(
@@ -62,23 +63,27 @@ export const builder = function (args: Yargs) {
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
-        const { name, teamId, description, store } = argv;
-        const api = getApi(new FileStore(store as string));
+        try {
+          const { name, teamId, description, store, apiUrl } = argv;
+          const api = getApi(new FileStore(store as string), apiUrl);
 
-        if (typeof name !== "string")
-          throw new Error("must provide project name");
-        if (typeof teamId !== "string")
-          throw new Error("must provide team for project");
-        if (typeof description !== "string")
-          throw new Error("must provide project description");
+          if (typeof name !== "string")
+            throw new Error("must provide project name");
+          if (typeof teamId !== "string")
+            throw new Error("must provide team for project");
+          if (typeof description !== "string")
+            throw new Error("must provide project description");
 
-        const result = await api.projects.newProject.mutate({
-          teamId,
-          name,
-          description,
-        });
+          const result = await api.projects.newProject.mutate({
+            teamId,
+            name,
+            description,
+          });
 
-        logger.log(JSON.stringify(result));
+          logger.log(JSON.stringify(result, null, 4));
+        } catch (err: any) {
+          logger.error(err);
+        }
       },
     )
     .command(

@@ -1,5 +1,5 @@
 import { schema } from "@tableland/studio-store";
-import { sealData, unsealData } from "iron-session/edge";
+import { sealData, unsealData } from "iron-session";
 import { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { NextRequest, NextResponse } from "next/server";

@@ -23,12 +23,12 @@ describe.skip("commands/team", function () {
   });
 
   // happy first
-  test("can create a team", async function () {
+  test("can list team", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["team", "create", "teamfoo"]).command(mod).parse();
+    await yargs(["team", "ls"]).command(mod).parse();
 
     const res = consoleLog.getCall(0).firstArg;
-    equal(res.startsWith("created team: "), true);
+    equal(res.startsWith("team: "), true);
 
     const value = JSON.parse(res.slice(14));
     equal(value.name, "teamfoo");

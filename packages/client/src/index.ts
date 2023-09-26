@@ -9,24 +9,24 @@ import superjson from "superjson";
 import { getBaseUrl, getUrl } from "./util.js";
 
 type NonEmptyArray<TItem> = [TItem, ...TItem[]];
+type ClientConfig = {
+  fetch?: (res: Response) => Response;
+  headers?: HTTPHeaders | ((opts: { opList: NonEmptyArray<Operation>; }) => HTTPHeaders | Promise<HTTPHeaders>);
+  url?: string
+};
 
 type ProxyClient = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
 
 const api = function (
-  config: {
-    fetch?: (res: Response) => Response;
-    headers?:
-      | HTTPHeaders
-      | ((opts: {
-          opList: NonEmptyArray<Operation>;
-        }) => HTTPHeaders | Promise<HTTPHeaders>);
-  } = {},
+  config: ClientConfig = {}
 ): ProxyClient {
+  const apiUrl = typeof config.url === "string" ? getUrl(config.url) : getUrl();
+
   return createTRPCProxyClient<AppRouter>({
     transformer: superjson,
     links: [
       httpBatchLink({
-        url: getUrl(),
+        url: apiUrl,
         fetch: async function (url, options) {
           const res = await fetch(url, options);
 
@@ -43,4 +43,5 @@ const api = function (
 
 type API = ReturnType<typeof api>;
 
-export { api, API, getBaseUrl, getUrl };
+export { api, API, getBaseUrl, getUrl, ClientConfig };
+

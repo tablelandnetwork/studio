@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "prepublishOnly": "npm run build",
+    "test": "mocha",
     "coverage": "TEST_TIMEOUT_FACTOR=3 c8 --100 --exclude test mocha --exit",
     "coverage:report": "c8 report --reporter=html",
     "lint": "eslint '**/*.{js,ts}'",
@@ -38,7 +39,7 @@
     "prettier:fix": "npm run prettier -- --write",
     "format": "npm run prettier:fix && npm run lint:fix",
     "clean": "rm -rf dist",
-    "build": "tsc && chmod +x dist/cli.js",
+    "build": "tsc && chmod +x dist/cli.js && ./fixup",
     "studio": "node ./dist/cli.js"
   },
   "license": "MIT AND Apache-2.0",

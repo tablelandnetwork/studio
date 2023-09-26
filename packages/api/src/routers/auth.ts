@@ -32,17 +32,20 @@ export function authRouter(store: Store) {
           if (info) {
             ctx.session.auth = info;
           }
+          await ctx.session.persist(ctx.responseCookies);
+
           return ctx.session.auth;
         } catch (e: any) {
           ctx.session.auth = undefined;
           ctx.session.nonce = undefined;
+
+          await ctx.session.persist(ctx.responseCookies);
+
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
             message: e.message,
             cause: e,
           });
-        } finally {
-          await ctx.session.persist(ctx.responseCookies);
         }
       }),
     register: publicProcedure
