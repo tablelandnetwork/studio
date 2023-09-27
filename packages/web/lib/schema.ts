@@ -1,16 +1,16 @@
-import { schema } from "@tableland/studio-store";
+import { Schema } from "@tableland/studio-store";
 
 export type Constraint = "not null" | "primary key" | "unique";
 
 export function hasConstraint(
-  column: schema.Schema["columns"][number],
+  column: Schema["columns"][number],
   constraint: Constraint,
 ) {
   return column.constraints ? column.constraints.includes(constraint) : false;
 }
 
 export function setConstraint(
-  column: schema.Schema["columns"][number],
+  column: Schema["columns"][number],
   constraint: Constraint,
   value: boolean,
 ) {
@@ -25,7 +25,7 @@ export function setConstraint(
 
 export function generateCreateTableStatement(
   tableName: string,
-  schema: schema.Schema,
+  schema: Schema,
 ) {
   if (!tableName.length) {
     return "";
@@ -50,7 +50,7 @@ export function generateCreateTableStatement(
   });`;
 }
 
-export function cleanSchema(schema: schema.Schema) {
+export function cleanSchema(schema: Schema) {
   return {
     ...schema,
     columns: schema.columns.filter(

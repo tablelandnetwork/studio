@@ -43,7 +43,7 @@
   },
   "license": "MIT AND Apache-2.0",
   "dependencies": {
-    "@tableland/sdk": "^4.5.1",
+    "@tableland/sdk": "^4.5.2",
     "@tableland/sqlparser": "^1.3.0",
     "@tableland/studio-client": "^0.0.0",
     "@toruslabs/broadcast-channel": "^8.0.0",

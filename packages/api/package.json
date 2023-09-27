@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tableland/sdk": "^4.5.1",
+    "@tableland/sdk": "^4.5.2",
     "@tableland/studio-mail": "^0.0.0",
     "@tableland/studio-store": "^1.0.0",
     "@trpc/server": "^10.38.4",

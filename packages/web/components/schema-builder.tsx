@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Constraint, hasConstraint, setConstraint } from "@/lib/schema";
 import { CheckedState } from "@radix-ui/react-checkbox";
-import { schema } from "@tableland/studio-store";
+import { Schema } from "@tableland/studio-store";
 import { Plus, X } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import { Button } from "./ui/button";
@@ -31,8 +31,8 @@ export default function SchemaBuilder({
   schema,
   setSchema,
 }: {
-  schema: schema.Schema;
-  setSchema: Dispatch<SetStateAction<schema.Schema>>;
+  schema: Schema;
+  setSchema: Dispatch<SetStateAction<Schema>>;
 }) {
   return (
     <div className="flex flex-col items-start">
@@ -71,10 +71,7 @@ export default function SchemaBuilder({
           setSchema((prev) => {
             return {
               ...prev,
-              columns: [
-                ...prev.columns,
-                { name: "", type: "text", constraints: [] },
-              ],
+              columns: [...prev.columns, { name: "", type: "text" }],
             };
           });
         }}
@@ -91,7 +88,7 @@ function RemoveColumn({
   setSchema,
 }: {
   columnIndex: number;
-  setSchema: Dispatch<SetStateAction<schema.Schema>>;
+  setSchema: Dispatch<SetStateAction<Schema>>;
 }) {
   return (
     <Button
@@ -118,8 +115,8 @@ function CreateColumn({
   setSchema,
 }: {
   columnIndex: number;
-  schema: schema.Schema;
-  setSchema: Dispatch<SetStateAction<schema.Schema>>;
+  schema: Schema;
+  setSchema: Dispatch<SetStateAction<Schema>>;
 }) {
   const column = schema.columns[columnIndex];
 
