@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cleanSchema, generateCreateTableStatement } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { helpers } from "@tableland/sdk";
-import { schema } from "@tableland/studio-store";
+import { Schema, schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -48,7 +48,7 @@ export default function NewTable({ project, team, envs }: Props) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  const [schema, setSchema] = useState<schema.Schema>({ columns: [] });
+  const [schema, setSchema] = useState<Schema>({ columns: [] });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

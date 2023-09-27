@@ -2,7 +2,7 @@
 
 import { api } from "@/trpc/server-invoker";
 import { Auth } from "@tableland/studio-api";
-import { schema } from "@tableland/studio-store";
+import { schema, Schema } from "@tableland/studio-store";
 
 export async function authenticated() {
   return await api.auth.authenticated.query();
@@ -81,12 +81,12 @@ export async function newTable(
   project: schema.Project,
   name: string,
   description: string,
-  schema: schema.Schema,
+  schema: Schema,
 ) {
   const table = api.tables.newTable.mutate({
     projectId: project.id,
     name,
-    schema: JSON.stringify(schema),
+    schema: schema,
     description,
   });
   await api.tables.projectTables.revalidate({ projectId: project.id });
