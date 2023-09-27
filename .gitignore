@@ -40,5 +40,6 @@ packages/*/.tablelandrc.json
 *.tsbuildinfo
 next-env.d.ts
 
+packages/web/scripts/validator/*.db*
 tables_31337.json
 .react-email
