@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:net": "node scripts/net-start.mjs",
+    "dev:all": "(sleep 30 && npm run dev) & npm run dev:net",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
