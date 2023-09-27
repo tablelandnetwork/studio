@@ -86,7 +86,7 @@ export async function newTable(
   const table = api.tables.newTable.mutate({
     projectId: project.id,
     name,
-    schema: schema,
+    schema,
     description,
   });
   await api.tables.projectTables.revalidate({ projectId: project.id });

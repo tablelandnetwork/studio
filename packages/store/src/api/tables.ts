@@ -4,13 +4,7 @@ import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import { Schema } from "../custom-types";
 import * as schema from "../schema";
-import {
-  NewTable,
-  projectTables,
-  tables,
-  teamProjects,
-  teams,
-} from "../schema";
+import { Table, projectTables, tables, teamProjects, teams } from "../schema";
 import { slugify } from "./utils";
 
 export function initTables(
@@ -38,7 +32,7 @@ export function initTables(
         tbl.prepare(projectTableSql).bind(projectTableParams),
         tbl.prepare(tableSql).bind(tableParams),
       ]);
-      const table: NewTable = { id: tableId, name, description, schema, slug };
+      const table: Table = { id: tableId, name, description, schema, slug };
       return table;
     },
 
