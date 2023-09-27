@@ -80,13 +80,13 @@ export async function newEnvironment(
 export async function newTable(
   project: schema.Project,
   name: string,
-  schema: string,
   description: string,
+  schema: schema.Schema,
 ) {
   const table = api.tables.newTable.mutate({
     projectId: project.id,
     name,
-    schema,
+    schema: JSON.stringify(schema),
     description,
   });
   await api.tables.projectTables.revalidate({ projectId: project.id });

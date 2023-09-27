@@ -3,7 +3,13 @@ import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema";
-import { Table, projectTables, tables, teamProjects, teams } from "../schema";
+import {
+  NewTable,
+  projectTables,
+  tables,
+  teamProjects,
+  teams,
+} from "../schema";
 import { slugify } from "./utils";
 
 export function initTables(
@@ -31,7 +37,7 @@ export function initTables(
         tbl.prepare(projectTableSql).bind(projectTableParams),
         tbl.prepare(tableSql).bind(tableParams),
       ]);
-      const table: Table = { id: tableId, name, description, schema, slug };
+      const table: NewTable = { id: tableId, name, description, schema, slug };
       return table;
     },
 
@@ -44,7 +50,7 @@ export function initTables(
         .orderBy(tables.name)
         .all();
       const mapped = res.map((r) => r.tables);
-      return mapped;
+      return mapped as unknown as schema.Table[];
     },
 
     tableTeam: async function (tableId: string) {

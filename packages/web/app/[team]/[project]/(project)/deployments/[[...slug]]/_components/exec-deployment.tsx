@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { generateCreateTableStatement } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import {
   Database,
@@ -108,8 +109,9 @@ export default function ExecDeployment({
           baseUrl: helpers.getBaseUrl(chainId),
           autoWait: false,
         });
-        // TODO: Table.schema will be JSON, convert it to SQL create table statement.
-        const res = await tbl.exec(table.schema);
+
+        const stmt = generateCreateTableStatement(table.name, table.schema);
+        const res = await tbl.exec(stmt);
         if (res.error) {
           throw new Error(res.error);
         }

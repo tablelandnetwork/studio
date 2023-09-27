@@ -1,3 +1,4 @@
+import { Table as TablelandTable } from "@tableland/sdk";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
   integer,
@@ -150,7 +151,11 @@ export const teamInvites = sqliteTable("team_invites", {
   claimedAt: text("claimed_at"),
 });
 
-export type Table = InferSelectModel<typeof tables>;
+export type Schema = TablelandTable["schema"];
+
+export type Table = Omit<InferSelectModel<typeof tables>, "schema"> & {
+  schema: Schema;
+};
 export type NewTable = InferInsertModel<typeof tables>;
 
 export type UserSealed = InferSelectModel<typeof users>;
