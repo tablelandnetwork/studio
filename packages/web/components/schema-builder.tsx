@@ -6,9 +6,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreateTable, createTableAtom } from "@/store/create-table";
-import { useAtom } from "jotai";
+import { Constraint, hasConstraint, setConstraint } from "@/lib/schema";
+import { CheckedState } from "@radix-ui/react-checkbox";
+import { Schema } from "@tableland/studio-store";
 import { Plus, X } from "lucide-react";
+import { Dispatch, SetStateAction } from "react";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
@@ -25,59 +27,17 @@ function isValidColumnName(variable: string) {
   return columnNameRegex.test(variable);
 }
 
-export function createTableStatementFromObject(
-  tableObj: CreateTable,
-  name: string,
-) {
-  if (!name) return false;
-  let statement = "CREATE TABLE " + name + " (";
-  let invalid = false;
-
-  let columns = tableObj.columns
-    .filter((column) => column.name !== "")
-    .map((column) => {
-      if (!isValidColumnName(column.name)) {
-        invalid = true;
-        return false;
-      }
-      let columnStatement = "\n     " + column.name + " " + column.type;
-
-      if (column.notNull) {
-        columnStatement += " NOT NULL";
-      }
-      if (column.unique) {
-        columnStatement += " UNIQUE";
-      }
-      if (column.primaryKey) {
-        columnStatement += " PRIMARY KEY";
-      }
-      if (column.default) {
-        let defaultValue = column.default;
-        if (!column.type.toUpperCase().startsWith("INTEGER")) {
-          defaultValue = "'" + defaultValue + "'";
-        }
-        columnStatement += " DEFAULT " + defaultValue;
-      }
-
-      return columnStatement;
-    });
-
-  statement += columns.join(", ");
-  statement += "\n);";
-
-  if (invalid) {
-    return false;
-  }
-
-  return statement;
-}
-
-export default function SchemaBuilder() {
-  const [tbl, setCreateTable] = useAtom(createTableAtom);
+export default function SchemaBuilder({
+  schema,
+  setSchema,
+}: {
+  schema: Schema;
+  setSchema: Dispatch<SetStateAction<Schema>>;
+}) {
   return (
     <div className="flex flex-col items-start">
       <Table>
-        {tbl.columns.length > 0 && (
+        {schema.columns.length > 0 && (
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -85,14 +45,20 @@ export default function SchemaBuilder() {
               <TableHead>Not Null</TableHead>
               <TableHead>Primary Key</TableHead>
               <TableHead>Unique</TableHead>
-              <TableHead>Default Value</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
         )}
         <TableBody>
-          {tbl.columns.map((column, index) => {
-            return <CreateColumn key={index} columnIndex={index} />;
+          {schema.columns.map((column, index) => {
+            return (
+              <CreateColumn
+                key={index}
+                columnIndex={index}
+                schema={schema}
+                setSchema={setSchema}
+              />
+            );
           })}
         </TableBody>
       </Table>
@@ -102,18 +68,10 @@ export default function SchemaBuilder() {
         variant="outline"
         size="sm"
         onClick={() => {
-          setCreateTable((prev) => {
-            const newColumn = {
-              name: "",
-              type: "text",
-              notNull: false,
-              primaryKey: false,
-              unique: false,
-              default: null,
-            };
+          setSchema((prev) => {
             return {
               ...prev,
-              columns: [...prev.columns, newColumn],
+              columns: [...prev.columns, { name: "", type: "text" }],
             };
           });
         }}
@@ -125,15 +83,20 @@ export default function SchemaBuilder() {
   );
 }
 
-function RemoveColumn({ columnIndex }: { columnIndex: number }) {
-  const [tbl, setAtom] = useAtom(createTableAtom);
+function RemoveColumn({
+  columnIndex,
+  setSchema,
+}: {
+  columnIndex: number;
+  setSchema: Dispatch<SetStateAction<Schema>>;
+}) {
   return (
     <Button
       type="button"
       variant="ghost"
       size="sm"
       onClick={() => {
-        setAtom((prev) => {
+        setSchema((prev) => {
           prev.columns.splice(columnIndex, 1);
           return {
             ...prev,
@@ -146,9 +109,45 @@ function RemoveColumn({ columnIndex }: { columnIndex: number }) {
   );
 }
 
-function CreateColumn({ columnIndex }: { columnIndex: number }) {
-  const [tbl, setCreateTable] = useAtom(createTableAtom);
-  const column = tbl && tbl.columns[columnIndex];
+function CreateColumn({
+  columnIndex,
+  schema,
+  setSchema,
+}: {
+  columnIndex: number;
+  schema: Schema;
+  setSchema: Dispatch<SetStateAction<Schema>>;
+}) {
+  const column = schema.columns[columnIndex];
+
+  const handleConstraintChanged = (
+    index: number,
+    constraint: Constraint,
+    state: CheckedState,
+  ) => {
+    if (state === "indeterminate") return;
+    const newSchema = { ...schema };
+    const { columns, ...rest } = newSchema;
+    const col = { ...columns[index] };
+    columns[index] = setConstraint(col, constraint, state);
+    setSchema({ columns, ...rest });
+  };
+
+  const handleNameUpdated = (index: number, name: string) => {
+    const newSchema = { ...schema };
+    const { columns, ...rest } = newSchema;
+    const col = { ...columns[index] };
+    columns[index] = { ...col, name };
+    setSchema({ columns, ...rest });
+  };
+
+  const handleTypeUpdated = (index: number, type: string) => {
+    const newSchema = { ...schema };
+    const { columns, ...rest } = newSchema;
+    const col = { ...columns[index] };
+    columns[index] = { ...col, type };
+    setSchema({ columns, ...rest });
+  };
 
   return (
     <TableRow>
@@ -163,12 +162,7 @@ function CreateColumn({ columnIndex }: { columnIndex: number }) {
           }
           value={column.name}
           onChange={(e) => {
-            setCreateTable((prev) => {
-              prev.columns[columnIndex].name = e.target.value;
-              return {
-                ...prev,
-              };
-            });
+            handleNameUpdated(columnIndex, e.target.value);
           }}
         />
       </TableCell>
@@ -176,12 +170,7 @@ function CreateColumn({ columnIndex }: { columnIndex: number }) {
         <Select
           defaultValue={column.type}
           onValueChange={(e) => {
-            setCreateTable((prev) => {
-              prev.columns[columnIndex].type = e;
-              return {
-                ...prev,
-              };
-            });
+            handleTypeUpdated(columnIndex, e);
           }}
         >
           <SelectTrigger className="gap-x-2">
@@ -198,64 +187,32 @@ function CreateColumn({ columnIndex }: { columnIndex: number }) {
       <TableCell>
         <Checkbox
           name="notNull"
-          checked={column.notNull}
+          checked={hasConstraint(column, "not null")}
           onCheckedChange={(state) => {
-            setCreateTable((prev) => {
-              prev.columns[columnIndex].notNull = !!state;
-              return {
-                ...prev,
-              };
-            });
+            handleConstraintChanged(columnIndex, "not null", state);
           }}
         />
       </TableCell>
       <TableCell>
         <Checkbox
           name="primaryKey"
-          checked={column.primaryKey}
+          checked={hasConstraint(column, "primary key")}
           onCheckedChange={(state) => {
-            setCreateTable((prev) => {
-              prev.columns[columnIndex].primaryKey = !!state;
-              return {
-                ...prev,
-              };
-            });
+            handleConstraintChanged(columnIndex, "primary key", state);
           }}
         />
       </TableCell>
       <TableCell>
         <Checkbox
           name="unique"
-          checked={column.unique}
+          checked={hasConstraint(column, "unique")}
           onCheckedChange={(state) => {
-            setCreateTable((prev) => {
-              prev.columns[columnIndex].unique = !!state;
-              return {
-                ...prev,
-              };
-            });
+            handleConstraintChanged(columnIndex, "unique", state);
           }}
         />
       </TableCell>
       <TableCell>
-        <Input
-          className="w-20"
-          type="text"
-          name="default"
-          placeholder="null"
-          defaultValue={column.default}
-          onChange={(e) => {
-            setCreateTable((prev) => {
-              prev.columns[columnIndex].default = e.target.value;
-              return {
-                ...prev,
-              };
-            });
-          }}
-        />
-      </TableCell>
-      <TableCell>
-        <RemoveColumn columnIndex={columnIndex} />
+        <RemoveColumn columnIndex={columnIndex} setSchema={setSchema} />
       </TableCell>
     </TableRow>
   );

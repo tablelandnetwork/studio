@@ -15,16 +15,15 @@ export default function Crumb({
   return (
     <div className={cn("flex", className)}>
       {items.map((item, index) => (
-        <>
+        <div key={item.label}>
           <Link
-            key={item.label}
             href={item.href}
             className="text-lg text-muted-foreground hover:text-primary"
           >
             {item.label}
           </Link>
           <span className="mx-2 text-lg text-muted-foreground">/</span>
-        </>
+        </div>
       ))}
       <p className="text-lg">{title}</p>
     </div>

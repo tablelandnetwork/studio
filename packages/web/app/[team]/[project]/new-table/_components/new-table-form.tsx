@@ -1,9 +1,7 @@
 "use client";
 
 import { newTable } from "@/app/actions";
-import SchemaBuilder, {
-  createTableStatementFromObject,
-} from "@/components/schema-builder";
+import SchemaBuilder from "@/components/schema-builder";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,14 +14,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createTableAtom } from "@/store/create-table";
+import { cleanSchema, generateCreateTableStatement } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { helpers } from "@tableland/sdk";
-import { schema } from "@tableland/studio-store";
-import { useAtom } from "jotai";
+import { Schema, schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -51,7 +48,7 @@ export default function NewTable({ project, team, envs }: Props) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  const [createTable, setCreateTable] = useAtom(createTableAtom);
+  const [schema, setSchema] = useState<Schema>({ columns: [] });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -73,17 +70,13 @@ export default function NewTable({ project, team, envs }: Props) {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
-      const statement = createTableStatementFromObject(
-        createTable,
+      await newTable(
+        project,
         values.name,
+        values.description,
+        cleanSchema(schema),
       );
-      if (!statement) {
-        console.error("No statement");
-        return;
-      }
-      await newTable(project, values.name, statement, values.description);
       router.replace(`/${team.slug}/${project.slug}`);
-      setCreateTable({ columns: [] });
     });
   }
 
@@ -128,8 +121,8 @@ export default function NewTable({ project, team, envs }: Props) {
         />
         <div className="space-y-2">
           <FormLabel>Columns</FormLabel>
-          <SchemaBuilder />
-          <pre>{createTableStatementFromObject(createTable, name)}</pre>
+          <SchemaBuilder schema={schema} setSchema={setSchema} />
+          <pre>{generateCreateTableStatement(name, schema)}</pre>
         </div>
         {/* <div className="space-y-2">
           <FormLabel>Deployments</FormLabel>

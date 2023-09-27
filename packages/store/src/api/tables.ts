@@ -2,6 +2,7 @@ import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
+import { Schema } from "../custom-types";
 import * as schema from "../schema";
 import { Table, projectTables, tables, teamProjects, teams } from "../schema";
 import { slugify } from "./utils";
@@ -15,7 +16,7 @@ export function initTables(
       projectId: string,
       name: string,
       description: string,
-      schema: string,
+      schema: Schema,
     ) {
       const tableId = randomUUID();
       const slug = slugify(name);

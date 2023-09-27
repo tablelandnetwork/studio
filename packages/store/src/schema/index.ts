@@ -6,6 +6,7 @@ import {
   text,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
+import { schema } from "../custom-types";
 
 export const users = sqliteTable(
   "users",
@@ -80,7 +81,7 @@ export const tables = sqliteTable("tables", {
   slug: text("slug").notNull(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  schema: text("schema").notNull(),
+  schema: schema("schema").notNull(),
 });
 
 export const projectTables = sqliteTable(

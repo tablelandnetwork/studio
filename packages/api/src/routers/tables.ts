@@ -1,8 +1,19 @@
 import { Validator, helpers } from "@tableland/sdk";
-import { Store } from "@tableland/studio-store";
+import { Schema, Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { projectProcedure, publicProcedure, router } from "../trpc";
+
+const schemaSchema: z.ZodType<Schema> = z.object({
+  columns: z.array(
+    z.object({
+      name: z.string().nonempty(),
+      type: z.string().nonempty(),
+      constraints: z.array(z.string().nonempty()).optional(),
+    }),
+  ),
+  table_constraints: z.array(z.string().nonempty()).optional(),
+});
 
 export function tablesRouter(store: Store) {
   return router({
@@ -15,8 +26,8 @@ export function tablesRouter(store: Store) {
       .input(
         z.object({
           name: z.string(),
-          schema: z.string(),
           description: z.string().nonempty(),
+          schema: schemaSchema,
         }),
       )
       .mutation(async ({ input }) => {
@@ -47,12 +58,11 @@ export function tablesRouter(store: Store) {
           tableId: input.tableId,
         });
 
-        // TODO: Figure out a standard way of encoding schema for both Tables created in Studio and imported tables.
         const table = await store.tables.createTable(
           input.projectId,
           input.name,
           input.description,
-          JSON.stringify(tablelandTable.schema),
+          tablelandTable.schema,
         );
         const createdAttr = tablelandTable.attributes?.find(
           (attr) => attr.traitType === "created",

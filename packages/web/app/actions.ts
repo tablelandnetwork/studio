@@ -2,7 +2,7 @@
 
 import { api } from "@/trpc/server-invoker";
 import { Auth } from "@tableland/studio-api";
-import { schema } from "@tableland/studio-store";
+import { schema, Schema } from "@tableland/studio-store";
 
 export async function authenticated() {
   return await api.auth.authenticated.query();
@@ -80,8 +80,8 @@ export async function newEnvironment(
 export async function newTable(
   project: schema.Project,
   name: string,
-  schema: string,
   description: string,
+  schema: Schema,
 ) {
   const table = api.tables.newTable.mutate({
     projectId: project.id,
