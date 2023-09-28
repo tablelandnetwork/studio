@@ -11,7 +11,9 @@ CREATE TABLE `deployments` (
 CREATE TABLE `environments` (
 	`id` text PRIMARY KEY NOT NULL,
 	`project_id` text NOT NULL,
-	`name` text NOT NULL
+	`name` text NOT NULL,
+	`slug` text NOT NULL,
+	UNIQUE (`project_id`,`slug`)
 );
 --> statement-breakpoint
 CREATE TABLE `project_tables` (
