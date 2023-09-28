@@ -87,6 +87,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/use-cases/#application-data"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Application Data
                   </Link>
@@ -95,6 +96,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/use-cases/#nfts--gaming"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     NFTs &amp; Gaming
                   </Link>
@@ -103,6 +105,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/use-cases/#data-daos--token-gating"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Data DAOs &amp; Token Gating
                   </Link>
@@ -113,27 +116,47 @@ export default function Footer() {
               <h3 className="text-sm font-medium text-white">Resources</h3>
               <ul className="flex flex-col space-y-3">
                 <li className="text-xs">
-                  <Link href="https://mirror.xyz/tableland.eth" target="_blank">
+                  <Link
+                    href="https://mirror.xyz/tableland.eth"
+                    target="_blank"
+                    className="text-gray-300 hover:text-white"
+                  >
                     Blog
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link href="https://dev.tableland.xyz" target="_blank">
+                  <Link
+                    href="https://dev.tableland.xyz"
+                    target="_blank"
+                    className="text-gray-300 hover:text-white"
+                  >
                     Tech Blog
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link target="_self" className="" href="/pilot-program">
+                  <Link
+                    target="_self"
+                    className="text-gray-300 hover:text-white"
+                    href="https://tableland.xyz/pilot-program"
+                  >
                     Pilot Program
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link href="https://tableland.xyz/jobs" target="_blank">
+                  <Link
+                    href="https://tableland.xyz/jobs"
+                    target="_blank"
+                    className="text-gray-300 hover:text-white"
+                  >
                     Jobs
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link href="https://tableland.xyz/newsletter" target="_blank">
+                  <Link
+                    href="https://tableland.xyz/newsletter"
+                    target="_blank"
+                    className="text-gray-300 hover:text-white"
+                  >
                     Newsletter
                   </Link>
                 </li>
@@ -141,6 +164,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/about/general-faqs"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     FAQ
                   </Link>
@@ -154,6 +178,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/quickstarts"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Quickstarts
                   </Link>
@@ -162,17 +187,26 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/specs/sql"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     SQL Spec
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link href="https://docs.tableland.xyz/sdk" target="_blank">
+                  <Link
+                    href="https://docs.tableland.xyz/sdk"
+                    target="_blank"
+                    className="text-gray-300 hover:text-white"
+                  >
                     SDK
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link href="https://docs.tableland.xyz/cli" target="_blank">
+                  <Link
+                    href="https://docs.tableland.xyz/cli"
+                    target="_blank"
+                    className="text-gray-300 hover:text-white"
+                  >
                     CLI
                   </Link>
                 </li>
@@ -180,6 +214,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/tutorials"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Tutorials
                   </Link>
@@ -188,6 +223,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/quickstarts/local-tableland"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Local Tableland
                   </Link>
@@ -198,17 +234,29 @@ export default function Footer() {
               <h3 className="text-sm font-medium text-white">Rigs</h3>
               <ul className="flex flex-col space-y-3">
                 <li className="text-xs">
-                  <Link target="_self" className="" href="/rigs">
+                  <Link
+                    target="_self"
+                    className="text-gray-300 hover:text-white"
+                    href="https://tableland.xyz/rigs"
+                  >
                     Info
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link href="https://garage.tableland.xyz" target="_blank">
+                  <Link
+                    href="https://garage.tableland.xyz"
+                    target="_blank"
+                    className="text-gray-300 hover:text-white"
+                  >
                     Garage
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link target="_self" className="" href="/rigs/samples">
+                  <Link
+                    target="_self"
+                    className="text-gray-300 hover:text-white"
+                    href="https://tableland.xyz/rigs/samples"
+                  >
                     Samples
                   </Link>
                 </li>
@@ -216,6 +264,7 @@ export default function Footer() {
                   <Link
                     href="https://opensea.io/collection/tableland-rigs"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     OpenSea
                   </Link>
@@ -229,6 +278,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/architecture/protocol-design"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Protocol
                   </Link>
@@ -237,6 +287,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/about/roadmap"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Roadmap
                   </Link>
@@ -245,6 +296,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/validator"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Run a Node
                   </Link>
@@ -253,12 +305,17 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/gateway-api"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Gateway
                   </Link>
                 </li>
                 <li className="text-xs">
-                  <Link href="https://tableland.xyz/token" target="_blank">
+                  <Link
+                    href="https://tableland.xyz/token"
+                    target="_blank"
+                    className="text-gray-300 hover:text-white"
+                  >
                     Token Info
                   </Link>
                 </li>
@@ -266,6 +323,7 @@ export default function Footer() {
                   <Link
                     href="https://textile.notion.site/Tableland-Privacy-Policy-6fd160e7f485491d9dc4cbab188043d5"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Privacy
                   </Link>
@@ -274,6 +332,7 @@ export default function Footer() {
                   <Link
                     href="https://textile.notion.site/Tableland-Terms-of-Use-cf80f1b550b843ad9d4b8c3140b78e35"
                     target="_blank"
+                    className="text-gray-300 hover:text-white"
                   >
                     Terms
                   </Link>
