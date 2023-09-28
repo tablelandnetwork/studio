@@ -114,7 +114,7 @@ export default async function TableDetails({
             {deploymentInfos.map((deploymentInfo) => (
               <Link
                 key={deploymentInfo.environment.id}
-                href={`/${team.slug}/${project.slug}/deployments/${deploymentInfo.environment.name}/${table.slug}`}
+                href={`/${team.slug}/${project.slug}/deployments/${deploymentInfo.environment.slug}/${table.slug}`}
               >
                 <div className="flex items-center rounded-md p-3 hover:bg-slate-100">
                   <Rocket />
