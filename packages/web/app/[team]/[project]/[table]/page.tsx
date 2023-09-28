@@ -1,0 +1,142 @@
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { hasConstraint } from "@/lib/schema";
+import { api } from "@/trpc/server-invoker";
+import { helpers } from "@tableland/sdk";
+import TimeAgo from "javascript-time-ago";
+import { Check, Rocket } from "lucide-react";
+import Link from "next/link";
+import { cache } from "react";
+
+const timeAgo = new TimeAgo("en-US");
+
+export default async function TableDetails({
+  params,
+}: {
+  params: { team: string; project: string; table: string };
+}) {
+  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
+  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
+    teamId: team.id,
+    slug: params.project,
+  });
+  const table = await cache(api.tables.tableByProjectIdAndSlug.query)({
+    projectId: project.id,
+    slug: params.table,
+  });
+  const deploymentInfos = await cache(
+    api.deployments.deploymentsByTableId.query,
+  )({
+    tableId: table.id,
+  });
+
+  return (
+    <main className="container max-w-2xl space-y-5 p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>About {table.name}</CardTitle>
+          <CardDescription>{table.description}</CardDescription>
+        </CardHeader>
+        {/* <CardContent>
+          <p className="text-base text-muted-foreground">{table.description}</p>
+        </CardContent> */}
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Columns</CardTitle>
+          <CardDescription>
+            Table {table.name} includes the following columns:
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            {table.schema.columns.length > 0 && (
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-center">Not Null</TableHead>
+                  <TableHead className="text-center">Primary Key</TableHead>
+                  <TableHead className="text-center">Unique</TableHead>
+                </TableRow>
+              </TableHeader>
+            )}
+            <TableBody>
+              {table.schema.columns.map((column, index) => {
+                return (
+                  <TableRow key={column.name}>
+                    <TableCell>
+                      <p>{column.name}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p>{column.type}</p>
+                    </TableCell>
+                    <TableCell align="center">
+                      {hasConstraint(column, "not null") && <Check />}
+                    </TableCell>
+                    <TableCell align="center">
+                      {hasConstraint(column, "primary key") && <Check />}
+                    </TableCell>
+                    <TableCell align="center">
+                      {hasConstraint(column, "unique") && <Check />}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Deployments</CardTitle>
+          <CardDescription>
+            {deploymentInfos.length
+              ? `Table ${table.name} has been deployed to the networks listed below.`
+              : `Table ${table.name} has not been deployed yet.`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-8">
+            {deploymentInfos.map((deploymentInfo) => (
+              <Link
+                key={deploymentInfo.environment.id}
+                href={`/${team.slug}/${project.slug}/deployments/${deploymentInfo.environment.name}/${table.slug}`}
+              >
+                <div className="flex items-center rounded-md p-3 hover:bg-slate-100">
+                  <Rocket />
+                  <div className="ml-4 space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {
+                        helpers.getChainInfo(deploymentInfo.deployment.chainId)
+                          .chainName
+                      }
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {timeAgo.format(
+                        new Date(deploymentInfo.deployment.createdAt),
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </main>
+  );
+}

@@ -22,6 +22,21 @@ export function tablesRouter(store: Store) {
       .query(async ({ input }) => {
         return await store.tables.tablesByProjectId(input.projectId);
       }),
+    tableByProjectIdAndSlug: publicProcedure
+      .input(z.object({ projectId: z.string(), slug: z.string() }))
+      .query(async ({ input }) => {
+        const table = await store.tables.tableByProjectIdAndSlug(
+          input.projectId,
+          input.slug,
+        );
+        if (!table) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Table not found",
+          });
+        }
+        return table;
+      }),
     newTable: projectProcedure(store)
       .input(
         z.object({

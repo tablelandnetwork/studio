@@ -30,6 +30,15 @@ export function deploymentsRouter(store: Store) {
         });
         return res;
       }),
+    deploymentsByTableId: publicProcedure
+      .input(
+        z.object({
+          tableId: z.string().uuid(),
+        }),
+      )
+      .query(async ({ input }) => {
+        return await store.deployments.deploymentsByTableId(input.tableId);
+      }),
     projectDeployments: publicProcedure
       .input(
         z.object({
