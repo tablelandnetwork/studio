@@ -17,30 +17,31 @@ import { Database, Validator, helpers } from "@tableland/sdk";
 import { LocalTableland } from "@tableland/local";
 import { NonceManager } from "@ethersproject/experimental";
 import { Wallet, getDefaultProvider } from "ethers";
+import {
+  TEST_API_BASE_URL,
+  TEST_API_PORT,
+  TEST_REGISTRY_PORT,
+  TEST_TIMEOUT_FACTOR,
+  TEST_VALIDATOR_URL,
+} from "./utils";
 
 type Provider = ReturnType<typeof getDefaultProvider>;
 type Store = ReturnType<typeof init>;
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
+// this sets default values globally
+helpers.overrideDefaults("local-tableland", { baseUrl: TEST_VALIDATOR_URL });
+helpers.overrideDefaults("localhost", { baseUrl: TEST_VALIDATOR_URL });
 
-const getTimeoutFactor = function (): number {
-  const envFactor = 4; //Number(process.env.TEST_TIMEOUT_FACTOR);
-  if (!isNaN(envFactor) && envFactor > 0) {
-    return envFactor;
-  }
-  return 1;
-};
-
-export const TEST_TIMEOUT_FACTOR = getTimeoutFactor();
-
-export const TEST_API_PORT = 2999;
-export const TEST_API_BASE_URL = `http://localhost:${TEST_API_PORT}`;
-
-const lt = new LocalTableland({ silent: true });
-const provider = getDefaultProvider(process.env.PROVIDER_URL);
+const lt = new LocalTableland({
+  validator: path.resolve(_dirname, "validator"),
+  registryPort: TEST_REGISTRY_PORT,
+  silent: true,
+});
+const provider = getDefaultProvider(`http://127.0.0.1:${TEST_REGISTRY_PORT}`);
 
 before(async function () {
-  this.timeout(30000 * TEST_TIMEOUT_FACTOR);
+  this.timeout(90000 * TEST_TIMEOUT_FACTOR);
 
   await lt.start();
 
@@ -157,7 +158,7 @@ function startTablelandApi(tablesFile: string, provider: Provider) {
   return { db, store, validator };
 }
 
-async function startStudioApi({ store, validator }: { store: Store; validator: Validator; }) {
+async function startStudioApi({ store }: { store: Store; }) {
 
   const apiRouter = appRouter(
     store,

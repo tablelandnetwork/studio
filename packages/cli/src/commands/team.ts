@@ -20,12 +20,12 @@ export const builder = function (args: Yargs) {
   return args
     .command(
       "ls [identifier]",
-      "Get a list of teams for a user",
+      "Get a list of your teams, or the teams for a default team id",
       function (args) {
         return args.positional("identifier", {
           type: "string",
           description:
-            "Optional team identifier. Can be team id, email, wallet address, or username. If not provided the current user's session is used",
+            "Optional team identifier. If not provided the current user's session is used",
         });
       },
       async function (argv) {

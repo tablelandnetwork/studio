@@ -7,7 +7,7 @@ import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import * as mod from "../src/commands/team.js";
 import { logger, wait } from "../src/utils.js";
-import { TEST_TIMEOUT_FACTOR, TEST_API_BASE_URL } from "./setup";
+import { TEST_TIMEOUT_FACTOR, TEST_API_BASE_URL } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 const accounts = getAccounts();
@@ -42,9 +42,34 @@ describe("commands/team", function () {
   const projectDescription = "testing project create";
   const projectName = "projectfoo";
 
-  test("can list team", async function () {
+  test("can list authenticated user's teams", async function () {
     const consoleTable = spy(logger, "table");
     await yargs(["team", "ls", ...defaultArgs]).command(mod).parse();
+
+    const table = consoleTable.getCall(0).firstArg;
+    equal(table.length, 1);
+    const team = table[0];
+    const idParts = team.id.split("-");
+    equal(idParts.length, 5);
+    equal(idParts[0].length, 8);
+    equal(idParts[1].length, 4);
+    equal(idParts[2].length, 4);
+    equal(idParts[3].length, 4);
+    equal(idParts[4].length, 12);
+
+    equal(team.name, teamName);
+    equal(team.slug, teamName);
+
+    equal(team.projects.length, 1);
+    const project = team.projects[0];
+    equal(project.name, projectName);
+    equal(project.description, projectDescription);
+  });
+
+  test.skip("can list teams for a specific user", async function () {
+    const consoleTable = spy(logger, "table");
+    const teamId = "123";
+    await yargs(["team", "ls", teamId, ...defaultArgs]).command(mod).parse();
 
     const table = consoleTable.getCall(0).firstArg;
     equal(table.length, 1);

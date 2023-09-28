@@ -8,7 +8,7 @@ import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/login.js";
 import { logger, wait } from "../src/utils.js";
-import { TEST_TIMEOUT_FACTOR, TEST_API_BASE_URL } from "./setup";
+import { TEST_TIMEOUT_FACTOR, TEST_API_BASE_URL } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 
