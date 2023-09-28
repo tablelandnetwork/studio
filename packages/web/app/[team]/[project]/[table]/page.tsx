@@ -58,7 +58,7 @@ export default async function TableDetails({
         <CardHeader>
           <CardTitle>Columns</CardTitle>
           <CardDescription>
-            Table {table.name} includes the following columns:
+            Table {table.name} has the following columns:
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -102,10 +102,34 @@ export default async function TableDetails({
       </Card>
       <Card>
         <CardHeader>
+          <CardTitle>Table Constraints</CardTitle>
+          <CardDescription>
+            {table.schema.table_constraints
+              ? `Table {table.name} includes the following table-wide constraints
+            that apply to one or more columns:`
+              : `Table ${table.name} doesn't have any table constraints.`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableBody>
+              {table.schema.table_constraints?.map((constraint, index) => {
+                return (
+                  <TableRow key={constraint}>
+                    <TableCell>{constraint}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
           <CardTitle>Deployments</CardTitle>
           <CardDescription>
             {deploymentInfos.length
-              ? `Table ${table.name} has been deployed to the networks listed below.`
+              ? `Table ${table.name} has been deployed to the following networks:`
               : `Table ${table.name} has not been deployed yet.`}
           </CardDescription>
         </CardHeader>
