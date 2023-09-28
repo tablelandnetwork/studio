@@ -1,4 +1,3 @@
-import Footer from "@/components/footer";
 import { JotaiProvider } from "@/components/jotai-provider";
 import MesaSvg from "@/components/mesa-svg";
 import { NavPrimary } from "@/components/nav-primary";
@@ -12,6 +11,7 @@ import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import Link from "next/link";
 import { cache } from "react";
+import Footer from "./_components/footer";
 import "./globals.css";
 
 TimeAgo.addDefaultLocale(en);
