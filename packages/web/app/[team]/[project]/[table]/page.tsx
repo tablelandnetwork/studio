@@ -50,9 +50,6 @@ export default async function TableDetails({
           <CardTitle>About {table.name}</CardTitle>
           <CardDescription>{table.description}</CardDescription>
         </CardHeader>
-        {/* <CardContent>
-          <p className="text-base text-muted-foreground">{table.description}</p>
-        </CardContent> */}
       </Card>
       <Card>
         <CardHeader>
