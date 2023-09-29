@@ -71,22 +71,40 @@ export default function Share({
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-center space-x-4">
-          <TwitterShareButton url={window.location.href}>
+          <TwitterShareButton
+            url={window.location.href}
+            className="transform transition duration-100 hover:scale-110"
+          >
             <TwitterIcon size={socialIconSize} round />
           </TwitterShareButton>
-          <FacebookShareButton url={window.location.href}>
+          <FacebookShareButton
+            url={window.location.href}
+            className="transform transition duration-100 hover:scale-110"
+          >
             <FacebookIcon size={socialIconSize} round />
           </FacebookShareButton>
-          <RedditShareButton url={window.location.href}>
+          <RedditShareButton
+            url={window.location.href}
+            className="transform transition duration-100 hover:scale-110"
+          >
             <RedditIcon size={socialIconSize} round />
           </RedditShareButton>
-          <TelegramShareButton url={window.location.href}>
+          <TelegramShareButton
+            url={window.location.href}
+            className="transform transition duration-100 hover:scale-110"
+          >
             <TelegramIcon size={socialIconSize} round />
           </TelegramShareButton>
-          <WeiboShareButton url={window.location.href}>
+          <WeiboShareButton
+            url={window.location.href}
+            className="transform transition duration-100 hover:scale-110"
+          >
             <WeiboIcon size={socialIconSize} round />
           </WeiboShareButton>
-          <EmailShareButton url={window.location.href}>
+          <EmailShareButton
+            url={window.location.href}
+            className="hover:scale-110"
+          >
             <EmailIcon size={socialIconSize} round />
           </EmailShareButton>
         </div>
