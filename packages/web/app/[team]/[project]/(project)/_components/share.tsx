@@ -103,7 +103,7 @@ export default function Share({
           </WeiboShareButton>
           <EmailShareButton
             url={window.location.href}
-            className="hover:scale-110"
+            className="transform transition duration-100 hover:scale-110"
           >
             <EmailIcon size={socialIconSize} round />
           </EmailShareButton>
