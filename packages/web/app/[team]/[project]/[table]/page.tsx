@@ -104,7 +104,7 @@ export default async function TableDetails({
         <CardHeader>
           <CardTitle>Table Constraints</CardTitle>
           <CardDescription>
-            {table.schema.table_constraints
+            {table.schema.tableConstraints
               ? `Table {table.name} includes the following table-wide constraints
             that apply to one or more columns:`
               : `Table ${table.name} doesn't have any table constraints.`}
@@ -113,7 +113,7 @@ export default async function TableDetails({
         <CardContent>
           <Table>
             <TableBody>
-              {table.schema.table_constraints?.map((constraint, index) => {
+              {table.schema.tableConstraints?.map((constraint, index) => {
                 return (
                   <TableRow key={constraint}>
                     <TableCell>{constraint}</TableCell>

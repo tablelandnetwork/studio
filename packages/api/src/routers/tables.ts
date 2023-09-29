@@ -12,7 +12,7 @@ const schemaSchema: z.ZodType<Schema> = z.object({
       constraints: z.array(z.string().nonempty()).optional(),
     }),
   ),
-  table_constraints: z.array(z.string().nonempty()).optional(),
+  tableConstraints: z.array(z.string().nonempty()).optional(),
 });
 
 export function tablesRouter(store: Store) {

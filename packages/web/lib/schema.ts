@@ -41,8 +41,8 @@ export function generateCreateTableStatement(
     })
     .join(", ");
 
-  const tableConstraints = cleaned.table_constraints
-    ? cleaned.table_constraints.join(",")
+  const tableConstraints = cleaned.tableConstraints
+    ? cleaned.tableConstraints.join(",")
     : "";
 
   return `create table ${tableName}(${columnDefinitions}${
