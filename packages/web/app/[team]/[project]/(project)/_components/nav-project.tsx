@@ -1,12 +1,13 @@
 "use client";
 
 import { projectByTeamIdAndSlug, teamBySlug } from "@/app/actions";
+import Crumb from "@/components/crumb";
 import { cn } from "@/lib/utils";
 import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import Crumb from "./crumb";
+import Share from "./share";
 
 function projectLinks(
   team: schema.Team,
@@ -62,29 +63,32 @@ export default function NavProject({
   }
 
   return (
-    <div>
-      <Crumb
-        title={project.name}
-        items={[{ label: team.name, href: `/${team.slug}` }]}
-        className="mb-2"
-      />
-      <nav
-        className={cn("flex items-center space-x-4 lg:space-x-6", className)}
-        {...props}
-      >
-        {projectLinks(team, project).map((link) => (
-          <Link
-            key={link.label}
-            href={link.href}
-            className={cn(
-              "text-sm font-medium transition-colors hover:text-primary",
-              !link.isActive(pathname) && "text-muted-foreground",
-            )}
-          >
-            {link.label}
-          </Link>
-        ))}
-      </nav>
+    <div className="flex flex-1">
+      <div className="flex flex-col">
+        <Crumb
+          title={project.name}
+          items={[{ label: team.name, href: `/${team.slug}` }]}
+          className="mb-2"
+        />
+        <nav
+          className={cn("flex items-center space-x-4 lg:space-x-6", className)}
+          {...props}
+        >
+          {projectLinks(team, project).map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                !link.isActive(pathname) && "text-muted-foreground",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+      <Share className="ml-auto self-end" project={project} />
     </div>
   );
 }
