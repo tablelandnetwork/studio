@@ -105,7 +105,7 @@ export default async function TableDetails({
           <CardTitle>Table Constraints</CardTitle>
           <CardDescription>
             {table.schema.tableConstraints
-              ? `Table {table.name} includes the following table-wide constraints
+              ? `Table ${table.name} includes the following table-wide constraints
             that apply to one or more columns:`
               : `Table ${table.name} doesn't have any table constraints.`}
           </CardDescription>
