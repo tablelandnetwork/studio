@@ -51,7 +51,7 @@ export default async function Projects({
   return (
     <main className="container flex flex-1 flex-col p-4">
       {authorized && (
-        <Link href={`/${team.slug}/new-project`}>
+        <Link href={`/${team.slug}/new-project`} className="ml-auto">
           <Button variant="ghost">
             <Plus className="mr-2" />
             New Project
@@ -80,7 +80,7 @@ export default async function Projects({
             <p className="text-muted-foreground">
               We&apos;ve created a default Team for you.{" "}
               {!!team.personal ? "This" : "It"} is your personal Team for your
-              own projects so you can&apos;t invite others{" "}
+              own projects &mdash; You can&apos;t invite collaborators{" "}
               {!!team.personal ? "here" : "there"}.
             </p>
           </div>
@@ -88,8 +88,8 @@ export default async function Projects({
             <Folders className="flex-shrink-0" />
             <p className="text-muted-foreground">
               Within a Team, work is organized into Projects. To get started,
-              create a new Project using the New Project button above and to the
-              left.
+              create a Project using the New Project button above and to the
+              right.
             </p>
           </div>
         </div>
