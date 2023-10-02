@@ -8,7 +8,11 @@ import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/login.js";
 import { logger, wait } from "../src/utils.js";
-import { TEST_TIMEOUT_FACTOR, TEST_API_BASE_URL } from "./setup";
+import {
+  TEST_TIMEOUT_FACTOR,
+  TEST_API_BASE_URL,
+  TEST_REGISTRY_PORT
+} from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,7 +25,7 @@ const defaultArgs = [
   "--chain",
   "local-tableland",
   "--providerUrl",
-  "http://127.0.0.1:8545/",
+  `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
   "--apiUrl",
   TEST_API_BASE_URL
 ];

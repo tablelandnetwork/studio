@@ -10,8 +10,11 @@ import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/project.js";
 import { logger, wait } from "../src/utils.js";
-import { TEST_TIMEOUT_FACTOR, TEST_API_BASE_URL } from "./setup";
-
+import {
+  TEST_TIMEOUT_FACTOR,
+  TEST_API_BASE_URL,
+  TEST_REGISTRY_PORT
+} from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 const accounts = getAccounts();
@@ -25,17 +28,10 @@ const defaultArgs = [
   "--chain",
   "local-tableland",
   "--providerUrl",
-  "http://127.0.0.1:8545/",
+  `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
   "--apiUrl",
   TEST_API_BASE_URL
 ];
-
-// TODO: remove this.  just using it to debug
-// const wallet = accounts[10];
-// const provider = getDefaultProvider(process.env.PROVIDER_URL);
-// const signer = wallet.connect(provider);
-// const db = new Database({ signer, autoWait: true });
-
 
 describe("commands/project", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
