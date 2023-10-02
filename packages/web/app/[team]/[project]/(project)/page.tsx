@@ -146,7 +146,7 @@ export default async function Project({
                 Here, you&apos;ll create your Project&apos;s Table definitions.
                 Get started by creating or importing a Table using the buttons
                 above. Remember here in your Blueprint, Tables are simply Table{" "}
-                <span className="italic">definitions</span> &mdash; To atually
+                <span className="italic">definitions</span> &mdash; To actually
                 create them on Tableland, vist the Project&apos;s{" "}
                 <Link href={`${project.slug}/deployments`}>
                   Deployments tab
