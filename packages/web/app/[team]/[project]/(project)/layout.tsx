@@ -1,4 +1,4 @@
-import NavProject from "@/components/nav-project";
+import NavProject from "./_components/nav-project";
 
 export default async function ProjectLayout({
   children,
