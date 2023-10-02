@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { schema } from "@tableland/studio-store";
-import { CheckCircle2, CircleDashed } from "lucide-react";
+import { Table2 } from "lucide-react";
 import Link from "next/link";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -60,21 +60,22 @@ export function Sidebar({
                       ? "secondary"
                       : "ghost"
                   }
-                  className="w-full"
+                  className="w-full justify-start"
                   disabled={!isAuthorized && !deployment}
                 >
+                  <Table2
+                    className={cn(
+                      "mr-2",
+                      !deployment && "text-red-400 opacity-40",
+                    )}
+                  />
                   <span>{table.name}</span>
-                  {deployment ? (
-                    <CheckCircle2 className="ml-auto text-green-400" />
-                  ) : (
-                    <CircleDashed className="ml-auto text-red-400" />
-                  )}
                 </Button>
               );
               return isAuthorized || deployment ? (
                 <Link
                   key={table.id}
-                  href={`/${teamSlug}/${projectSlug}/deployments/${environment.name}/${table.name}`}
+                  href={`/${teamSlug}/${projectSlug}/deployments/${environment.slug}/${table.name}`}
                 >
                   {button}
                 </Link>

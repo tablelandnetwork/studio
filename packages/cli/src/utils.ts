@@ -207,7 +207,8 @@ export async function getWalletWithProvider({
   if (provider == null) {
     throw new Error("unable to create ETH API provider");
   }
-
+console.log("provider:", provider);
+console.log("network:", network);
   let providerChainId: number | undefined;
   try {
     providerChainId = (await provider.getNetwork()).chainId;

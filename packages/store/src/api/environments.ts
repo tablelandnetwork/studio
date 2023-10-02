@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema";
 import { Environment, environments } from "../schema";
+import { slugify } from "./utils";
 
 export function initEnvironments(
   db: DrizzleD1Database<typeof schema>,
@@ -22,6 +23,7 @@ export function initEnvironments(
         id,
         projectId,
         name,
+        slug: slugify(name),
       };
       const { sql, params } = db
         .insert(environments)

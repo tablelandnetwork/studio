@@ -47,7 +47,7 @@ export default async function Deployments({
     const envSlug = params.slug[0];
     const tableSlug = params.slug[1];
     selectedEnvironment = environments.find(
-      (environment) => environment.name === envSlug,
+      (environment) => environment.slug === envSlug,
     );
     selectedTable = tables.find((table) => table.name === tableSlug);
     if (!selectedEnvironment || !selectedTable) {

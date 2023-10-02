@@ -20,29 +20,33 @@ export const builder = function (args: Yargs) {
   return args
     .command(
       "ls [identifier]",
-      "Get a list of teams for a user",
+      "Get a list of your teams, or the teams for a default team id",
       function (args) {
         return args.positional("identifier", {
           type: "string",
           description:
-            "Optional team identifier. Can be team id, email, wallet address, or username. If not provided the current user's session is used",
+            "Optional team identifier. If not provided the current user's session is used",
         });
       },
       async function (argv) {
-        const { identifier, store } = argv;
-        const api = getApi(new FileStore(store as string));
+        try {
+          const { identifier, store, apiUrl } = argv;
+          const api = getApi(new FileStore(store as string), apiUrl as string);
 
-        let query;
-        if (typeof identifier === "string" && identifier.trim() !== "") {
-          // TODO: `identifier` needs to be converted to teamId for this to work.
-          //       Alternatively we could create a new rpc endpoint that takes
-          //       wallet or email or whatever account identifier we want.
-          query = { userTeamId: identifier };
+          let query;
+          if (typeof identifier === "string" && identifier.trim() !== "") {
+            // TODO: `identifier` needs to be converted to teamId for this to work.
+            //       Alternatively we could create a new rpc endpoint that takes
+            //       wallet or email or whatever account identifier we want.
+            query = { userTeamId: identifier };
+          }
+
+          const teams = await api.teams.userTeams.query(query);
+
+          logger.table(teams);
+        } catch (err) {
+          logger.error(err);
         }
-
-        const teams = await api.teams.userTeams.query(query);
-
-        logger.table(teams);
       },
     )
     .command(
