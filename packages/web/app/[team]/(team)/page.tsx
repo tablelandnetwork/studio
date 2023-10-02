@@ -78,18 +78,18 @@ export default async function Projects({
           <div className="flex items-center space-x-4">
             <UserCircle className="flex-shrink-0" />
             <p className="text-muted-foreground">
-              We&apos;ve created a default Team for you.{" "}
-              {!!team.personal ? "This" : "It"} is your personal Team for your
-              own projects &mdash; You can&apos;t invite collaborators{" "}
-              {!!team.personal ? "here" : "there"}.
+              We&apos;ve created a default Team &mdash;{" "}
+              <span className="font-semibold text-foreground">{team.slug}</span>{" "}
+              &mdash; for you. {!!team.personal ? "This" : "It"} is your
+              personal Team for your own projects &mdash; You can&apos;t invite
+              collaborators {!!team.personal ? "here" : "there"}.
             </p>
           </div>
           <div className="flex items-center space-x-4">
             <Folders className="flex-shrink-0" />
             <p className="text-muted-foreground">
               Within a Team, work is organized into Projects. To get started,
-              create a Project using the New Project button above and to the
-              right.
+              create a Project using the New Project button above.
             </p>
           </div>
         </div>
