@@ -61,7 +61,7 @@ export default async function Project({
               >
                 <Card className="">
                   <CardHeader>
-                    <CardTitle className="flex gap-1">
+                    <CardTitle className="flex items-center gap-1">
                       <Table2 />
                       {table.name}
                     </CardTitle>
