@@ -78,8 +78,10 @@ export default async function Projects({
           <div className="flex items-center space-x-4">
             <UserCircle className="flex-shrink-0" />
             <p className="text-muted-foreground">
-              We&apos;ve created a default Team for you. This is your personal
-              Team for your own projects so you can&apos;t invite others here.
+              We&apos;ve created a default Team for you.{" "}
+              {!!team.personal ? "This" : "It"} is your personal Team for your
+              own projects so you can&apos;t invite others{" "}
+              {!!team.personal ? "here" : "there"}.
             </p>
           </div>
           <div className="flex items-center space-x-4">
