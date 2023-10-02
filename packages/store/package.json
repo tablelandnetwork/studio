@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tableland/sdk": "^4.5.2",
+    "@tableland/sdk": "^4.5.3-dev.0",
     "drizzle-orm": "^0.28.5",
     "iron-session": "^6.3.1"
   }

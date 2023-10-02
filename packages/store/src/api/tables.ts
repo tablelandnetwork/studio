@@ -1,6 +1,6 @@
 import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import { Schema } from "../custom-types";
 import * as schema from "../schema";
@@ -46,6 +46,18 @@ export function initTables(
         .all();
       const mapped = res.map((r) => r.tables);
       return mapped;
+    },
+
+    tableByProjectIdAndSlug: async function (projectId: string, slug: string) {
+      const res = await db
+        .select({ tables })
+        .from(projectTables)
+        .innerJoin(tables, eq(projectTables.tableId, tables.id))
+        .where(
+          and(eq(projectTables.projectId, projectId), eq(tables.slug, slug)),
+        )
+        .get();
+      return res?.tables;
     },
 
     tableTeam: async function (tableId: string) {

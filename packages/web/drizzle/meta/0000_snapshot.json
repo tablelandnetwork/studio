@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "e257e58b-057a-4051-ae5f-1cd05d36d9d1",
+  "id": "40654131-953f-4a1c-bc0e-c2485b88d11f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "deployments": {
@@ -96,9 +96,22 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "projectEnvIdx": {
+          "name": "projectEnvIdx",
+          "columns": ["project_id", "slug"],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

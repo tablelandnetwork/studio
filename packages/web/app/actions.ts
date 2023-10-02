@@ -51,6 +51,10 @@ export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
   return await api.projects.projectByTeamIdAndSlug.query({ teamId, slug });
 }
 
+export async function tableByProjectIdAndSlug(projectId: string, slug: string) {
+  return await api.tables.tableByProjectIdAndSlug.query({ projectId, slug });
+}
+
 export async function newProject(
   teamId: string,
   name: string,
