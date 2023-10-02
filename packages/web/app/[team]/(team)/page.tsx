@@ -7,7 +7,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { api } from "@/trpc/server-invoker";
-import { Plus, Rocket, Table2 } from "lucide-react";
+import {
+  Folders,
+  Plus,
+  Rocket,
+  Sparkles,
+  Table2,
+  UserCircle,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 
@@ -41,52 +49,87 @@ export default async function Projects({
   );
 
   return (
-    <main className="container p-4">
-      <div className="m-auto grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {projects.map((project, i) => {
-          const tableCount = tables[i].length;
-          const deploymentsCount = deployments[i].length;
-          return (
-            <Link key={project.id} href={`/${team.slug}/${project.slug}`}>
-              <Card className="">
-                <CardHeader>
-                  <CardTitle>{project.name}</CardTitle>
-                  <CardDescription className="truncate">
-                    {project.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center space-x-6">
-                  <div className="flex items-center gap-1">
-                    <Table2 className="h-6 w-6" />
-                    <div className="flex flex-col items-center">
-                      <p className="text-4xl">{tableCount}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Table{tableCount !== 1 && "s"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Rocket className="h-6 w-6" />
-                    <div className="flex flex-col items-center">
-                      <p className="text-4xl">{deploymentsCount}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Deployment{deploymentsCount !== 1 && "s"}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
+    <main className="container flex flex-1 flex-col p-4">
       {authorized && (
         <Link href={`/${team.slug}/new-project`}>
-          <Button variant="ghost" className="mt-4">
+          <Button variant="ghost">
             <Plus className="mr-2" />
             New Project
           </Button>
         </Link>
+      )}
+      {!projects.length ? (
+        <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4">
+          <div className="flex items-center space-x-4">
+            <Sparkles className="flex-shrink-0" />
+            <h1 className="text-2xl font-medium">
+              Welcome to Tableland Studio!
+            </h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Users className="flex-shrink-0" />
+            <p className="text-muted-foreground">
+              In Studio, Teams are the top level container for your work. You
+              can create new Teams and switch Teams using the Team switcher in
+              the upper left corner of the screen. Once you create new Team, you
+              can invite others to collaborate.
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <UserCircle className="flex-shrink-0" />
+            <p className="text-muted-foreground">
+              We&apos;ve created a default Team for you. This is your personal
+              Team for your own projects so you can&apos;t invite others here.
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Folders className="flex-shrink-0" />
+            <p className="text-muted-foreground">
+              Within a Team, work is organized into Projects. To get started,
+              create a new Project using the New Project button above and to the
+              left.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {projects.map((project, i) => {
+            const tableCount = tables[i].length;
+            const deploymentsCount = deployments[i].length;
+            return (
+              <Link key={project.id} href={`/${team.slug}/${project.slug}`}>
+                <Card className="">
+                  <CardHeader>
+                    <CardTitle>{project.name}</CardTitle>
+                    <CardDescription className="truncate">
+                      {project.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-center space-x-6">
+                    <div className="flex items-center gap-1">
+                      <Table2 className="h-6 w-6" />
+                      <div className="flex flex-col items-center">
+                        <p className="text-4xl">{tableCount}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Table{tableCount !== 1 && "s"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Rocket className="h-6 w-6" />
+                      <div className="flex flex-col items-center">
+                        <p className="text-4xl">{deploymentsCount}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Deployment{deploymentsCount !== 1 && "s"}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
       )}
     </main>
   );
