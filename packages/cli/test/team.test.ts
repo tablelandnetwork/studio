@@ -7,7 +7,11 @@ import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import * as mod from "../src/commands/team.js";
 import { logger, wait } from "../src/utils.js";
-import { TEST_TIMEOUT_FACTOR, TEST_API_BASE_URL } from "./utils";
+import {
+  TEST_TIMEOUT_FACTOR,
+  TEST_API_BASE_URL,
+  TEST_REGISTRY_PORT
+} from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 const accounts = getAccounts();
@@ -21,7 +25,7 @@ const defaultArgs = [
   "--chain",
   "local-tableland",
   "--providerUrl",
-  "http://127.0.0.1:8545/",
+  `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
   "--apiUrl",
   TEST_API_BASE_URL
 ];
