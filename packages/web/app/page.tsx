@@ -42,7 +42,7 @@ export default function Page() {
             Then log into Studio using the button in the upper right corner of
             the screen. You&apos;ll be prompted to choose a Studio username and
             then you&apos;ll be redirected to the Studio page for your personal
-            Team..
+            Team.
           </p>
         </div>
       </div>
