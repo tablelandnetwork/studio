@@ -1,6 +1,6 @@
 "use client";
 
-import { newProject } from "@/app/actions";
+import { newProject, projectNameAvailable } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,15 +11,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
+import InputWithCheck from "./input-with-check";
 
 const formSchema = z.object({
   name: z.string().min(3),
@@ -28,6 +28,9 @@ const formSchema = z.object({
 });
 
 export default function NewProjectForm({ team }: { team: schema.Team }) {
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
+    undefined,
+  );
   const [pending, startTransition] = useTransition();
 
   const router = useRouter();
@@ -69,6 +72,10 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
     });
   }
 
+  const checkProjectName = async (name: string) => {
+    return await projectNameAvailable(team.id, name);
+  };
+
   return (
     <Form {...form}>
       <form
@@ -82,7 +89,12 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Project name" {...field} />
+                <InputWithCheck
+                  placeholder="Project name"
+                  check={checkProjectName}
+                  onCheckResult={setNameAvailable}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Project name must be unique within your team and at least three
@@ -172,7 +184,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
             Add Environment
           </Button>
         </div> */}
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending || !nameAvailable}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit
         </Button>

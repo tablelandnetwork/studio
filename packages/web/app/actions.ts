@@ -59,6 +59,10 @@ export async function tableByProjectIdAndSlug(projectId: string, slug: string) {
   return await api.tables.tableByProjectIdAndSlug.query({ projectId, slug });
 }
 
+export async function projectNameAvailable(teamId: string, name: string) {
+  return await api.projects.nameAvailable.query({ teamId, name });
+}
+
 export async function newProject(
   teamId: string,
   name: string,

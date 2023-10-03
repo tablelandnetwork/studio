@@ -17,6 +17,21 @@ export function initProjects(
   tbl: Database,
 ) {
   return {
+    nameAvailable: async function (teamId: string, name: string) {
+      const res = await db
+        .select()
+        .from(projects)
+        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
+        .where(
+          and(
+            eq(teamProjects.teamId, teamId),
+            eq(projects.slug, slugify(name)),
+          ),
+        )
+        .get();
+      return !res;
+    },
+
     createProject: async function (
       teamId: string,
       name: string,
