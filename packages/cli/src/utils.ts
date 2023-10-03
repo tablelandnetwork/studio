@@ -33,6 +33,14 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   return api(apiArgs);
 };
 
+export const getProject = function (
+  argv: { store: FileStore; projectId?: string; }
+) {
+  if (typeof projectId === "string") return projectId;
+
+  return store.get<string>("projectId");
+};
+
 export class FileStore {
   readonly data: Record<string, any>;
   readonly filePath: string;
