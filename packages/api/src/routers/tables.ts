@@ -37,6 +37,11 @@ export function tablesRouter(store: Store) {
         }
         return table;
       }),
+    nameAvailable: publicProcedure
+      .input(z.object({ projectId: z.string(), name: z.string() }))
+      .query(async ({ input }) => {
+        return await store.tables.nameAvailable(input.projectId, input.name);
+      }),
     newTable: projectProcedure(store)
       .input(
         z.object({

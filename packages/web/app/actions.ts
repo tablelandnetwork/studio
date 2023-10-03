@@ -89,6 +89,10 @@ export async function newEnvironment(
   return environment;
 }
 
+export async function tableNameAvailable(projectId: string, name: string) {
+  return await api.tables.nameAvailable.query({ projectId, name });
+}
+
 export async function newTable(
   project: schema.Project,
   name: string,
