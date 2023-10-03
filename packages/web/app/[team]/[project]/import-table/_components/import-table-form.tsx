@@ -1,6 +1,7 @@
 "use client";
 
-import { importTable } from "@/app/actions";
+import { importTable, tableNameAvailable } from "@/app/actions";
+import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -46,6 +47,9 @@ interface Props {
 }
 
 export default function ImportTableForm({ project, team, envs }: Props) {
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
+    undefined,
+  );
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -75,6 +79,10 @@ export default function ImportTableForm({ project, team, envs }: Props) {
       router.replace(`/${team.slug}/${project.slug}`);
     });
   }
+
+  const checkTableName = async (name: string) => {
+    return await tableNameAvailable(project.id, name);
+  };
 
   return (
     <Form {...form}>
@@ -121,7 +129,12 @@ export default function ImportTableForm({ project, team, envs }: Props) {
             <FormItem>
               <FormLabel>Table Name</FormLabel>
               <FormControl>
-                <Input placeholder="eg. users" {...field} />
+                <InputWithCheck
+                  placeholder="eg. users"
+                  check={checkTableName}
+                  onCheckResult={setNameAvailable}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 The name of the Table to create in your Studio project. This

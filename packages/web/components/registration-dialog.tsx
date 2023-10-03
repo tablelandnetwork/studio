@@ -1,7 +1,8 @@
-import { register } from "@/app/actions";
+import { register, teamNameAvailable } from "@/app/actions";
 import { Auth } from "@tableland/studio-api";
 import { Loader2 } from "lucide-react";
 import { useState, useTransition } from "react";
+import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -25,6 +26,9 @@ export default function RegistrationDialog({
   onSuccess: (auth: Auth) => void;
   onCancel: () => void;
 }) {
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
+    undefined,
+  );
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [registerError, setRegisterError] = useState("");
@@ -72,10 +76,12 @@ export default function RegistrationDialog({
           <div className="space-y-4 py-2 pb-4">
             <div className="space-y-2">
               <Label htmlFor="name">Username</Label>
-              <Input
+              <InputWithCheck
                 id="name"
                 placeholder="myusername"
                 value={username}
+                check={teamNameAvailable}
+                onCheckResult={setNameAvailable}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -95,7 +101,11 @@ export default function RegistrationDialog({
           <Button variant="outline" onClick={handleCancel} disabled={pending}>
             Cancel
           </Button>
-          <Button type="submit" onClick={handleRegister} disabled={pending}>
+          <Button
+            type="submit"
+            onClick={handleRegister}
+            disabled={pending || !nameAvailable}
+          >
             {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Continue
           </Button>

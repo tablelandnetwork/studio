@@ -2,6 +2,7 @@
 
 import "@biconomy/web3-auth/dist/src/style.css";
 
+import { teamNameAvailable } from "@/app/actions";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import InputWithCheck from "./input-with-check";
 import MenuUser from "./menu-user";
 import { Button } from "./ui/button";
 
@@ -28,6 +30,9 @@ export default function UserActions() {
   const register = useSetAtom(registerAtom);
 
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
+    undefined,
+  );
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [registerError, setRegisterError] = useState("");
@@ -110,10 +115,12 @@ export default function UserActions() {
           <div className="space-y-4 py-2 pb-4">
             <div className="space-y-2">
               <Label htmlFor="name">Username</Label>
-              <Input
+              <InputWithCheck
                 id="name"
                 placeholder="myusername"
                 value={username}
+                check={teamNameAvailable}
+                onCheckResult={setNameAvailable}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -133,7 +140,11 @@ export default function UserActions() {
           <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             Cancel
           </Button>
-          <Button type="submit" onClick={handleRegister} disabled={isPending}>
+          <Button
+            type="submit"
+            onClick={handleRegister}
+            disabled={isPending || !nameAvailable}
+          >
             {isPending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Continue
           </Button>

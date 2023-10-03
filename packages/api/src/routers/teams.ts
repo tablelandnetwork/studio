@@ -22,6 +22,11 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
           input.teamId,
         );
       }),
+    nameAvailable: publicProcedure
+      .input(z.object({ name: z.string() }))
+      .query(async ({ input }) => {
+        return await store.teams.nameAvailable(input.name);
+      }),
     teamById: publicProcedure
       .input(z.object({ teamId: z.string() }))
       .query(async ({ input }) => {

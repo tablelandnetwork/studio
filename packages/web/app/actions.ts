@@ -43,6 +43,10 @@ export async function logout() {
   await api.auth.authenticated.revalidate(undefined);
 }
 
+export async function teamNameAvailable(name: string) {
+  return await api.teams.nameAvailable.query({ name });
+}
+
 export async function teamBySlug(slug: string) {
   return await api.teams.teamBySlug.query({ slug });
 }
@@ -53,6 +57,10 @@ export async function projectByTeamIdAndSlug(teamId: string, slug: string) {
 
 export async function tableByProjectIdAndSlug(projectId: string, slug: string) {
   return await api.tables.tableByProjectIdAndSlug.query({ projectId, slug });
+}
+
+export async function projectNameAvailable(teamId: string, name: string) {
+  return await api.projects.nameAvailable.query({ teamId, name });
 }
 
 export async function newProject(
@@ -79,6 +87,10 @@ export async function newEnvironment(
   });
   await api.environments.projectEnvironments.revalidate({ projectId });
   return environment;
+}
+
+export async function tableNameAvailable(projectId: string, name: string) {
+  return await api.tables.nameAvailable.query({ projectId, name });
 }
 
 export async function newTable(

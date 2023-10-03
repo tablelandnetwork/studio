@@ -12,6 +12,20 @@ export function initTables(
   tbl: Database,
 ) {
   return {
+    nameAvailable: async function (projectId: string, name: string) {
+      const res = await db
+        .select()
+        .from(projectTables)
+        .innerJoin(tables, eq(projectTables.tableId, tables.id))
+        .where(
+          and(
+            eq(projectTables.projectId, projectId),
+            eq(tables.name, slugify(name)),
+          ),
+        )
+        .get();
+      return !res;
+    },
     createTable: async function (
       projectId: string,
       name: string,

@@ -32,6 +32,11 @@ export function projectsRouter(store: Store) {
         }
         return project;
       }),
+    nameAvailable: publicProcedure
+      .input(z.object({ teamId: z.string(), name: z.string() }))
+      .query(async ({ input }) => {
+        return await store.projects.nameAvailable(input.teamId, input.name);
+      }),
     newProject: teamProcedure(store)
       .input(
         z.object({

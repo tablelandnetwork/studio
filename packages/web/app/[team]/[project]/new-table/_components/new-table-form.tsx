@@ -1,6 +1,7 @@
 "use client";
 
-import { newTable } from "@/app/actions";
+import { newTable, tableNameAvailable } from "@/app/actions";
+import InputWithCheck from "@/components/input-with-check";
 import SchemaBuilder from "@/components/schema-builder";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cleanSchema, generateCreateTableStatement } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,6 +45,9 @@ interface Props {
 }
 
 export default function NewTable({ project, team, envs }: Props) {
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
+    undefined,
+  );
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -80,6 +83,10 @@ export default function NewTable({ project, team, envs }: Props) {
     });
   }
 
+  const checkTableName = async (name: string) => {
+    return await tableNameAvailable(project.id, name);
+  };
+
   return (
     <Form {...form}>
       <form
@@ -93,7 +100,12 @@ export default function NewTable({ project, team, envs }: Props) {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Table name" {...field} />
+                <InputWithCheck
+                  placeholder="Table name"
+                  check={checkTableName}
+                  onCheckResult={setNameAvailable}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Table name must be unique within your Project.
@@ -192,7 +204,7 @@ export default function NewTable({ project, team, envs }: Props) {
             );
           })}
         </div> */}
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending || !nameAvailable}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit
         </Button>
