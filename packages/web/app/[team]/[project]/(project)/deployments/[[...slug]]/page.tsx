@@ -102,22 +102,22 @@ export default async function Deployments({
                   A Deployment represents a Table definition from your
                   Project&apos;s Blueprint, created on the Tableland network. To
                   the left, you&apos;ll see a list of all your Project&apos;s
-                  Deployments and pending Deployments.
+                  deployed and undeployed Tables.
                 </p>
               </div>
               <div className="flex items-center space-x-4">
                 <Table2 className="flex-shrink-0" />
                 <p className="text-muted-foreground">
-                  Deployed Tables are incicated by this black table icon. You
-                  can select any deployed Table to see details about the
-                  Deployment and view the Table&apos;s data.
+                  Deployed Tables are incicated by a black table icon. You can
+                  select any deployed Table to see details about the Deployment
+                  and view the Table&apos;s data.
                 </p>
               </div>
               <div className="flex items-center space-x-4">
                 <Table2 className="flex-shrink-0 text-red-400 opacity-40" />
                 <p className="text-muted-foreground">
-                  Undeployed Tables are incicated by this red table icon. You
-                  can select any undeployed Table to deploy it to the Tableland
+                  Undeployed Tables are incicated by a red table icon. You can
+                  select any undeployed Table to deploy it to the Tableland
                   network.
                 </p>
               </div>
