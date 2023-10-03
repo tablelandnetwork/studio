@@ -1,6 +1,6 @@
 "use client";
 
-import { newTeam } from "@/app/actions";
+import { newTeam, teamNameAvailable } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,21 +11,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import InputWithCheck from "./input-with-check";
 import TagInput from "./tag-input";
 
 const schema = z.object({
-  name: z.string().min(3),
+  name: z.string().nonempty(),
   emailInvites: z.array(z.string().email()),
 });
 
 export default function NewTeamForm() {
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
+    undefined,
+  );
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -59,11 +62,14 @@ export default function NewTeamForm() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Team name" {...field} />
+                <InputWithCheck
+                  placeholder="Team name"
+                  check={teamNameAvailable}
+                  onCheckResult={setNameAvailable}
+                  {...field}
+                />
               </FormControl>
-              <FormDescription>
-                Team name must be unique and be at least three characters long.
-              </FormDescription>
+              <FormDescription>Team name must be unique.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -94,7 +100,7 @@ export default function NewTeamForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending || !nameAvailable}>
           {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit
         </Button>
