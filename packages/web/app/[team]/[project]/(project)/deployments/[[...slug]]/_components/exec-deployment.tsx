@@ -207,7 +207,7 @@ export default function ExecDeployment({
             <SelectTrigger className="w-fit gap-x-2">
               <SelectValue placeholder="Select chain" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[20rem] overflow-y-auto">
               {supportedChains.map((chain) => (
                 <SelectItem key={chain.chainName} value={`${chain.chainId}`}>
                   {chain.chainName} ({chain.chainId})
