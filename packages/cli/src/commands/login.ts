@@ -57,6 +57,10 @@ export const handler = async (
     // note: the api handles session cookie storage
     const res = await api.auth.login.mutate({ message, signature });
 
+    if (typeof res === "undefined") {
+      throw new Error(`cannot login with an unregistered address: ${wallet.address}`);
+    }
+
     logger.log(`You are logged in with address: ${wallet.address}`);
   } catch (err: any) {
     logger.error(err);
