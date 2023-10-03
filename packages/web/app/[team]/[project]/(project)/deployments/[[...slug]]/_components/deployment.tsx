@@ -72,7 +72,12 @@ export default async function Deployment({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">{deployment.tableName}</div>
-            <p className="text-xs text-muted-foreground">View on Tablescan</p>
+            <Link
+              className="text-xs text-muted-foreground"
+              href={`https://tablescan.io/${deployment.tableName}`}
+            >
+              View on Tablescan
+            </Link>
           </CardContent>
         </Card>
         <Card>
