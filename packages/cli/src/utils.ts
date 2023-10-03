@@ -33,6 +33,14 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   return api(apiArgs);
 };
 
+export const getProject = function (
+  argv: { store: FileStore; projectId?: string; }
+) {
+  if (typeof argv.projectId === "string") return argv.projectId;
+
+  return argv.store.get<string>("projectId");
+};
+
 export class FileStore {
   readonly data: Record<string, any>;
   readonly filePath: string;
@@ -116,6 +124,13 @@ export function getChainName(
     return helpers.getChainInfo(chain)?.chainName;
   }
   return chain;
+}
+
+export function getChainFromTableName(tableName: string) {
+  const parts = tableName.trim().split("_");
+  if (parts.length < 3) throw new Error("invalid table name");
+
+  return parts[parts.length - 2];
 }
 
 export interface Options {
