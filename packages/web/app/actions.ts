@@ -43,6 +43,10 @@ export async function logout() {
   await api.auth.authenticated.revalidate(undefined);
 }
 
+export async function teamNameAvailable(name: string) {
+  return await api.teams.nameAvailable.query({ name });
+}
+
 export async function teamBySlug(slug: string) {
   return await api.teams.teamBySlug.query({ slug });
 }

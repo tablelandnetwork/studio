@@ -23,6 +23,15 @@ export function initTeams(
   dataSealPass: string,
 ) {
   return {
+    nameAvailable: async function (name: string) {
+      const res = await db
+        .select()
+        .from(teams)
+        .where(eq(teams.slug, slugify(name)))
+        .get();
+      return !res;
+    },
+
     createTeamByPersonalTeam: async function (
       name: string,
       personalTeamId: string,
