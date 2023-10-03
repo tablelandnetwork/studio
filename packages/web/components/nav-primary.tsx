@@ -31,7 +31,8 @@ function links(
     links.push({
       label: "Studio",
       href: `/${team?.slug}`,
-      isActive: (pathname: string) => pathname.includes(`/${team.slug}`),
+      isActive: (pathname: string) =>
+        pathname.includes(`/${team.slug}`) || pathname === "/new-team",
     });
   }
   return links;
