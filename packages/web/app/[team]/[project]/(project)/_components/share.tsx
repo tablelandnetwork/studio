@@ -63,7 +63,7 @@ export default function Share({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Share Project</DialogTitle>
+          <DialogTitle>Share the {project.name} Project</DialogTitle>
           <DialogDescription>
             Please share the {project.name} project to let everyone know what
             you&apos;re working on and help us spread the word about Tableland

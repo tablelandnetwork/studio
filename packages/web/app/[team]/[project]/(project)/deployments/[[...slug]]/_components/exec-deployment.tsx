@@ -207,7 +207,7 @@ export default function ExecDeployment({
             <SelectTrigger className="w-fit gap-x-2">
               <SelectValue placeholder="Select chain" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[20rem] overflow-y-auto">
               {supportedChains.map((chain) => (
                 <SelectItem key={chain.chainName} value={`${chain.chainId}`}>
                   {chain.chainName} ({chain.chainId})
@@ -283,15 +283,17 @@ function DeployStep({
         state === "pending" && "opacity-40",
       )}
     >
-      {state === "pending" && <CircleDashed className="mr-2 h-5 w-5" />}
+      {state === "pending" && (
+        <CircleDashed className="mr-2 h-5 w-5 flex-shrink-0" />
+      )}
       {state === "processing" && (
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        <Loader2 className="mr-2 h-5 w-5 flex-shrink-0 animate-spin" />
       )}
       {state === "complete" && (
-        <CheckCircle2 className="mr-2 h-5 w-5 text-green-500" />
+        <CheckCircle2 className="mr-2 h-5 w-5 flex-shrink-0 text-green-500" />
       )}
       {state instanceof Error && (
-        <AlertCircle className="mr-2 h-5 w-5 text-red-500" />
+        <AlertCircle className="mr-2 h-5 w-5 flex-shrink-0 text-red-500" />
       )}
       <p className="text-sm">{text()}</p>
     </div>
