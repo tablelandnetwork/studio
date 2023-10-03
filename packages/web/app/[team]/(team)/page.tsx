@@ -63,28 +63,40 @@ export default async function Projects({
           <div className="flex items-center space-x-4">
             <Gem className="flex-shrink-0" />
             <h1 className="text-2xl font-medium">
-              Welcome to Tableland Studio!
+              {!!team.personal
+                ? "Welcome to Tableland Studio!"
+                : `Team ${team.name} has been created!`}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
             <Users className="flex-shrink-0" />
-            <p className="text-muted-foreground">
-              In Studio, Teams are the top level container for your work. You
-              can create new Teams and switch Teams using the Team switcher in
-              the upper left corner of the screen. Once you create new Team, you
-              can invite others to collaborate.
-            </p>
+            {!!team.personal ? (
+              <p className="text-muted-foreground">
+                In Studio, Teams are the top level container for your work. You
+                can create new Teams and switch Teams using the Team switcher in
+                the upper left corner of the screen. Once you create new Team,
+                you can invite others to collaborate.
+              </p>
+            ) : (
+              <p className="text-muted-foreground">
+                You can invite others to collaborate in the People tab above.
+              </p>
+            )}
           </div>
-          <div className="flex items-center space-x-4">
-            <UserCircle className="flex-shrink-0" />
-            <p className="text-muted-foreground">
-              We&apos;ve created a default Team &mdash;{" "}
-              <span className="font-semibold text-foreground">{team.slug}</span>{" "}
-              &mdash; for you. {!!team.personal ? "This" : "It"} is your
-              personal Team for your own projects &mdash; You can&apos;t invite
-              collaborators {!!team.personal ? "here" : "there"}.
-            </p>
-          </div>
+          {!!team.personal && (
+            <div className="flex items-center space-x-4">
+              <UserCircle className="flex-shrink-0" />
+              <p className="text-muted-foreground">
+                We&apos;ve created a default Team &mdash;{" "}
+                <span className="font-semibold text-foreground">
+                  {team.slug}
+                </span>{" "}
+                &mdash; for you. {!!team.personal ? "This" : "It"} is your
+                personal Team for your own projects &mdash; You can&apos;t
+                invite collaborators {!!team.personal ? "here" : "there"}.
+              </p>
+            </div>
+          )}
           <div className="flex items-center space-x-4">
             <Folders className="flex-shrink-0" />
             <p className="text-muted-foreground">
