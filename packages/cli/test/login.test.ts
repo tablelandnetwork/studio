@@ -20,8 +20,6 @@ const accounts = getAccounts();
 const defaultArgs = [
   "--store",
   path.join(_dirname, ".studioclisession.json"),
-  "--privateKey",
-  accounts[10].privateKey.slice(2),
   "--chain",
   "local-tableland",
   "--providerUrl",
@@ -41,9 +39,31 @@ describe("commands/login", function () {
     restore();
   });
 
+  test("cannot login with an unregistered wallet", async function () {
+    const consoleError = spy(logger, "error");
+    await yargs([
+      "login",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[9].privateKey.slice(2)
+    ]).command<GlobalOptions>(mod).parse();
+
+    const res = consoleError.getCall(0).firstArg;
+
+    equal(
+      res,
+      `Error: cannot login with an unregistered address: ${accounts[9].address}`
+    );
+  });
+
   test("can login with wallet", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["login", ...defaultArgs]).command<GlobalOptions>(mod).parse();
+    await yargs([
+      "login",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2)
+    ]).command<GlobalOptions>(mod).parse();
 
     const res = consoleLog.getCall(0).firstArg;
 
