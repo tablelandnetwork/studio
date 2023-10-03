@@ -34,7 +34,7 @@ export default async function Deployment({
     : [];
 
   return (
-    <div className="flex-1 space-y-4 p-4 pl-0">
+    <div className="flex-1 space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-medium">{table.name}</h1>
         {/* <Select>

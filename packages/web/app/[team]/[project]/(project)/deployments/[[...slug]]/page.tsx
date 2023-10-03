@@ -1,6 +1,6 @@
 import { api } from "@/trpc/server-invoker";
 import { schema } from "@tableland/studio-store";
-import { AlertOctagon, HelpCircle, Rocket } from "lucide-react";
+import { AlertOctagon, HelpCircle, Info, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -65,7 +65,7 @@ export default async function Deployments({
       {!!tables.length ? (
         <>
           <Sidebar
-            className="sticky top-14 h-fit min-w-[200px]"
+            className="min-w-[200px sticky top-14 h-fit"
             environments={environments}
             selectedEnvironment={selectedEnvironment}
             tables={tables}
@@ -91,9 +91,37 @@ export default async function Deployments({
               />
             )
           ) : (
-            <p>
-              Deployments overview {params.team} {params.project}
-            </p>
+            <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4">
+              <div className="flex items-center space-x-4">
+                <Rocket className="flex-shrink-0" />
+                <h1 className="text-2xl font-medium">Your Deployments.</h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Info className="flex-shrink-0" />
+                <p className="text-muted-foreground">
+                  A Deployment represents a Table definition from your
+                  Project&apos;s Blueprint, created on the Tableland network. To
+                  the left, you&apos;ll see a list of all your Project&apos;s
+                  Deployments and pending Deployments.
+                </p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Table2 className="flex-shrink-0" />
+                <p className="text-muted-foreground">
+                  Deployed Tables are incicated by this black table icon. You
+                  can select any deployed Table to see details about the
+                  Deployment and view the Table&apos;s data.
+                </p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Table2 className="flex-shrink-0 text-red-400 opacity-40" />
+                <p className="text-muted-foreground">
+                  Undeployed Tables are incicated by this red table icon. You
+                  can select any undeployed Table to deploy it to the Tableland
+                  network.
+                </p>
+              </div>
+            </div>
           )}
         </>
       ) : (
