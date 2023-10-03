@@ -39,8 +39,8 @@ export default function Page() {
         <div className="flex items-center space-x-4">
           <LogIn className="flex-shrink-0" />
           <p className="text-muted-foreground">
-            Then log into Sudio using the button in the upper right corner of
-            the screen. You&apos;ll be prompted to choose a Sudio username and
+            Then log into Studio using the button in the upper right corner of
+            the screen. You&apos;ll be prompted to choose a Studio username and
             then you&apos;ll be redirected to the Studio page for your personal
             Team..
           </p>
