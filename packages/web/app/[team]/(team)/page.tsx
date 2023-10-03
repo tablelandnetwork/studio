@@ -9,9 +9,9 @@ import {
 import { api } from "@/trpc/server-invoker";
 import {
   Folders,
+  Gem,
   Plus,
   Rocket,
-  Sparkles,
   Table2,
   UserCircle,
   Users,
@@ -61,7 +61,7 @@ export default async function Projects({
       {!projects.length ? (
         <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4">
           <div className="flex items-center space-x-4">
-            <Sparkles className="flex-shrink-0" />
+            <Gem className="flex-shrink-0" />
             <h1 className="text-2xl font-medium">
               Welcome to Tableland Studio!
             </h1>
