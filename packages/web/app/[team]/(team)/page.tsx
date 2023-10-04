@@ -59,7 +59,7 @@ export default async function Projects({
         </Link>
       )}
       {!projects.length ? (
-        <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4">
+        <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4 py-16">
           <div className="flex items-center space-x-4">
             <Gem className="flex-shrink-0" />
             <h1 className="text-2xl font-medium">

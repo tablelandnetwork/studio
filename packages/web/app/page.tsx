@@ -2,8 +2,8 @@ import { Construction, Info, LogIn, Sparkles, Wallet } from "lucide-react";
 
 export default function Page() {
   return (
-    <main className="container flex flex-1 flex-col px-4 py-12">
-      <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4">
+    <main className="container flex flex-1 flex-col p-4">
+      <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4 py-16">
         <div className="flex items-center space-x-4">
           <Sparkles className="flex-shrink-0" />
           <h1 className="text-2xl font-medium">
