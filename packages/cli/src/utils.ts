@@ -41,6 +41,14 @@ export const getProject = function (
   return argv.store.get<string>("projectId");
 };
 
+export const getTeam = function (
+  argv: { store: FileStore; teamId?: string; }
+) {
+  if (typeof argv.teamId === "string") return argv.teamId;
+
+  return argv.store.get<string>("teamId");
+};
+
 export class FileStore {
   private data: Record<string, any>;
   readonly filePath: string;
