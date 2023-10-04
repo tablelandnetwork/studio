@@ -130,7 +130,12 @@ export function getChainFromTableName(tableName: string) {
   const parts = tableName.trim().split("_");
   if (parts.length < 3) throw new Error("invalid table name");
 
-  return parts[parts.length - 2];
+  const chainId = parseInt(parts[parts.length - 2], 10);
+  if (isNaN(chainId)) {
+    throw new Error("invalid table name");
+  }
+
+  return chainId;
 }
 
 export interface Options {
@@ -222,8 +227,7 @@ export async function getWalletWithProvider({
   if (provider == null) {
     throw new Error("unable to create ETH API provider");
   }
-console.log("provider:", provider);
-console.log("network:", network);
+
   let providerChainId: number | undefined;
   try {
     providerChainId = (await provider.getNetwork()).chainId;
