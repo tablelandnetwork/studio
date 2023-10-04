@@ -15,7 +15,8 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const { chain, providerUrl, apiUrl, store } = argv;
-    const api = getApi(new FileStore(store), apiUrl);
+    const fileStore = new FileStore(store);
+    const api = getApi(fileStore, apiUrl);
 
     await api.auth.logout.mutate();
 
@@ -23,6 +24,8 @@ export const handler = async (
     if (user) {
       throw new Error("logout failed");
     }
+
+    fileStore.reset();
 
     logger.log(`You are logged out`);
   } catch (err: any) {

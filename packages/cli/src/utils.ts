@@ -42,7 +42,7 @@ export const getProject = function (
 };
 
 export class FileStore {
-  readonly data: Record<string, any>;
+  private data: Record<string, any>;
   readonly filePath: string;
 
   constructor(filePath: string) {
@@ -75,6 +75,11 @@ export class FileStore {
 
   set(key: string, val: any) {
     this.data[key] = val;
+  }
+
+  reset() {
+    this.data = {};
+    this.save();
   }
 }
 

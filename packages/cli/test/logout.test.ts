@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { equal, match } from "node:assert";
+import { deepStrictEqual, equal } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
@@ -65,6 +65,8 @@ describe("commands/logout", function () {
 
     const sessionBuf = readFileSync(sessionFilePath);
     const session = JSON.parse(sessionBuf.toString());
+
+    deepStrictEqual(session, {});
 
     await yargs([
       "login",
