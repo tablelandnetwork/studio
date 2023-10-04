@@ -25,9 +25,7 @@ export const handler = async (
     const { chain, providerUrl, apiUrl, store } = argv;
     const api = getApi(new FileStore(store), apiUrl);
 
-    console.log("checking for existing authentication...");
     const user = await api.auth.authenticated.query();
-    console.log("found authentication:", user);
     if (user) {
       logger.log("already logged in, you can use `logout` command to logout");
       return;

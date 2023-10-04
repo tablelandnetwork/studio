@@ -1,6 +1,5 @@
 import { Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
-import { revalidatePath } from "next/cache";
 import { generateNonce, SiweMessage } from "siwe";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
@@ -68,7 +67,6 @@ export function authRouter(store: Store) {
       }),
     logout: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
       await ctx.session.clear(ctx.responseCookies);
-      revalidatePath("/");
     }),
   });
 }
