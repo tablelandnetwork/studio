@@ -16,15 +16,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cleanSchema, generateCreateTableStatement } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { helpers } from "@tableland/sdk";
 import { Schema, schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
-
-const supportedChains = Object.values(helpers.supportedChains);
 
 const formSchema = z.object({
   name: z
@@ -186,7 +183,7 @@ export default function NewTable({ project, team, envs }: Props) {
                           <SelectItem value="no-deploy">
                             Don&apos;t deploy
                           </SelectItem>
-                          {supportedChains.map((chain) => (
+                          {chains().map((chain) => (
                             <SelectItem
                               key={chain.chainName}
                               value={chain.chainName}
