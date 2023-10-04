@@ -33,8 +33,16 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   return api(apiArgs);
 };
 
+export const getProject = function (
+  argv: { store: FileStore; projectId?: string; }
+) {
+  if (typeof argv.projectId === "string") return argv.projectId;
+
+  return argv.store.get<string>("projectId");
+};
+
 export class FileStore {
-  readonly data: Record<string, any>;
+  private data: Record<string, any>;
   readonly filePath: string;
 
   constructor(filePath: string) {
@@ -67,6 +75,11 @@ export class FileStore {
 
   set(key: string, val: any) {
     this.data[key] = val;
+  }
+
+  reset() {
+    this.data = {};
+    this.save();
   }
 }
 
@@ -116,6 +129,18 @@ export function getChainName(
     return helpers.getChainInfo(chain)?.chainName;
   }
   return chain;
+}
+
+export function getChainFromTableName(tableName: string) {
+  const parts = tableName.trim().split("_");
+  if (parts.length < 3) throw new Error("invalid table name");
+
+  const chainId = parseInt(parts[parts.length - 2], 10);
+  if (isNaN(chainId)) {
+    throw new Error("invalid table name");
+  }
+
+  return chainId;
 }
 
 export interface Options {
@@ -207,8 +232,7 @@ export async function getWalletWithProvider({
   if (provider == null) {
     throw new Error("unable to create ETH API provider");
   }
-console.log("provider:", provider);
-console.log("network:", network);
+
   let providerChainId: number | undefined;
   try {
     providerChainId = (await provider.getNetwork()).chainId;

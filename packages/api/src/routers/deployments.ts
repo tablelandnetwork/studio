@@ -48,5 +48,10 @@ export function deploymentsRouter(store: Store) {
       .query(async ({ input }) => {
         return await store.deployments.deploymentsByProjectId(input.projectId);
       }),
+    deploymentsByEnvironmentId: publicProcedure
+      .input(z.object({environmentId: z.string().uuid()}))
+      .query(async ({ input }) => {
+        return await store.deployments.deploymentsByEnvironmentId(input.environmentId);
+      }),
   });
 }

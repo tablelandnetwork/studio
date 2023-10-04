@@ -38,13 +38,13 @@ const config = explorer.search();
 // If a dotenv file (or exported env vars) are provided, these override any config values
 dotenv.config();
 
-// TODO: this is a copy/pasta from tableland cli. Replace these values.
 export interface GlobalOptions {
   apiUrl: string;
   baseUrl: string;
   chain: helpers.ChainName | number;
   privateKey: string;
   providerUrl: string;
+  projectId: string;
   store: string;
 }
 
@@ -94,6 +94,13 @@ const _argv = yargs(hideBin(process.argv))
     default: "",
     description:
       "JSON RPC API provider URL. (e.g., https://eth-rinkeby.alchemyapi.io/v2/123abc123a...)",
+  })
+  .option("projectId", {
+    alias: "pid",
+    type: "string",
+    default: "",
+    description:
+      "Project ID the command is scoped to",
   })
   .option("store", {
     type: "string",

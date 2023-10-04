@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema";
-import { deployments, environments, projectTables } from "../schema";
+import { deployments, environments, projectTables, tables } from "../schema";
 
 export function initDeployments(db: DrizzleD1Database<typeof schema>) {
   return {
@@ -55,6 +55,20 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
         .all();
 
       const mapped = res.map((r) => r.deployments);
+      return mapped;
+    },
+
+    deploymentsByEnvironmentId: async function (environmentId: string) {
+      const res = await db
+        .select()
+        .from(deployments)
+        .innerJoin(tables, eq(deployments.tableId, tables.id))
+        .where(eq(deployments.environmentId, environmentId))
+        .all();
+      const mapped = res.map((r) => ({
+        deployment: r.deployments,
+        table: r.tables,
+      }));
       return mapped;
     },
   };
