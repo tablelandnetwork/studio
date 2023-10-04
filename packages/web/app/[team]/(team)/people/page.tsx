@@ -62,7 +62,7 @@ export default async function People({ params }: { params: { team: string } }) {
   });
 
   return (
-    <div className="mx-auto max-w-2xl p-4">
+    <main className="mx-auto w-full max-w-2xl p-4">
       <div className="flex flex-col space-y-6">
         {peopleAugmented.map((person) => {
           return (
@@ -150,6 +150,6 @@ export default async function People({ params }: { params: { team: string } }) {
           })}
         {teamAuthorization && <NewInvite team={team} />}
       </div>
-    </div>
+    </main>
   );
 }

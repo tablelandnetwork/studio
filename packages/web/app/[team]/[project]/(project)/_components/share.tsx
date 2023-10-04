@@ -55,7 +55,7 @@ export default function Share({
 
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
-      <DialogTrigger className={cn(className)}>
+      <DialogTrigger asChild className={cn(className)}>
         <Button variant="ghost" size="sm">
           <Share2 className="mr-1" />
           Share

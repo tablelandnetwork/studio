@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -14,7 +13,7 @@ import {
 import { authAtom } from "@/store/wallet";
 import { Auth } from "@tableland/studio-api";
 import { useAtom } from "jotai";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAccount, useConnect } from "wagmi";
@@ -139,14 +138,14 @@ export default function Profile() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                    {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
+                {/* <DropdownMenuGroup> */}
+                {/* <DropdownMenuItem> */}
+                {/* <Settings className="mr-2 h-4 w-4" /> */}
+                {/* <span>Settings</span> */}
+                {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
+                {/* </DropdownMenuItem> */}
+                {/* </DropdownMenuGroup> */}
+                {/* <DropdownMenuSeparator /> */}
                 <DropdownMenuItem onClick={onSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign out</span>

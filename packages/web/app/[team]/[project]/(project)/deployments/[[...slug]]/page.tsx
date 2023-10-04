@@ -91,7 +91,7 @@ export default async function Deployments({
               />
             )
           ) : (
-            <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4">
+            <div className="m-auto my-16 flex max-w-xl flex-1 flex-col justify-center space-y-4 p-4">
               <div className="flex items-center space-x-4">
                 <Rocket className="flex-shrink-0" />
                 <h1 className="text-2xl font-medium">Your Deployments.</h1>
@@ -125,7 +125,7 @@ export default async function Deployments({
           )}
         </>
       ) : (
-        <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4">
+        <div className="m-auto my-16 flex max-w-xl flex-1 flex-col justify-center space-y-4">
           <div className="flex items-center space-x-4">
             <Rocket className="flex-shrink-0" />
             <h1 className="text-2xl font-medium">

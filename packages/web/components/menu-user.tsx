@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -14,7 +13,7 @@ import {
 import { logoutAtom } from "@/store/social-login";
 import { schema } from "@tableland/studio-store";
 import { useSetAtom } from "jotai";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
@@ -60,14 +59,14 @@ export default function MenuUser({
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-            {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
+        {/* <DropdownMenuGroup> */}
+        {/* <DropdownMenuItem> */}
+        {/* <Settings className="mr-2 h-4 w-4" /> */}
+        {/* <span>Settings</span> */}
+        {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
+        {/* </DropdownMenuItem> */}
+        {/* </DropdownMenuGroup> */}
+        {/* <DropdownMenuSeparator /> */}
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sign out</span>

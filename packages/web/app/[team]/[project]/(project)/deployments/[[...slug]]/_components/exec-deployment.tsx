@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { chains } from "@/lib/chains";
 import { generateCreateTableStatement } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import {
@@ -38,8 +39,6 @@ import {
   switchNetwork,
   waitForTransaction,
 } from "wagmi/actions";
-
-const supportedChains = Object.values(helpers.supportedChains);
 
 export default function ExecDeployment({
   team,
@@ -208,7 +207,7 @@ export default function ExecDeployment({
               <SelectValue placeholder="Select chain" />
             </SelectTrigger>
             <SelectContent className="max-h-[20rem] overflow-y-auto">
-              {supportedChains.map((chain) => (
+              {chains().map((chain) => (
                 <SelectItem key={chain.chainName} value={`${chain.chainId}`}>
                   {chain.chainName} ({chain.chainId})
                 </SelectItem>
