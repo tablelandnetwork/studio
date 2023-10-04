@@ -1,4 +1,5 @@
 import { AppRouter } from "@tableland/studio-api";
+import { helpers } from "@tableland/sdk";
 import {
   createTRPCProxyClient,
   httpBatchLink,
@@ -43,5 +44,37 @@ const api = function (
 
 type API = ReturnType<typeof api>;
 
-export { api, API, getBaseUrl, getUrl, ClientConfig };
+// TODO: there is currently no concept of an environment for a user
+function studioAliases({
+  environmentId,
+  apiUrl
+}: {
+  environmentId: string,
+  apiUrl?: string
+}): helpers.AliasesNameMap {
+  const studioApi = api({
+    url: apiUrl,
+  });
+  const loadMap = async function (): Promise<void> {
+    const res = await studioApi.deployments.deploymentsByEnvironmentId.query({ environmentId });
 
+    _map = {};
+    res.forEach(function (dep) {
+      _map[dep.table.name] = dep.deployment.tableName;
+    })
+  };
+
+  let _map: helpers.NameMapping;
+  return {
+    read: async function (): Promise<helpers.NameMapping> {
+      if (typeof _map === "undefined") await loadMap();
+
+      return _map;
+    },
+    write: async function () {
+      throw new Error("cannot create project tables via studio sdk aliases");
+    },
+  };
+}
+
+export { api, API, getBaseUrl, getUrl, ClientConfig, studioAliases };
