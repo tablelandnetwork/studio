@@ -16,9 +16,9 @@ export const handler = async (
   try {
     const { chain, providerUrl, apiUrl, store } = argv;
     const api = getApi(new FileStore(store), apiUrl);
-console.log("doing logout...");
+
     await api.auth.logout.mutate();
-console.log("checking logout...");
+
     const user = await api.auth.authenticated.query();
     if (user) {
       throw new Error("logout failed");
