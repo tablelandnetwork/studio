@@ -2,7 +2,7 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, logger } from "../utils.js";
+import { FileStore, getApi, getApiUrl, logger } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -32,8 +32,10 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          const { teamId, store, apiUrl } = argv;
-          const api = getApi(new FileStore(store as string), apiUrl as string);
+          const { teamId, store, apiUrl: apiUrlArg } = argv;
+          const fileStore = new FileStore(store as string);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
+          const api = getApi(fileStore, apiUrl as string);
 
           const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
           const projects = await api.projects.teamProjects.query(query);

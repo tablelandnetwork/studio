@@ -4,6 +4,7 @@ import { type GlobalOptions } from "../cli.js";
 import {
   logger,
   getApi,
+  getApiUrl,
   FileStore,
 } from "../utils.js";
 
@@ -14,9 +15,12 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { chain, providerUrl, apiUrl, store } = argv;
-    const fileStore = new FileStore(store);
-    const api = getApi(fileStore, apiUrl);
+    const { chain, providerUrl, apiUrl: apiUrlArg, store } = argv;
+    const fileStore = new FileStore(store as string);
+    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
+    const api = getApi(fileStore, apiUrl as string);
+
+
 
     await api.auth.logout.mutate();
 

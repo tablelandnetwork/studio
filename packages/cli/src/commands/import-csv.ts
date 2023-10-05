@@ -17,6 +17,7 @@ import {
   normalizePrivateKey,
   toChecksumAddress,
   getApi,
+  getApiUrl,
   getProject,
   FileStore,
 } from "../utils.js";
@@ -30,8 +31,9 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { providerUrl, apiUrl, store, table, file } = argv;
+    const { providerUrl, apiUrl: apiUrlArg, store, table, file } = argv;
     const fileStore = new FileStore(store as string);
+    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
     const api = getApi(fileStore, apiUrl as string);
     const projectId = getProject({ ...argv, store: fileStore });
     
