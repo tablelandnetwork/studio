@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server-http";
 import { Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";

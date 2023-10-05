@@ -1,4 +1,4 @@
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server-http";
 import { schema } from "@tableland/studio-store";
 import { AlertOctagon, HelpCircle, Info, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";

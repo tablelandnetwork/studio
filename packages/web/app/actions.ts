@@ -1,6 +1,6 @@
 "use server";
 
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server-http";
 import { Auth } from "@tableland/studio-api";
 import { schema, Schema } from "@tableland/studio-store";
 

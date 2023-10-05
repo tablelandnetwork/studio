@@ -4,7 +4,7 @@ import { NavPrimary } from "@/components/nav-primary";
 import PrimaryHeaderItem from "@/components/primary-header-item";
 import { Toaster } from "@/components/ui/toaster";
 import WagmiProvider from "@/components/wagmi-provider";
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server-http";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";

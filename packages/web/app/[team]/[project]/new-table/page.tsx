@@ -1,4 +1,4 @@
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server-http";
 import { cache } from "react";
 import NewTableForm from "./_components/new-table-form";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { teamBySlug } from "@/app/actions";
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server-http";
 import { schema } from "@tableland/studio-store";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
