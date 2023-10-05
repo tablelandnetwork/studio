@@ -1,11 +1,15 @@
 "use server";
 
 import { api } from "@/trpc/server-invoker";
-import { Auth } from "@tableland/studio-api";
-import { schema, Schema } from "@tableland/studio-store";
+import { Auth, Session } from "@tableland/studio-api";
+import { Schema, schema } from "@tableland/studio-store";
+import { cookies } from "next/headers";
 
 export async function authenticated() {
-  return await api.auth.authenticated.query();
+  const session = await Session.fromCookies(cookies());
+  return await api.auth.authenticated.query(
+    session.auth ? { userTeamId: session.auth.user.teamId } : undefined,
+  );
 }
 
 export async function nonce() {
@@ -18,7 +22,7 @@ export async function login(
 ): Promise<{ auth?: Auth; error?: string }> {
   try {
     const auth = await api.auth.login.mutate({ message, signature });
-    await api.auth.authenticated.revalidate(undefined);
+    await api.auth.authenticated.revalidate({ userTeamId: auth?.user.teamId });
     return { auth };
   } catch (e: any) {
     return { error: e.message };
@@ -31,7 +35,7 @@ export async function register(
 ): Promise<{ auth?: Auth; error?: string }> {
   try {
     const auth = await api.auth.register.mutate({ username, email });
-    await api.auth.authenticated.revalidate(undefined);
+    await api.auth.authenticated.revalidate({ userTeamId: auth.user.teamId });
     return { auth };
   } catch (e: any) {
     return { error: e.message };
@@ -39,8 +43,11 @@ export async function register(
 }
 
 export async function logout() {
+  const session = await Session.fromCookies(cookies());
   await api.auth.logout.mutate();
-  await api.auth.authenticated.revalidate(undefined);
+  await api.auth.authenticated.revalidate({
+    userTeamId: session.auth?.user.teamId,
+  });
 }
 
 export async function teamNameAvailable(name: string) {
@@ -161,7 +168,10 @@ export async function importTable(
 
 export async function newTeam(name: string, emailInvites: string[]) {
   const team = await api.teams.newTeam.mutate({ name, emailInvites });
-  await api.teams.userTeams.revalidate();
+  const session = await Session.fromCookies(cookies());
+  await api.teams.userTeams.revalidate({
+    userTeamId: session.auth!.user.teamId,
+  });
   return team;
 }
 
