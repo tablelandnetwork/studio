@@ -1,4 +1,4 @@
-"use client"; // Error components must be Client Components
+"use client";
 
 import { useEffect } from "react";
 
@@ -6,7 +6,7 @@ export default function Error({
   error,
   reset,
 }: {
-  error: Error;
+  error: Error & { digest?: string };
   reset: () => void;
 }) {
   useEffect(() => {
@@ -15,9 +15,9 @@ export default function Error({
   }, [error]);
 
   return (
-    <div>
+    <div className="p-4">
       <h2>Something went wrong!</h2>
-      <p>{error.message}</p>
+      <p>{error.digest}</p>
       <button
         onClick={
           // Attempt to recover by trying to re-render the segment
