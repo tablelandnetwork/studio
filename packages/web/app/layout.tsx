@@ -5,10 +5,12 @@ import PrimaryHeaderItem from "@/components/primary-header-item";
 import { Toaster } from "@/components/ui/toaster";
 import WagmiProvider from "@/components/wagmi-provider";
 import { api } from "@/trpc/server-invoker";
+import { Session } from "@tableland/studio-api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { cache } from "react";
 import Footer from "./_components/footer";
@@ -49,12 +51,17 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const session = await Session.fromCookies(cookies());
   var teams: Awaited<ReturnType<typeof api.teams.userTeams.query>> = [];
-  try {
-    teams = await cache(api.teams.userTeams.query)();
-  } catch {
-    // This is fine, we just don't have any teams if the user
-    // is unauthorized or some other error happens.
+  if (session.auth) {
+    try {
+      teams = await cache(api.teams.userTeams.query)({
+        userTeamId: session.auth.user.teamId,
+      });
+    } catch {
+      // This is fine, we just don't have any teams if the user
+      // is unauthorized or some other error happens.
+    }
   }
 
   return (
