@@ -2,6 +2,8 @@ import AddressDisplay from "@/components/address-display";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/server-invoker";
+import { Session } from "@tableland/studio-api";
+import { cookies } from "next/headers";
 import { cache } from "react";
 import Info from "./_components/info";
 import InviteActions from "./_components/invite-actions";
@@ -9,7 +11,10 @@ import NewInvite from "./_components/new-invite";
 import UserActions from "./_components/user-actions";
 
 export default async function People({ params }: { params: { team: string } }) {
-  const auth = await cache(api.auth.authenticated.query)();
+  const session = await Session.fromCookies(cookies());
+  const auth = await cache(api.auth.authenticated.query)(
+    session.auth ? { userTeamId: session.auth.user.teamId } : undefined,
+  );
 
   const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
   const people = await cache(api.teams.usersForTeam.query)({

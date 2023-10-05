@@ -6,9 +6,12 @@ import { protectedProcedure, publicProcedure, router } from "../trpc";
 
 export function authRouter(store: Store) {
   return router({
-    authenticated: publicProcedure.input(z.void()).query(({ ctx }) => {
-      return ctx.session.auth;
-    }),
+    authenticated: publicProcedure
+      // Optional userTeamId input for better cache control during ssr.
+      .input(z.object({ userTeamId: z.string().nonempty() }).or(z.void()))
+      .query(({ ctx }) => {
+        return ctx.session.auth;
+      }),
     nonce: publicProcedure.input(z.void()).mutation(async ({ ctx }) => {
       ctx.session.nonce = generateNonce();
       await ctx.session.persist(ctx.responseCookies);

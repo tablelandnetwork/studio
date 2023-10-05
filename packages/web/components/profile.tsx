@@ -100,9 +100,9 @@ export default function Profile() {
   };
 
   const onSignOut = async () => {
-    router.push("/");
     await logout();
     setAuth(undefined);
+    router.refresh();
   };
 
   return (
