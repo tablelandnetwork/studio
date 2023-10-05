@@ -1,5 +1,6 @@
 "use server";
 
+import { signer } from "@/lib/wallet";
 import { api } from "@/trpc/server-invoker";
 import { Auth, Session } from "@tableland/studio-api";
 import { Schema, schema } from "@tableland/studio-store";
@@ -150,6 +151,8 @@ export async function importTable(
   environmentId: string,
   description: string,
 ) {
+  const nonce = await signer.getTransactionCount();
+  console.log("Transaction count in importTable:", nonce);
   const res = await api.tables.importTable.mutate({
     projectId: project.id,
     chainId,
