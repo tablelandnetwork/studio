@@ -85,6 +85,10 @@ export class FileStore {
     this.data[key] = val;
   }
 
+  remove(key: string) {
+    delete this.data[key];
+  }
+
   reset() {
     this.data = {};
     this.save();
