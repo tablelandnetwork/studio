@@ -1,5 +1,6 @@
 {
   "name": "@tableland/studio-client",
+  "private": true,
   "version": "0.0.0",
   "description": "A tRPC client for Studio",
   "type": "module",
