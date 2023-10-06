@@ -10,8 +10,8 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-const UserActions = dynamic(
-  () => import("@/components/user-actions").then((res) => res.default),
+const Profile = dynamic(
+  () => import("@/components/profile").then((res) => res.default),
   { ssr: false },
 );
 
@@ -59,7 +59,7 @@ export default function InviteHandler({
         {pendingIgnore && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
         Ignore
       </Button>
-      {!auth && <UserActions />}
+      {!auth && <Profile hideAddress dontRedirect />}
       {auth && (
         <Button
           onClick={handleAccept}

@@ -23,7 +23,13 @@ import SignInButton from "./sign-in-button";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 
-export default function Profile() {
+export default function Profile({
+  hideAddress = false,
+  dontRedirect = false,
+}: {
+  hideAddress?: boolean;
+  dontRedirect?: boolean;
+}) {
   const { isConnected, address } = useAccount();
   const {
     connect,
@@ -79,7 +85,9 @@ export default function Profile() {
   const onSignInSuccess = ({ auth }: { auth: Auth | undefined }) => {
     if (auth) {
       setAuth(auth);
-      router.push(`/${auth.personalTeam.slug}`);
+      if (!dontRedirect) {
+        router.push(`/${auth.personalTeam.slug}`);
+      }
     } else {
       setShowRegisterDialog(true);
     }
@@ -92,7 +100,9 @@ export default function Profile() {
   const onRegisterSuccess = (auth: Auth) => {
     setAuth(auth);
     setShowRegisterDialog(false);
-    router.push(`/${auth.personalTeam.slug}`);
+    if (!dontRedirect) {
+      router.push(`/${auth.personalTeam.slug}`);
+    }
   };
 
   const onRegisterCancel = () => {
@@ -110,7 +120,7 @@ export default function Profile() {
       {isConnected && (
         <>
           {/* Wallet content goes here */}
-          {address && <AddressDisplay address={address} copy />}
+          {address && !hideAddress && <AddressDisplay address={address} copy />}
           {auth ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
