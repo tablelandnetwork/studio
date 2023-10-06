@@ -52,8 +52,8 @@ export default async function Invite({
         <CardContent>
           {!session.auth && (
             <p className="text-center">
-              You need to sign in to accept your invitation or you can choose to
-              ignore it now.
+              You need to connect your wallet and then sign in to accept your
+              invitation or you can choose to ignore it now.
             </p>
           )}
           {session.auth && (
