@@ -5,6 +5,7 @@ import { helpers } from "@tableland/sdk";
 import { API, api, ClientConfig } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
+const DEFAULT_API_URL = "https://studio.tableland.xyz";
 
 export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
@@ -47,6 +48,17 @@ export const getTeam = function (
   if (typeof argv.teamId === "string") return argv.teamId;
 
   return argv.store.get<string>("teamId");
+};
+
+export const getApiUrl = function (
+  argv: { store: FileStore; apiUrl?: string; }
+) {
+  if (typeof argv.apiUrl === "string") return argv.apiUrl;
+
+  const storeApiUrl = argv.store.get<string>("apiUrl");
+  if (storeApiUrl) return storeApiUrl;
+
+  return DEFAULT_API_URL;
 };
 
 export class FileStore {
