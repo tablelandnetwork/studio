@@ -11,6 +11,7 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
 
   if (fileStore) {
+    // read response headers and save cookie in session json file
     apiArgs.fetch = function (res) {
       const setCookie = res.headers.get("set-cookie");
 
@@ -20,6 +21,7 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
       }
       return res;
     };
+    // set request cookie header if session json file has cookie
     apiArgs.headers = function () {
       const cookie = fileStore.get(sessionKey);
 
@@ -145,6 +147,7 @@ export const getChains = function (): typeof helpers.supportedChains {
     ),
   ) as Record<helpers.ChainName, helpers.ChainInfo>;
 };
+
 export function getChainName(
   chain: number | helpers.ChainName,
 ): helpers.ChainName {
@@ -155,16 +158,31 @@ export function getChainName(
   return chain;
 }
 
-export function getChainFromTableName(tableName: string) {
+export function getChainIdFromTableName(tableName: string) {
+  return getIdFromTableName(tableName, 2);
+}
+
+export function getTableIdFromTableName(tableName: string) {
+  return getIdFromTableName(tableName, 1);
+}
+
+function getIdFromTableName(tableName: string, revIndx: number) {
   const parts = tableName.trim().split("_");
   if (parts.length < 3) throw new Error("invalid table name");
 
-  const chainId = parseInt(parts[parts.length - 2], 10);
-  if (isNaN(chainId)) {
+  const id = parseInt(parts[parts.length - revIndx], 10);
+  if (isNaN(id)) {
     throw new Error("invalid table name");
   }
 
-  return chainId;
+  return id;
+}
+
+export function getPrefixFromTableName(tableName: string) {
+  const parts = tableName.trim().split("_");
+  if (parts.length < 3) throw new Error("invalid table name");
+
+  return parts.slice(0, -2).join("_");
 }
 
 export interface Options {
