@@ -82,6 +82,7 @@ export async function newProject(
     description,
   });
   await api.projects.teamProjects.revalidate({ teamId });
+  await api.projects.nameAvailable.revalidate({ teamId, name });
   return project;
 }
 
@@ -114,6 +115,7 @@ export async function newTable(
     description,
   });
   await api.tables.projectTables.revalidate({ projectId: project.id });
+  await api.tables.nameAvailable.revalidate({ projectId: project.id, name });
   return table;
 }
 
@@ -175,6 +177,7 @@ export async function newTeam(name: string, emailInvites: string[]) {
   await api.teams.userTeams.revalidate({
     userTeamId: session.auth!.user.teamId,
   });
+  await api.teams.nameAvailable.revalidate({ name });
   return team;
 }
 
