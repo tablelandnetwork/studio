@@ -37,7 +37,7 @@ export default function Info({
   ...props
 }: Props) {
   function content() {
-    if (membership && !invite) {
+    if (userMembership && membership && !invite) {
       return (
         <div className="flex items-center space-x-2">
           <Cake />
@@ -79,6 +79,18 @@ export default function Info({
                 {timeAgo.format(new Date(membership.joinedAt))}
               </p>
             </div>
+          </div>
+        </div>
+      );
+    } else if (membership) {
+      return (
+        <div className="flex items-center space-x-2">
+          <Merge />
+          <div>
+            <p className="text-xs text-muted-foreground">Joined</p>
+            <p className="text-sm">
+              {timeAgo.format(new Date(membership.joinedAt))}
+            </p>
           </div>
         </div>
       );
