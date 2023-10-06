@@ -7,22 +7,26 @@ type Props = {
   placeholder: string;
   tags: string[];
   setTags: (tags: string[]) => void;
+  pendingValue: string;
+  setPendingValue: (value: string) => void;
 };
 
 const TagInput = forwardRef<HTMLDivElement, Props>(
-  ({ id, placeholder, tags, setTags }: Props, ref) => {
-    const [input, setInput] = React.useState("");
+  (
+    { id, placeholder, tags, setTags, pendingValue, setPendingValue }: Props,
+    ref,
+  ) => {
     // const [tags, setTags] = React.useState<string[]>([]);
     const [isKeyReleased, setIsKeyReleased] = React.useState(false);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = e.target;
-      setInput(value);
+      setPendingValue(value);
     };
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       const { key } = e;
-      const trimmedInput = input.trim();
+      const trimmedInput = pendingValue.trim();
       if (
         (key === "," || key === "Enter") &&
         trimmedInput.length &&
@@ -30,12 +34,12 @@ const TagInput = forwardRef<HTMLDivElement, Props>(
       ) {
         e.preventDefault();
         setTags([...tags, trimmedInput]);
-        setInput("");
+        setPendingValue("");
       }
 
       if (
         key === "Backspace" &&
-        !input.length &&
+        !pendingValue.length &&
         tags.length &&
         isKeyReleased
       ) {
@@ -44,7 +48,7 @@ const TagInput = forwardRef<HTMLDivElement, Props>(
         e.preventDefault();
         setTags(tagsCopy);
         if (poppedTag) {
-          setInput(poppedTag);
+          setPendingValue(poppedTag);
         }
       }
       setIsKeyReleased(false);
@@ -80,7 +84,7 @@ const TagInput = forwardRef<HTMLDivElement, Props>(
         ))}
         <Input
           className="m-0 w-full min-w-fit flex-1 border-none outline-none focus-visible:outline-none focus-visible:ring-0"
-          value={input}
+          value={pendingValue}
           placeholder={placeholder}
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
