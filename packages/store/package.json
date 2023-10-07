@@ -1,5 +1,6 @@
 {
   "name": "@tableland/studio-store",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "type": "module",

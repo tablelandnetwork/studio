@@ -29,6 +29,7 @@ export default function NewTeamForm() {
   const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
     undefined,
   );
+  const [pendingEmail, setPendingEmail] = useState<string>("");
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -41,7 +42,9 @@ export default function NewTeamForm() {
   });
 
   function onSubmit(values: z.infer<typeof schema>) {
-    console.log(values);
+    if (!!pendingEmail) {
+      values.emailInvites = [...values.emailInvites, pendingEmail];
+    }
     startTransition(async () => {
       const res = await newTeam(values.name, values.emailInvites);
       router.push(`/${res.slug}`);
@@ -89,6 +92,8 @@ export default function NewTeamForm() {
                     form.setValue("emailInvites", tags);
                     // form.trigger("emailInvites");
                   }}
+                  pendingValue={pendingEmail}
+                  setPendingValue={setPendingEmail}
                   {...field}
                 />
               </FormControl>

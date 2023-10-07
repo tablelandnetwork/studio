@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { getAccounts } from "@tableland/local";
@@ -7,15 +8,18 @@ import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/login.js";
+import * as modLogout from "../src/commands/logout.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
+  TEST_API_PORT,
   TEST_REGISTRY_PORT
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const sessionFilePath = path.join(_dirname, ".studioclisession.json");
 const accounts = getAccounts();
 const defaultArgs = [
   "--store",
@@ -24,8 +28,6 @@ const defaultArgs = [
   "local-tableland",
   "--providerUrl",
   `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
-  "--apiUrl",
-  TEST_API_BASE_URL
 ];
 
 describe("commands/login", function () {
@@ -44,6 +46,8 @@ describe("commands/login", function () {
     await yargs([
       "login",
       ...defaultArgs,
+      "--apiUrl",
+      TEST_API_BASE_URL,
       "--privateKey",
       accounts[9].privateKey.slice(2)
     ]).command<GlobalOptions>(mod).parse();
@@ -61,6 +65,8 @@ describe("commands/login", function () {
     await yargs([
       "login",
       ...defaultArgs,
+      "--apiUrl",
+      TEST_API_BASE_URL,
       "--privateKey",
       accounts[10].privateKey.slice(2)
     ]).command<GlobalOptions>(mod).parse();
@@ -71,5 +77,31 @@ describe("commands/login", function () {
       res,
       `You are logged in with address: ${accounts[10].address}`
     );
+  });
+
+  test("login sets the default api url", async function () {
+    await yargs([
+      "logout",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2)
+    ]).command<GlobalOptions>(modLogout).parse();
+
+    // Use the IP instead of `localhost` so we can test the difference
+    const customApi = `http://127.0.0.1:${TEST_API_PORT}`;
+    await yargs([
+      "login",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+      "--apiUrl",
+      customApi
+    ]).command<GlobalOptions>(mod).parse();
+
+
+    const sessionBuf = readFileSync(sessionFilePath);
+    const session = JSON.parse(sessionBuf.toString());
+
+    equal(session.apiUrl, customApi);
   });
 });

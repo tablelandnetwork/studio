@@ -2,7 +2,7 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, logger, normalizePrivateKey } from "../utils.js";
+import { FileStore, getApi, getApiUrl, logger, normalizePrivateKey } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -30,8 +30,10 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          const { identifier, store, apiUrl } = argv;
-          const api = getApi(new FileStore(store as string), apiUrl as string);
+          const { identifier, store, apiUrl: apiUrlArg } = argv;
+          const fileStore = new FileStore(store as string);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
+          const api = getApi(fileStore, apiUrl as string);
 
           let query;
           if (typeof identifier === "string" && identifier.trim() !== "") {

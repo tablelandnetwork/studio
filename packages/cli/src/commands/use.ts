@@ -30,6 +30,10 @@ export const handler = async (
         fileStore.set("projectId", id);
         fileStore.save();
         break;
+      case "api":
+        fileStore.set("apiUrl", id);
+        fileStore.save();
+        break;
       default:
         throw new Error(`cannot set context for: ${context}`)
     }

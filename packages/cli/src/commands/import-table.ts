@@ -12,17 +12,20 @@ import { Database, helpers } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
 import {
   logger,
-  getChainFromTableName,
+  getChainIdFromTableName,
+  getTableIdFromTableName,
+  getPrefixFromTableName,
   getWalletWithProvider,
   normalizePrivateKey,
   toChecksumAddress,
   getApi,
+  getApiUrl,
   getProject,
   FileStore,
 } from "../utils.js";
 
-export const command = "import <table> <file>";
-export const desc = "write the content of a csv into an existing table";
+export const command = "import-table <table> <project> <description> [name]";
+export const desc = "import an existing tableland table into a project with description and optionally with a new name";
 
 const maxStatementLength = 35000;
 
@@ -30,11 +33,25 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { providerUrl, apiUrl, store, table, file } = argv;
+    const {
+      providerUrl,
+      apiUrl: apiUrlArg,
+      store,
+      table: uuTableName,
+      project,
+      name,
+      description,
+    } = argv;
+
+    if (typeof description !== "string" || description.trim() === "") {
+      throw new Error(`table description is required`);
+    }
+
     const fileStore = new FileStore(store as string);
+    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
     const api = getApi(fileStore, apiUrl as string);
     const projectId = getProject({ ...argv, store: fileStore });
-    
+
     // lookup environmentId by projectId
     const environments = await api.environments.projectEnvironments.query({ projectId });
     const environmentId = environments.find(env => env.name === "default")?.id;
@@ -42,64 +59,28 @@ export const handler = async (
       throw new Error("could not get default environment");
     }
 
-    const aliases = studioAliases({ environmentId, apiUrl });
-    const uuTableName = (await aliases.read())[table as string];
     if (typeof uuTableName !== "string") {
-      throw new Error("could not find table in project");
-    }
-// TODO: need to reverse lookup uuTableName from table and projectId so
-    //       that the wallet can be connected to the right provider.
-    const chain = getChainFromTableName(uuTableName);
-    const privateKey = normalizePrivateKey(argv.privateKey);
-    const signer = await getWalletWithProvider({
-      privateKey,
-      chain,
-      providerUrl,
-    });
-
-    const db = new Database({
-      signer,
-      aliases,
-    });
-
-    const fileString = readFileSync(file as string).toString();
-    const dataObject = await parseCsvFile(fileString);
-
-    // TODO: parse csv and enforce the existence of the right headers
-    const headers = dataObject.slice(0, 1);
-    const rows = dataObject.slice(1);
-
-    const stmt = `INSERT INTO ${table}
-      (${headers.join(",")})
-      VALUES ${rows.map(function (row) {
-        return `(${row.join(",")})`
-      }).join(",")}
-    `;
-
-    const statementCount = Math.ceil(stmt.length / maxStatementLength);
-    const doImport = await confirmImport({
-      statementLength: stmt.length,
-      rowCount: rows.length,
-      wallet: signer.address,
-      statementCount,
-      table,
-    });
-
-    if (!doImport) return logger.log("aborting");
-    if (statementCount !== 1) {
-      throw new Error("multi statement import not implemented yet");
+      throw new Error("must provide full tableland table name");
     }
 
-    // TODO: split the rows into a set of sql statements that meet the
-    //       protocol size requirements and potentially execute the
-    //       statement(s) with database batch
-    const result = await db.prepare(stmt).all();
+    const chainId = getChainIdFromTableName(uuTableName);
+    const tableId = getTableIdFromTableName(uuTableName).toString();
+    const prefix = (name as string) || getPrefixFromTableName(uuTableName);
+
+    await api.tables.importTable.mutate({
+      chainId,
+      tableId,
+      projectId,
+      name: prefix,
+      environmentId,
+      description,
+    });
 
     logger.log(
-`successfully inserted ${rows.length} row${rows.length === 1 ? "" : "s"} into ${table}
-  transaction receipt: ${chalk.gray.bold(JSON.stringify(result.meta?.txn, null, 4))}
-  project id: ${projectId}
-  environment id: ${environmentId}`
+`successfully imported ${uuTableName}
+  projectId: ${projectId}
+  name: ${name}
+  description: ${description}`
     );
   } catch (err: any) {
     logger.error(err);

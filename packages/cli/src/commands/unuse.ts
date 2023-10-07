@@ -26,6 +26,10 @@ export const handler = async (
         fileStore.remove("projectId");
         fileStore.save();
         break;
+      case "api":
+        fileStore.remove("apiUrl");
+        fileStore.save();
+        break;
       default:
         throw new Error(`cannot remove context for: ${context}`)
     }

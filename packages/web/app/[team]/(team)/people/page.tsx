@@ -11,10 +11,7 @@ import NewInvite from "./_components/new-invite";
 import UserActions from "./_components/user-actions";
 
 export default async function People({ params }: { params: { team: string } }) {
-  const session = await Session.fromCookies(cookies());
-  const auth = await cache(api.auth.authenticated.query)(
-    session.auth ? { userTeamId: session.auth.user.teamId } : undefined,
-  );
+  const { auth } = await Session.fromCookies(cookies());
 
   const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
   const people = await cache(api.teams.usersForTeam.query)({
@@ -29,14 +26,14 @@ export default async function People({ params }: { params: { team: string } }) {
         ReturnType<typeof api.invites.invitesForTeam.query>
       >["teamAuthorization"]
     | undefined;
-  try {
-    const { invites: invitesRes, teamAuthorization: teamAuthorizationRes } =
-      await cache(api.invites.invitesForTeam.query)({
-        teamId: team.id,
-      });
-    invites = invitesRes;
-    teamAuthorization = teamAuthorizationRes;
-  } catch {}
+  if (auth) {
+    try {
+      const { invites: invitesRes, teamAuthorization: teamAuthorizationRes } =
+        await cache(api.invites.invitesForTeam.query)({ teamId: team.id });
+      invites = invitesRes;
+      teamAuthorization = teamAuthorizationRes;
+    } catch {}
+  }
 
   const binnedInvites = invites.reduce<{
     pending: (typeof invites)[number][];

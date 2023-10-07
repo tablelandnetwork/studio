@@ -12,6 +12,7 @@ import {
   normalizePrivateKey,
   toChecksumAddress,
   getApi,
+  getApiUrl,
   FileStore,
 } from "../utils.js";
 
@@ -22,8 +23,10 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { chain, providerUrl, apiUrl, store } = argv;
-    const api = getApi(new FileStore(store), apiUrl);
+    const { chain, providerUrl, apiUrl: apiUrlArg, store } = argv;
+    const fileStore = new FileStore(store as string);
+    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
+    const api = getApi(fileStore, apiUrl as string);
 
     const user = await api.auth.authenticated.query();
     if (user) {
@@ -58,6 +61,11 @@ export const handler = async (
     if (typeof res === "undefined") {
       throw new Error(`cannot login with an unregistered address: ${wallet.address}`);
     }
+
+    // When a user logs in we want to make sure they are using same api
+    // url going forward, unless they explicitly use a different one
+    fileStore.set("apiUrl", apiUrl);
+    fileStore.save();
 
     logger.log(`You are logged in with address: ${wallet.address}`);
   } catch (err: any) {

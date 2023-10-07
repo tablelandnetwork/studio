@@ -5,6 +5,7 @@ import { sealData } from "iron-session";
 export function createSendInvite(
   store: Store,
   dataSealPass: string,
+  inviteImageLink: string,
   createInviteLink: (seal: string) => string,
   mailApi: MailApi,
 ) {
@@ -28,6 +29,7 @@ export function createSendInvite(
 
     return await mailApi.sendInvite(
       invite.email,
+      inviteImageLink,
       inviterTeam.name,
       team.name,
       link,
