@@ -1,7 +1,7 @@
 "use server";
 
+import { getBaseUrl } from "@/lib/base-url";
 import { AppRouter } from "@tableland/studio-api";
-import { getUrl } from "@tableland/studio-client";
 import { loggerLink } from "@trpc/client";
 import { experimental_nextHttpLink } from "@trpc/next/app-dir/links/nextHttp";
 import { experimental_createTRPCNextAppDirServer } from "@trpc/next/app-dir/server";
@@ -18,7 +18,7 @@ export const api = experimental_createTRPCNextAppDirServer<AppRouter>({
         }),
         experimental_nextHttpLink({
           batch: true,
-          url: getUrl(),
+          url: getBaseUrl() + "/api/trpc",
           headers() {
             return {
               cookie: cookies().toString(),

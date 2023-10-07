@@ -1,31 +1,22 @@
-import { readFileSync } from "fs";
-import { join } from "path";
-import { Writable } from "stream";
-import { createInterface } from "readline";
-import type yargs from "yargs";
-import type { Arguments, CommandBuilder } from "yargs";
-import { parse } from "csv-parse";
 import chalk from "chalk";
-import { Auth } from "@tableland/studio-api";
-import { studioAliases } from "@tableland/studio-client";
-import { Database, helpers } from "@tableland/sdk";
+import { parse } from "csv-parse";
+import { createInterface } from "readline";
+import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
-  logger,
-  getChainIdFromTableName,
-  getTableIdFromTableName,
-  getPrefixFromTableName,
-  getWalletWithProvider,
-  normalizePrivateKey,
-  toChecksumAddress,
+  FileStore,
   getApi,
   getApiUrl,
+  getChainIdFromTableName,
+  getPrefixFromTableName,
   getProject,
-  FileStore,
+  getTableIdFromTableName,
+  logger,
 } from "../utils.js";
 
 export const command = "import-table <table> <project> <description> [name]";
-export const desc = "import an existing tableland table into a project with description and optionally with a new name";
+export const desc =
+  "import an existing tableland table into a project with description and optionally with a new name";
 
 const maxStatementLength = 35000;
 
@@ -48,13 +39,16 @@ export const handler = async (
     }
 
     const fileStore = new FileStore(store as string);
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
-    const api = getApi(fileStore, apiUrl as string);
+    const apiBaseUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+    const { api } = getApi(fileStore, apiBaseUrl);
     const projectId = getProject({ ...argv, store: fileStore });
 
     // lookup environmentId by projectId
-    const environments = await api.environments.projectEnvironments.query({ projectId });
-    const environmentId = environments.find(env => env.name === "default")?.id;
+    const environments = await api.environments.projectEnvironments.query({
+      projectId,
+    });
+    const environmentId = environments.find((env) => env.name === "default")
+      ?.id;
     if (typeof environmentId !== "string") {
       throw new Error("could not get default environment");
     }
@@ -77,10 +71,10 @@ export const handler = async (
     });
 
     logger.log(
-`successfully imported ${uuTableName}
+      `successfully imported ${uuTableName}
   projectId: ${projectId}
   name: ${name}
-  description: ${description}`
+  description: ${description}`,
     );
   } catch (err: any) {
     logger.error(err);
@@ -88,24 +82,24 @@ export const handler = async (
 };
 
 const parseCsvFile = async function (
-  file: string
+  file: string,
 ): Promise<Array<Array<string>>> {
   return new Promise(function (resolve, reject) {
     const parser = parse();
     const rows: any[] = [];
 
-    parser.on('readable', function () {
+    parser.on("readable", function () {
       let row;
       while ((row = parser.read()) !== null) {
         rows.push(row);
       }
     });
 
-    parser.on('error', function(err){
+    parser.on("error", function (err) {
       reject(err);
     });
 
-    parser.on('end', function(){
+    parser.on("end", function () {
       resolve(rows);
     });
 
@@ -131,15 +125,22 @@ async function confirmImport(info: {
       output: process.stdout,
     });
 
-
     logger.log(
-      `You are about to use address: ${chalk.yellow(info.wallet)} to insert ${chalk.yellow(info.rowCount)} row${info.rowCount === 1 ? "" : "s"} into table ${chalk.yellow(info.table)}`
+      `You are about to use address: ${chalk.yellow(
+        info.wallet,
+      )} to insert ${chalk.yellow(info.rowCount)} row${
+        info.rowCount === 1 ? "" : "s"
+      } into table ${chalk.yellow(info.table)}`,
     );
     logger.log(
-      `This can be done with a total of ${chalk.yellow(info.statementCount)} statment${info.statementCount === 1 ? "" : "s"}`
+      `This can be done with a total of ${chalk.yellow(
+        info.statementCount,
+      )} statment${info.statementCount === 1 ? "" : "s"}`,
     );
     logger.log(
-      `The total size of the statment${info.statementCount === 1 ? "" : "s"} is: ${chalk.yellow(info.statementLength)}`
+      `The total size of the statment${
+        info.statementCount === 1 ? "" : "s"
+      } is: ${chalk.yellow(info.statementLength)}`,
     );
     rl.question(
       `Do you want to continue? (${chalk.bold("y/n")}): `,
@@ -152,7 +153,7 @@ async function confirmImport(info: {
         }
 
         resolve(false);
-      }
+      },
     );
   });
 }

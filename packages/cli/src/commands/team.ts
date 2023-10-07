@@ -2,7 +2,13 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, logger, normalizePrivateKey } from "../utils.js";
+import {
+  FileStore,
+  getApi,
+  getApiUrl,
+  logger,
+  normalizePrivateKey,
+} from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -32,8 +38,11 @@ export const builder = function (args: Yargs) {
         try {
           const { identifier, store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
-          const api = getApi(fileStore, apiUrl as string);
+          const apiBaseUrl = getApiUrl({
+            apiUrl: apiUrlArg as string,
+            store: fileStore,
+          });
+          const { api } = getApi(fileStore, apiBaseUrl);
 
           let query;
           if (typeof identifier === "string" && identifier.trim() !== "") {
@@ -78,7 +87,7 @@ export const builder = function (args: Yargs) {
         console.log("trying to create team...");
         const { name, personalTeamId, invites, store } = argv;
 
-        const api = getApi(new FileStore(store));
+        const { api } = getApi(new FileStore(store));
         const privateKey = normalizePrivateKey(argv.privateKey);
 
         if (typeof name !== "string") throw new Error("must provide team name");
@@ -114,7 +123,7 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         const { team, user, privateKey, providerUrl, store } = argv;
-        const api = getApi(new FileStore(store));
+        const { api } = getApi(new FileStore(store));
       },
     );
 };

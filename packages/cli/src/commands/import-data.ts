@@ -1,25 +1,20 @@
-import { readFileSync } from "fs";
-import { join } from "path";
-import { Writable } from "stream";
-import { createInterface } from "readline";
-import type yargs from "yargs";
-import type { Arguments, CommandBuilder } from "yargs";
-import { parse } from "csv-parse";
-import chalk from "chalk";
-import { Auth } from "@tableland/studio-api";
+import { Database } from "@tableland/sdk";
 import { studioAliases } from "@tableland/studio-client";
-import { Database, helpers } from "@tableland/sdk";
+import chalk from "chalk";
+import { parse } from "csv-parse";
+import { readFileSync } from "fs";
+import { createInterface } from "readline";
+import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
-  logger,
-  getChainIdFromTableName,
-  getWalletWithProvider,
-  normalizePrivateKey,
-  toChecksumAddress,
+  FileStore,
   getApi,
   getApiUrl,
+  getChainIdFromTableName,
   getProject,
-  FileStore,
+  getWalletWithProvider,
+  logger,
+  normalizePrivateKey,
 } from "../utils.js";
 
 export const command = "import-data <table> <file>";
@@ -33,23 +28,26 @@ export const handler = async (
   try {
     const { providerUrl, apiUrl: apiUrlArg, store, table, file } = argv;
     const fileStore = new FileStore(store as string);
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
-    const api = getApi(fileStore, apiUrl as string);
+    const apiBaseUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+    const { api } = getApi(fileStore, apiBaseUrl as string);
     const projectId = getProject({ ...argv, store: fileStore });
-    
+
     // lookup environmentId by projectId
-    const environments = await api.environments.projectEnvironments.query({ projectId });
-    const environmentId = environments.find(env => env.name === "default")?.id;
+    const environments = await api.environments.projectEnvironments.query({
+      projectId,
+    });
+    const environmentId = environments.find((env) => env.name === "default")
+      ?.id;
     if (typeof environmentId !== "string") {
       throw new Error("could not get default environment");
     }
 
-    const aliases = studioAliases({ environmentId, apiUrl });
+    const aliases = studioAliases({ environmentId, apiBaseUrl });
     const uuTableName = (await aliases.read())[table as string];
     if (typeof uuTableName !== "string") {
       throw new Error("could not find table in project");
     }
-// TODO: need to reverse lookup uuTableName from table and projectId so
+    // TODO: need to reverse lookup uuTableName from table and projectId so
     //       that the wallet can be connected to the right provider.
     const chain = getChainIdFromTableName(uuTableName);
     const privateKey = normalizePrivateKey(argv.privateKey);
@@ -73,9 +71,11 @@ export const handler = async (
 
     const stmt = `INSERT INTO ${table}
       (${headers.join(",")})
-      VALUES ${rows.map(function (row) {
-        return `(${row.join(",")})`
-      }).join(",")}
+      VALUES ${rows
+        .map(function (row) {
+          return `(${row.join(",")})`;
+        })
+        .join(",")}
     `;
 
     const statementCount = Math.ceil(stmt.length / maxStatementLength);
@@ -98,10 +98,14 @@ export const handler = async (
     const result = await db.prepare(stmt).all();
 
     logger.log(
-`successfully inserted ${rows.length} row${rows.length === 1 ? "" : "s"} into ${table}
-  transaction receipt: ${chalk.gray.bold(JSON.stringify(result.meta?.txn, null, 4))}
+      `successfully inserted ${rows.length} row${
+        rows.length === 1 ? "" : "s"
+      } into ${table}
+  transaction receipt: ${chalk.gray.bold(
+    JSON.stringify(result.meta?.txn, null, 4),
+  )}
   project id: ${projectId}
-  environment id: ${environmentId}`
+  environment id: ${environmentId}`,
     );
   } catch (err: any) {
     logger.error(err);
@@ -109,24 +113,24 @@ export const handler = async (
 };
 
 const parseCsvFile = async function (
-  file: string
+  file: string,
 ): Promise<Array<Array<string>>> {
   return new Promise(function (resolve, reject) {
     const parser = parse();
     const rows: any[] = [];
 
-    parser.on('readable', function () {
+    parser.on("readable", function () {
       let row;
       while ((row = parser.read()) !== null) {
         rows.push(row);
       }
     });
 
-    parser.on('error', function(err){
+    parser.on("error", function (err) {
       reject(err);
     });
 
-    parser.on('end', function(){
+    parser.on("end", function () {
       resolve(rows);
     });
 
@@ -152,15 +156,22 @@ async function confirmImport(info: {
       output: process.stdout,
     });
 
-
     logger.log(
-      `You are about to use address: ${chalk.yellow(info.wallet)} to insert ${chalk.yellow(info.rowCount)} row${info.rowCount === 1 ? "" : "s"} into table ${chalk.yellow(info.table)}`
+      `You are about to use address: ${chalk.yellow(
+        info.wallet,
+      )} to insert ${chalk.yellow(info.rowCount)} row${
+        info.rowCount === 1 ? "" : "s"
+      } into table ${chalk.yellow(info.table)}`,
     );
     logger.log(
-      `This can be done with a total of ${chalk.yellow(info.statementCount)} statment${info.statementCount === 1 ? "" : "s"}`
+      `This can be done with a total of ${chalk.yellow(
+        info.statementCount,
+      )} statment${info.statementCount === 1 ? "" : "s"}`,
     );
     logger.log(
-      `The total size of the statment${info.statementCount === 1 ? "" : "s"} is: ${chalk.yellow(info.statementLength)}`
+      `The total size of the statment${
+        info.statementCount === 1 ? "" : "s"
+      } is: ${chalk.yellow(info.statementLength)}`,
     );
     rl.question(
       `Do you want to continue? (${chalk.bold("y/n")}): `,
@@ -173,7 +184,7 @@ async function confirmImport(info: {
         }
 
         resolve(false);
-      }
+      },
     );
   });
 }

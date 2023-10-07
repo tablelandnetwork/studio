@@ -1,11 +1,10 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { helpers } from "@tableland/sdk";
+import { API, ClientConfig, api } from "@tableland/studio-client";
 import { Wallet, getDefaultProvider, providers } from "ethers";
 import createKeccakHash from "keccak";
-import { helpers } from "@tableland/sdk";
-import { API, api, ClientConfig } from "@tableland/studio-client";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const sessionKey = "session-cookie";
-const DEFAULT_API_URL = "https://studio.tableland.xyz";
 
 export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
@@ -36,31 +35,31 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   return api(apiArgs);
 };
 
-export const getProject = function (
-  argv: { store: FileStore; projectId?: string; }
-) {
+export const getProject = function (argv: {
+  store: FileStore;
+  projectId?: string;
+}) {
   if (typeof argv.projectId === "string") return argv.projectId;
 
   return argv.store.get<string>("projectId");
 };
 
-export const getTeam = function (
-  argv: { store: FileStore; teamId?: string; }
-) {
+export const getTeam = function (argv: { store: FileStore; teamId?: string }) {
   if (typeof argv.teamId === "string") return argv.teamId;
 
   return argv.store.get<string>("teamId");
 };
 
-export const getApiUrl = function (
-  argv: { store: FileStore; apiUrl?: string; }
-) {
+export const getApiUrl = function (argv: {
+  store: FileStore;
+  apiUrl?: string;
+}) {
   if (typeof argv.apiUrl === "string") return argv.apiUrl;
 
   const storeApiUrl = argv.store.get<string>("apiUrl");
   if (storeApiUrl) return storeApiUrl;
 
-  return DEFAULT_API_URL;
+  return undefined;
 };
 
 export class FileStore {
@@ -76,7 +75,7 @@ export class FileStore {
     try {
       const fileBuf = readFileSync(filePath);
       return JSON.parse(fileBuf.toString());
-    }  catch (err: any) {
+    } catch (err: any) {
       // console.log("findOrCreate", err);
 
       // TODO: figure out when to throw

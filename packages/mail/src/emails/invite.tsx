@@ -1,5 +1,4 @@
 import * as reactEmailComponents from "@react-email/components";
-import { getBaseUrl } from "@tableland/studio-client";
 import * as React from "react";
 
 const {
@@ -23,8 +22,6 @@ export interface InviteProps {
   link: string;
 }
 
-const baseUrl = getBaseUrl();
-
 export const InviteUserEmail = ({
   inviterUsername = "user1",
   teamName = "Team",
@@ -41,7 +38,7 @@ export const InviteUserEmail = ({
           <Container className="mx-auto my-[40px] w-[465px] rounded border border-solid border-[#eaeaea] p-[20px]">
             <Section className="mt-[32px]">
               <Img
-                src={`${baseUrl}/mesa.jpg`}
+                src={`https://google.com/mesa.jpg`}
                 width="55"
                 height="31"
                 alt="Tableland Studio"

@@ -1,5 +1,5 @@
+import { getBaseUrl } from "@/lib/base-url";
 import { AppRouter } from "@tableland/studio-api";
-import { getUrl } from "@tableland/studio-client/src/util";
 import { createTRPCProxyClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { experimental_createTRPCNextAppDirClient } from "@trpc/next/app-dir/client";
 import { experimental_nextHttpLink } from "@trpc/next/app-dir/links/nextHttp";
@@ -15,7 +15,7 @@ export const api = experimental_createTRPCNextAppDirClient<AppRouter>({
         }),
         experimental_nextHttpLink({
           batch: true,
-          url: getUrl(),
+          url: getBaseUrl() + "/api/trpc",
           headers() {
             return {
               "x-trpc-source": "client",
@@ -31,7 +31,7 @@ export const proxyClientApi = createTRPCProxyClient<AppRouter>({
   transformer: superjson,
   links: [
     httpBatchLink({
-      url: getUrl(),
+      url: getBaseUrl() + "/api/trpc",
     }),
   ],
 });
