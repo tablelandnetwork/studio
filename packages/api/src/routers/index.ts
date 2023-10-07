@@ -13,6 +13,7 @@ import { teamsRouter } from "./teams";
 export function appRouter(
   store: Store,
   mailApiKey: string,
+  inviteImageLink: string,
   createInviteLink: (seal: string) => string,
   dataSealPass: string,
 ) {
@@ -20,6 +21,7 @@ export function appRouter(
   const sendInvite = createSendInvite(
     store,
     dataSealPass,
+    inviteImageLink,
     createInviteLink,
     mailApi,
   );
