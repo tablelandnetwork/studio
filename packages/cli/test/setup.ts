@@ -2,21 +2,21 @@
 //       we should probably have a way to configure the mailer to run in "dev"/"test"
 //       mode.  in this mode the email body would be logged to the terminal in a way that
 //       can be spied on instead of sending an actual email.
+import { NonceManager } from "@ethersproject/experimental";
+import { LocalTableland } from "@tableland/local";
+import { Database, Validator, helpers } from "@tableland/sdk";
+import { appRouter, createContext } from "@tableland/studio-api";
+import { init } from "@tableland/studio-store";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { createHash } from "crypto";
 import "dotenv/config";
+import { Wallet, getDefaultProvider } from "ethers";
 import fs from "fs";
-import { readFile, readdir, stat } from "fs/promises";
+import { readFile } from "fs/promises";
+import http from "http";
+import { after, before } from "mocha";
 import path from "path";
 import { fileURLToPath } from "url";
-import http from "http";
-import { createHash } from "crypto";
-import { after, before } from "mocha";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { AppRouter, appRouter, createContext } from "@tableland/studio-api";
-import { init } from "@tableland/studio-store";
-import { Database, Validator, helpers } from "@tableland/sdk";
-import { LocalTableland } from "@tableland/local";
-import { NonceManager } from "@ethersproject/experimental";
-import { Wallet, getDefaultProvider } from "ethers";
 import {
   TEST_API_BASE_URL,
   TEST_API_PORT,
@@ -65,24 +65,29 @@ after(async function () {
   await lt.shutdown();
 });
 
-
 // startup helpers
 async function deployStudioTables(db: Database) {
-  await db.prepare(
-    "create table migrations (id integer primary key, file text not null unique, hash text not null);",
-  ).all();
+  await db
+    .prepare(
+      "create table migrations (id integer primary key, file text not null unique, hash text not null);",
+    )
+    .all();
 
   console.log("Created migrations table");
 
-  const tableSetupFilepath = path.join(_dirname, "sql", "setup_studio_test_tables.sql");
+  const tableSetupFilepath = path.join(
+    _dirname,
+    "sql",
+    "setup_studio_test_tables.sql",
+  );
 
   const sqlFileBytes = await readFile(tableSetupFilepath);
   const hash = createHash("sha256").update(sqlFileBytes).digest("hex");
   const statements = sqlFileBytes.toString().split("--> statement-breakpoint");
 
   console.log(`Creating studio tables...`);
-  const preparedStatements = statements.map(
-    (statement: string) => db.prepare(statement)
+  const preparedStatements = statements.map((statement: string) =>
+    db.prepare(statement),
   );
   await db.batch(preparedStatements);
   await db
@@ -95,13 +100,17 @@ async function populateStudioTestData(db: Database) {
   // TODO: setup an account, a project, a team, and some tables
   console.log("inserting test data into studio tables");
 
-  const tableSetupFilepath = path.join(_dirname, "sql", "generate_test_data.sql");
+  const tableSetupFilepath = path.join(
+    _dirname,
+    "sql",
+    "generate_test_data.sql",
+  );
 
   const sqlFileBytes = await readFile(tableSetupFilepath);
   const statements = sqlFileBytes.toString().split("--> statement-breakpoint");
 
-  const preparedStatements = statements.map(
-    (statement: string) => db.prepare(statement)
+  const preparedStatements = statements.map((statement: string) =>
+    db.prepare(statement),
   );
   await db.batch(preparedStatements);
 }
@@ -158,11 +167,11 @@ function startTablelandApi(tablesFile: string, provider: Provider) {
   return { db, store, validator };
 }
 
-async function startStudioApi({ store }: { store: Store; }) {
-
+async function startStudioApi({ store }: { store: Store }) {
   const apiRouter = appRouter(
     store,
     process.env.POSTMARK_API_KEY!,
+    `${TEST_API_BASE_URL}/mesa.jpg`,
     (seal: string) => `${TEST_API_BASE_URL}/invite?seal=${seal}`,
     process.env.DATA_SEAL_PASS!,
   );
@@ -178,10 +187,10 @@ async function startStudioApi({ store }: { store: Store; }) {
         return new Promise(function (resolve, reject) {
           const body: any[] = [];
           req
-            .on('data', (chunk: any) => {
+            .on("data", (chunk: any) => {
               body.push(chunk);
             })
-            .on('end', () => {
+            .on("end", () => {
               resolve(Buffer.concat(body).toString());
             });
         });
@@ -195,19 +204,22 @@ async function startStudioApi({ store }: { store: Store; }) {
         createContext,
       });
 
-      const responseHeaders = Object.fromEntries(response.headers.entries())
+      const responseHeaders = Object.fromEntries(response.headers.entries());
 
       res.writeHead(response.status, responseHeaders);
       // using `as unknown as` because of https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/62651
-      const body = response.body ? await streamToString(response.body as unknown as NodeJS.ReadableStream) : "";
+      const body = response.body
+        ? await streamToString(
+            response.body as unknown as NodeJS.ReadableStream,
+          )
+        : "";
       res.end(body);
-
     } catch (err: any) {
       console.log(err);
 
-      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.writeHead(500, { "Content-Type": "application/json" });
       res.end(
-        `{"error":{"json":{"message":"${err.message}","code":-32603,"data":{"code":"INTERNAL_SERVER_ERROR","httpStatus":500}}}}`
+        `{"error":{"json":{"message":"${err.message}","code":-32603,"data":{"code":"INTERNAL_SERVER_ERROR","httpStatus":500}}}}`,
       );
     }
   });
@@ -218,8 +230,8 @@ async function startStudioApi({ store }: { store: Store; }) {
 async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
   const chunks: Array<any> = [];
   for await (const chunk of stream) {
-      chunks.push(chunk)
+    chunks.push(chunk);
   }
   const buffer = Buffer.concat(chunks);
-  return buffer.toString("utf-8")
+  return buffer.toString("utf-8");
 }
