@@ -1,4 +1,4 @@
-import { AppRouter } from "@tableland/studio-api";
+import { type AppRouter } from "@tableland/studio-api";
 import { helpers } from "@tableland/sdk";
 import {
   createTRPCProxyClient,

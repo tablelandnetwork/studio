@@ -1,7 +1,7 @@
 {
   "name": "@tableland/studio",
-  "version": "0.0.0",
   "private": true,
+  "version": "0.0.0",
   "scripts": {
     "dev": "next dev",
     "dev:net": "node scripts/net-start.mjs",
@@ -34,9 +34,9 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@tableland/sdk": "^4.5.3-dev.0",
-    "@tableland/studio-api": "^1.0.0",
-    "@tableland/studio-client": "^0.0.0",
-    "@tableland/studio-store": "^1.0.0",
+    "@tableland/studio-api": "^0.0.0-pre.0",
+    "@tableland/studio-client": "^0.0.0-pre.0",
+    "@tableland/studio-store": "^0.0.0-pre.0",
     "@tanstack/react-table": "^8.10.1",
     "@trpc/client": "^10.38.4",
     "@trpc/next": "^10.38.4",

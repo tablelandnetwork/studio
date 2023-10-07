@@ -1,8 +1,11 @@
 {
   "name": "@tableland/studio-store",
-  "private": true,
-  "version": "1.0.0",
+  "version": "0.0.0-pre.0",
   "description": "",
+  "repository": "https://github.com/tablelandnetwork/studio/store",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +15,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT AND Apache-2.0",
   "dependencies": {
     "@tableland/sdk": "^4.5.3-dev.0",
     "drizzle-orm": "^0.28.5",
