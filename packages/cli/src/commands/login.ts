@@ -61,7 +61,7 @@ export const handler = async (
 
     // When a user logs in we want to make sure they are using same api
     // url going forward, unless they explicitly use a different one
-    fileStore.set("apiUrl", apiUrl);
+    fileStore.set("apiUrl", apiBaseUrl);
     fileStore.save();
 
     logger.log(`You are logged in with address: ${wallet.address}`);
