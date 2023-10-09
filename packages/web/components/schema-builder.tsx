@@ -47,7 +47,7 @@ export default function SchemaBuilder({
                 Type
                 <HoverCard>
                   <HoverCardTrigger>
-                    <HelpCircle className="text-gray-200 hover:text-gray-400" />
+                    <HelpCircle className="h-5 w-5 text-gray-200 hover:text-gray-400" />
                   </HoverCardTrigger>
                   <HoverCardContent className="w-80">
                     <Table>
