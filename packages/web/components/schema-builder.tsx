@@ -1,6 +1,7 @@
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -9,10 +10,11 @@ import {
 import { Constraint, hasConstraint, setConstraint } from "@/lib/schema";
 import { CheckedState } from "@radix-ui/react-checkbox";
 import { Schema } from "@tableland/studio-store";
-import { Plus, X } from "lucide-react";
+import { HelpCircle, Plus, X } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { Input } from "./ui/input";
 import {
   Select,
@@ -41,7 +43,57 @@ export default function SchemaBuilder({
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead className="flex items-center gap-2">
+                Type
+                <HoverCard>
+                  <HoverCardTrigger>
+                    <HelpCircle className="text-gray-200 hover:text-gray-400" />
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <Table>
+                      <TableCaption className="text-xs font-normal text-muted-foreground">
+                        Explanation of supported column types.
+                      </TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Description</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-medium">Int</TableCell>
+                          <TableCell className="font-normal">
+                            Signed integer values, stored in 0, 1, 2, 3, 4, 6,
+                            or 8 bytes depending on the magnitude of the value.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Integer</TableCell>
+                          <TableCell className="font-normal">
+                            Same as Int, except it may also be used to represent
+                            an auto-incrementing primary key field.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Text</TableCell>
+                          <TableCell className="font-normal">
+                            Text string, stored using the database encoding
+                            (UTF-8).
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Blob</TableCell>
+                          <TableCell className="font-normal">
+                            A blob of data, stored exactly as it was input.
+                            Useful for byte slices etc.
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </HoverCardContent>
+                </HoverCard>
+              </TableHead>
               <TableHead>Not Null</TableHead>
               <TableHead>Primary Key</TableHead>
               <TableHead>Unique</TableHead>
@@ -71,7 +123,7 @@ export default function SchemaBuilder({
           setSchema((prev) => {
             return {
               ...prev,
-              columns: [...prev.columns, { name: "", type: "text" }],
+              columns: [...prev.columns, { name: "", type: "integer" }],
             };
           });
         }}
@@ -177,9 +229,9 @@ function CreateColumn({
             <SelectValue placeholder="Select a type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="text">Text</SelectItem>
-            <SelectItem value="integer">Integer</SelectItem>
             <SelectItem value="int">Int</SelectItem>
+            <SelectItem value="integer">Integer</SelectItem>
+            <SelectItem value="text">Text</SelectItem>
             <SelectItem value="blob">Blob</SelectItem>
           </SelectContent>
         </Select>
