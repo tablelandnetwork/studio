@@ -1,8 +1,11 @@
 {
   "name": "@tableland/studio-api",
-  "private": true,
-  "version": "1.0.0",
+  "version": "0.0.0-pre.0",
   "description": "",
+  "repository": "https://github.com/tablelandnetwork/studio/api",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,11 +15,11 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT AND Apache-2.0",
   "dependencies": {
     "@tableland/sdk": "^4.5.3-dev.0",
-    "@tableland/studio-mail": "^0.0.0",
-    "@tableland/studio-store": "^1.0.0",
+    "@tableland/studio-mail": "^0.0.0-pre.0",
+    "@tableland/studio-store": "^0.0.0-pre.0",
     "@trpc/server": "^10.38.4",
     "iron-session": "^6.3.1",
     "next": "13.5.3",
