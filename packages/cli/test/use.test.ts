@@ -66,7 +66,7 @@ describe("commands/use", function () {
       accounts[10].privateKey.slice(2)
     ]).command<GlobalOptions>(modLogin).parse();
 
-    const consoleTable = spy(logger, "table");
+    const consoleLog = spy(logger, "log");
 
     await yargs([
       "team",
@@ -76,9 +76,9 @@ describe("commands/use", function () {
       accounts[10].privateKey.slice(2)
     ]).command<GlobalOptions>(modTeam).parse();
 
-    const teamId = consoleTable.getCall(0).firstArg[0].id
+    const teamStr = consoleLog.getCall(0).firstArg;
+    const teamId = JSON.parse(teamStr)[0].id;
 
-    const consoleLog = spy(logger, "log");
     await yargs([
       "use",
       "team",
@@ -89,7 +89,7 @@ describe("commands/use", function () {
     ]).command<GlobalOptions>(modUse).parse();
 
     equal(
-      consoleLog.getCall(0).firstArg,
+      consoleLog.getCall(1).firstArg,
       `your team context has been set to team_id of: ${teamId}`
     );
 
