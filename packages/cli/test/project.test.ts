@@ -82,13 +82,14 @@ describe("commands/project", function () {
   });
 
   test("can list projects", async function () {
-    const consoleTable = spy(logger, "table");
+    const consoleLog = spy(logger, "log");
     await yargs(["project", "ls", TEST_TEAM_ID, ...defaultArgs]).command(mod).parse();
 
-    const table = consoleTable.getCall(0).firstArg;
+    const projectStr = consoleLog.getCall(0).firstArg;
+    const data = JSON.parse(projectStr);
 
-    equal(table.length, 1);
-    const project = table[0];
+    equal(data.length, 1);
+    const project = data[0];
     const idParts = project.id.split("-");
     equal(idParts.length, 5);
     equal(idParts[0].length, 8);
