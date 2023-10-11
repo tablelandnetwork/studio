@@ -47,12 +47,14 @@ describe("commands/team", function () {
   const projectName = "projectfoo";
 
   test("can list authenticated user's teams", async function () {
-    const consoleTable = spy(logger, "table");
+    const consoleLog = spy(logger, "log");
     await yargs(["team", "ls", ...defaultArgs]).command(mod).parse();
 
-    const table = consoleTable.getCall(0).firstArg;
-    equal(table.length, 1);
-    const team = table[0];
+    const output = consoleLog.getCall(0).firstArg;
+    const data = JSON.parse(output);
+
+    equal(data.length, 1);
+    const team = data[0];
     const idParts = team.id.split("-");
     equal(idParts.length, 5);
     equal(idParts[0].length, 8);
@@ -71,13 +73,15 @@ describe("commands/team", function () {
   });
 
   test.skip("can list teams for a specific user", async function () {
-    const consoleTable = spy(logger, "table");
+    const consoleLog = spy(logger, "log");
     const teamId = "123";
     await yargs(["team", "ls", teamId, ...defaultArgs]).command(mod).parse();
 
-    const table = consoleTable.getCall(0).firstArg;
-    equal(table.length, 1);
-    const team = table[0];
+    const output = consoleLog.getCall(0).firstArg;
+    const data = JSON.parse(output);
+
+    equal(data.length, 1);
+    const team = data[0];
     const idParts = team.id.split("-");
     equal(idParts.length, 5);
     equal(idParts[0].length, 8);
