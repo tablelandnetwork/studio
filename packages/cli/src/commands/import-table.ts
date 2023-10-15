@@ -53,7 +53,7 @@ export const handler = async (
     const api = getApi(fileStore, apiUrl as string);
     const projectId = getProject({ ...argv, store: fileStore });
 
-    const environmentId = await getEnvironmentId(projectId);
+    const environmentId = await getEnvironmentId(api, projectId);
 
     if (typeof uuTableName !== "string") {
       throw new Error("must provide full tableland table name");

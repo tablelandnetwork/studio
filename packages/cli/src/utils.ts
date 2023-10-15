@@ -52,10 +52,10 @@ export const getTeam = function (
   return argv.store.get<string>("teamId");
 };
 
-export const getEnvironmentId = async function (projectId: string) {
+export const getEnvironmentId = async function (api: any, projectId: string) {
     // lookup environmentId by projectId
     const environments = await api.environments.projectEnvironments.query({ projectId });
-    const environmentId = environments.find(env => env.name === "default")?.id;
+    const environmentId = environments.find((env: any) => env.name === "default")?.id;
     if (typeof environmentId !== "string") {
       throw new Error("could not get default environment");
     }

@@ -38,7 +38,7 @@ export const handler = async (
     const api = getApi(fileStore, apiUrl as string);
     const projectId = getProject({ ...argv, store: fileStore });
 
-    const environmentId = await getEnvironmentId(projectId);
+    const environmentId = await getEnvironmentId(api, projectId);
 
     const aliases = studioAliases({ environmentId, apiUrl });
     const uuTableName = (await aliases.read())[table as string];

@@ -1,15 +1,20 @@
 import type { Arguments } from "yargs";
 import yargs from "yargs";
 import { helpers, Database } from "@tableland/sdk";
+import { generateCreateTableStatement } from "@tableland/studio-store";
+import { waitForTransaction } from "wagmi/actions";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
 import {
   FileStore,
   getApi,
   getApiUrl,
+  getChainName,
   getProject,
   getEnvironmentId,
+  getWalletWithProvider,
   logger,
+  normalizePrivateKey,
 } from "../utils.js";
 
 type Yargs = typeof yargs;
@@ -72,13 +77,15 @@ export const builder = function (args: Yargs) {
         try {
           throw new Error("creating projects in the cli isn't implemented yet");
 
-          const { name, store, apiUrl: apiUrlArg, providerUrl } = argv;
+          const { chain, name, store, apiUrl: apiUrlArg, providerUrl } = argv;
+
+          const chainInfo = helpers.getChainInfo(chain as number);
           const fileStore = new FileStore(store as string);
           const privateKey = normalizePrivateKey(argv.privateKey);
           const wallet = await getWalletWithProvider({
             privateKey,
-            chain,
-            providerUrl,
+            chain: chainInfo.id as number,
+            providerUrl: providerUrl as string,
           });
 
           const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
@@ -95,12 +102,13 @@ export const builder = function (args: Yargs) {
             throw new Error("must provide project for deployment");
           }
 
-          const environmentId = await getEnvironmentId(projectId);
+          const environmentId = await getEnvironmentId(api, projectId);
 
           // lookup table data from project and name
           const table = await api.tables.tableByProjectIdAndSlug.query({
-            projectId,
-            slug: name,
+            // TODO: the type check above isn't working, using `as string` as a work around
+            projectId: projectId as string,
+            slug: name as string,
           });
 
           if (!(table && table.name && table.schema)) {
@@ -115,7 +123,7 @@ export const builder = function (args: Yargs) {
 
           const db = new Database({
             signer: wallet,
-            baseUrl: helpers.getBaseUrl(chainId),
+            baseUrl: helpers.getBaseUrl(chainInfo.id as number),
             autoWait: true,
           });
 
@@ -132,7 +140,7 @@ export const builder = function (args: Yargs) {
           }
           const txn = res.meta.txn;
           const evmReceipt = await waitForTransaction({
-            hash: txn.transactionHash as `0x${string}`,
+            hash: txn?.transactionHash as `0x${string}`,
           });
           if (evmReceipt.status === "reverted") {
             throw new Error("Transaction reverted");
@@ -140,12 +148,13 @@ export const builder = function (args: Yargs) {
 
           const result = await api.deployments.recordDeployment.mutate({
             environmentId,
-            tableName: txn.name,
-            chainId: txn.chainId,
-            tableId: txn.tableId,
+            tableName: txn?.name as string,
+            chainId: txn?.chainId as number,
+            tableId: txn?.tableId as string,
+            tokenId: txn?.tableId as string,
             createdAt: new Date(),
-            blockNumber: txn.blockNumber,
-            txnHash: txn.transactionHash,
+            blockNumber: txn?.blockNumber,
+            txnHash: txn?.transactionHash,
           });
 
           logger.log(JSON.stringify(result, null, 4));

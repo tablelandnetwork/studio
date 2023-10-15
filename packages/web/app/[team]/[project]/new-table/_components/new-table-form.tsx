@@ -36,11 +36,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { cleanSchema, setConstraint } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sqliteKeywords } from "@tableland/studio-client";
 import { Schema, schema } from "@tableland/studio-store";
 import { HelpCircle, Loader2, Plus, X } from "lucide-react";
+import {
+  Schema,
+  cleanSchema,
+  generateCreateTableStatement,
+  schema,
+  setConstraint,
+} from "@tableland/studio-store";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
