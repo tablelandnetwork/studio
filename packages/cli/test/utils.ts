@@ -13,3 +13,5 @@ export const TEST_API_PORT = 2999;
 export const TEST_API_BASE_URL = `http://localhost:${TEST_API_PORT}`;
 export const TEST_REGISTRY_PORT = 8546;
 export const TEST_VALIDATOR_URL = "http://localhost:8081/api/v1";
+
+export const TEST_TEAM_ID = "01a2d24d-3805-4a14-8059-7041f8b69afc";

@@ -12,7 +12,6 @@ import * as modUnuse from "../src/commands/unuse.js";
 import * as modLogin from "../src/commands/login.js";
 import * as modLogout from "../src/commands/logout.js";
 import * as modTeam from "../src/commands/team.js";
-import * as modProject from "../src/commands/project.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,

@@ -12,7 +12,7 @@ export const desc = "manage studio teams";
 export interface CommandOptions extends GlobalOptions {
   teamId?: string;
   name?: string;
-  description: string;
+  description?: string;
   team?: string;
   user?: string;
   personalTeamId?: string;

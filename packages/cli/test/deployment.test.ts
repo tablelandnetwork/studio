@@ -7,7 +7,10 @@ import { getDefaultProvider } from "ethers";
 import { afterEach, before, describe, test } from "mocha";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
-import * as mod from "../src/commands/project.js";
+import { type GlobalOptions } from "../src/cli.js";
+import * as mod from "../src/commands/deployment.js";
+import * as modProject from "../src/commands/project.js";
+import * as modLogin from "../src/commands/login.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
@@ -32,34 +35,63 @@ const defaultArgs = [
   TEST_API_BASE_URL
 ];
 
-describe("commands/project", function () {
+describe("commands/deployment", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
+  let projectId: string;
+  let environmentId: string;
   before(async function () {
     await wait(1000);
+
+    await yargs([
+      "login",
+      "--store",
+      path.join(_dirname, ".studioclisession.json"),
+      "--chain",
+      "local-tableland",
+      "--providerUrl",
+      `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+      "--apiUrl",
+      TEST_API_BASE_URL
+    ]).command<GlobalOptions>(modLogin).parse();
+
+    const consoleLog = spy(logger, "log");
+    await yargs([
+      "project",
+      "create",
+      "deploy_test_project",
+      "--description",
+      "description for deploy_test_project",
+      "--teamId",
+      TEST_TEAM_ID,
+      ...defaultArgs
+    ]).command(modProject).parse();
+
+    const projectStr = consoleLog.getCall(0).firstArg;
+    const data = JSON.parse(projectStr);
+
+    projectId = data.id;
+
+    restore();
   });
 
   afterEach(function () {
     restore();
   });
 
-  // TODO: need to fix the fact that all the tests rely on the previous tests.
-  const description = "testing project create";
-  const projectName = "projectfoo";
-
   // happy first
-  test("can create a project", async function () {
+  test("can create a deployment", async function () {
     const consoleLog = spy(logger, "log");
 
     await yargs([
-      "project",
+      "deployment",
       "create",
-      projectName,
-      "--description",
-      description,
-      "--teamId",
-      TEST_TEAM_ID,
-      ...defaultArgs
+      "test1",
+      "--projectId",
+      projectId,
+      ...defaultArgs,
     ]).command(mod).parse();
 
     const res = consoleLog.getCall(0).firstArg;
@@ -74,22 +106,20 @@ describe("commands/project", function () {
     equal(idParts[3].length, 4);
     equal(idParts[4].length, 12);
 
-    equal(value.name, projectName);
-    equal(value.description, description);
-    equal(value.slug, projectName);
+    // TODO: assert other things about success
 
   });
 
-  test("can list projects", async function () {
+  test("can list deployments", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["project", "ls", TEST_TEAM_ID, ...defaultArgs]).command(mod).parse();
+    await yargs(["deployment", "ls", projectId, ...defaultArgs]).command(mod).parse();
 
-    const projectStr = consoleLog.getCall(0).firstArg;
-    const data = JSON.parse(projectStr);
+    const deploymentStr = consoleLog.getCall(0).firstArg;
+    const data = JSON.parse(deploymentStr);
 
     equal(data.length, 1);
-    const project = data[0];
-    const idParts = project.id.split("-");
+    const deployment = data[0];
+    const idParts = deployment.id.split("-");
     equal(idParts.length, 5);
     equal(idParts[0].length, 8);
     equal(idParts[1].length, 4);
@@ -97,8 +127,8 @@ describe("commands/project", function () {
     equal(idParts[3].length, 4);
     equal(idParts[4].length, 12);
 
-    equal(project.name, projectName);
-    equal(project.description, description);
-    equal(project.slug, projectName);
+    equal(deployment.environmentId, environmentId);
+
+    // TODO: assert other things about success
   });
 });

@@ -10,13 +10,13 @@ import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
-  TEST_REGISTRY_PORT
+  TEST_REGISTRY_PORT,
+  TEST_TEAM_ID,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 const accounts = getAccounts();
 
-const TEST_TEAM_ID = "01a2d24d-3805-4a14-8059-7041f8b69afc";
 const defaultArgs = [
   "--store",
   path.join(_dirname, ".studioclisession.json"),

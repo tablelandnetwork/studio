@@ -19,6 +19,7 @@ import {
   getApi,
   getApiUrl,
   getProject,
+  getEnvironmentId,
   FileStore,
 } from "../utils.js";
 
@@ -36,13 +37,8 @@ export const handler = async (
     const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
     const api = getApi(fileStore, apiUrl as string);
     const projectId = getProject({ ...argv, store: fileStore });
-    
-    // lookup environmentId by projectId
-    const environments = await api.environments.projectEnvironments.query({ projectId });
-    const environmentId = environments.find(env => env.name === "default")?.id;
-    if (typeof environmentId !== "string") {
-      throw new Error("could not get default environment");
-    }
+
+    const environmentId = await getEnvironmentId(projectId);
 
     const aliases = studioAliases({ environmentId, apiUrl });
     const uuTableName = (await aliases.read())[table as string];
