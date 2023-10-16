@@ -20,7 +20,7 @@ export function chains() {
     (window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1")
   ) {
-    res.push(getChainInfo("localhost"));
+    res.push(getChainInfo("local-tableland"));
   }
   return res;
 }

@@ -7,7 +7,7 @@ import {
   arbitrumNova,
   filecoin,
   filecoinCalibration,
-  localhost,
+  hardhat,
   mainnet,
   optimism,
   optimismGoerli,
@@ -33,7 +33,7 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
     sepolia,
     filecoin,
     filecoinCalibration,
-    localhost,
+    hardhat,
   ],
   [
     infuraProvider({ apiKey: "92f6902cf1214401ae5b08a1e117eb91" }),
