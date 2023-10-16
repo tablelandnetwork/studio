@@ -92,7 +92,7 @@ export const builder = function (args: Yargs) {
         if (typeof personalTeamId !== "string") {
           throw new Error("must provide personal team id");
         }
-        console.log("doing create by pId...");
+
         // const result = await createTeamByPersonalTeam(
         //   name,
         //   personalTeamId,

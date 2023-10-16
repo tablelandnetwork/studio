@@ -35,6 +35,13 @@ describe("commands/login", function () {
 
   before(async function () {
     await wait(1000);
+    await yargs([
+      "logout",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2)
+    ]).command<GlobalOptions>(modLogout).parse();
+
   });
 
   afterEach(function () {

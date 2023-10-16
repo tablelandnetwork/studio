@@ -88,9 +88,6 @@ export class FileStore {
       const fileBuf = readFileSync(filePath);
       return JSON.parse(fileBuf.toString());
     }  catch (err: any) {
-      // console.log("findOrCreate", err);
-
-      // TODO: figure out when to throw
       if (err.code !== "ENOENT") throw err;
     }
 

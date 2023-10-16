@@ -42,7 +42,7 @@ describe("commands/team", function () {
   });
 
   // TODO: all the tests depend on previous tests, need to fix this
-  const teamName = "joe"; // TODO: get better test data
+  const teamName = "testuser";
   const projectDescription = "testing project create";
   const projectName = "projectfoo";
 
@@ -66,7 +66,7 @@ describe("commands/team", function () {
     equal(team.name, teamName);
     equal(team.slug, teamName);
 
-    equal(team.projects.length, 1);
+    equal(team.projects.length, 2);
     const project = team.projects[0];
     equal(project.name, projectName);
     equal(project.description, projectDescription);

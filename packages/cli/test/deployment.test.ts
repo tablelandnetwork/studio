@@ -38,8 +38,8 @@ const defaultArgs = [
 describe("commands/deployment", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
-  let projectId: string;
-  let environmentId: string;
+  const projectId = "2f403473-de7b-41ba-8d97-12a0344aeccb";
+  const environmentId = "c862f12c-f2f8-451a-bae3-bbf633e3ae57";
   before(async function () {
     await wait(1000);
 
@@ -56,25 +56,6 @@ describe("commands/deployment", function () {
       "--apiUrl",
       TEST_API_BASE_URL
     ]).command<GlobalOptions>(modLogin).parse();
-
-    const consoleLog = spy(logger, "log");
-    await yargs([
-      "project",
-      "create",
-      "deploy_test_project",
-      "--description",
-      "description for deploy_test_project",
-      "--teamId",
-      TEST_TEAM_ID,
-      ...defaultArgs
-    ]).command(modProject).parse();
-
-    const projectStr = consoleLog.getCall(0).firstArg;
-    const data = JSON.parse(projectStr);
-
-    projectId = data.id;
-
-    restore();
   });
 
   afterEach(function () {

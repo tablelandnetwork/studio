@@ -87,7 +87,7 @@ describe("commands/project", function () {
     const projectStr = consoleLog.getCall(0).firstArg;
     const data = JSON.parse(projectStr);
 
-    equal(data.length, 1);
+    equal(data.length, 2);
     const project = data[0];
     const idParts = project.id.split("-");
     equal(idParts.length, 5);

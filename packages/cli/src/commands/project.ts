@@ -34,7 +34,7 @@ export const builder = function (args: Yargs) {
         try {
           const { teamId, store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore});
           const api = getApi(fileStore, apiUrl as string);
 
           const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
@@ -66,8 +66,10 @@ export const builder = function (args: Yargs) {
       },
       async function (argv: CommandOptions) {
         try {
-          const { name, teamId, description, store, apiUrl } = argv;
-          const api = getApi(new FileStore(store as string), apiUrl);
+          const { name, teamId, description, store, apiUrl: apiUrlArg } = argv;
+          const fileStore = new FileStore(store as string);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore});
+          const api = getApi(fileStore, apiUrl);
 
           if (typeof name !== "string")
             throw new Error("must provide project name");

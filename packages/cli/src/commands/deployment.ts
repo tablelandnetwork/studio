@@ -75,8 +75,6 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          throw new Error("creating projects in the cli isn't implemented yet");
-
           const { chain, name, store, apiUrl: apiUrlArg, providerUrl } = argv;
 
           const chainInfo = helpers.getChainInfo(chain as number);
@@ -84,7 +82,7 @@ export const builder = function (args: Yargs) {
           const privateKey = normalizePrivateKey(argv.privateKey);
           const wallet = await getWalletWithProvider({
             privateKey,
-            chain: chainInfo.id as number,
+            chain: chainInfo.chainId as number,
             providerUrl: providerUrl as string,
           });
 
@@ -123,7 +121,7 @@ export const builder = function (args: Yargs) {
 
           const db = new Database({
             signer: wallet,
-            baseUrl: helpers.getBaseUrl(chainInfo.id as number),
+            baseUrl: helpers.getBaseUrl(chainInfo.chainId as number),
             autoWait: true,
           });
 
