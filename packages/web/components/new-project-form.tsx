@@ -22,9 +22,9 @@ import * as z from "zod";
 import InputWithCheck from "./input-with-check";
 
 const formSchema = z.object({
-  name: z.string().min(3),
-  description: z.string().nonempty(),
-  environments: z.array(z.object({ name: z.string().min(3) })),
+  name: z.string().trim().min(3),
+  description: z.string().trim().nonempty(),
+  environments: z.array(z.object({ name: z.string().trim().min(3) })),
 });
 
 export default function NewProjectForm({ team }: { team: schema.Team }) {

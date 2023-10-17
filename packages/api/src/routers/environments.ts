@@ -5,7 +5,7 @@ import { projectProcedure, publicProcedure, router } from "../trpc";
 export function environmentsRouter(store: Store) {
   return router({
     projectEnvironments: publicProcedure
-      .input(z.object({ projectId: z.string() }))
+      .input(z.object({ projectId: z.string().trim() }))
       .query(async ({ input }) => {
         return await store.environments.getEnvironmentsByProjectId(
           input.projectId,
@@ -14,7 +14,7 @@ export function environmentsRouter(store: Store) {
     newEnvironment: projectProcedure(store)
       .input(
         z.object({
-          name: z.string(),
+          name: z.string().trim(),
         }),
       )
       .mutation(async ({ input }) => {

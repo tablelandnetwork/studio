@@ -21,8 +21,8 @@ import InputWithCheck from "./input-with-check";
 import TagInput from "./tag-input";
 
 const schema = z.object({
-  name: z.string().nonempty(),
-  emailInvites: z.array(z.string().email()),
+  name: z.string().trim().nonempty(),
+  emailInvites: z.array(z.string().trim().email()),
 });
 
 export default function NewTeamForm() {

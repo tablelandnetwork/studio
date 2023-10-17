@@ -7,13 +7,13 @@ export function deploymentsRouter(store: Store) {
     recordDeployment: tableProcedure(store)
       .input(
         z.object({
-          tableId: z.string().uuid(),
-          environmentId: z.string().uuid(),
-          tableName: z.string().nonempty(),
+          tableId: z.string().trim().uuid(),
+          environmentId: z.string().trim().uuid(),
+          tableName: z.string().trim().nonempty(),
           chainId: z.number().int().nonnegative(),
-          tokenId: z.string().nonempty(),
+          tokenId: z.string().trim().nonempty(),
           blockNumber: z.number().int().nonnegative().optional(),
-          txnHash: z.string().nonempty().optional(),
+          txnHash: z.string().trim().nonempty().optional(),
           createdAt: z.date(),
         }),
       )
@@ -33,7 +33,7 @@ export function deploymentsRouter(store: Store) {
     deploymentsByTableId: publicProcedure
       .input(
         z.object({
-          tableId: z.string().uuid(),
+          tableId: z.string().trim().uuid(),
         }),
       )
       .query(async ({ input }) => {
@@ -42,16 +42,18 @@ export function deploymentsRouter(store: Store) {
     projectDeployments: publicProcedure
       .input(
         z.object({
-          projectId: z.string().uuid(),
+          projectId: z.string().trim().uuid(),
         }),
       )
       .query(async ({ input }) => {
         return await store.deployments.deploymentsByProjectId(input.projectId);
       }),
     deploymentsByEnvironmentId: publicProcedure
-      .input(z.object({environmentId: z.string().uuid()}))
+      .input(z.object({ environmentId: z.string().trim().uuid() }))
       .query(async ({ input }) => {
-        return await store.deployments.deploymentsByEnvironmentId(input.environmentId);
+        return await store.deployments.deploymentsByEnvironmentId(
+          input.environmentId,
+        );
       }),
   });
 }
