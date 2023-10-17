@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -229,21 +230,23 @@ export default function ExecDeployment({
             <SelectTrigger className="w-fit gap-x-2">
               <SelectValue placeholder="Select chain" />
             </SelectTrigger>
-            <SelectContent className="max-h-[20rem] overflow-y-auto">
-              {groupedChains.map((group) => {
-                return (
-                  <div key={group[0]}>
-                    <p className="px-2 pt-2 text-xs text-muted-foreground">
-                      {group[0]}
-                    </p>
-                    {group[1].map((chain) => (
-                      <SelectItem key={chain.name} value={`${chain.id}`}>
-                        {chain.name} ({chain.id})
-                      </SelectItem>
-                    ))}
-                  </div>
-                );
-              })}
+            <SelectContent>
+              <ScrollArea className="h-[20rem]">
+                {groupedChains.map((group) => {
+                  return (
+                    <div key={group[0]}>
+                      <p className="px-2 pt-2 text-xs text-muted-foreground">
+                        {group[0]}
+                      </p>
+                      {group[1].map((chain) => (
+                        <SelectItem key={chain.name} value={`${chain.id}`}>
+                          {chain.name} ({chain.id})
+                        </SelectItem>
+                      ))}
+                    </div>
+                  );
+                })}
+              </ScrollArea>
             </SelectContent>
           </Select>
         </div>
