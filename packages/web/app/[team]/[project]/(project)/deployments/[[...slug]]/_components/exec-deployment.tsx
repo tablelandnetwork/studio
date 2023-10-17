@@ -39,6 +39,29 @@ import {
   switchNetwork,
   waitForTransaction,
 } from "wagmi/actions";
+import { Chain } from "wagmi/chains";
+
+const groupedChains = Array.from(
+  chains()
+    .reduce(
+      (acc, chain) => {
+        if (chain.testnet === undefined) {
+          acc.get("Others")?.push(chain);
+        } else if (chain.testnet) {
+          acc.get("Testnets")?.push(chain);
+        } else {
+          acc.get("Mainnets")?.push(chain);
+        }
+        return acc;
+      },
+      new Map<string, Chain[]>([
+        ["Mainnets", []],
+        ["Testnets", []],
+        ["Others", []],
+      ]),
+    )
+    .entries(),
+);
 
 export default function ExecDeployment({
   team,
@@ -207,11 +230,20 @@ export default function ExecDeployment({
               <SelectValue placeholder="Select chain" />
             </SelectTrigger>
             <SelectContent className="max-h-[20rem] overflow-y-auto">
-              {chains().map((chain) => (
-                <SelectItem key={chain.chainName} value={`${chain.chainId}`}>
-                  {chain.chainName} ({chain.chainId})
-                </SelectItem>
-              ))}
+              {groupedChains.map((group) => {
+                return (
+                  <div key={group[0]}>
+                    <p className="px-2 pt-2 text-xs text-muted-foreground">
+                      {group[0]}
+                    </p>
+                    {group[1].map((chain) => (
+                      <SelectItem key={chain.name} value={`${chain.id}`}>
+                        {chain.name} ({chain.id})
+                      </SelectItem>
+                    ))}
+                  </div>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
