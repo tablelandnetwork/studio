@@ -54,7 +54,7 @@ insert into `team_projects` (
 	1
 );
 --> statement-breakpoint
-insert into `environments_31337_4` (
+insert into `environments` (
 	`id`,
 	`project_id`,
 	`name`,
@@ -67,23 +67,23 @@ insert into `environments_31337_4` (
 );
 --> statement-breakpoint
 insert into `project_tables` (
-	`project_id`,`table_id`
+	`project_id`,
+	`table_id`
 ) values (
 	'2f403473-de7b-41ba-8d97-12a0344aeccb',
 	'48cbba6f-ff44-4461-a926-9ae5a1ce73f9'
 );
 --> statement-breakpoint
 insert into `tables` (
-	`id`,`slug`,`name`,`description`,`schema`
+	`id`,
+	`slug`,
+	`name`,
+	`description`,
+	`schema`
 ) values (
 	'48cbba6f-ff44-4461-a926-9ae5a1ce73f9',
 	'table1',
 	'table1',
 	'first test table',
-	'{`columns`:[{`name`:`id`,`type`:`integer`,`constraints`:[`primary key`]},{`name`:`info`,`type`:`text`}]}'
+	'{"columns":[{"name":"id","type":"integer","constraints":["primary key"]},{"name":"info","type":"text"}]}'
 );
-
-
-
-
-

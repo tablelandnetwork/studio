@@ -126,7 +126,7 @@ export const builder = function (args: Yargs) {
           });
 
           const stmt = generateCreateTableStatement(table.name, table.schema);
-          const res = await db.exec(stmt);
+          const res = await db.prepare(stmt).all();
           if (res.error) {
             throw new Error(res.error);
           }
@@ -137,18 +137,12 @@ export const builder = function (args: Yargs) {
             throw new Error("No transaction found in metadata");
           }
           const txn = res.meta.txn;
-          const evmReceipt = await waitForTransaction({
-            hash: txn?.transactionHash as `0x${string}`,
-          });
-          if (evmReceipt.status === "reverted") {
-            throw new Error("Transaction reverted");
-          }
 
           const result = await api.deployments.recordDeployment.mutate({
             environmentId,
             tableName: txn?.name as string,
             chainId: txn?.chainId as number,
-            tableId: txn?.tableId as string,
+            tableId: table.id,
             tokenId: txn?.tableId as string,
             createdAt: new Date(),
             blockNumber: txn?.blockNumber,
