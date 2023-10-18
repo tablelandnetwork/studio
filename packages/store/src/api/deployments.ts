@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
-import * as schema from "../schema";
-import { deployments, environments, projectTables, tables } from "../schema";
+import * as schema from "../schema/index.js";
+import { deployments, environments, projectTables, tables } from "../schema/index.js";
 
 export function initDeployments(db: DrizzleD1Database<typeof schema>) {
   return {

@@ -3,9 +3,9 @@ import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData, unsealData } from "iron-session";
-import * as schema from "../schema";
-import { teamMemberships, teams, users } from "../schema";
-import { slugify } from "./utils";
+import * as schema from "../schema/index.js";
+import { teamMemberships, teams, users } from "../schema/index.js";
+import { slugify } from "./utils.js";
 
 export function auth(
   db: DrizzleD1Database<typeof schema>,

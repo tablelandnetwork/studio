@@ -2,9 +2,9 @@ import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
-import * as schema from "../schema";
-import { Environment, environments } from "../schema";
-import { slugify } from "./utils";
+import * as schema from "../schema/index.js";
+import { Environment, environments } from "../schema/index.js";
+import { slugify } from "./utils.js";
 
 export function initEnvironments(
   db: DrizzleD1Database<typeof schema>,
