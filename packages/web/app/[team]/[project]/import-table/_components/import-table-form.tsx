@@ -24,7 +24,7 @@ import * as z from "zod";
 
 const formSchema = z.object({
   chainId: z.coerce.number().gt(0),
-  tableId: z.string().nonempty(),
+  tableId: z.string().trim().nonempty(),
   name: z
     .string()
     .nonempty()
@@ -32,7 +32,7 @@ const formSchema = z.object({
       /^(?!\d)[a-z0-9_]+$/,
       "Table name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
     ),
-  description: z.string().nonempty(),
+  description: z.string().trim().nonempty(),
   environment: z
     .string()
     .optional()

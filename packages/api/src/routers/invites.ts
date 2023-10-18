@@ -21,7 +21,7 @@ export function invitesRouter(
       return { invites, teamAuthorization: ctx.teamAuthorization };
     }),
     inviteEmails: teamProcedure(store)
-      .input(z.object({ emails: z.array(z.string().email()) }))
+      .input(z.object({ emails: z.array(z.string().trim().email()) }))
       .mutation(async ({ ctx, input }) => {
         const invites = await store.invites.inviteEmailsToTeam(
           input.teamId,
@@ -31,7 +31,7 @@ export function invitesRouter(
         await Promise.all(invites.map((invite) => sendInvite(invite)));
       }),
     resendInvite: teamProcedure(store)
-      .input(z.object({ inviteId: z.string() }))
+      .input(z.object({ inviteId: z.string().trim() }))
       .mutation(async ({ input }) => {
         const invite = await store.invites.inviteById(input.inviteId);
         if (!invite) {
@@ -43,7 +43,7 @@ export function invitesRouter(
         return await sendInvite(invite);
       }),
     inviteFromSeal: publicProcedure
-      .input(z.object({ seal: z.string() }))
+      .input(z.object({ seal: z.string().trim() }))
       .query(async ({ input }) => {
         const { inviteId } = await unsealData(input.seal, {
           password: dataSealPass,
@@ -58,7 +58,7 @@ export function invitesRouter(
         return invite;
       }),
     acceptInvite: protectedProcedure
-      .input(z.object({ seal: z.string() }))
+      .input(z.object({ seal: z.string().trim() }))
       .mutation(async ({ input, ctx }) => {
         const { inviteId } = await unsealData(input.seal, {
           password: dataSealPass,
@@ -80,7 +80,7 @@ export function invitesRouter(
         return invite;
       }),
     ignoreInvite: publicProcedure
-      .input(z.object({ seal: z.string() }))
+      .input(z.object({ seal: z.string().trim() }))
       .mutation(async ({ input }) => {
         const { inviteId } = await unsealData(input.seal, {
           password: dataSealPass,
@@ -99,7 +99,7 @@ export function invitesRouter(
         return invite;
       }),
     deleteInvite: teamProcedure(store)
-      .input(z.object({ inviteId: z.string() }))
+      .input(z.object({ inviteId: z.string().trim() }))
       .mutation(async ({ input }) => {
         await store.invites.deleteInvite(input.inviteId);
       }),

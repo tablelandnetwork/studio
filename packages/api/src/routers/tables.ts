@@ -7,23 +7,25 @@ import { projectProcedure, publicProcedure, router } from "../trpc";
 const schemaSchema: z.ZodType<Schema> = z.object({
   columns: z.array(
     z.object({
-      name: z.string().nonempty(),
-      type: z.string().nonempty(),
-      constraints: z.array(z.string().nonempty()).optional(),
+      name: z.string().trim().nonempty(),
+      type: z.string().trim().nonempty(),
+      constraints: z.array(z.string().trim().nonempty()).optional(),
     }),
   ),
-  tableConstraints: z.array(z.string().nonempty()).optional(),
+  tableConstraints: z.array(z.string().trim().nonempty()).optional(),
 });
 
 export function tablesRouter(store: Store) {
   return router({
     projectTables: publicProcedure
-      .input(z.object({ projectId: z.string() }))
+      .input(z.object({ projectId: z.string().trim() }))
       .query(async ({ input }) => {
         return await store.tables.tablesByProjectId(input.projectId);
       }),
     tableByProjectIdAndSlug: publicProcedure
-      .input(z.object({ projectId: z.string(), slug: z.string() }))
+      .input(
+        z.object({ projectId: z.string().trim(), slug: z.string().trim() }),
+      )
       .query(async ({ input }) => {
         const table = await store.tables.tableByProjectIdAndSlug(
           input.projectId,
@@ -38,15 +40,17 @@ export function tablesRouter(store: Store) {
         return table;
       }),
     nameAvailable: publicProcedure
-      .input(z.object({ projectId: z.string(), name: z.string() }))
+      .input(
+        z.object({ projectId: z.string().trim(), name: z.string().trim() }),
+      )
       .query(async ({ input }) => {
         return await store.tables.nameAvailable(input.projectId, input.name);
       }),
     newTable: projectProcedure(store)
       .input(
         z.object({
-          name: z.string(),
-          description: z.string().nonempty(),
+          name: z.string().trim(),
+          description: z.string().trim().nonempty(),
           schema: schemaSchema,
         }),
       )
@@ -62,10 +66,10 @@ export function tablesRouter(store: Store) {
       .input(
         z.object({
           chainId: z.number(),
-          tableId: z.string(),
-          name: z.string(),
-          environmentId: z.string(),
-          description: z.string().nonempty(),
+          tableId: z.string().trim(),
+          name: z.string().trim(),
+          environmentId: z.string().trim(),
+          description: z.string().trim().nonempty(),
         }),
       )
       .mutation(async ({ input }) => {

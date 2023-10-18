@@ -8,7 +8,9 @@ export function authRouter(store: Store) {
   return router({
     authenticated: publicProcedure
       // Optional userTeamId input for better cache control during ssr.
-      .input(z.object({ userTeamId: z.string().nonempty() }).or(z.void()))
+      .input(
+        z.object({ userTeamId: z.string().trim().nonempty() }).or(z.void()),
+      )
       .query(({ ctx }) => {
         return ctx.session.auth;
       }),
@@ -18,7 +20,9 @@ export function authRouter(store: Store) {
       return ctx.session.nonce;
     }),
     login: publicProcedure
-      .input(z.object({ message: z.string(), signature: z.string() }))
+      .input(
+        z.object({ message: z.string().trim(), signature: z.string().trim() }),
+      )
       .mutation(async ({ input, ctx }) => {
         try {
           const siweMessage = new SiweMessage(input.message);
@@ -51,7 +55,12 @@ export function authRouter(store: Store) {
         }
       }),
     register: publicProcedure
-      .input(z.object({ username: z.string(), email: z.string().optional() }))
+      .input(
+        z.object({
+          username: z.string().trim(),
+          email: z.string().trim().optional(),
+        }),
+      )
       .mutation(async ({ input, ctx }) => {
         if (!ctx.session.siweFields) {
           throw new TRPCError({

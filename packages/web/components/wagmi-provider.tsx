@@ -1,40 +1,14 @@
 "use client";
 
+import { chains as supportedChains } from "@/lib/chains";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import {
-  arbitrum,
-  arbitrumGoerli,
-  arbitrumNova,
-  filecoin,
-  filecoinCalibration,
-  hardhat,
-  mainnet,
-  optimism,
-  optimismGoerli,
-  polygon,
-  polygonMumbai,
-  sepolia,
-} from "wagmi/chains";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { infuraProvider } from "wagmi/providers/infura";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { publicProvider } from "wagmi/providers/public";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [
-    arbitrum,
-    arbitrumNova,
-    arbitrumGoerli,
-    polygon,
-    polygonMumbai,
-    optimism,
-    optimismGoerli,
-    mainnet,
-    sepolia,
-    filecoin,
-    filecoinCalibration,
-    hardhat,
-  ],
+  supportedChains(),
   [
     infuraProvider({ apiKey: "92f6902cf1214401ae5b08a1e117eb91" }),
     jsonRpcProvider({

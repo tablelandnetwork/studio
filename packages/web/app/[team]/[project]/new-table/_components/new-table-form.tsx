@@ -31,8 +31,10 @@ const formSchema = z.object({
       /^(?!\d)[a-z0-9_]+$/,
       "Table name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
     ),
-  description: z.string().nonempty(),
-  deployments: z.array(z.object({ env: z.string(), chain: z.string() })),
+  description: z.string().trim().nonempty(),
+  deployments: z.array(
+    z.object({ env: z.string().trim(), chain: z.string().trim() }),
+  ),
 });
 
 interface Props {
