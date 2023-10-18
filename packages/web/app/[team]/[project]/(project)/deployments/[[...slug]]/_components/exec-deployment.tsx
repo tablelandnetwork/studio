@@ -233,7 +233,7 @@ export default function ExecDeployment({
             <SelectContent>
               <ScrollArea className="h-[20rem]">
                 {groupedChains.map((group) => {
-                  return (
+                  return !!group[1].length ? (
                     <div key={group[0]}>
                       <p className="px-2 pt-2 text-xs text-muted-foreground">
                         {group[0]}
@@ -244,7 +244,7 @@ export default function ExecDeployment({
                         </SelectItem>
                       ))}
                     </div>
-                  );
+                  ) : null;
                 })}
               </ScrollArea>
             </SelectContent>
