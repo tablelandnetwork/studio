@@ -39,7 +39,9 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
 export const getProject = function (
   argv: { store: FileStore; projectId?: string; }
 ) {
-  if (typeof argv.projectId === "string") return argv.projectId;
+  if (typeof argv.projectId === "string" && argv.projectId.trim() !== "") {
+    return argv.projectId.trim();
+  }
 
   return argv.store.get<string>("projectId");
 };
@@ -47,26 +49,48 @@ export const getProject = function (
 export const getTeam = function (
   argv: { store: FileStore; teamId?: string; }
 ) {
-  if (typeof argv.teamId === "string") return argv.teamId;
+  if (typeof argv.teamId === "string" && argv.teamId.trim() !== "") {
+    return argv.teamId.trim();
+  }
 
   return argv.store.get<string>("teamId");
 };
 
-export const getEnvironmentId = async function (api: any, projectId: string) {
-    // lookup environmentId by projectId
-    const environments = await api.environments.projectEnvironments.query({ projectId });
-    const environmentId = environments.find((env: any) => env.name === "default")?.id;
-    if (typeof environmentId !== "string") {
-      throw new Error("could not get default environment");
-    }
 
+const NO_DEFAULT_ENV_ERR = "could not get default environment";
+export const getEnvironmentId = async function (api: any, projectId: string) {
+  // lookup environmentId by projectId
+  const environments = await api.environments.projectEnvironments.query({ projectId });
+  const environmentId = environments.find((env: any) => env.name === "default")?.id;
+  if (typeof environmentId !== "string") {
+    throw new Error(NO_DEFAULT_ENV_ERR);
+  }
+
+  return environmentId;
+}
+
+export const findOrCreateDefaultEnvironment = async function (api: any, projectId: string) {
+  try {
+    const environmentId = await getEnvironmentId(api, projectId);
     return environmentId;
+  } catch (err: any) {
+    if (err.message !== NO_DEFAULT_ENV_ERR) throw err;
+  }
+
+  const environment = await api.environments.newEnvironment.mutate({
+    name: "default",
+    projectId,
+  });
+console.log("environment", environment);
+  return environment.id;
 }
 
 export const getApiUrl = function (
   argv: { store: FileStore; apiUrl?: string; }
 ) {
-  if (typeof argv.apiUrl === "string") return argv.apiUrl;
+  if (typeof argv.apiUrl === "string" && argv.apiUrl.trim() !== "") {
+    return argv.apiUrl.trim();
+  }
 
   const storeApiUrl = argv.store.get<string>("apiUrl");
   if (storeApiUrl) return storeApiUrl;

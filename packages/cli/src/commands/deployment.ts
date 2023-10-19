@@ -11,7 +11,7 @@ import {
   getApiUrl,
   getChainName,
   getProject,
-  getEnvironmentId,
+  findOrCreateDefaultEnvironment,
   getWalletWithProvider,
   logger,
   normalizePrivateKey,
@@ -93,14 +93,14 @@ export const builder = function (args: Yargs) {
             store: fileStore
           });
 
-          if (typeof name !== "string") {
+          if (typeof name !== "string" || name.trim() === "") {
             throw new Error("must provide table name");
           }
-          if (typeof projectId !== "string") {
+          if (typeof projectId !== "string" || projectId.trim() === "") {
             throw new Error("must provide project for deployment");
           }
 
-          const environmentId = await getEnvironmentId(api, projectId);
+          const environmentId = await findOrCreateDefaultEnvironment(api, projectId);
 
           // lookup table data from project and name
           const table = await api.tables.tableByProjectIdAndSlug.query({

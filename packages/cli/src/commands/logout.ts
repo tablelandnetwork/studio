@@ -20,9 +20,13 @@ export const handler = async (
     const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
     const api = getApi(fileStore, apiUrl as string);
 
-
-
-    await api.auth.logout.mutate();
+    try {
+      await api.auth.logout.mutate();
+    } catch (err: any) {
+      // calling logout when you are logged out is an api error
+      // but the cli should return a normal success message
+      if (err.message !== "UNAUTHORIZED") throw err;
+    }
 
     const user = await api.auth.authenticated.query();
     if (user) {

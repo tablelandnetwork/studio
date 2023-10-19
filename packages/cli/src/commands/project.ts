@@ -2,12 +2,12 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, logger } from "../utils.js";
+import { FileStore, getApi, getApiUrl, getTeam, logger } from "../utils.js";
 
 type Yargs = typeof yargs;
 
 export const command = "project <sub>";
-export const desc = "manage studio teams";
+export const desc = "manage studio projects";
 
 export interface CommandOptions extends GlobalOptions {
   teamId?: string;
@@ -23,7 +23,7 @@ export const builder = function (args: Yargs) {
   return args
     .command(
       "ls [teamId]",
-      "list the projects for the given id, or if no id is given, for currenlty logged in user",
+      "list the projects for the given team id, or if no id is given, for currenlty logged in user's default team",
       function (args) {
         return args.positional("teamId", {
           type: "string",
@@ -40,24 +40,31 @@ export const builder = function (args: Yargs) {
           const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
           const projects = await api.projects.teamProjects.query(query);
 
-          logger.log(JSON.stringify(projects, null, 4));
+          const projectsWithTables = [];
+
+          for (const proj of projects) {
+            const tables = await api.tables.projectTables.query({ projectId: proj.id });
+            projectsWithTables.push({ tables, ...proj});
+          }
+
+          logger.log(JSON.stringify(projectsWithTables, null, 4));
         } catch (err: any) {
           logger.error(err);
         }
       },
     )
     .command(
-      "create <name> [description]",
-      "create a team with the given name, and optional description",
+      "create <name> <description>",
+      "create a project with the given name and description",
       function (args) {
         return args
           .positional("name", {
             type: "string",
-            description: "the team name",
+            description: "the project name",
           })
           .option("description", {
             type: "string",
-            description: "the team description",
+            description: "the project description",
           })
           .option("teamId", {
             type: "string",
@@ -66,17 +73,21 @@ export const builder = function (args: Yargs) {
       },
       async function (argv: CommandOptions) {
         try {
-          const { name, teamId, description, store, apiUrl: apiUrlArg } = argv;
+          const { name, teamId: teamIdArg, description, store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
           const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore});
           const api = getApi(fileStore, apiUrl);
+          const teamId = getTeam({store: fileStore, teamId: teamIdArg});
 
-          if (typeof name !== "string")
+          if (typeof name !== "string") {
             throw new Error("must provide project name");
-          if (typeof teamId !== "string")
-            throw new Error("must provide team for project");
-          if (typeof description !== "string")
+          }
+          if (typeof description !== "string") {
             throw new Error("must provide project description");
+          }
+          if (typeof teamId !== "string") {
+            throw new Error("must provide team for project");
+          }
 
           const result = await api.projects.newProject.mutate({
             teamId,
@@ -88,24 +99,6 @@ export const builder = function (args: Yargs) {
         } catch (err: any) {
           logger.error(err);
         }
-      },
-    )
-    .command(
-      "add",
-      "add user to a team",
-      function (args) {
-        return args
-          .option("team", {
-            type: "string",
-            description: "name of team to add to",
-          })
-          .option("user", {
-            type: "string",
-            description: "user to be added to team",
-          });
-      },
-      async function (argv) {
-        const { team, user, privateKey, providerUrl } = argv;
       },
     );
 };

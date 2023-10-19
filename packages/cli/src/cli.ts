@@ -67,7 +67,8 @@ const _argv = yargs(hideBin(process.argv))
   .option("apiUrl", {
     alias: "a",
     type: "string",
-    default: "https://studio.tableland.xyz",
+    // The logic to get the api url is in utils.ts we don't want a default here
+    default: "",
     description:
       "RPC URL for the Studio API",
   })
