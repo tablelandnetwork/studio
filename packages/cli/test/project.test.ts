@@ -55,7 +55,6 @@ describe("commands/project", function () {
       "project",
       "create",
       projectName,
-      "--description",
       description,
       "--teamId",
       TEST_TEAM_ID,
