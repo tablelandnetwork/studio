@@ -1,3 +1,4 @@
+import readline from "node:readline/promises";
 import { readFileSync, writeFileSync } from "node:fs";
 import { Wallet, getDefaultProvider, providers } from "ethers";
 import createKeccakHash from "keccak";
@@ -34,6 +35,22 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   if (apiUrl) apiArgs.url = apiUrl;
 
   return api(apiArgs);
+};
+
+export ask = async function (questions: string[]) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  const answers = [];
+  for (const question of questions) {
+    const answer = await rl.question(question);
+  }
+
+  rl.close();
+
+  return answers;
 };
 
 export const getProject = function (
