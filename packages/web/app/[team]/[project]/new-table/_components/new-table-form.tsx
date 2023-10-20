@@ -71,8 +71,7 @@ const formSchema = z.object({
         )
         .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
           message: "You can't use a SQL keyword as a column name.",
-        })
-        .optional(),
+        }),
       type: z.enum(["int", "integer", "text", "blob"]),
       notNull: z.boolean(),
       primaryKey: z.boolean(),
