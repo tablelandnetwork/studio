@@ -6,7 +6,7 @@ import { publicProcedure, router, teamProcedure } from "../trpc";
 export function projectsRouter(store: Store) {
   return router({
     teamProjects: publicProcedure
-      .input(z.object({ teamId: z.string().nonempty() }).or(z.void()))
+      .input(z.object({ teamId: z.string().trim().nonempty() }).or(z.void()))
       .query(async ({ ctx, input }) => {
         const teamId = input?.teamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
@@ -18,7 +18,7 @@ export function projectsRouter(store: Store) {
         return await store.projects.projectsByTeamId(teamId);
       }),
     projectByTeamIdAndSlug: publicProcedure
-      .input(z.object({ teamId: z.string(), slug: z.string() }))
+      .input(z.object({ teamId: z.string().trim(), slug: z.string().trim() }))
       .query(async ({ input }) => {
         const project = await store.projects.projectByTeamIdAndSlug(
           input.teamId,
@@ -33,15 +33,15 @@ export function projectsRouter(store: Store) {
         return project;
       }),
     nameAvailable: publicProcedure
-      .input(z.object({ teamId: z.string(), name: z.string() }))
+      .input(z.object({ teamId: z.string().trim(), name: z.string().trim() }))
       .query(async ({ input }) => {
         return await store.projects.nameAvailable(input.teamId, input.name);
       }),
     newProject: teamProcedure(store)
       .input(
         z.object({
-          name: z.string(),
-          description: z.string().nonempty(),
+          name: z.string().trim(),
+          description: z.string().trim().nonempty(),
         }),
       )
       .mutation(async ({ input }) => {

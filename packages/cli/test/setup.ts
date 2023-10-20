@@ -2,6 +2,7 @@
 //       we should probably have a way to configure the mailer to run in "dev"/"test"
 //       mode.  in this mode the email body would be logged to the terminal in a way that
 //       can be spied on instead of sending an actual email.
+import "dotenv/config";
 import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
@@ -9,7 +10,6 @@ import { appRouter, createContext } from "@tableland/studio-api";
 import { init } from "@tableland/studio-store";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { createHash } from "crypto";
-import "dotenv/config";
 import { Wallet, getDefaultProvider } from "ethers";
 import fs from "fs";
 import { readFile } from "fs/promises";

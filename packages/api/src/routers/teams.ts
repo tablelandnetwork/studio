@@ -12,7 +12,7 @@ import { SendInviteFunc } from "../utils/sendInvite";
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
   return router({
     isAuthorized: publicProcedure
-      .input(z.object({ teamId: z.string() }))
+      .input(z.object({ teamId: z.string().trim() }))
       .query(async ({ ctx, input }) => {
         if (!ctx.session.auth) {
           return false;
@@ -23,12 +23,12 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         );
       }),
     nameAvailable: publicProcedure
-      .input(z.object({ name: z.string() }))
+      .input(z.object({ name: z.string().trim() }))
       .query(async ({ input }) => {
         return await store.teams.nameAvailable(input.name);
       }),
     teamById: publicProcedure
-      .input(z.object({ teamId: z.string() }))
+      .input(z.object({ teamId: z.string().trim() }))
       .query(async ({ input }) => {
         const team = await store.teams.teamById(input.teamId);
         if (!team) {
@@ -37,7 +37,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return team;
       }),
     teamBySlug: publicProcedure
-      .input(z.object({ slug: z.string() }))
+      .input(z.object({ slug: z.string().trim() }))
       .query(async ({ input }) => {
         const team = await store.teams.teamBySlug(input.slug);
         if (!team) {
@@ -46,7 +46,9 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return team;
       }),
     userTeams: publicProcedure
-      .input(z.object({ userTeamId: z.string().nonempty() }).or(z.void()))
+      .input(
+        z.object({ userTeamId: z.string().trim().nonempty() }).or(z.void()),
+      )
       .query(async ({ input, ctx }) => {
         const teamId = input?.userTeamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
@@ -58,7 +60,12 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return await store.teams.teamsByMemberId(teamId);
       }),
     newTeam: protectedProcedure
-      .input(z.object({ name: z.string(), emailInvites: z.array(z.string()) }))
+      .input(
+        z.object({
+          name: z.string().trim(),
+          emailInvites: z.array(z.string().trim()),
+        }),
+      )
       .mutation(async ({ ctx, input }) => {
         const { team, invites } = await store.teams.createTeamByPersonalTeam(
           input.name,
@@ -69,18 +76,18 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return team;
       }),
     usersForTeam: publicProcedure
-      .input(z.object({ teamId: z.string() }))
+      .input(z.object({ teamId: z.string().trim() }))
       .query(async ({ input }) => {
         const people = await store.teams.userTeamsForTeamId(input.teamId);
         return people;
       }),
     toggleAdmin: teamAdminProcedure(store)
-      .input(z.object({ userId: z.string() }))
+      .input(z.object({ userId: z.string().trim() }))
       .mutation(async ({ input }) => {
         await store.teams.toggleAdmin(input.teamId, input.userId);
       }),
     removeTeamMember: teamAdminProcedure(store)
-      .input(z.object({ userId: z.string() }))
+      .input(z.object({ userId: z.string().trim() }))
       .mutation(async ({ input }) => {
         await store.teams.removeTeamMember(input.teamId, input.userId);
       }),

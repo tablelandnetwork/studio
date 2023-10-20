@@ -32,7 +32,7 @@ export const protectedProcedure = publicProcedure.use((opts) => {
 
 export const teamProcedure = (store: Store) =>
   protectedProcedure
-    .input(z.object({ teamId: z.string().nonempty() }))
+    .input(z.object({ teamId: z.string().trim().nonempty() }))
     .use(async (opts) => {
       const membership = await store.teams.isAuthorizedForTeam(
         opts.ctx.session.auth.user.teamId,
@@ -62,7 +62,7 @@ export const teamAdminProcedure = (store: Store) =>
 
 export const projectProcedure = (store: Store) =>
   protectedProcedure
-    .input(z.object({ projectId: z.string().nonempty() }))
+    .input(z.object({ projectId: z.string().trim().nonempty() }))
     .use(async (opts) => {
       const team = await store.projects.projectTeamByProjectId(
         opts.input.projectId,
@@ -90,7 +90,7 @@ export const projectProcedure = (store: Store) =>
 
 export const tableProcedure = (store: Store) =>
   protectedProcedure
-    .input(z.object({ tableId: z.string().uuid() }))
+    .input(z.object({ tableId: z.string().trim().uuid() }))
     .use(async (opts) => {
       const team = await store.tables.tableTeam(opts.input.tableId);
       if (!team) {

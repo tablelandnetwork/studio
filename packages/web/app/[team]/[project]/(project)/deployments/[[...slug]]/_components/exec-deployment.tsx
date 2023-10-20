@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -39,6 +40,29 @@ import {
   switchNetwork,
   waitForTransaction,
 } from "wagmi/actions";
+import { Chain } from "wagmi/chains";
+
+const groupedChains = Array.from(
+  chains()
+    .reduce(
+      (acc, chain) => {
+        if (chain.testnet === undefined) {
+          acc.get("Others")?.push(chain);
+        } else if (chain.testnet) {
+          acc.get("Testnets")?.push(chain);
+        } else {
+          acc.get("Mainnets")?.push(chain);
+        }
+        return acc;
+      },
+      new Map<string, Chain[]>([
+        ["Mainnets", []],
+        ["Testnets", []],
+        ["Others", []],
+      ]),
+    )
+    .entries(),
+);
 
 export default function ExecDeployment({
   team,
@@ -206,12 +230,23 @@ export default function ExecDeployment({
             <SelectTrigger className="w-fit gap-x-2">
               <SelectValue placeholder="Select chain" />
             </SelectTrigger>
-            <SelectContent className="max-h-[20rem] overflow-y-auto">
-              {chains().map((chain) => (
-                <SelectItem key={chain.chainName} value={`${chain.chainId}`}>
-                  {chain.chainName} ({chain.chainId})
-                </SelectItem>
-              ))}
+            <SelectContent>
+              <ScrollArea className="h-[20rem]">
+                {groupedChains.map((group) => {
+                  return !!group[1].length ? (
+                    <div key={group[0]}>
+                      <p className="px-2 pt-2 text-xs text-muted-foreground">
+                        {group[0]}
+                      </p>
+                      {group[1].map((chain) => (
+                        <SelectItem key={chain.name} value={`${chain.id}`}>
+                          {chain.name} ({chain.id})
+                        </SelectItem>
+                      ))}
+                    </div>
+                  ) : null;
+                })}
+              </ScrollArea>
             </SelectContent>
           </Select>
         </div>

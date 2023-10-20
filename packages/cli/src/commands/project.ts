@@ -40,7 +40,7 @@ export const builder = function (args: Yargs) {
           const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
           const projects = await api.projects.teamProjects.query(query);
 
-          logger.table(projects);
+          logger.log(JSON.stringify(projects, null, 4));
         } catch (err: any) {
           logger.error(err);
         }

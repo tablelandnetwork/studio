@@ -1,46 +1,27 @@
 "use client";
 
+import { chains as supportedChains } from "@/lib/chains";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import {
-  arbitrum,
-  arbitrumGoerli,
-  arbitrumNova,
-  filecoin,
-  filecoinCalibration,
-  localhost,
-  mainnet,
-  optimism,
-  optimismGoerli,
-  polygon,
-  polygonMumbai,
-  sepolia,
-} from "wagmi/chains";
+import { arbitrumNova } from "wagmi/chains";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { infuraProvider } from "wagmi/providers/infura";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { publicProvider } from "wagmi/providers/public";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [
-    arbitrum,
-    arbitrumNova,
-    arbitrumGoerli,
-    polygon,
-    polygonMumbai,
-    optimism,
-    optimismGoerli,
-    mainnet,
-    sepolia,
-    filecoin,
-    filecoinCalibration,
-    localhost,
-  ],
+  supportedChains(),
   [
     infuraProvider({ apiKey: "92f6902cf1214401ae5b08a1e117eb91" }),
     jsonRpcProvider({
-      rpc: () => ({
-        http: "https://neat-dark-dust.nova-mainnet.quiknode.pro/2d4bbaa84ce4721fc6576c47051cd505e16fb325/",
-      }),
+      rpc: (chain) => {
+        let slug = "breakit";
+        if (chain.id === arbitrumNova.id) {
+          slug = "nova-mainnet";
+        }
+        return {
+          http: `https://neat-dark-dust.${slug}.quiknode.pro/2d4bbaa84ce4721fc6576c47051cd505e16fb325/`,
+        };
+      },
     }),
     publicProvider(),
   ],

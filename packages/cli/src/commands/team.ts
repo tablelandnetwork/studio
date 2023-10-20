@@ -2,7 +2,13 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, logger, normalizePrivateKey } from "../utils.js";
+import {
+  FileStore,
+  getApi,
+  getApiUrl,
+  logger,
+  normalizePrivateKey,
+} from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -44,8 +50,9 @@ export const builder = function (args: Yargs) {
           }
 
           const teams = await api.teams.userTeams.query(query);
+          const pretty = JSON.stringify(teams, null, 4);
 
-          logger.table(teams);
+          logger.log(pretty);
         } catch (err) {
           logger.error(err);
         }

@@ -1,18 +1,21 @@
 {
   "name": "@tableland/studio-client",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.0.0-pre.0",
   "description": "A tRPC client for Studio",
+  "repository": "https://github.com/tablelandnetwork/studio/client",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
+  "types": "./dist/index.d.js",
+  "files": [
+    "dist/**/*.js"
+  ],
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tablelandnetwork/studio.git"
   },
   "keywords": [
     "tableland",
@@ -30,7 +33,7 @@
   },
   "homepage": "https://github.com/tablelandnetwork/studio#readme",
   "dependencies": {
-    "@tableland/studio-api": "^1.0.0",
+    "@tableland/studio-api": "^0.0.0-pre.0",
     "@trpc/client": "^10.38.4",
     "superjson": "^1.13.1"
   }

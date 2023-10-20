@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 const formSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().email(),
 });
 
 export default function NewInvite({ team }: { team: schema.Team }) {
