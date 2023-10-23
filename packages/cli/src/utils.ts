@@ -37,7 +37,7 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   return api(apiArgs);
 };
 
-export ask = async function (questions: string[]) {
+export const ask = async function (questions: string[]) {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -46,6 +46,7 @@ export ask = async function (questions: string[]) {
   const answers = [];
   for (const question of questions) {
     const answer = await rl.question(question);
+    answers.push(answer);
   }
 
   rl.close();

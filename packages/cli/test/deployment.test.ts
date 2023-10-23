@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import { equal, match } from "node:assert";
 import { getAccounts } from "@tableland/local";
 import { Database } from "@tableland/sdk";
+import mockStd from "mock-stdin";
 import { getDefaultProvider } from "ethers";
 import { afterEach, before, describe, test } from "mocha";
 import { restore, spy } from "sinon";
@@ -66,6 +67,11 @@ describe("commands/deployment", function () {
   const tableName = "table1";
   test("can create a deployment", async function () {
     const consoleLog = spy(logger, "log");
+    const stdin = mockStd.stdin();
+
+    setTimeout(() => {
+      stdin.send("y\n").end();
+    }, 1000);
 
     await yargs([
       "deployment",
@@ -76,7 +82,7 @@ describe("commands/deployment", function () {
       ...defaultArgs,
     ]).command(mod).parse();
 
-    const res = consoleLog.getCall(0).firstArg;
+    const res = consoleLog.getCall(1).firstArg;
     const value = JSON.parse(res);
 
     // assert id format

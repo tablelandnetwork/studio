@@ -6,6 +6,7 @@ import { waitForTransaction } from "wagmi/actions";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
 import {
+  ask,
   FileStore,
   getApi,
   getApiUrl,
@@ -116,8 +117,15 @@ export const builder = function (args: Yargs) {
           // TODO: setup a "ping" endpoint in the api so we can be sure the api is responding before
           //       the deployment is created
 
-          // TODO: setup readline interface to let the user
-          //       confirm they want to deploy their tables
+          // confirm they want to deploy their table
+          const confirm = await ask([
+            `you are about to use funds from account ${wallet.address} on ${chainInfo.name} to deploy a table
+are you sure you want to continue (y/n)? `
+          ]);
+
+          if (confirm[0].length < 1 || confirm[0][0].toLowerCase() !== "y") {
+            logger.log("aborting deployment");
+          }
 
           const db = new Database({
             signer: wallet,
@@ -149,6 +157,7 @@ export const builder = function (args: Yargs) {
             txnHash: txn?.transactionHash,
           });
 
+          logger.log("table deployed");
           logger.log(JSON.stringify(result, null, 4));
         } catch (err: any) {
           logger.error(err);
