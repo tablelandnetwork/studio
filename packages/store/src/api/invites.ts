@@ -4,7 +4,7 @@ import { asc, eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import { alias } from "drizzle-orm/sqlite-core";
 import { sealData, unsealData } from "iron-session";
-import * as schema from "../schema";
+import * as schema from "../schema/index.js";
 import {
   NewTeamInviteSealed,
   Team,
@@ -12,7 +12,7 @@ import {
   teamInvites,
   teamMemberships,
   teams,
-} from "../schema";
+} from "../schema/index.js";
 
 export function invites(
   db: DrizzleD1Database<typeof schema>,

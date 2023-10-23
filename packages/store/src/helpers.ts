@@ -1,4 +1,4 @@
-import { Schema } from "@tableland/studio-store";
+import { type Schema } from "./index.js";
 
 export type Constraint = "not null" | "primary key" | "unique";
 

@@ -20,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { chains } from "@/lib/chains";
-import { generateCreateTableStatement } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import {
   Database,
@@ -28,7 +27,7 @@ import {
   WaitableTransactionReceipt,
   helpers,
 } from "@tableland/sdk";
-import { schema } from "@tableland/studio-store";
+import { generateCreateTableStatement, schema } from "@tableland/studio-store";
 import { providers } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";

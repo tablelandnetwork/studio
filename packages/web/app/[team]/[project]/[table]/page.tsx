@@ -13,9 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { hasConstraint } from "@/lib/schema";
 import { api } from "@/trpc/server-invoker";
 import { helpers } from "@tableland/sdk";
+import { hasConstraint } from "@tableland/studio-store";
 import TimeAgo from "javascript-time-ago";
 import { Check, Rocket } from "lucide-react";
 import Link from "next/link";

@@ -82,6 +82,7 @@ export const builder = function (args: Yargs) {
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
+        throw new Error("team create not implemented in CLI yet. use the web application.")
         console.log("trying to create team...");
         const { name, personalTeamId, invites, store } = argv;
 
@@ -92,7 +93,7 @@ export const builder = function (args: Yargs) {
         if (typeof personalTeamId !== "string") {
           throw new Error("must provide personal team id");
         }
-        console.log("doing create by pId...");
+
         // const result = await createTeamByPersonalTeam(
         //   name,
         //   personalTeamId,
@@ -106,17 +107,17 @@ export const builder = function (args: Yargs) {
       },
     )
     .command(
-      "add",
-      "add user to a team",
+      "add <user>",
+      "add user to a team. team id must either be a command option or available in the context.",
       function (args) {
         return args
+          .positional("user", {
+            type: "string",
+            description: "user to be added to team",
+          })
           .option("team", {
             type: "string",
             description: "name of team to add to",
-          })
-          .option("user", {
-            type: "string",
-            description: "user to be added to team",
           });
       },
       async function (argv) {

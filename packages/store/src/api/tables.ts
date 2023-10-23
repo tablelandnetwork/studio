@@ -2,10 +2,10 @@ import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
 import { and, eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
-import { Schema } from "../custom-types";
-import * as schema from "../schema";
-import { Table, projectTables, tables, teamProjects, teams } from "../schema";
-import { slugify } from "./utils";
+import { Schema } from "../custom-types/index.js";
+import * as schema from "../schema/index.js";
+import { Table, projectTables, tables, teamProjects, teams } from "../schema/index.js";
+import { slugify } from "./utils.js";
 
 export function initTables(
   db: DrizzleD1Database<typeof schema>,
