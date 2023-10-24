@@ -26,8 +26,9 @@ import {
   FileStore,
 } from "../utils.js";
 
+// note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "import-data <table> <file>";
-export const desc = "write the content of a csv into an existing table";
+export const desc = "write the content of a csv into an  existing table";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,

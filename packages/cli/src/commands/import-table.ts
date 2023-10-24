@@ -25,8 +25,9 @@ import {
   FileStore,
 } from "../utils.js";
 
-export const command = "import-table <table> <project> <description> [name]";
-export const desc = "import an existing tableland table into a project with description and optionally with a new name";
+// note: abnormal spacing is needed to ensure help message is formatted correctly
+export const command = "import-table <table> <project>   <description> [name]";
+export const desc = "import an existing tableland table  into a project with description and optionally with a new name";
 
 const maxStatementLength = 35000;
 
