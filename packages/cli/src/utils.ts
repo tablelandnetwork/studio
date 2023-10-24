@@ -7,6 +7,7 @@ import { API, api, ClientConfig } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
 const DEFAULT_API_URL = "https://studio.tableland.xyz";
+const MAX_STATEMENT_SIZE = 34999;
 
 export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
@@ -46,7 +47,7 @@ export const ask = async function (questions: string[]) {
   const answers = [];
   for (const question of questions) {
     const answer = await rl.question(question);
-    answers.push(answer);
+    answers.push(answer.trim());
   }
 
   rl.close();
@@ -354,6 +355,62 @@ export function toChecksumAddress(address: string) {
   }
   return ret;
 }
+
+export const batchRows = function (
+  rows: Array<Array<string | number>>,
+  headers: string[],
+  table: string
+) {
+  let rowCount = 0;
+  const batches = [];
+  while (rows.length) {
+    let statement = `INSERT INTO ${table}(${headers.join(",")})VALUES`
+
+    while (
+      rows.length
+      && byteSize(statement + getNextValues(rows[0])) < MAX_STATEMENT_SIZE
+    ) {
+      const row = rows.shift();
+      if (!row) continue;
+      rowCount += 1;
+      if (row.length !== headers.length) {
+        throw new Error(`malformed csv file, row ${rowCount} has incorrect number of columns`);
+      }
+      // include comma between
+      statement += getNextValues(row);
+    }
+
+    // remove last comma and add semicolon
+    statement = statement.slice(0, -1) + ";";
+    batches.push(statement.toString());
+  }
+
+  return batches;
+};
+
+const byteSize = function (str: string) {
+  return new Blob([str]).size;
+};
+
+const getNextValues = function (row: (string | number)[]) {
+  return `(${row.join(",")}),`;
+}
+
+// Headers need to be enclosed in tick marks to comply with Studio table
+// creation and users may not realize this. If they provide a csv without
+// tickmarks we can convert for them.
+export const prepareCsvHeaders = function (headers: string[]) {
+  for (let i = 0; i < headers.length; i++) {
+    if (headers[i][0] !== "`") {
+      headers[i] = "`" + headers[i];
+    }
+    if (headers[i][headers[i].length - 1] !== "`") {
+      headers[i] = headers[i] + "`";
+    }
+  }
+
+  return headers;
+};
 
 // Wrap any direct calls to console.log, so that test spies can distinguise between
 // the CLI's output, and messaging that originates outside the CLI
