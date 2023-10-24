@@ -9,12 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { chains } from "@/lib/chains";
-import {
-  type FieldValues,
-  type Path,
-  type PathValue,
-  type UseFormSetValue,
-} from "react-hook-form";
 import { type Chain } from "wagmi/chains";
 
 const groupedChains = Array.from(
@@ -39,24 +33,13 @@ const groupedChains = Array.from(
     .entries(),
 );
 
-interface Props<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends Path<TFieldValues> = Path<TFieldValues>,
-> {
-  setValue: UseFormSetValue<TFieldValues>;
-  name: TName;
+interface Props {
+  setValue: (v: string) => void;
 }
 
-export default function ChainSelector<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends Path<TFieldValues> = Path<TFieldValues>,
->({ setValue, name }: Props<TFieldValues, TName>) {
+export default function ChainSelector({ setValue }: Props) {
   return (
-    <Select
-      onValueChange={(val) => {
-        setValue(name, val as PathValue<TFieldValues, TName>);
-      }}
-    >
+    <Select onValueChange={(val) => setValue(val)}>
       <SelectTrigger className="w-fit gap-x-2">
         <SelectValue placeholder="Select chain" />
       </SelectTrigger>

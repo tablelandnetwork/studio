@@ -98,9 +98,8 @@ export default function ImportTableForm({ project, team, envs }: Props) {
             <FormItem>
               <FormLabel>Chain ID</FormLabel>
               <FormControl>
-                <ChainSelector<z.infer<typeof formSchema>>
-                  name="chainId"
-                  setValue={setValue}
+                <ChainSelector
+                  setValue={(val) => setValue("chainId", parseInt(val, 10))}
                 />
               </FormControl>
               <FormDescription>
