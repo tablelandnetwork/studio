@@ -13,6 +13,7 @@ import {
   getProject,
   isUUID,
   getEnvironmentId,
+  getQueryValidator,
 } from "../utils.js";
 
 export const command = "read [query]";
@@ -31,6 +32,13 @@ export const handler = async (
     //       must be doing something wrong.
     if (typeof query !== "string") {
       throw new Error("must provide query");
+    }
+
+    const validateQuery = await getQueryValidator();
+    const queryObject = await validateQuery(query);
+
+    if (queryObject.type !== "read") {
+      throw new Error("query must be a read query");
     }
 
     const fileStore = new FileStore(store as string);

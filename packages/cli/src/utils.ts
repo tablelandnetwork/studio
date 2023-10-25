@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { Wallet, getDefaultProvider, providers } from "ethers";
 import createKeccakHash from "keccak";
 import { helpers } from "@tableland/sdk";
+import { init } from "@tableland/sqlparser";
 import { API, api, ClientConfig } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
@@ -23,6 +24,13 @@ export const isUUID = function (value: unknown) {
   if (idParts[4].length !== 12)return false;
 
   return true;
+};
+
+export const getQueryValidator = async function () {
+  await init();
+  return async function (query: string) {
+    return await globalThis.sqlparser.normalize(query);
+  };
 };
 
 export const ask = async function (questions: string[]) {
