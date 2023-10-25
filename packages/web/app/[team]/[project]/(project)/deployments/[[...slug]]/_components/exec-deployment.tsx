@@ -194,7 +194,10 @@ export default function ExecDeployment({
         </DialogHeader>
         <div className="flex items-center gap-2">
           <Label>Deploy to</Label>
-          <ChainSelector setValue={(val) => setSelectedChain(val)} />
+          <ChainSelector
+            setValue={(val) => setSelectedChain(val)}
+            isDisabled={pendingDeploy}
+          />
         </div>
         <DeployStep
           pendingText="Resolve signer"

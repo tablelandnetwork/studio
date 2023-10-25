@@ -35,11 +35,12 @@ const groupedChains = Array.from(
 
 interface Props {
   setValue: (v: string) => void;
+  isDisabled?: boolean;
 }
 
-export default function ChainSelector({ setValue }: Props) {
+export default function ChainSelector({ setValue, isDisabled }: Props) {
   return (
-    <Select onValueChange={(val) => setValue(val)}>
+    <Select onValueChange={(val) => setValue(val)} disabled={isDisabled}>
       <SelectTrigger className="w-fit gap-x-2">
         <SelectValue placeholder="Select chain" />
       </SelectTrigger>
