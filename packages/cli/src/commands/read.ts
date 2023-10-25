@@ -39,7 +39,10 @@ export const handler = async (
       })
     });
 
-    const result = await db.prepare(query).all();
+    const preparedStatement = db.prepare(query);
+console.log("preparedStatement", preparedStatement);
+
+    const result = await preparedStatement.all();
 
     logger.log(JSON.stringify(result, null, 4));
   } catch (err: any) {
