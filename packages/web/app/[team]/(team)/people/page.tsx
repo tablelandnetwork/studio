@@ -1,8 +1,8 @@
 import AddressDisplay from "@/components/address-display";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { api } from "@/trpc/server-invoker";
-import { Session } from "@tableland/studio-api";
+import { api } from "@/trpc/server";
+import { RouterOutputs, Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import Info from "./_components/info";
@@ -18,13 +18,9 @@ export default async function People({ params }: { params: { team: string } }) {
     teamId: team.id,
   });
 
-  let invites: Awaited<
-    ReturnType<typeof api.invites.invitesForTeam.query>
-  >["invites"] = [];
+  let invites: RouterOutputs["invites"]["invitesForTeam"]["invites"] = [];
   let teamAuthorization:
-    | Awaited<
-        ReturnType<typeof api.invites.invitesForTeam.query>
-      >["teamAuthorization"]
+    | RouterOutputs["invites"]["invitesForTeam"]["teamAuthorization"]
     | undefined;
   if (auth) {
     try {

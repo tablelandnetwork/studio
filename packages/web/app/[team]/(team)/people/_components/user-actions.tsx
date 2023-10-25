@@ -1,6 +1,5 @@
 "use client";
 
-import { removeTeamMember, toggleAdmin } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,10 +11,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
 import { DropdownMenuTriggerProps } from "@radix-ui/react-dropdown-menu";
 import { schema } from "@tableland/studio-store";
 import { MoreHorizontal } from "lucide-react";
-import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 type Props = DropdownMenuTriggerProps & {
   team: schema.Team;
@@ -36,12 +36,12 @@ export default function UserActions({
   claimedInviteId,
   ...props
 }: Props) {
+  const router = useRouter();
   const { toast } = useToast();
-  const [pending, startTransition] = useTransition();
 
-  async function onToggleAdmin() {
-    startTransition(async () => {
-      await toggleAdmin(team, member);
+  const toggleAdmin = api.teams.toggleAdmin.useMutation({
+    onSuccess: () => {
+      router.refresh();
       toast({
         title: "Success!",
         description: (
@@ -51,12 +51,12 @@ export default function UserActions({
           </p>
         ),
       });
-    });
-  }
+    },
+  });
 
-  async function onRemoveUser() {
-    startTransition(async () => {
-      await removeTeamMember(team, member);
+  const removeUser = api.teams.removeTeamMember.useMutation({
+    onSuccess: () => {
+      router.refresh();
       toast({
         title: "Success!",
         description: (
@@ -67,14 +67,22 @@ export default function UserActions({
           </p>
         ),
       });
-    });
-  }
+    },
+  });
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className={cn(className)} {...props} asChild>
-        <Button variant="ghost" disabled={pending}>
-          <MoreHorizontal className={cn(pending && "animate-pulse")} />
+        <Button
+          variant="ghost"
+          disabled={toggleAdmin.isLoading || removeUser.isLoading}
+        >
+          <MoreHorizontal
+            className={cn(
+              (toggleAdmin.isLoading || removeUser.isLoading) &&
+                "animate-pulse",
+            )}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -88,10 +96,18 @@ export default function UserActions({
         )}
         {!!userMembership.isOwner && user.id !== member.id && (
           <>
-            <DropdownMenuItem onClick={onToggleAdmin}>
+            <DropdownMenuItem
+              onClick={() =>
+                toggleAdmin.mutate({ teamId: team.id, userId: member.id })
+              }
+            >
               {!!memberMembership.isOwner ? "Remove" : "Make"} admin
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onRemoveUser}>
+            <DropdownMenuItem
+              onClick={() =>
+                removeUser.mutate({ teamId: team.id, userId: member.id })
+              }
+            >
               Remove from team
             </DropdownMenuItem>
           </>

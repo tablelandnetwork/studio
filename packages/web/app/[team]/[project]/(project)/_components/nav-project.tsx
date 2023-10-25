@@ -1,12 +1,11 @@
 "use client";
 
-import { projectByTeamIdAndSlug, teamBySlug } from "@/app/actions";
 import Crumb from "@/components/crumb";
 import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
 import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import Share from "./share";
 
 function projectLinks(
@@ -36,27 +35,14 @@ export default function NavProject({
     team: string;
     project: string;
   }>();
-  const [team, setTeam] = useState<schema.Team | undefined>(undefined);
-  const [project, setProject] = useState<schema.Project | undefined>(undefined);
   const pathname = usePathname();
 
-  useEffect(() => {
-    const getTeam = async () => {
-      const team = await teamBySlug(teamSlug);
-      setTeam(team);
-    };
-    getTeam();
-  }, [teamSlug]);
-
-  useEffect(() => {
-    const getProject = async (teamId: string) => {
-      const project = await projectByTeamIdAndSlug(teamId, projectSlug);
-      setProject(project);
-    };
-    if (team) {
-      getProject(team.id);
-    }
-  }, [projectSlug, team]);
+  const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
+  const teamId = team?.id;
+  const { data: project } = api.projects.projectByTeamIdAndSlug.useQuery(
+    { teamId: teamId!, slug: projectSlug },
+    { enabled: !!teamId },
+  );
 
   if (!team || !project) {
     return null;

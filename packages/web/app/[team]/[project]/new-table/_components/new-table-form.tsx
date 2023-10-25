@@ -1,6 +1,5 @@
 "use client";
 
-import { newTable, tableNameAvailable } from "@/app/actions";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sqliteKeywords } from "@tableland/studio-client";
 import {
@@ -46,7 +46,7 @@ import {
 } from "@tableland/studio-store";
 import { HelpCircle, Loader2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -94,11 +94,20 @@ interface Props {
 }
 
 export default function NewTable({ project, team, envs }: Props) {
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
-    undefined,
-  );
-  const [pending, startTransition] = useTransition();
+  const [tableName, setTableName] = useState("");
   const router = useRouter();
+
+  const tableNameAvailable = api.tables.nameAvailable.useQuery(
+    { projectId: project.id, name: tableName },
+    { enabled: !!tableName },
+  );
+
+  const newTable = api.tables.newTable.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      router.replace(`/${team.slug}/${project.slug}`);
+    },
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -160,20 +169,13 @@ export default function NewTable({ project, team, envs }: Props) {
         return schemaColumn;
       },
     );
-    startTransition(async () => {
-      await newTable(
-        project,
-        values.name,
-        values.description,
-        cleanSchema({ columns: schemaCols }),
-      );
-      router.replace(`/${team.slug}/${project.slug}`);
+    newTable.mutate({
+      projectId: project.id,
+      name: values.name,
+      description: values.description,
+      schema: cleanSchema({ columns: schemaCols }),
     });
   }
-
-  const checkTableName = async (name: string) => {
-    return await tableNameAvailable(project.id, name);
-  };
 
   return (
     <Form {...form}>
@@ -190,8 +192,9 @@ export default function NewTable({ project, team, envs }: Props) {
               <FormControl>
                 <InputWithCheck
                   placeholder="Table name"
-                  check={checkTableName}
-                  onCheckResult={setNameAvailable}
+                  onCheck={setTableName}
+                  checkPending={tableNameAvailable.isLoading}
+                  checkPassed={tableNameAvailable.data}
                   {...field}
                 />
               </FormControl>
@@ -501,8 +504,13 @@ export default function NewTable({ project, team, envs }: Props) {
             );
           })}
         </div> */}
-        <Button type="submit" disabled={pending || !nameAvailable}>
-          {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+        <Button
+          type="submit"
+          disabled={newTable.isLoading || !tableNameAvailable.data}
+        >
+          {newTable.isLoading && (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          )}
           Submit
         </Button>
       </form>

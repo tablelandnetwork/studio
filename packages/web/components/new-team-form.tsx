@@ -1,6 +1,5 @@
 "use client";
 
-import { newTeam, teamNameAvailable } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,10 +10,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import InputWithCheck from "./input-with-check";
@@ -26,12 +26,21 @@ const schema = z.object({
 });
 
 export default function NewTeamForm() {
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
-    undefined,
-  );
-  const [pendingEmail, setPendingEmail] = useState<string>("");
-  const [pending, startTransition] = useTransition();
+  const [teamName, setTeamName] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
   const router = useRouter();
+
+  const teamNameAvailable = api.teams.nameAvailable.useQuery(
+    { name: teamName },
+    { enabled: !!teamName },
+  );
+
+  const newTeam = api.teams.newTeam.useMutation({
+    onSuccess: (res) => {
+      router.push(`/${res.slug}`);
+      router.refresh();
+    },
+  });
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -45,11 +54,7 @@ export default function NewTeamForm() {
     if (!!pendingEmail) {
       values.emailInvites = [...values.emailInvites, pendingEmail];
     }
-    startTransition(async () => {
-      const res = await newTeam(values.name, values.emailInvites);
-      router.push(`/${res.slug}`);
-      router.refresh();
-    });
+    newTeam.mutate(values);
   }
 
   return (
@@ -67,8 +72,9 @@ export default function NewTeamForm() {
               <FormControl>
                 <InputWithCheck
                   placeholder="Team name"
-                  check={teamNameAvailable}
-                  onCheckResult={setNameAvailable}
+                  onCheck={setTeamName}
+                  checkPending={teamNameAvailable.isLoading}
+                  checkPassed={teamNameAvailable.data}
                   {...field}
                 />
               </FormControl>
@@ -105,8 +111,13 @@ export default function NewTeamForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={pending || !nameAvailable}>
-          {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+        <Button
+          type="submit"
+          disabled={newTeam.isLoading || !teamNameAvailable.data}
+        >
+          {newTeam.isLoading && (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          )}
           Submit
         </Button>
       </form>

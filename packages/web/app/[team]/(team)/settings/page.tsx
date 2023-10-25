@@ -1,4 +1,4 @@
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server";
 import { cache } from "react";
 
 export default async function TeamSettings({

@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server";
 import { helpers } from "@tableland/sdk";
 import { hasConstraint } from "@tableland/studio-store";
 import TimeAgo from "javascript-time-ago";

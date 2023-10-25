@@ -1,6 +1,5 @@
 "use client";
 
-import { newProject, projectNameAvailable } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,11 +11,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 import InputWithCheck from "./input-with-check";
@@ -28,12 +28,21 @@ const formSchema = z.object({
 });
 
 export default function NewProjectForm({ team }: { team: schema.Team }) {
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
-    undefined,
-  );
-  const [pending, startTransition] = useTransition();
+  const [projectName, setProjectName] = useState("");
 
   const router = useRouter();
+
+  const projectNameAvailable = api.projects.nameAvailable.useQuery(
+    { teamId: team.id, name: projectName },
+    { enabled: !!projectName },
+  );
+
+  const newProject = api.projects.newProject.useMutation({
+    onSuccess: (res) => {
+      router.refresh();
+      router.push(`/${team.slug}/${res.slug}`);
+    },
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,21 +69,12 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
   );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      // TODO: A default env is being created in the store when the Project is created.
-      // Undo this later.
-      const res = await newProject(team.id, values.name, values.description);
-      // TODO: Should probably do this within "new project action"
-      // await Promise.all(
-      //   values.environments.map((env) => newEnvironment(res.id, env.name)),
-      // );
-      router.push(`/${team.slug}/${res.slug}`);
+    newProject.mutate({
+      teamId: team.id,
+      name: values.name,
+      description: values.description,
     });
   }
-
-  const checkProjectName = async (name: string) => {
-    return await projectNameAvailable(team.id, name);
-  };
 
   return (
     <Form {...form}>
@@ -91,8 +91,9 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
               <FormControl>
                 <InputWithCheck
                   placeholder="Project name"
-                  check={checkProjectName}
-                  onCheckResult={setNameAvailable}
+                  onCheck={setProjectName}
+                  checkPending={projectNameAvailable.isLoading}
+                  checkPassed={projectNameAvailable.data}
                   {...field}
                 />
               </FormControl>
@@ -184,8 +185,13 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
             Add Environment
           </Button>
         </div> */}
-        <Button type="submit" disabled={pending || !nameAvailable}>
-          {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+        <Button
+          type="submit"
+          disabled={newProject.isLoading || !projectNameAvailable.data}
+        >
+          {newProject.isLoading && (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          )}
           Submit
         </Button>
       </form>

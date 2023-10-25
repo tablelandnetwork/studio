@@ -1,16 +1,11 @@
 import { Input, InputProps } from "@/components/ui/input";
 import { CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
-import {
-  ChangeEvent,
-  forwardRef,
-  useEffect,
-  useState,
-  useTransition,
-} from "react";
+import { ChangeEvent, forwardRef, useEffect, useState } from "react";
 
 export type Props = InputProps & {
-  check: (inputValue: string) => Promise<boolean>;
-  onCheckResult?: (result: boolean | undefined) => void;
+  onCheck: (inputValue: string) => void;
+  checkPending: boolean;
+  checkPassed?: boolean;
   debounceDuration?: number;
   failedMessage?: string;
 };
@@ -18,8 +13,9 @@ export type Props = InputProps & {
 const InputWithCheck = forwardRef<HTMLDivElement, Props>(
   (
     {
-      check,
-      onCheckResult,
+      onCheck,
+      checkPending,
+      checkPassed,
       onChange,
       debounceDuration = 500,
       failedMessage = "unavailable",
@@ -29,18 +25,13 @@ const InputWithCheck = forwardRef<HTMLDivElement, Props>(
   ) => {
     const [inputValue, setInputValue] = useState("");
     const [debouncing, setDebouncing] = useState(false);
-    const [debouncedName, setDebouncedName] = useState("");
-    const [checkPassed, setCheckPassed] = useState<boolean | undefined>(
-      undefined,
-    );
-    const [checkPending, startCheckPendingTransition] = useTransition();
+    const [debouncedValue, setDebouncedValue] = useState("");
 
     useEffect(() => {
       setDebouncing(true);
-      setCheckPassed(undefined);
       const id = setTimeout(() => {
         setDebouncing(false);
-        setDebouncedName(inputValue);
+        setDebouncedValue(inputValue);
       }, debounceDuration);
       return () => {
         setDebouncing(false);
@@ -49,26 +40,11 @@ const InputWithCheck = forwardRef<HTMLDivElement, Props>(
     }, [inputValue, debounceDuration]);
 
     useEffect(() => {
-      if (!debouncedName.length) {
-        setCheckPassed(undefined);
+      if (!debouncedValue.length) {
         return;
       }
-      startCheckPendingTransition(async () => {
-        const res = await check(debouncedName);
-        if (!debouncing) {
-          setCheckPassed(res);
-        }
-      });
-      // Leaving debouncing out of the deps array here is intentional
-      // because we don't want to retrigger this effect when debouncing changes.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedName]);
-
-    useEffect(() => {
-      if (onCheckResult) {
-        onCheckResult(checkPassed);
-      }
-    }, [checkPassed, onCheckResult]);
+      onCheck(debouncedValue);
+    }, [debouncedValue, onCheck]);
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
       setInputValue(event.target.value);

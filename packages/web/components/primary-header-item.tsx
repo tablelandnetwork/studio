@@ -1,32 +1,26 @@
 "use client";
 
-import { teamBySlug } from "@/app/actions";
-import { api } from "@/trpc/server-invoker";
-import { schema } from "@tableland/studio-store";
+import { api } from "@/trpc/react";
+import { RouterOutputs } from "@tableland/studio-api";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import TeamSwitcher from "./team-switcher";
 
 export default function PrimaryHeaderItem({
   teams,
 }: {
-  teams: Awaited<ReturnType<typeof api.teams.userTeams.query>>;
+  teams: RouterOutputs["teams"]["userTeams"];
 }) {
   const { team: teamSlug } = useParams<{ team?: string }>();
-  const [team, setTeam] = useState<schema.Team | undefined>(
-    teams.find((team) => team.slug === teamSlug),
-  );
-  useEffect(() => {
-    const getTeam = async (slug: string) => {
-      const team = await teamBySlug(slug);
-      setTeam(team);
-    };
-    if (!!teams.length && teamSlug) {
-      getTeam(teamSlug);
-    }
-  }, [teamSlug, teams.length]);
 
-  if (!teams.length || !team) {
+  const team = api.teams.teamBySlug.useQuery(
+    { slug: teamSlug! },
+    {
+      enabled: !!teamSlug,
+      initialData: teams.find((team) => team.slug === teamSlug),
+    },
+  );
+
+  if (!teams.length || !team.data) {
     return (
       <h1 className="text-2xl font-normal uppercase text-fuchsia-800">
         Studio
@@ -34,5 +28,5 @@ export default function PrimaryHeaderItem({
     );
   }
 
-  return <TeamSwitcher team={team} teams={teams} />;
+  return <TeamSwitcher team={team.data} teams={teams} />;
 }
