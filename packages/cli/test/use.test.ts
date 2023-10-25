@@ -57,6 +57,38 @@ describe("commands/use", function () {
     ]).command<GlobalOptions>(modLogout).parse();
   });
 
+  test("use command throws if project id is not valid", async function () {
+    const consoleError = spy(logger, "error");
+
+    await yargs([
+      "use",
+      "project",
+      "invalidprojectid",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2)
+    ]).command<GlobalOptions>(modUse).parse();
+
+    const err = consoleError.getCall(0).firstArg;
+    equal(err.message, "invalid project id");
+  });
+
+  test("use command throws if team id is not valid", async function () {
+    const consoleError = spy(logger, "error");
+
+    await yargs([
+      "use",
+      "team",
+      "invalidteamid",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2)
+    ]).command<GlobalOptions>(modUse).parse();
+
+    const err = consoleError.getCall(0).firstArg;
+    equal(err.message, "invalid team id");
+  });
+
   test("use command sets teamId for project command", async function () {
     await yargs([
       "login",

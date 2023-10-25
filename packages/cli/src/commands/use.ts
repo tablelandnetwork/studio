@@ -5,6 +5,7 @@ import {
   logger,
   getApi,
   FileStore,
+  isUUID,
 } from "../utils.js";
 
 export const command = "use [context] [id]";
@@ -23,10 +24,12 @@ export const handler = async (
 
     switch (context) {
       case "team":
+        if (!isUUID(id)) throw new Error("invalid team id");
         fileStore.set("teamId", id);
         fileStore.save();
         break;
       case "project":
+        if (!isUUID(id)) throw new Error("invalid project id");
         fileStore.set("projectId", id);
         fileStore.save();
         break;
