@@ -9,17 +9,20 @@ const sessionKey = "session-cookie";
 const DEFAULT_API_URL = "https://studio.tableland.xyz";
 const MAX_STATEMENT_SIZE = 34999;
 
-export const isUUID = function (value: string) {
-    // assert id format
-    const idParts = value.split("-");
-    if (idParts.length !== 5) return false;
-    if (idParts[0].length !== 8) return false;
-    if (idParts[1].length !== 4) return false;
-    if (idParts[2].length !== 4) return false;
-    if (idParts[3].length !== 4) return false;
-    if (idParts[4].length !== 12)return false;
+export const ERROR_INVALID_PROJECT_ID = "you must provide project id";
 
-    return true;
+export const isUUID = function (value: unknown) {
+  // assert id format
+  if (typeof value !== "string") return false;
+  const idParts = value.split("-");
+  if (idParts.length !== 5) return false;
+  if (idParts[0].length !== 8) return false;
+  if (idParts[1].length !== 4) return false;
+  if (idParts[2].length !== 4) return false;
+  if (idParts[3].length !== 4) return false;
+  if (idParts[4].length !== 12)return false;
+
+  return true;
 };
 
 export const ask = async function (questions: string[]) {
