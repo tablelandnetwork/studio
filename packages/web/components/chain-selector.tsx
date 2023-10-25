@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { chains } from "@/lib/chains";
+import { SelectProps } from "@radix-ui/react-select";
 import { type Chain } from "wagmi/chains";
 
 const groupedChains = Array.from(
@@ -33,14 +34,16 @@ const groupedChains = Array.from(
     .entries(),
 );
 
-interface Props {
-  setValue: (v: string) => void;
-  isDisabled?: boolean;
-}
+type Props = Omit<SelectProps, "onValueChange"> & {
+  onValueChange?(value: number): void;
+};
 
-export default function ChainSelector({ setValue, isDisabled }: Props) {
+export default function ChainSelector({
+  onValueChange = () => {},
+  ...rest
+}: Props) {
   return (
-    <Select onValueChange={(val) => setValue(val)} disabled={isDisabled}>
+    <Select {...rest} onValueChange={(val) => onValueChange(parseInt(val, 10))}>
       <SelectTrigger className="w-fit gap-x-2">
         <SelectValue placeholder="Select chain" />
       </SelectTrigger>
