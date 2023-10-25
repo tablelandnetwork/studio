@@ -15,7 +15,7 @@
     "build": "lerna run build"
   },
   "devDependencies": {
-    "@tableland/local": "^2.0.1",
+    "@tableland/local": "^2.1.0",
     "@types/cosmiconfig": "^6.0.0",
     "@types/inquirer": "^9.0.2",
     "@types/js-yaml": "^4.0.5",
