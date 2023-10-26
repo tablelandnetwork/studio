@@ -33,12 +33,12 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { providerUrl, apiUrl: apiUrlArg, store, table, file } = argv;
+    const { providerUrl, store, table, file } = argv;
     if (typeof table !== "string") {
       throw new Error("table name parameter is required");
     }
     const fileStore = new FileStore(store as string);
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
+    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore})
     const api = getApi(fileStore, apiUrl as string);
     const projectId = getProject({ ...argv, store: fileStore });
 
