@@ -1,6 +1,7 @@
 "use client";
 
 import { importTable, tableNameAvailable } from "@/app/actions";
+import ChainSelector from "@/components/chain-selector";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,7 +65,7 @@ export default function ImportTableForm({ project, team, envs }: Props) {
     },
   });
 
-  const { handleSubmit, control, register } = form;
+  const { handleSubmit, control, register, setValue } = form;
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
@@ -97,10 +98,23 @@ export default function ImportTableForm({ project, team, envs }: Props) {
             <FormItem>
               <FormLabel>Chain ID</FormLabel>
               <FormControl>
-                <Input placeholder="eg. 8001" {...field} />
+                <ChainSelector
+                  onValueChange={(val) => setValue("chainId", val)}
+                />
               </FormControl>
               <FormDescription>
-                The chain ID where the existing Tableland table exists.
+                The chain ID where the existing Tableland table exists.&nbsp;
+                <a
+                  href={
+                    "https://docs.tableland.xyz/smart-contracts/deployed-contracts#registry-contract"
+                  }
+                  className={
+                    "text-sm font-medium transition-colors hover:text-primary"
+                  }
+                  target="_blank"
+                >
+                  Supported chains
+                </a>
               </FormDescription>
               <FormMessage />
             </FormItem>
