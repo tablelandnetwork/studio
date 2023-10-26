@@ -27,10 +27,11 @@ export default function RegistrationDialog({
   onCancel: () => void;
 }) {
   const [teamName, setTeamName] = useState("");
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
 
-  const teamNameAvailable = api.teams.nameAvailable.useQuery(
+  const nameAvailableQuery = api.teams.nameAvailable.useQuery(
     { name: teamName },
     { enabled: !!teamName },
   );
@@ -72,9 +73,9 @@ export default function RegistrationDialog({
                 id="name"
                 placeholder="myusername"
                 value={username}
-                onCheck={setTeamName}
-                checkPending={teamNameAvailable.isLoading}
-                checkPassed={teamNameAvailable.data}
+                updateQuery={setTeamName}
+                queryStatus={nameAvailableQuery}
+                onResult={setNameAvailable}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -103,7 +104,7 @@ export default function RegistrationDialog({
           <Button
             type="submit"
             onClick={handleRegister}
-            disabled={register.isLoading || !teamNameAvailable.data}
+            disabled={register.isLoading || !nameAvailable}
           >
             {register.isLoading && (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />

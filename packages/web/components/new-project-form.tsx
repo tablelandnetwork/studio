@@ -29,10 +29,10 @@ const formSchema = z.object({
 
 export default function NewProjectForm({ team }: { team: schema.Team }) {
   const [projectName, setProjectName] = useState("");
-
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const router = useRouter();
 
-  const projectNameAvailable = api.projects.nameAvailable.useQuery(
+  const nameAvailableQuery = api.projects.nameAvailable.useQuery(
     { teamId: team.id, name: projectName },
     { enabled: !!projectName },
   );
@@ -91,9 +91,9 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
               <FormControl>
                 <InputWithCheck
                   placeholder="Project name"
-                  onCheck={setProjectName}
-                  checkPending={projectNameAvailable.isLoading}
-                  checkPassed={projectNameAvailable.data}
+                  updateQuery={setProjectName}
+                  queryStatus={nameAvailableQuery}
+                  onResult={setNameAvailable}
                   {...field}
                 />
               </FormControl>
@@ -185,10 +185,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
             Add Environment
           </Button>
         </div> */}
-        <Button
-          type="submit"
-          disabled={newProject.isLoading || !projectNameAvailable.data}
-        >
+        <Button type="submit" disabled={newProject.isLoading || !nameAvailable}>
           {newProject.isLoading && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           )}

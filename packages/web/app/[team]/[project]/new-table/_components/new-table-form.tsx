@@ -95,9 +95,10 @@ interface Props {
 
 export default function NewTable({ project, team, envs }: Props) {
   const [tableName, setTableName] = useState("");
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const router = useRouter();
 
-  const tableNameAvailable = api.tables.nameAvailable.useQuery(
+  const nameAvailableQuery = api.tables.nameAvailable.useQuery(
     { projectId: project.id, name: tableName },
     { enabled: !!tableName },
   );
@@ -192,9 +193,9 @@ export default function NewTable({ project, team, envs }: Props) {
               <FormControl>
                 <InputWithCheck
                   placeholder="Table name"
-                  onCheck={setTableName}
-                  checkPending={tableNameAvailable.isLoading}
-                  checkPassed={tableNameAvailable.data}
+                  updateQuery={setTableName}
+                  queryStatus={nameAvailableQuery}
+                  onResult={setNameAvailable}
                   {...field}
                 />
               </FormControl>
@@ -504,10 +505,7 @@ export default function NewTable({ project, team, envs }: Props) {
             );
           })}
         </div> */}
-        <Button
-          type="submit"
-          disabled={newTable.isLoading || !tableNameAvailable.data}
-        >
+        <Button type="submit" disabled={newTable.isLoading || !nameAvailable}>
           {newTable.isLoading && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           )}

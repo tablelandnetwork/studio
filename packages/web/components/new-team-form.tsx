@@ -27,10 +27,11 @@ const schema = z.object({
 
 export default function NewTeamForm() {
   const [teamName, setTeamName] = useState("");
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const [pendingEmail, setPendingEmail] = useState("");
   const router = useRouter();
 
-  const teamNameAvailable = api.teams.nameAvailable.useQuery(
+  const nameAvailableQuery = api.teams.nameAvailable.useQuery(
     { name: teamName },
     { enabled: !!teamName },
   );
@@ -72,9 +73,9 @@ export default function NewTeamForm() {
               <FormControl>
                 <InputWithCheck
                   placeholder="Team name"
-                  onCheck={setTeamName}
-                  checkPending={teamNameAvailable.isLoading}
-                  checkPassed={teamNameAvailable.data}
+                  updateQuery={setTeamName}
+                  queryStatus={nameAvailableQuery}
+                  onResult={setNameAvailable}
                   {...field}
                 />
               </FormControl>
@@ -111,10 +112,7 @@ export default function NewTeamForm() {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          disabled={newTeam.isLoading || !teamNameAvailable.data}
-        >
+        <Button type="submit" disabled={newTeam.isLoading || !nameAvailable}>
           {newTeam.isLoading && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           )}

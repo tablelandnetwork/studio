@@ -49,6 +49,7 @@ interface Props {
 
 export default function ImportTableForm({ project, team, envs }: Props) {
   const [tableName, setTableName] = useState("");
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -64,7 +65,7 @@ export default function ImportTableForm({ project, team, envs }: Props) {
 
   const { handleSubmit, control, register, setValue } = form;
 
-  const tableNameAvailable = api.tables.nameAvailable.useQuery(
+  const nameAvailableQuery = api.tables.nameAvailable.useQuery(
     {
       projectId: project.id,
       name: tableName,
@@ -151,9 +152,9 @@ export default function ImportTableForm({ project, team, envs }: Props) {
               <FormControl>
                 <InputWithCheck
                   placeholder="eg. users"
-                  onCheck={setTableName}
-                  checkPending={tableNameAvailable.isLoading}
-                  checkPassed={tableNameAvailable.data}
+                  updateQuery={setTableName}
+                  queryStatus={nameAvailableQuery}
+                  onResult={setNameAvailable}
                   {...field}
                 />
               </FormControl>
@@ -217,7 +218,10 @@ export default function ImportTableForm({ project, team, envs }: Props) {
             // </FormItem>
           )}
         />
-        <Button type="submit" disabled={importTable.isLoading}>
+        <Button
+          type="submit"
+          disabled={importTable.isLoading || !nameAvailable}
+        >
           {importTable.isLoading && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           )}
