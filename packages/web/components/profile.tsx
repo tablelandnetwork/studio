@@ -89,6 +89,7 @@ export default function Profile({
 
   const onSignInSuccess = ({ auth }: { auth: Auth | undefined }) => {
     if (auth) {
+      router.refresh();
       setAuth(auth);
       if (!dontRedirect) {
         router.push(`/${auth.personalTeam.slug}`);
@@ -103,6 +104,7 @@ export default function Profile({
   };
 
   const onRegisterSuccess = (auth: Auth) => {
+    router.refresh();
     setAuth(auth);
     setShowRegisterDialog(false);
     if (!dontRedirect) {
