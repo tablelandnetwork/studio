@@ -89,6 +89,7 @@ export default function NewInvite({ team }: { team: schema.Team }) {
             />
             <Button
               type="submit"
+              size="sm"
               disabled={inviteEmails.isLoading}
               className="ml-auto"
             >
@@ -98,6 +99,7 @@ export default function NewInvite({ team }: { team: schema.Team }) {
               Submit
             </Button>
             <Button
+              size="sm"
               variant="ghost"
               disabled={inviteEmails.isLoading}
               onClick={onCancel}
