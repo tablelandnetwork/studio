@@ -3,11 +3,52 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { Wallet, getDefaultProvider, providers } from "ethers";
 import createKeccakHash from "keccak";
 import { helpers } from "@tableland/sdk";
+import { init } from "@tableland/sqlparser";
 import { API, api, ClientConfig } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
 const DEFAULT_API_URL = "https://studio.tableland.xyz";
 const MAX_STATEMENT_SIZE = 34999;
+
+export const ERROR_INVALID_PROJECT_ID = "you must provide project id";
+
+export const isUUID = function (value: unknown) {
+  // assert id format
+  if (typeof value !== "string") return false;
+  const idParts = value.split("-");
+  if (idParts.length !== 5) return false;
+  if (idParts[0].length !== 8) return false;
+  if (idParts[1].length !== 4) return false;
+  if (idParts[2].length !== 4) return false;
+  if (idParts[3].length !== 4) return false;
+  if (idParts[4].length !== 12)return false;
+
+  return true;
+};
+
+export const getQueryValidator = async function () {
+  await init();
+  return async function (query: string) {
+    return await globalThis.sqlparser.normalize(query);
+  };
+};
+
+export const ask = async function (questions: string[]) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  const answers = [];
+  for (const question of questions) {
+    const answer = await rl.question(question);
+    answers.push(answer.trim());
+  }
+
+  rl.close();
+
+  return answers;
+};
 
 export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
@@ -36,23 +77,6 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   if (apiUrl) apiArgs.url = apiUrl;
 
   return api(apiArgs);
-};
-
-export const ask = async function (questions: string[]) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  const answers = [];
-  for (const question of questions) {
-    const answer = await rl.question(question);
-    answers.push(answer.trim());
-  }
-
-  rl.close();
-
-  return answers;
 };
 
 export const getProject = function (

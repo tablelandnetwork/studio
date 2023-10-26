@@ -31,7 +31,7 @@
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
-    "@tableland/sdk": "^4.5.3-dev.0",
+    "@tableland/sdk": "^4.5.3",
     "@tableland/studio-api": "^0.0.0-pre.0",
     "@tableland/studio-client": "^0.0.0-pre.0",
     "@tableland/studio-store": "^0.0.0-pre.0",

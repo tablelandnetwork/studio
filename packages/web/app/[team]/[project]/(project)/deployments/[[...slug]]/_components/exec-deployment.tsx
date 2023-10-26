@@ -1,5 +1,6 @@
 "use client";
 
+import ChainSelector from "@/components/chain-selector";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,15 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { chains } from "@/lib/chains";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import {
@@ -39,29 +31,6 @@ import {
   switchNetwork,
   waitForTransaction,
 } from "wagmi/actions";
-import { Chain } from "wagmi/chains";
-
-const groupedChains = Array.from(
-  chains()
-    .reduce(
-      (acc, chain) => {
-        if (chain.testnet === undefined) {
-          acc.get("Others")?.push(chain);
-        } else if (chain.testnet) {
-          acc.get("Testnets")?.push(chain);
-        } else {
-          acc.get("Mainnets")?.push(chain);
-        }
-        return acc;
-      },
-      new Map<string, Chain[]>([
-        ["Mainnets", []],
-        ["Testnets", []],
-        ["Others", []],
-      ]),
-    )
-    .entries(),
-);
 
 export default function ExecDeployment({
   team,
@@ -76,7 +45,7 @@ export default function ExecDeployment({
 }) {
   const router = useRouter();
   const [showDialog, setShowDialog] = useState(false);
-  const [selectedChain, setSelectedChain] = useState("");
+  const [chainId, setChainId] = useState<number | undefined>(undefined);
   const [pendingDeploy, startDeployTransition] = useTransition();
   const [signerState, setSignerState] = useState<
     "pending" | "processing" | "complete" | Error
@@ -103,14 +72,15 @@ export default function ExecDeployment({
 
   const handleDeploy = async () => {
     startDeployTransition(async () => {
-      let chainId: number;
       let signer: providers.JsonRpcSigner;
       let tbl: Database;
       let txn: WaitableTransactionReceipt;
 
       setSignerState("processing");
       try {
-        chainId = Number.parseInt(selectedChain);
+        if (!chainId) {
+          throw new Error("No chain selected");
+        }
         const currentNetwork = getNetwork();
         if (currentNetwork.chain?.id !== chainId) {
           await switchNetwork({ chainId });
@@ -230,29 +200,7 @@ export default function ExecDeployment({
         </DialogHeader>
         <div className="flex items-center gap-2">
           <Label>Deploy to</Label>
-          <Select onValueChange={setSelectedChain} disabled={pendingDeploy}>
-            <SelectTrigger className="w-fit gap-x-2">
-              <SelectValue placeholder="Select chain" />
-            </SelectTrigger>
-            <SelectContent>
-              <ScrollArea className="h-[20rem]">
-                {groupedChains.map((group) => {
-                  return !!group[1].length ? (
-                    <div key={group[0]}>
-                      <p className="px-2 pt-2 text-xs text-muted-foreground">
-                        {group[0]}
-                      </p>
-                      {group[1].map((chain) => (
-                        <SelectItem key={chain.name} value={`${chain.id}`}>
-                          {chain.name} ({chain.id})
-                        </SelectItem>
-                      ))}
-                    </div>
-                  ) : null;
-                })}
-              </ScrollArea>
-            </SelectContent>
-          </Select>
+          <ChainSelector onValueChange={setChainId} disabled={pendingDeploy} />
         </div>
         <DeployStep
           pendingText="Resolve signer"
@@ -292,7 +240,7 @@ export default function ExecDeployment({
           <Button
             type="submit"
             onClick={handleDeploy}
-            disabled={pendingDeploy || !selectedChain}
+            disabled={pendingDeploy || !chainId}
           >
             {pendingDeploy && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Deploy

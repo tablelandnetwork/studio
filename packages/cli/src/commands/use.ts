@@ -5,10 +5,12 @@ import {
   logger,
   getApi,
   FileStore,
+  isUUID,
 } from "../utils.js";
 
+// note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "use [context] [id]";
-export const desc = "use the given context id for all ensuing commands";
+export const desc = "use the given context id for all    ensuing commands";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
@@ -23,10 +25,12 @@ export const handler = async (
 
     switch (context) {
       case "team":
+        if (!isUUID(id)) throw new Error("invalid team id");
         fileStore.set("teamId", id);
         fileStore.save();
         break;
       case "project":
+        if (!isUUID(id)) throw new Error("invalid project id");
         fileStore.set("projectId", id);
         fileStore.save();
         break;
