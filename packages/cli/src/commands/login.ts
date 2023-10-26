@@ -16,8 +16,9 @@ import {
   FileStore,
 } from "../utils.js";
 
+// note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "login";
-export const desc = "create a login session via private key";
+export const desc = "create a login session via private  key";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,

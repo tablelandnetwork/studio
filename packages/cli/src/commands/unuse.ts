@@ -7,8 +7,9 @@ import {
   FileStore,
 } from "../utils.js";
 
+// note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "unuse [context]";
-export const desc = "remove any existing id from the given context";
+export const desc = "remove any existing id from the     given context";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
