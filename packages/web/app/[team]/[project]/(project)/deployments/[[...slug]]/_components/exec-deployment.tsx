@@ -45,7 +45,7 @@ export default function ExecDeployment({
 }) {
   const router = useRouter();
   const [showDialog, setShowDialog] = useState(false);
-  const [selectedChain, setSelectedChain] = useState("");
+  const [chainId, setChainId] = useState<number | undefined>(undefined);
   const [pendingDeploy, startDeployTransition] = useTransition();
   const [signerState, setSignerState] = useState<
     "pending" | "processing" | "complete" | Error
@@ -66,14 +66,15 @@ export default function ExecDeployment({
 
   const handleDeploy = async () => {
     startDeployTransition(async () => {
-      let chainId: number;
       let signer: providers.JsonRpcSigner;
       let tbl: Database;
       let txn: WaitableTransactionReceipt;
 
       setSignerState("processing");
       try {
-        chainId = Number.parseInt(selectedChain);
+        if (!chainId) {
+          throw new Error("No chain selected");
+        }
         const currentNetwork = getNetwork();
         if (currentNetwork.chain?.id !== chainId) {
           await switchNetwork({ chainId });
@@ -194,10 +195,7 @@ export default function ExecDeployment({
         </DialogHeader>
         <div className="flex items-center gap-2">
           <Label>Deploy to</Label>
-          <ChainSelector
-            setValue={(val) => setSelectedChain(val)}
-            isDisabled={pendingDeploy}
-          />
+          <ChainSelector onValueChange={setChainId} disabled={pendingDeploy} />
         </div>
         <DeployStep
           pendingText="Resolve signer"
@@ -237,7 +235,7 @@ export default function ExecDeployment({
           <Button
             type="submit"
             onClick={handleDeploy}
-            disabled={pendingDeploy || !selectedChain}
+            disabled={pendingDeploy || !chainId}
           >
             {pendingDeploy && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             Deploy
