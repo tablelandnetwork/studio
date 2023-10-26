@@ -30,6 +30,7 @@ export default function Profile({
   hideAddress?: boolean;
   dontRedirect?: boolean;
 }) {
+  const [auth, setAuth] = useAtom(authAtom);
   const { isConnected, address } = useAccount();
   const {
     connect,
@@ -45,7 +46,6 @@ export default function Profile({
       router.refresh();
     },
   });
-  const [auth, setAuth] = useAtom(authAtom);
   const [signInError, setSignInError] = useState<Error | undefined>(undefined);
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
   const { toast } = useToast();
@@ -60,6 +60,10 @@ export default function Profile({
     window.addEventListener("focus", handler);
     return () => window.removeEventListener("focus", handler);
   }, [authenticated]);
+
+  useEffect(() => {
+    setAuth(authenticated.data);
+  }, [authenticated.data, setAuth]);
 
   useEffect(() => {
     if (walletConnectorError) {
