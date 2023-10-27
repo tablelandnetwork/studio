@@ -1,25 +1,16 @@
 "use client";
 
-import { teamBySlug } from "@/app/actions";
-import { schema } from "@tableland/studio-store";
+import { api } from "@/trpc/react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import Crumb from "./crumb";
 
 export default function NavNewProject({
   className,
 }: React.HTMLAttributes<HTMLElement> & {}) {
   const { team: teamSlug } = useParams<{ team: string }>();
-  const [team, setTeam] = useState<schema.Team | undefined>(undefined);
-  useEffect(() => {
-    const getTeam = async () => {
-      const team = await teamBySlug(teamSlug);
-      setTeam(team);
-    };
-    getTeam();
-  }, [teamSlug]);
+  const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
 
-  if (!team) {
+  if (!team.data) {
     return null;
   }
 
@@ -27,7 +18,7 @@ export default function NavNewProject({
     <div className={className}>
       <Crumb
         title="New Project"
-        items={[{ label: team.name, href: `/${team.slug}` }]}
+        items={[{ label: team.data.name, href: `/${team.data.slug}` }]}
       />
     </div>
   );

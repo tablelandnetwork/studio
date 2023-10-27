@@ -1,5 +1,6 @@
 import { initMailApi } from "@tableland/studio-mail";
 import { Store } from "@tableland/studio-store";
+import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { router } from "../trpc";
 import { createSendInvite } from "../utils/sendInvite";
 import { authRouter } from "./auth";
@@ -37,3 +38,16 @@ export function appRouter(
 }
 
 export type AppRouter = ReturnType<typeof appRouter>;
+/**
+ * Inference helper for inputs.
+ *
+ * @example type HelloInput = RouterInputs['example']['hello']
+ */
+export type RouterInputs = inferRouterInputs<AppRouter>;
+
+/**
+ * Inference helper for outputs.
+ *
+ * @example type HelloOutput = RouterOutputs['example']['hello']
+ */
+export type RouterOutputs = inferRouterOutputs<AppRouter>;

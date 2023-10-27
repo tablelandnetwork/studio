@@ -1,14 +1,13 @@
 "use client";
 
-import { acceptInvite, ignoreInvite } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { authAtom } from "@/store/wallet";
+import { authAtom } from "@/store/auth";
+import { api } from "@/trpc/react";
 import { schema } from "@tableland/studio-store";
 import { useAtomValue } from "jotai";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 
 const Profile = dynamic(
   () => import("@/components/profile").then((res) => res.default),
@@ -24,23 +23,19 @@ export default function InviteHandler({
 }) {
   const auth = useAtomValue(authAtom);
   const router = useRouter();
-  const [pendingAccept, startAccept] = useTransition();
-  const [pendingIgnore, startIgnore] = useTransition();
 
-  const handleAccept = () => {
-    startAccept(async () => {
-      await acceptInvite(seal);
+  const acceptInvite = api.invites.acceptInvite.useMutation({
+    onSuccess: () => {
       router.push(`/${targetTeam.slug}`);
       router.refresh();
-    });
-  };
+    },
+  });
 
-  const handleIgnore = () => {
-    startIgnore(async () => {
-      await ignoreInvite(seal);
+  const ignoreInvite = api.invites.ignoreInvite.useMutation({
+    onSuccess: () => {
       router.push("/");
-    });
-  };
+    },
+  });
 
   // TODO: Display errors.
   return (
@@ -53,19 +48,23 @@ export default function InviteHandler({
       )} */}
       <Button
         variant={"outline"}
-        onClick={handleIgnore}
-        disabled={pendingIgnore || pendingAccept}
+        onClick={() => ignoreInvite.mutate({ seal })}
+        disabled={ignoreInvite.isLoading || acceptInvite.isLoading}
       >
-        {pendingIgnore && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+        {ignoreInvite.isLoading && (
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        )}
         Ignore
       </Button>
       {!auth && <Profile hideAddress dontRedirect />}
       {auth && (
         <Button
-          onClick={handleAccept}
-          disabled={pendingAccept || pendingIgnore}
+          onClick={() => acceptInvite.mutate({ seal })}
+          disabled={acceptInvite.isLoading || ignoreInvite.isLoading}
         >
-          {pendingAccept && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+          {acceptInvite.isLoading && (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          )}
           Accept
         </Button>
       )}

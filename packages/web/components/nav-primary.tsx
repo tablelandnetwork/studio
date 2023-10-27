@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { authAtom } from "@/store/wallet";
+import { authAtom } from "@/store/auth";
 import { schema } from "@tableland/studio-store";
 import { useAtomValue } from "jotai";
 import Link from "next/link";

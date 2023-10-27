@@ -1,6 +1,5 @@
 "use client";
 
-import { inviteEmails } from "@/app/actions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,10 +10,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schema } from "@tableland/studio-store";
 import { Loader2, Plus } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -23,8 +24,15 @@ const formSchema = z.object({
 });
 
 export default function NewInvite({ team }: { team: schema.Team }) {
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const inviteEmails = api.invites.inviteEmails.useMutation({
+    onSuccess: () => {
+      router.refresh();
+      setShowForm(false);
+      form.reset();
+    },
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,11 +48,7 @@ export default function NewInvite({ team }: { team: schema.Team }) {
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      await inviteEmails(team.id, [values.email]);
-      setShowForm(false);
-      form.reset();
-    });
+    inviteEmails.mutate({ teamId: team.id, emails: [values.email] });
   }
 
   function onCancel() {
@@ -75,7 +79,7 @@ export default function NewInvite({ team }: { team: schema.Team }) {
                     <Input
                       placeholder="Email address"
                       className="ml-4"
-                      disabled={pending}
+                      disabled={inviteEmails.isLoading}
                       {...field}
                     />
                   </FormControl>
@@ -83,13 +87,21 @@ export default function NewInvite({ team }: { team: schema.Team }) {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={pending} className="ml-auto">
-              {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+            <Button
+              type="submit"
+              size="sm"
+              disabled={inviteEmails.isLoading}
+              className="ml-auto"
+            >
+              {inviteEmails.isLoading && (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              )}
               Submit
             </Button>
             <Button
+              size="sm"
               variant="ghost"
-              disabled={pending}
+              disabled={inviteEmails.isLoading}
               onClick={onCancel}
               className="ml-2"
             >

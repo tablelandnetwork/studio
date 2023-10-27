@@ -1,11 +1,10 @@
 "use client";
 
-import { teamBySlug } from "@/app/actions";
 import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
 import { schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import Crumb from "./crumb";
 
 function teamLinks(team: schema.Team) {
@@ -36,27 +35,20 @@ export default function NavTeam({
 }: React.HTMLAttributes<HTMLElement> & {}) {
   const pathname = usePathname();
   const { team: teamSlug } = useParams<{ team: string }>();
-  const [team, setTeam] = useState<schema.Team | undefined>(undefined);
-  useEffect(() => {
-    const getTeam = async () => {
-      const team = await teamBySlug(teamSlug);
-      setTeam(team);
-    };
-    getTeam();
-  }, [teamSlug]);
+  const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
 
-  if (!team) {
+  if (!team.data) {
     return null;
   }
 
   return (
     <div>
-      <Crumb title={team.name} className="mb-2" />
+      <Crumb title={team.data.name} className="mb-2" />
       <nav
         className={cn("flex items-center space-x-4 lg:space-x-6", className)}
         {...props}
       >
-        {teamLinks(team).map((link) => (
+        {teamLinks(team.data).map((link) => (
           <Link
             key={link.href}
             href={link.href}

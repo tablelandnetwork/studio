@@ -1,6 +1,5 @@
 "use client";
 
-import { recordDeployment } from "@/app/actions";
 import ChainSelector from "@/components/chain-selector";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
 import {
   Database,
   Validator,
@@ -63,6 +63,12 @@ export default function ExecDeployment({
   useEffect(() => {
     setShowDialog(true);
   }, []);
+
+  const recordDeployment = api.deployments.recordDeployment.useMutation({
+    onSuccess: () => {
+      router.refresh();
+    },
+  });
 
   const handleDeploy = async () => {
     startDeployTransition(async () => {
@@ -146,17 +152,16 @@ export default function ExecDeployment({
 
       setRecordDeploymentState("processing");
       try {
-        await recordDeployment(
-          project.id,
-          table.id,
-          environment.id,
-          txn.name,
-          txn.chainId,
-          txn.tableId,
-          new Date(),
-          txn.blockNumber,
-          txn.transactionHash,
-        );
+        await recordDeployment.mutateAsync({
+          tableId: table.id,
+          environmentId: environment.id,
+          tableName: txn.name,
+          chainId: txn.chainId,
+          tokenId: txn.tableId,
+          createdAt: new Date(),
+          blockNumber: txn.blockNumber,
+          txnHash: txn.transactionHash,
+        });
       } catch (error) {
         setRecordDeploymentState(
           error instanceof Error ? error : new Error(String(error)),
