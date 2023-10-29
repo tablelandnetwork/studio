@@ -1,6 +1,6 @@
 {
   "name": "@tableland/studio-client",
-  "version": "0.0.0-pre.0",
+  "version": "0.0.0-pre.1",
   "description": "A tRPC client for Studio",
   "repository": "https://github.com/tablelandnetwork/studio/client",
   "publishConfig": {
