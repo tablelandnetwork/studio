@@ -10,7 +10,7 @@ import * as modUse from "../src/commands/use.js";
 import * as modUnuse from "../src/commands/unuse.js";
 import * as modLogin from "../src/commands/login.js";
 import * as modLogout from "../src/commands/logout.js";
-import * as mod from "../src/commands/read.js";
+import * as mod from "../src/commands/query.js";
 import { wait, logger } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
@@ -34,7 +34,7 @@ const defaultArgs = [
   TEST_API_BASE_URL
 ];
 
-describe("commands/read", function () {
+describe("commands/query", function () {
   this.timeout(10000 * TEST_TIMEOUT_FACTOR);
 
   before(async function () {
@@ -69,7 +69,7 @@ describe("commands/read", function () {
 
   test("fails with invalid statement", async function () {
     const consoleError = spy(logger, "error");
-    await yargs(["read", "invalid;", ...defaultArgs])
+    await yargs(["query", "invalid;", ...defaultArgs])
       .command<GlobalOptions>(mod)
       .parse();
 
@@ -82,7 +82,7 @@ describe("commands/read", function () {
 
   test("can run a read query", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["read", "select * from table1;", ...defaultArgs])
+    await yargs(["query", "select * from table1;", ...defaultArgs])
       .command<GlobalOptions>(mod)
       .parse();
 
