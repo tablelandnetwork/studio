@@ -63,14 +63,18 @@ export const handler = async (
       output: process.stdout,
       completer: function (line: string) {
         // TODO: check against all table names in this project and add to common sql terms
-        const word = line.split(" ").pop();
+        const words = line.split(" ");
+        const word = words.pop();
         if (typeof word !== "string") return [[], line];
 
         const hits = sqlTerms.filter(function (term: string | undefined) {
           if (typeof term !== "string" || term === "") return false;
           return term.indexOf(word) === 0;
         });
-        return [hits, line];
+        return [hits.map((hit: string) => {
+          words.push(hit);
+          return words.join(" ");
+        }), line];
       },
       terminal: true,
       tabSize: 4
@@ -89,7 +93,10 @@ export const handler = async (
       }
 
       line = line.trim();
-      if (line === "") return setMidPrompt();
+      if (line === "") {
+        if (statement === "") return resetPrompt();
+        return setMidPrompt();
+      }
 
       // note: this gives the first index of ";", if there is more than one
       //   semicolon the check below will ensure the user isn't trying to run
@@ -127,7 +134,7 @@ export const handler = async (
           aliases: studioAliasMapper
         };
         if (queryObject.type !== "read") {
-          // TODO: ensure that the inserts with sub-query select statments work right
+          // TODO: all sub-queries I can think of work here, but ask others for try and break this.
           const chain = getChainIdFromTableName(
             (await studioAliasMapper.read())[queryObject.tables[0]]
           );
