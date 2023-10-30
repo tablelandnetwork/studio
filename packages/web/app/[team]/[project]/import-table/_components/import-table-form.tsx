@@ -218,6 +218,11 @@ export default function ImportTableForm({ project, team, envs }: Props) {
             // </FormItem>
           )}
         />
+        {importTable.error && (
+          <p className="text-[0.8rem] font-medium text-destructive">
+            {importTable.error.message}
+          </p>
+        )}
         <Button
           type="submit"
           disabled={importTable.isLoading || !nameAvailable}
