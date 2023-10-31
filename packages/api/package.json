@@ -1,6 +1,6 @@
 {
   "name": "@tableland/studio-api",
-  "version": "0.0.0-pre.1",
+  "version": "0.0.0-pre.2",
   "description": "",
   "repository": "https://github.com/tablelandnetwork/studio/api",
   "publishConfig": {

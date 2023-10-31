@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { describe, test, afterEach, before } from "mocha";
 import { spy, restore } from "sinon";
 import yargs from "yargs/yargs";
+import mockStd from "mock-stdin";
 import { getAccounts } from "@tableland/local";
 import { type GlobalOptions } from "../src/cli.js";
 import * as modUse from "../src/commands/use.js";
@@ -69,28 +70,50 @@ describe("commands/query", function () {
 
   test("fails with invalid statement", async function () {
     const consoleError = spy(logger, "error");
-    await yargs(["query", "invalid;", ...defaultArgs])
+    const stdin = mockStd.stdin();
+
+    await yargs(["query", ...defaultArgs])
       .command<GlobalOptions>(mod)
       .parse();
 
-    const err = consoleError.getCall(0).firstArg;
-    equal(
-      err.message,
-      "error parsing statement: syntax error at position 7 near 'invalid'"
-    );
+    await new Promise(function (resolve, reject) {
+      stdin.send("invalid;\n").end();
+      stdin.restore();
+
+      setTimeout(function () {
+        const err = consoleError.getCall(0).firstArg;
+        equal(
+          err.message,
+          "error parsing statement: syntax error at position 7 near 'invalid'"
+        );
+
+        resolve(void 0);
+      }, 1000);
+    });
   });
 
   test("can run a read query", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["query", "select * from table1;", ...defaultArgs])
+    const stdin = mockStd.stdin();
+
+    await yargs(["query", ...defaultArgs])
       .command<GlobalOptions>(mod)
       .parse();
 
-    const res = consoleLog.getCall(0).firstArg;
-    const data = JSON.parse(res);
+    await new Promise(function (resolve, reject) {
+      stdin.send("select * from table1;\n").end();
+      stdin.restore();
 
-    equal(typeof data.meta.duration, "number");
-    equal(data.success, true);
-    deepStrictEqual(data.results, []);
+      setTimeout(function () {
+        const res = consoleLog.getCall(0).firstArg;
+        const data = JSON.parse(res);
+
+        equal(typeof data.meta.duration, "number");
+        equal(data.success, true);
+        deepStrictEqual(data.results, []);
+
+        resolve(void 0);
+      }, 1000);
+    });
   });
 });
