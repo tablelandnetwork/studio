@@ -12,27 +12,21 @@ function links(
 ): { label: string; href: string; isActive: (pathname: string) => boolean }[] {
   const links = [
     {
-      label: "Home",
-      href: "/",
-      isActive: (pathname: string) => pathname === "/",
-    },
-    {
       label: "Tableland",
       href: "https://tableland.xyz",
-      isActive: () => false,
+      isActive: (_: string) => false,
     },
     {
       label: "Docs",
       href: "https://docs.tableland.xyz",
-      isActive: () => false,
+      isActive: (_: string) => false,
     },
   ];
   if (team) {
-    links.push({
-      label: "Studio",
+    links.unshift({
+      label: "Home",
       href: `/${team?.slug}`,
-      isActive: (pathname: string) =>
-        pathname.includes(`/${team.slug}`) || pathname === "/new-team",
+      isActive: (pathname: string) => pathname === `/${team.slug}`,
     });
   }
   return links;
