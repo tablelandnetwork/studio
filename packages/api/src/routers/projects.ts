@@ -32,7 +32,10 @@ export function projectsRouter(store: Store) {
             message: "Team ID must be provided as input or session context",
           });
         }
-        const project = await store.projects.projectBySlug(teamId, input.slug);
+        const project = await store.projects.projectByTeamIdAndSlug(
+          teamId,
+          input.slug,
+        );
         if (!project) {
           throw new TRPCError({
             code: "NOT_FOUND",
