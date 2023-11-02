@@ -10,13 +10,13 @@ import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
-  TEST_REGISTRY_PORT
+  TEST_REGISTRY_PORT,
+  TEST_TEAM_ID,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 const accounts = getAccounts();
 
-const TEST_TEAM_ID = "01a2d24d-3805-4a14-8059-7041f8b69afc";
 const defaultArgs = [
   "--store",
   path.join(_dirname, ".studioclisession.json"),
@@ -42,7 +42,7 @@ describe("commands/team", function () {
   });
 
   // TODO: all the tests depend on previous tests, need to fix this
-  const teamName = "joe"; // TODO: get better test data
+  const teamName = "testuser";
   const projectDescription = "testing project create";
   const projectName = "projectfoo";
 
@@ -66,7 +66,7 @@ describe("commands/team", function () {
     equal(team.name, teamName);
     equal(team.slug, teamName);
 
-    equal(team.projects.length, 1);
+    equal(team.projects.length, 2);
     const project = team.projects[0];
     equal(project.name, projectName);
     equal(project.description, projectDescription);

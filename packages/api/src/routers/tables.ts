@@ -1,4 +1,4 @@
-import { Validator, helpers } from "@tableland/sdk";
+import { ApiError, Table, Validator, helpers } from "@tableland/sdk";
 import { Schema, Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -76,37 +76,61 @@ export function tablesRouter(store: Store) {
         const validator = new Validator({
           baseUrl: helpers.getBaseUrl(input.chainId),
         });
-        // TODO: Execute different table inserts in a batch txn.
-        const tablelandTable = await validator.getTableById({
-          chainId: input.chainId,
-          tableId: input.tableId,
-        });
 
-        const table = await store.tables.createTable(
-          input.projectId,
-          input.name,
-          input.description,
-          tablelandTable.schema,
-        );
+        let tablelandTable: Table;
+        try {
+          tablelandTable = await validator.getTableById({
+            chainId: input.chainId,
+            tableId: input.tableId,
+          });
+        } catch (err) {
+          if (err instanceof ApiError && err.status === 404) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: `Table id ${input.tableId} not found on chain ${input.chainId}.`,
+            });
+          }
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error getting table by id.",
+            cause: err,
+          });
+        }
+
         const createdAttr = tablelandTable.attributes?.find(
           (attr) => attr.traitType === "created",
         );
         if (!createdAttr) {
           throw new TRPCError({
             code: "PARSE_ERROR",
-            message: "No created attribute found",
+            message: "No created attribute found.",
           });
         }
 
-        const deployment = await store.deployments.recordDeployment({
-          tableId: table.id,
-          environmentId: input.environmentId,
-          tableName: tablelandTable.name,
-          chainId: input.chainId,
-          tokenId: input.tableId,
-          createdAt: new Date(createdAttr.value * 1000),
-        });
-        return { table, deployment };
+        try {
+          // TODO: Execute different table inserts in a batch txn.
+          const table = await store.tables.createTable(
+            input.projectId,
+            input.name,
+            input.description,
+            tablelandTable.schema,
+          );
+          const deployment = await store.deployments.recordDeployment({
+            tableId: table.id,
+            environmentId: input.environmentId,
+            tableName: tablelandTable.name,
+            chainId: input.chainId,
+            tokenId: input.tableId,
+            createdAt: new Date(createdAttr.value * 1000),
+          });
+          return { table, deployment };
+        } catch (err) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error saving table and deployment records.",
+            cause: err,
+          });
+        }
       }),
   });
 }

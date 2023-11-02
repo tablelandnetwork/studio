@@ -11,6 +11,8 @@ import { studioAliases } from "@tableland/studio-client";
 import { Database, helpers } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
 import {
+  ask,
+  batchRows,
   logger,
   getChainIdFromTableName,
   getWalletWithProvider,
@@ -19,38 +21,37 @@ import {
   getApi,
   getApiUrl,
   getProject,
+  getEnvironmentId,
+  prepareCsvHeaders,
   FileStore,
 } from "../utils.js";
 
+// note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "import-data <table> <file>";
-export const desc = "write the content of a csv into an existing table";
-
-const maxStatementLength = 35000;
+export const desc = "write the content of a csv into an  existing table";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { providerUrl, apiUrl: apiUrlArg, store, table, file } = argv;
+    const { providerUrl, store, table, file } = argv;
+    if (typeof table !== "string") {
+      throw new Error("table name parameter is required");
+    }
     const fileStore = new FileStore(store as string);
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
+    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore})
     const api = getApi(fileStore, apiUrl as string);
     const projectId = getProject({ ...argv, store: fileStore });
-    
-    // lookup environmentId by projectId
-    const environments = await api.environments.projectEnvironments.query({ projectId });
-    const environmentId = environments.find(env => env.name === "default")?.id;
-    if (typeof environmentId !== "string") {
-      throw new Error("could not get default environment");
-    }
+
+    const environmentId = await getEnvironmentId(api, projectId);
 
     const aliases = studioAliases({ environmentId, apiUrl });
-    const uuTableName = (await aliases.read())[table as string];
+    const uuTableName = (await aliases.read())[table];
     if (typeof uuTableName !== "string") {
       throw new Error("could not find table in project");
     }
-// TODO: need to reverse lookup uuTableName from table and projectId so
-    //       that the wallet can be connected to the right provider.
+    // need to reverse lookup uuTableName from table and projectId so
+    // that the wallet can be connected to the right provider
     const chain = getChainIdFromTableName(uuTableName);
     const privateKey = normalizePrivateKey(argv.privateKey);
     const signer = await getWalletWithProvider({
@@ -67,38 +68,34 @@ export const handler = async (
     const fileString = readFileSync(file as string).toString();
     const dataObject = await parseCsvFile(fileString);
 
-    // TODO: parse csv and enforce the existence of the right headers
-    const headers = dataObject.slice(0, 1);
+    // parse csv and enforce the existence of the right header format
+    const headers = prepareCsvHeaders(dataObject[0]);
     const rows = dataObject.slice(1);
+    // need to capture row length now since `batchRows` will mutate the
+    // rows Array to reduce memory overhead
+    const rowCount = Number(rows.length);
+    const statements = batchRows(rows, headers, table);
 
-    const stmt = `INSERT INTO ${table}
-      (${headers.join(",")})
-      VALUES ${rows.map(function (row) {
-        return `(${row.join(",")})`
-      }).join(",")}
-    `;
-
-    const statementCount = Math.ceil(stmt.length / maxStatementLength);
     const doImport = await confirmImport({
-      statementLength: stmt.length,
-      rowCount: rows.length,
+      statementLength: statements.join("").length,
+      rowCount: rowCount,
       wallet: signer.address,
-      statementCount,
+      statementCount: statements.length,
       table,
     });
 
     if (!doImport) return logger.log("aborting");
-    if (statementCount !== 1) {
-      throw new Error("multi statement import not implemented yet");
-    }
 
     // TODO: split the rows into a set of sql statements that meet the
     //       protocol size requirements and potentially execute the
     //       statement(s) with database batch
-    const result = await db.prepare(stmt).all();
+    const results = await db.batch(statements.map(stmt => db.prepare(stmt)));
+    // the batch method returns an array of results for reads, but in this case
+    // its an Array of length 1 with a single Object containing txn data
+    const result = results[0];
 
     logger.log(
-`successfully inserted ${rows.length} row${rows.length === 1 ? "" : "s"} into ${table}
+`successfully inserted ${rowCount} row${rowCount === 1 ? "" : "s"} into ${table}
   transaction receipt: ${chalk.gray.bold(JSON.stringify(result.meta?.txn, null, 4))}
   project id: ${projectId}
   environment id: ${environmentId}`
@@ -146,34 +143,17 @@ async function confirmImport(info: {
     throw new Error("table name is required");
   }
 
-  return await new Promise((resolve) => {
-    const rl = createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
+  const answers = await ask([
+    `You are about to use address: ${chalk.yellow(info.wallet)} to insert ${chalk.yellow(info.rowCount)} row${info.rowCount === 1 ? "" : "s"} into table ${chalk.yellow(info.table)}
+This can be done with a total of ${chalk.yellow(info.statementCount)} statment${info.statementCount === 1 ? "" : "s"}
+The total size of the statment${info.statementCount === 1 ? "" : "s"} is: ${chalk.yellow(info.statementLength)}
+Do you want to continue (${chalk.bold("y/n")})? `
+  ]);
+  const proceed = answers[0].toLowerCase()[0];
 
+  if (proceed !== "y") {
+    return false;
+  }
 
-    logger.log(
-      `You are about to use address: ${chalk.yellow(info.wallet)} to insert ${chalk.yellow(info.rowCount)} row${info.rowCount === 1 ? "" : "s"} into table ${chalk.yellow(info.table)}`
-    );
-    logger.log(
-      `This can be done with a total of ${chalk.yellow(info.statementCount)} statment${info.statementCount === 1 ? "" : "s"}`
-    );
-    logger.log(
-      `The total size of the statment${info.statementCount === 1 ? "" : "s"} is: ${chalk.yellow(info.statementLength)}`
-    );
-    rl.question(
-      `Do you want to continue? (${chalk.bold("y/n")}): `,
-      (answer) => {
-        const response = answer.trim().toLowerCase();
-        rl.close();
-
-        if (response === "y" || response === "yes") {
-          return resolve(true);
-        }
-
-        resolve(false);
-      }
-    );
-  });
+  return true;
 }

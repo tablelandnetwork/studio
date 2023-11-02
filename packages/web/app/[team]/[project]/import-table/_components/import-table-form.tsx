@@ -1,6 +1,6 @@
 "use client";
 
-import { importTable, tableNameAvailable } from "@/app/actions";
+import ChainSelector from "@/components/chain-selector";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,11 +14,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -47,10 +48,8 @@ interface Props {
 }
 
 export default function ImportTableForm({ project, team, envs }: Props) {
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
-    undefined,
-  );
-  const [pending, startTransition] = useTransition();
+  const [tableName, setTableName] = useState("");
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -64,25 +63,34 @@ export default function ImportTableForm({ project, team, envs }: Props) {
     },
   });
 
-  const { handleSubmit, control, register } = form;
+  const { handleSubmit, control, register, setValue } = form;
+
+  const nameAvailableQuery = api.tables.nameAvailable.useQuery(
+    {
+      projectId: project.id,
+      name: tableName,
+    },
+    {
+      enabled: !!tableName,
+    },
+  );
+
+  const importTable = api.tables.importTable.useMutation({
+    onSuccess: () => {
+      router.replace(`/${team.slug}/${project.slug}`);
+    },
+  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      await importTable(
-        project,
-        values.chainId,
-        values.tableId,
-        values.name,
-        values.environment,
-        values.description,
-      );
-      router.replace(`/${team.slug}/${project.slug}`);
+    importTable.mutate({
+      projectId: project.id,
+      chainId: values.chainId,
+      tableId: values.tableId,
+      name: values.name,
+      environmentId: values.environment,
+      description: values.description,
     });
   }
-
-  const checkTableName = async (name: string) => {
-    return await tableNameAvailable(project.id, name);
-  };
 
   return (
     <Form {...form}>
@@ -97,10 +105,23 @@ export default function ImportTableForm({ project, team, envs }: Props) {
             <FormItem>
               <FormLabel>Chain ID</FormLabel>
               <FormControl>
-                <Input placeholder="eg. 8001" {...field} />
+                <ChainSelector
+                  onValueChange={(val) => setValue("chainId", val)}
+                />
               </FormControl>
               <FormDescription>
-                The chain ID where the existing Tableland table exists.
+                The chain ID where the existing Tableland table exists.&nbsp;
+                <a
+                  href={
+                    "https://docs.tableland.xyz/smart-contracts/deployed-contracts#registry-contract"
+                  }
+                  className={
+                    "text-sm font-medium transition-colors hover:text-primary"
+                  }
+                  target="_blank"
+                >
+                  Supported chains
+                </a>
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -131,8 +152,9 @@ export default function ImportTableForm({ project, team, envs }: Props) {
               <FormControl>
                 <InputWithCheck
                   placeholder="eg. users"
-                  check={checkTableName}
-                  onCheckResult={setNameAvailable}
+                  updateQuery={setTableName}
+                  queryStatus={nameAvailableQuery}
+                  onResult={setNameAvailable}
                   {...field}
                 />
               </FormControl>
@@ -196,8 +218,18 @@ export default function ImportTableForm({ project, team, envs }: Props) {
             // </FormItem>
           )}
         />
-        <Button type="submit" disabled={pending}>
-          {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+        {importTable.error && (
+          <p className="text-[0.8rem] font-medium text-destructive">
+            {importTable.error.message}
+          </p>
+        )}
+        <Button
+          type="submit"
+          disabled={importTable.isLoading || !nameAvailable}
+        >
+          {importTable.isLoading && (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          )}
           Import
         </Button>
       </form>

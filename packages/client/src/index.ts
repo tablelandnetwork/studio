@@ -7,7 +7,7 @@ import {
   Operation,
 } from "@trpc/client";
 import superjson from "superjson";
-import { sqliteKeywords } from "./sqlite-keywords";
+import { sqliteKeywords } from "./sqlite-keywords.js";
 import { getBaseUrl, getUrl } from "./util.js";
 
 type NonEmptyArray<TItem> = [TItem, ...TItem[]];

@@ -1,6 +1,6 @@
-import { nonce as getNonce, login } from "@/app/actions";
+import { api } from "@/trpc/react";
 import { Auth } from "@tableland/studio-api";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { SiweMessage } from "siwe";
 import { useAccount, useNetwork, useSignMessage } from "wagmi";
 import { Button } from "./ui/button";
@@ -13,26 +13,30 @@ export default function SignInButton({
   onError: (args: { error: Error }) => void;
 }) {
   const [pending, startTransition] = useTransition();
-  const [nonce, setNonce] = useState<string | undefined>(undefined);
 
   const { address } = useAccount();
   const { chain } = useNetwork();
   const { signMessageAsync } = useSignMessage();
 
-  const fetchNonce = async () => {
-    try {
-      const nonce = await getNonce();
-      setNonce(nonce);
-    } catch (error) {
-      onError({ error: error as Error });
-    }
-  };
+  const nonce = api.auth.nonce.useMutation({
+    onError: (error) => {
+      onError({ error: new Error(error.message) });
+    },
+  });
+  const login = api.auth.login.useMutation({
+    onSuccess: (res) => {
+      onSuccess({ auth: res });
+    },
+    onError: (error) => {
+      onError({ error: new Error(error.message) });
+    },
+  });
 
   // Pre-fetch random nonce when button is rendered
   // to ensure deep linking works for WalletConnect
   // users on iOS when signing the SIWE message
   useEffect(() => {
-    fetchNonce();
+    nonce.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -51,26 +55,22 @@ export default function SignInButton({
           uri: window.location.origin,
           version: "1",
           chainId,
-          nonce,
+          nonce: nonce.data,
         });
         const message = rawMessage.prepareMessage();
         const signature = await signMessageAsync({ message });
 
         // Verify signature
-        const res = await login(message, signature);
-        if (res.error) {
-          throw new Error(res.error);
-        }
-        onSuccess({ auth: res.auth });
+        login.mutate({ message, signature });
       } catch (error) {
         onError({ error: error as Error });
-        fetchNonce();
+        nonce.mutate();
       }
     });
   };
 
   return (
-    <Button onClick={handleSignIn} disabled={!nonce || pending}>
+    <Button onClick={handleSignIn} disabled={!nonce.data || pending}>
       Sign In
     </Button>
   );

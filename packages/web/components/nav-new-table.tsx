@@ -1,9 +1,7 @@
 "use client";
 
-import { projectByTeamIdAndSlug, teamBySlug } from "@/app/actions";
-import { schema } from "@tableland/studio-store";
+import { api } from "@/trpc/react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import Crumb from "./crumb";
 
 export default function NavNewTable({
@@ -14,28 +12,14 @@ export default function NavNewTable({
     team: string;
     project: string;
   }>();
-  const [team, setTeam] = useState<schema.Team | undefined>(undefined);
-  const [project, setProject] = useState<schema.Project | undefined>(undefined);
 
-  useEffect(() => {
-    const getTeam = async () => {
-      const team = await teamBySlug(teamSlug);
-      setTeam(team);
-    };
-    getTeam();
-  }, [teamSlug]);
+  const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
+  const project = api.projects.projectByTeamIdAndSlug.useQuery(
+    { teamId: team.data!.id, slug: projectSlug },
+    { enabled: !!team.data },
+  );
 
-  useEffect(() => {
-    const getProject = async (teamId: string) => {
-      const project = await projectByTeamIdAndSlug(teamId, projectSlug);
-      setProject(project);
-    };
-    if (team) {
-      getProject(team.id);
-    }
-  }, [projectSlug, team]);
-
-  if (!team || !project) {
+  if (!team.data || !project.data) {
     return null;
   }
 
@@ -44,8 +28,11 @@ export default function NavNewTable({
       <Crumb
         title={crumbTitle}
         items={[
-          { label: team.name, href: `/${team.slug}` },
-          { label: project.name, href: `/${team.slug}/${project.slug}` },
+          { label: team.data.name, href: `/${team.data.slug}` },
+          {
+            label: project.data.name,
+            href: `/${team.data.slug}/${project.data.slug}`,
+          },
         ]}
       />
     </div>

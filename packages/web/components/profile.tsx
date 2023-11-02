@@ -1,6 +1,5 @@
 "use client";
 
-import { authenticated, logout } from "@/app/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,7 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { authAtom } from "@/store/wallet";
+import { authAtom } from "@/store/auth";
+import { api } from "@/trpc/react";
 import { Auth } from "@tableland/studio-api";
 import { useAtom } from "jotai";
 import { LogOut } from "lucide-react";
@@ -30,6 +30,7 @@ export default function Profile({
   hideAddress?: boolean;
   dontRedirect?: boolean;
 }) {
+  const [auth, setAuth] = useAtom(authAtom);
   const { isConnected, address } = useAccount();
   const {
     connect,
@@ -38,7 +39,13 @@ export default function Profile({
     isLoading,
     reset,
   } = useConnect();
-  const [auth, setAuth] = useAtom(authAtom);
+  const authenticated = api.auth.authenticated.useQuery();
+  const logout = api.auth.logout.useMutation({
+    onSuccess: () => {
+      setAuth(undefined);
+      router.refresh();
+    },
+  });
   const [signInError, setSignInError] = useState<Error | undefined>(undefined);
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
   const { toast } = useToast();
@@ -47,18 +54,16 @@ export default function Profile({
   // Fetch user when:
   useEffect(() => {
     const handler = async () => {
-      try {
-        const auth = await authenticated();
-        setAuth(auth);
-      } catch (_error) {}
+      authenticated.refetch();
     };
-    // 1. page loads
-    handler();
-
-    // 2. window is focused (in case user logs out of another window)
+    // 1. window is focused (in case user logs out of another window)
     window.addEventListener("focus", handler);
     return () => window.removeEventListener("focus", handler);
-  }, [setAuth]);
+  }, [authenticated]);
+
+  useEffect(() => {
+    setAuth(authenticated.data || undefined);
+  }, [authenticated.data, setAuth]);
 
   useEffect(() => {
     if (walletConnectorError) {
@@ -84,6 +89,7 @@ export default function Profile({
 
   const onSignInSuccess = ({ auth }: { auth: Auth | undefined }) => {
     if (auth) {
+      router.refresh();
       setAuth(auth);
       if (!dontRedirect) {
         router.push(`/${auth.personalTeam.slug}`);
@@ -98,6 +104,7 @@ export default function Profile({
   };
 
   const onRegisterSuccess = (auth: Auth) => {
+    router.refresh();
     setAuth(auth);
     setShowRegisterDialog(false);
     if (!dontRedirect) {
@@ -107,12 +114,6 @@ export default function Profile({
 
   const onRegisterCancel = () => {
     setShowRegisterDialog(false);
-  };
-
-  const onSignOut = async () => {
-    await logout();
-    setAuth(undefined);
-    router.refresh();
   };
 
   return (
@@ -156,7 +157,7 @@ export default function Profile({
                 {/* </DropdownMenuItem> */}
                 {/* </DropdownMenuGroup> */}
                 {/* <DropdownMenuSeparator /> */}
-                <DropdownMenuItem onClick={onSignOut}>
+                <DropdownMenuItem onClick={() => logout.mutate()}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign out</span>
                   {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}

@@ -1,6 +1,6 @@
 {
   "name": "@tableland/studio-client",
-  "version": "0.0.0-pre.0",
+  "version": "0.0.0-pre.2",
   "description": "A tRPC client for Studio",
   "repository": "https://github.com/tablelandnetwork/studio/client",
   "publishConfig": {
@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/tablelandnetwork/studio#readme",
   "dependencies": {
-    "@tableland/studio-api": "^0.0.0-pre.0",
+    "@tableland/studio-api": "^0.0.0-pre.2",
     "@trpc/client": "^10.38.4",
     "superjson": "^1.13.1"
   }

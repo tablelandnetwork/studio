@@ -1,7 +1,7 @@
-import { register, teamNameAvailable } from "@/app/actions";
+import { api } from "@/trpc/react";
 import { Auth } from "@tableland/studio-api";
 import { Loader2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
 import {
@@ -26,33 +26,26 @@ export default function RegistrationDialog({
   onSuccess: (auth: Auth) => void;
   onCancel: () => void;
 }) {
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>(
-    undefined,
-  );
+  const [teamName, setTeamName] = useState("");
+  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [registerError, setRegisterError] = useState("");
-  const [pending, startTransition] = useTransition();
 
-  const handleRegister = async () => {
-    startTransition(async () => {
-      try {
-        const res = await register(username, email);
-        if (res.error) {
-          throw new Error(res.error);
-        } else if (res.auth) {
-          onSuccess(res.auth);
-          setUsername("");
-          setEmail("");
-        } else {
-          throw new Error("No result from register");
-        }
-      } catch (error) {
-        setRegisterError(
-          error instanceof Error ? error.message : String(error),
-        );
-      }
-    });
+  const nameAvailableQuery = api.teams.nameAvailable.useQuery(
+    { name: teamName },
+    { enabled: !!teamName },
+  );
+
+  const register = api.auth.register.useMutation({
+    onSuccess: (res) => {
+      onSuccess(res);
+      setUsername("");
+      setEmail("");
+    },
+  });
+
+  const handleRegister = () => {
+    register.mutate({ username, email });
   };
 
   const handleCancel = () => {
@@ -80,8 +73,9 @@ export default function RegistrationDialog({
                 id="name"
                 placeholder="myusername"
                 value={username}
-                check={teamNameAvailable}
-                onCheckResult={setNameAvailable}
+                updateQuery={setTeamName}
+                queryStatus={nameAvailableQuery}
+                onResult={setNameAvailable}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -95,18 +89,26 @@ export default function RegistrationDialog({
               />
             </div>
           </div>
-          {!!registerError && <p>Error registering: {registerError}</p>}
+          {register.isError && (
+            <p>Error registering: {register.error.message}</p>
+          )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={handleCancel} disabled={pending}>
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={register.isLoading}
+          >
             Cancel
           </Button>
           <Button
             type="submit"
             onClick={handleRegister}
-            disabled={pending || !nameAvailable}
+            disabled={register.isLoading || !nameAvailable}
           >
-            {pending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+            {register.isLoading && (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            )}
             Continue
           </Button>
         </DialogFooter>

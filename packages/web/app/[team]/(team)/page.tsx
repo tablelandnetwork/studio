@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { api } from "@/trpc/server-invoker";
+import { api } from "@/trpc/server";
 import {
   Folders,
   Gem,

@@ -1,25 +1,24 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import { equal, match } from "node:assert";
 import { getAccounts } from "@tableland/local";
 import { Database } from "@tableland/sdk";
 import { getDefaultProvider } from "ethers";
 import { afterEach, before, describe, test } from "mocha";
-import { equal, match } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
-import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/project.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
-  TEST_REGISTRY_PORT
+  TEST_REGISTRY_PORT,
+  TEST_TEAM_ID,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 const accounts = getAccounts();
 
-const TEST_TEAM_ID = "01a2d24d-3805-4a14-8059-7041f8b69afc";
 const defaultArgs = [
   "--store",
   path.join(_dirname, ".studioclisession.json"),
@@ -56,7 +55,6 @@ describe("commands/project", function () {
       "project",
       "create",
       projectName,
-      "--description",
       description,
       "--teamId",
       TEST_TEAM_ID,
@@ -88,7 +86,7 @@ describe("commands/project", function () {
     const projectStr = consoleLog.getCall(0).firstArg;
     const data = JSON.parse(projectStr);
 
-    equal(data.length, 1);
+    equal(data.length, 2);
     const project = data[0];
     const idParts = project.id.split("-");
     equal(idParts.length, 5);

@@ -1,11 +1,54 @@
+import readline from "node:readline/promises";
 import { readFileSync, writeFileSync } from "node:fs";
 import { Wallet, getDefaultProvider, providers } from "ethers";
 import createKeccakHash from "keccak";
 import { helpers } from "@tableland/sdk";
+import { init } from "@tableland/sqlparser";
 import { API, api, ClientConfig } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
 const DEFAULT_API_URL = "https://studio.tableland.xyz";
+const MAX_STATEMENT_SIZE = 34999;
+
+export const ERROR_INVALID_PROJECT_ID = "you must provide project id";
+
+export const isUUID = function (value: unknown) {
+  // assert id format
+  if (typeof value !== "string") return false;
+  const idParts = value.split("-");
+  if (idParts.length !== 5) return false;
+  if (idParts[0].length !== 8) return false;
+  if (idParts[1].length !== 4) return false;
+  if (idParts[2].length !== 4) return false;
+  if (idParts[3].length !== 4) return false;
+  if (idParts[4].length !== 12)return false;
+
+  return true;
+};
+
+export const getQueryValidator = async function () {
+  await init();
+  return async function (query: string) {
+    return await globalThis.sqlparser.normalize(query);
+  };
+};
+
+export const ask = async function (questions: string[]) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  const answers = [];
+  for (const question of questions) {
+    const answer = await rl.question(question);
+    answers.push(answer.trim());
+  }
+
+  rl.close();
+
+  return answers;
+};
 
 export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
@@ -39,7 +82,9 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
 export const getProject = function (
   argv: { store: FileStore; projectId?: string; }
 ) {
-  if (typeof argv.projectId === "string") return argv.projectId;
+  if (typeof argv.projectId === "string" && argv.projectId.trim() !== "") {
+    return argv.projectId.trim();
+  }
 
   return argv.store.get<string>("projectId");
 };
@@ -47,15 +92,48 @@ export const getProject = function (
 export const getTeam = function (
   argv: { store: FileStore; teamId?: string; }
 ) {
-  if (typeof argv.teamId === "string") return argv.teamId;
+  if (typeof argv.teamId === "string" && argv.teamId.trim() !== "") {
+    return argv.teamId.trim();
+  }
 
   return argv.store.get<string>("teamId");
 };
 
+
+const NO_DEFAULT_ENV_ERR = "could not get default environment";
+export const getEnvironmentId = async function (api: any, projectId: string) {
+  // lookup environmentId by projectId
+  const environments = await api.environments.projectEnvironments.query({ projectId });
+  const environmentId = environments.find((env: any) => env.name === "default")?.id;
+  if (typeof environmentId !== "string") {
+    throw new Error(NO_DEFAULT_ENV_ERR);
+  }
+
+  return environmentId;
+}
+
+export const findOrCreateDefaultEnvironment = async function (api: any, projectId: string) {
+  try {
+    const environmentId = await getEnvironmentId(api, projectId);
+    return environmentId;
+  } catch (err: any) {
+    if (err.message !== NO_DEFAULT_ENV_ERR) throw err;
+  }
+
+  const environment = await api.environments.newEnvironment.mutate({
+    name: "default",
+    projectId,
+  });
+console.log("environment", environment);
+  return environment.id;
+}
+
 export const getApiUrl = function (
   argv: { store: FileStore; apiUrl?: string; }
 ) {
-  if (typeof argv.apiUrl === "string") return argv.apiUrl;
+  if (typeof argv.apiUrl === "string" && argv.apiUrl.trim() !== "") {
+    return argv.apiUrl.trim();
+  }
 
   const storeApiUrl = argv.store.get<string>("apiUrl");
   if (storeApiUrl) return storeApiUrl;
@@ -77,9 +155,6 @@ export class FileStore {
       const fileBuf = readFileSync(filePath);
       return JSON.parse(fileBuf.toString());
     }  catch (err: any) {
-      // console.log("findOrCreate", err);
-
-      // TODO: figure out when to throw
       if (err.code !== "ENOENT") throw err;
     }
 
@@ -304,6 +379,62 @@ export function toChecksumAddress(address: string) {
   }
   return ret;
 }
+
+export const batchRows = function (
+  rows: Array<Array<string | number>>,
+  headers: string[],
+  table: string
+) {
+  let rowCount = 0;
+  const batches = [];
+  while (rows.length) {
+    let statement = `INSERT INTO ${table}(${headers.join(",")})VALUES`
+
+    while (
+      rows.length
+      && byteSize(statement + getNextValues(rows[0])) < MAX_STATEMENT_SIZE
+    ) {
+      const row = rows.shift();
+      if (!row) continue;
+      rowCount += 1;
+      if (row.length !== headers.length) {
+        throw new Error(`malformed csv file, row ${rowCount} has incorrect number of columns`);
+      }
+      // include comma between
+      statement += getNextValues(row);
+    }
+
+    // remove last comma and add semicolon
+    statement = statement.slice(0, -1) + ";";
+    batches.push(statement.toString());
+  }
+
+  return batches;
+};
+
+const byteSize = function (str: string) {
+  return new Blob([str]).size;
+};
+
+const getNextValues = function (row: (string | number)[]) {
+  return `(${row.join(",")}),`;
+}
+
+// Headers need to be enclosed in tick marks to comply with Studio table
+// creation and users may not realize this. If they provide a csv without
+// tickmarks we can convert for them.
+export const prepareCsvHeaders = function (headers: string[]) {
+  for (let i = 0; i < headers.length; i++) {
+    if (headers[i][0] !== "`") {
+      headers[i] = "`" + headers[i];
+    }
+    if (headers[i][headers[i].length - 1] !== "`") {
+      headers[i] = headers[i] + "`";
+    }
+  }
+
+  return headers;
+};
 
 // Wrap any direct calls to console.log, so that test spies can distinguise between
 // the CLI's output, and messaging that originates outside the CLI

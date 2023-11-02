@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { and, asc, eq } from "drizzle-orm";
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData } from "iron-session";
-import * as schema from "../schema";
+import * as schema from "../schema/index.js";
 import {
   NewTeamInviteSealed,
   Team,
@@ -14,8 +14,8 @@ import {
   teamProjects,
   teams,
   users,
-} from "../schema";
-import { slugify } from "./utils";
+} from "../schema/index.js";
+import { slugify } from "./utils.js";
 
 export function initTeams(
   db: DrizzleD1Database<typeof schema>,
