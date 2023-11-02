@@ -87,7 +87,7 @@ export function tablesRouter(store: Store) {
           if (err instanceof ApiError && err.status === 404) {
             throw new TRPCError({
               code: "NOT_FOUND",
-              message: `Table id ${input.tableId} not found.`,
+              message: `Table id ${input.tableId} not found on chain ${input.chainId}.`,
             });
           }
           throw new TRPCError({
