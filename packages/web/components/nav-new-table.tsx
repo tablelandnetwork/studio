@@ -14,7 +14,7 @@ export default function NavNewTable({
   }>();
 
   const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
-  const project = api.projects.projectByTeamIdAndSlug.useQuery(
+  const project = api.projects.projectBySlug.useQuery(
     { teamId: team.data!.id, slug: projectSlug },
     { enabled: !!team.data },
   );

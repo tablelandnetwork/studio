@@ -69,7 +69,7 @@ export function initProjects(
       return mapped;
     },
 
-    projectByTeamIdAndSlug: async function (teamId: string, slug: string) {
+    projectBySlug: async function (teamId: string, slug: string) {
       const res = await db
         .select({ projects })
         .from(teamProjects)
