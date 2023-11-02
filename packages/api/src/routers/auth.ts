@@ -12,7 +12,7 @@ export function authRouter(store: Store) {
         z.object({ userTeamId: z.string().trim().nonempty() }).or(z.void()),
       )
       .query(({ ctx }) => {
-        return ctx.session.auth;
+        return ctx.session.auth || false;
       }),
     nonce: publicProcedure.input(z.void()).mutation(async ({ ctx }) => {
       ctx.session.nonce = generateNonce();

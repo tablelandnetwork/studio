@@ -62,7 +62,7 @@ export default function Profile({
   }, [authenticated]);
 
   useEffect(() => {
-    setAuth(authenticated.data);
+    setAuth(authenticated.data || undefined);
   }, [authenticated.data, setAuth]);
 
   useEffect(() => {
