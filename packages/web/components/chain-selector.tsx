@@ -8,12 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { chains } from "@/lib/chains";
 import { SelectProps } from "@radix-ui/react-select";
-import { type Chain } from "wagmi/chains";
+import { supportedChains } from "@tableland/studio-chains";
+import { type Chain } from "viem/chains";
 
 const groupedChains = Array.from(
-  chains()
+  supportedChains(
+    typeof window !== "undefined" &&
+      (window.location?.hostname === "localhost" ||
+        window.location?.hostname === "127.0.0.1"),
+  )
     .reduce(
       (acc, chain) => {
         if (chain.testnet === undefined) {

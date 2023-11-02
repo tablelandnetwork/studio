@@ -18,6 +18,7 @@
   "license": "MIT AND Apache-2.0",
   "dependencies": {
     "@tableland/sdk": "^4.5.3",
+    "@tableland/studio-chains": "^0.0.0-pre.0",
     "@tableland/studio-mail": "^0.0.0-pre.0",
     "@tableland/studio-store": "^0.0.0-pre.1",
     "@trpc/server": "^10.38.4",
