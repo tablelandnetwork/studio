@@ -110,7 +110,7 @@ export const getEnvironmentId = async function (api: any, projectId: string) {
   }
 
   return environmentId;
-}
+};
 
 export const findOrCreateDefaultEnvironment = async function (api: any, projectId: string) {
   try {
@@ -124,9 +124,9 @@ export const findOrCreateDefaultEnvironment = async function (api: any, projectI
     name: "default",
     projectId,
   });
-console.log("environment", environment);
+
   return environment.id;
-}
+};
 
 export const getApiUrl = function (
   argv: { store: FileStore; apiUrl?: string; }
