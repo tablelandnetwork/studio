@@ -1,30 +1,13 @@
 "use client";
 
-import { chains as supportedChains } from "@/lib/chains";
-import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { arbitrumNova } from "wagmi/chains";
-import { InjectedConnector } from "wagmi/connectors/injected";
-import { infuraProvider } from "wagmi/providers/infura";
-import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
-import { publicProvider } from "wagmi/providers/public";
+import { configuredChains } from "@tableland/studio-chains";
+import { InjectedConnector } from "@wagmi/core/connectors/injected";
+import { WagmiConfig, createConfig } from "wagmi";
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  supportedChains(),
-  [
-    infuraProvider({ apiKey: "92f6902cf1214401ae5b08a1e117eb91" }),
-    jsonRpcProvider({
-      rpc: (chain) => {
-        let slug = "breakit";
-        if (chain.id === arbitrumNova.id) {
-          slug = "nova-mainnet";
-        }
-        return {
-          http: `https://neat-dark-dust.${slug}.quiknode.pro/2d4bbaa84ce4721fc6576c47051cd505e16fb325/`,
-        };
-      },
-    }),
-    publicProvider(),
-  ],
+const { chains, publicClient, webSocketPublicClient } = configuredChains(
+  typeof window !== "undefined" &&
+    (window.location?.hostname === "localhost" ||
+      window.location?.hostname === "127.0.0.1"),
 );
 
 const config = createConfig({

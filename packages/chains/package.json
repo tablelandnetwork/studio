@@ -1,0 +1,39 @@
+{
+  "name": "@tableland/studio-chains",
+  "version": "0.0.0-pre.0",
+  "description": "Supported chain definitions for Tableland Studio",
+  "repository": "https://github.com/tablelandnetwork/studio/chains",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.js",
+  "files": [
+    "dist/**/*.js"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "tableland",
+    "studio",
+    "wagmi",
+    "sql",
+    "database",
+    "ethereum",
+    "evm"
+  ],
+  "author": "Tableland",
+  "license": "MIT AND Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/tablelandnetwork/studio/issues"
+  },
+  "homepage": "https://github.com/tablelandnetwork/studio#readme",
+  "dependencies": {
+    "viem": "^1.16.5",
+    "wagmi": "^1.4.3"
+  }
+}
