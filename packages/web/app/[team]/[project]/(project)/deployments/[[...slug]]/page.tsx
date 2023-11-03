@@ -21,7 +21,7 @@ export default async function Deployments({
   const authorized = await cache(api.teams.isAuthorized.query)({
     teamId: team.id,
   });
-  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
+  const project = await cache(api.projects.projectBySlug.query)({
     teamId: team.id,
     slug: params.project,
   });

@@ -8,7 +8,7 @@ export default async function ProjectSettings({
 }) {
   const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
 
-  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
+  const project = await cache(api.projects.projectBySlug.query)({
     teamId: team.id,
     slug: params.project,
   });

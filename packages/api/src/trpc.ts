@@ -44,11 +44,12 @@ export const protectedProcedure = publicProcedure.use((opts) => {
 
 export const teamProcedure = (store: Store) =>
   protectedProcedure
-    .input(z.object({ teamId: z.string().trim().nonempty() }))
+    .input(z.object({ teamId: z.string().trim().nonempty().optional() }))
     .use(async (opts) => {
+      const teamId = opts.input.teamId || opts.ctx.session.auth.user.teamId;
       const membership = await store.teams.isAuthorizedForTeam(
         opts.ctx.session.auth.user.teamId,
-        opts.input.teamId,
+        teamId,
       );
       if (!membership) {
         throw new TRPCError({
@@ -56,8 +57,9 @@ export const teamProcedure = (store: Store) =>
           message: "not authorized for team",
         });
       }
+      opts.input.teamId = teamId;
       return opts.next({
-        ctx: { teamAuthorization: membership },
+        ctx: { teamAuthorization: membership, teamId },
       });
     });
 

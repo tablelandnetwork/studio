@@ -12,14 +12,21 @@ import { SendInviteFunc } from "../utils/sendInvite";
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
   return router({
     isAuthorized: publicProcedure
-      .input(z.object({ teamId: z.string().trim() }))
+      .input(z.object({ teamId: z.string().trim() }).or(z.void()))
       .query(async ({ ctx, input }) => {
         if (!ctx.session.auth) {
           return false;
         }
+        const teamId = input?.teamId || ctx.session.auth.user.teamId;
+        if (!teamId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Team ID must be provided as input or session context",
+          });
+        }
         return await store.teams.isAuthorizedForTeam(
           ctx.session.auth.user.teamId,
-          input.teamId,
+          teamId,
         );
       }),
     nameAvailable: publicProcedure
@@ -27,10 +34,17 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
       .query(async ({ input }) => {
         return await store.teams.nameAvailable(input.name);
       }),
-    teamById: publicProcedure
-      .input(z.object({ teamId: z.string().trim() }))
-      .query(async ({ input }) => {
-        const team = await store.teams.teamById(input.teamId);
+    getTeam: publicProcedure
+      .input(z.object({ teamId: z.string().trim() }).or(z.void()))
+      .query(async ({ input, ctx }) => {
+        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
+        if (!teamId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Team ID must be provided as input or session context",
+          });
+        }
+        const team = await store.teams.teamById(teamId);
         if (!team) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Team not found" });
         }
@@ -76,20 +90,27 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return team;
       }),
     usersForTeam: publicProcedure
-      .input(z.object({ teamId: z.string().trim() }))
-      .query(async ({ input }) => {
-        const people = await store.teams.userTeamsForTeamId(input.teamId);
+      .input(z.object({ teamId: z.string().trim() }).or(z.void()))
+      .query(async ({ input, ctx }) => {
+        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
+        if (!teamId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Team ID must be provided as input or session context",
+          });
+        }
+        const people = await store.teams.userTeamsForTeamId(teamId);
         return people;
       }),
     toggleAdmin: teamAdminProcedure(store)
       .input(z.object({ userId: z.string().trim() }))
-      .mutation(async ({ input }) => {
-        await store.teams.toggleAdmin(input.teamId, input.userId);
+      .mutation(async ({ input, ctx }) => {
+        await store.teams.toggleAdmin(ctx.teamId, input.userId);
       }),
     removeTeamMember: teamAdminProcedure(store)
       .input(z.object({ userId: z.string().trim() }))
-      .mutation(async ({ input }) => {
-        await store.teams.removeTeamMember(input.teamId, input.userId);
+      .mutation(async ({ input, ctx }) => {
+        await store.teams.removeTeamMember(ctx.teamId, input.userId);
       }),
   });
 }
