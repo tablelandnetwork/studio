@@ -16,15 +16,15 @@ export function invitesRouter(
   dataSealPass: string,
 ) {
   return router({
-    invitesForTeam: teamProcedure(store).query(async ({ ctx, input }) => {
-      const invites = await store.invites.invitesForTeam(input.teamId);
+    invitesForTeam: teamProcedure(store).query(async ({ ctx }) => {
+      const invites = await store.invites.invitesForTeam(ctx.teamId);
       return { invites, teamAuthorization: ctx.teamAuthorization };
     }),
     inviteEmails: teamProcedure(store)
       .input(z.object({ emails: z.array(z.string().trim().email()) }))
       .mutation(async ({ ctx, input }) => {
         const invites = await store.invites.inviteEmailsToTeam(
-          input.teamId,
+          ctx.teamId,
           ctx.session.auth.user.teamId,
           input.emails,
         );

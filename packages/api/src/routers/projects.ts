@@ -17,11 +17,23 @@ export function projectsRouter(store: Store) {
         }
         return await store.projects.projectsByTeamId(teamId);
       }),
-    projectByTeamIdAndSlug: publicProcedure
-      .input(z.object({ teamId: z.string().trim(), slug: z.string().trim() }))
-      .query(async ({ input }) => {
+    projectBySlug: publicProcedure
+      .input(
+        z.object({
+          teamId: z.string().trim().optional(),
+          slug: z.string().trim(),
+        }),
+      )
+      .query(async ({ input, ctx }) => {
+        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
+        if (!teamId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Team ID must be provided as input or session context",
+          });
+        }
         const project = await store.projects.projectByTeamIdAndSlug(
-          input.teamId,
+          teamId,
           input.slug,
         );
         if (!project) {
@@ -33,9 +45,21 @@ export function projectsRouter(store: Store) {
         return project;
       }),
     nameAvailable: publicProcedure
-      .input(z.object({ teamId: z.string().trim(), name: z.string().trim() }))
-      .query(async ({ input }) => {
-        return await store.projects.nameAvailable(input.teamId, input.name);
+      .input(
+        z.object({
+          teamId: z.string().trim().optional(),
+          name: z.string().trim(),
+        }),
+      )
+      .query(async ({ input, ctx }) => {
+        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
+        if (!teamId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Team ID must be provided as input or session context",
+          });
+        }
+        return await store.projects.nameAvailable(teamId, input.name);
       }),
     newProject: teamProcedure(store)
       .input(
@@ -44,9 +68,9 @@ export function projectsRouter(store: Store) {
           description: z.string().trim().nonempty(),
         }),
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const project = await store.projects.createProject(
-          input.teamId,
+          ctx.teamId,
           input.name,
           input.description,
         );

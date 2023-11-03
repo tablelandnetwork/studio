@@ -39,7 +39,7 @@ export default function NavProject({
 
   const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
   const teamId = team?.id;
-  const { data: project } = api.projects.projectByTeamIdAndSlug.useQuery(
+  const { data: project } = api.projects.projectBySlug.useQuery(
     { teamId: teamId!, slug: projectSlug },
     { enabled: !!teamId },
   );

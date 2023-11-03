@@ -28,10 +28,10 @@ export default async function Invite({
   if (invite.claimedByTeamId || invite.claimedAt) {
     notFound();
   }
-  const targetTeam = await cache(api.teams.teamById.query)({
+  const targetTeam = await cache(api.teams.getTeam.query)({
     teamId: invite.teamId,
   });
-  const inviterTeam = await cache(api.teams.teamById.query)({
+  const inviterTeam = await cache(api.teams.getTeam.query)({
     teamId: invite.inviterTeamId,
   });
 

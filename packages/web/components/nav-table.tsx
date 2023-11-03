@@ -19,7 +19,7 @@ export default function NavNewTable({
 
   // TODO: Create a single endpoint for this.
   const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
-  const project = api.projects.projectByTeamIdAndSlug.useQuery(
+  const project = api.projects.projectBySlug.useQuery(
     { teamId: team.data!.id, slug: projectSlug },
     { enabled: !!team.data },
   );

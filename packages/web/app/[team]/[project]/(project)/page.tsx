@@ -27,7 +27,7 @@ export default async function Project({
   params: { team: string; project: string };
 }) {
   const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
-  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
+  const project = await cache(api.projects.projectBySlug.query)({
     teamId: team.id,
     slug: params.project,
   });
