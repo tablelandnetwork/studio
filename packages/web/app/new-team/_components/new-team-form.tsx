@@ -1,5 +1,8 @@
 "use client";
 
+import { FormRootMessage } from "@/components/form-root";
+import InputWithCheck from "@/components/input-with-check";
+import TagInput from "@/components/tag-input";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,9 +20,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { FormRootMessage } from "./form-root";
-import InputWithCheck from "./input-with-check";
-import TagInput from "./tag-input";
 
 const schema = z.object({
   name: z.string().trim().nonempty(),

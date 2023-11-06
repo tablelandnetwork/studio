@@ -1,5 +1,7 @@
 "use client";
 
+import { FormRootMessage } from "@/components/form-root";
+import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,8 +21,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
-import { FormRootMessage } from "./form-root";
-import InputWithCheck from "./input-with-check";
 
 const formSchema = z.object({
   name: z.string().trim().min(3),
