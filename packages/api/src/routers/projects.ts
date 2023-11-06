@@ -69,17 +69,25 @@ export function projectsRouter(store: Store) {
         }),
       )
       .mutation(async ({ input, ctx }) => {
-        const project = await store.projects.createProject(
-          ctx.teamId,
-          input.name,
-          input.description,
-        );
-        // TODO: This is temporary to make sure all projects have a default environment.
-        await store.environments.createEnvironment({
-          projectId: project.id,
-          name: "default",
-        });
-        return project;
+        try {
+          const project = await store.projects.createProject(
+            ctx.teamId,
+            input.name,
+            input.description,
+          );
+          // TODO: This is temporary to make sure all projects have a default environment.
+          await store.environments.createEnvironment({
+            projectId: project.id,
+            name: "default",
+          });
+          return project;
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error creating project",
+            cause: error,
+          });
+        }
       }),
   });
 }

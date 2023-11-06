@@ -19,6 +19,12 @@ export default function SignInButton({
   const { signMessageAsync } = useSignMessage();
 
   const nonce = api.auth.nonce.useMutation({
+    onMutate: () => {
+      console.log("nonce onMutate");
+    },
+    onSuccess: (res) => {
+      console.log("nonce onSuccess", res);
+    },
     onError: (error) => {
       onError({ error: new Error(error.message) });
     },

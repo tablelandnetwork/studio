@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
+import { FormRootMessage } from "./form-root";
 import InputWithCheck from "./input-with-check";
 
 const formSchema = z.object({
@@ -42,6 +43,9 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
       router.refresh();
       router.push(`/${team.slug}/${res.slug}`);
     },
+    onError: (err) => {
+      setError("root", { message: err.message });
+    },
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,6 +63,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
     control,
     formState: { isValid, errors, isValidating, isDirty },
     reset,
+    setError,
   } = form;
 
   const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
@@ -185,6 +190,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
             Add Environment
           </Button>
         </div> */}
+        <FormRootMessage />
         <Button type="submit" disabled={newProject.isLoading || !nameAvailable}>
           {newProject.isLoading && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
