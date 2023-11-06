@@ -1,4 +1,4 @@
-import { Store } from "@tableland/studio-store";
+import { Store, schema } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -81,12 +81,30 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         }),
       )
       .mutation(async ({ ctx, input }) => {
-        const { team, invites } = await store.teams.createTeamByPersonalTeam(
-          input.name,
-          ctx.session.auth.user.teamId,
-          input.emailInvites,
-        );
-        await Promise.all(invites.map((invite) => sendInvite(invite)));
+        let team: schema.Team;
+        let invites: schema.TeamInvite[];
+        try {
+          const res = await store.teams.createTeamByPersonalTeam(
+            input.name,
+            ctx.session.auth.user.teamId,
+            input.emailInvites,
+          );
+          team = res.team;
+          invites = res.invites;
+        } catch (e) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error creating team",
+            cause: e,
+          });
+        }
+
+        // Intentionally swallowing any error here since the team is still
+        // created and invites can be viewed and resent at any time.
+        try {
+          await Promise.all(invites.map((invite) => sendInvite(invite)));
+        } catch (e) {}
+
         return team;
       }),
     usersForTeam: publicProcedure
