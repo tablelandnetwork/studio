@@ -1,5 +1,6 @@
 "use client";
 
+import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -108,6 +109,9 @@ export default function NewTable({ project, team, envs }: Props) {
       router.refresh();
       router.replace(`/${team.slug}/${project.slug}`);
     },
+    onError: (err) => {
+      setError("root", { message: err.message });
+    },
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -120,7 +124,7 @@ export default function NewTable({ project, team, envs }: Props) {
     },
   });
 
-  const { handleSubmit, register, control, watch } = form;
+  const { handleSubmit, register, control, watch, setError } = form;
 
   const { fields } = useFieldArray({
     control,
@@ -505,6 +509,7 @@ export default function NewTable({ project, team, envs }: Props) {
             );
           })}
         </div> */}
+        <FormRootMessage />
         <Button type="submit" disabled={newTable.isLoading || !nameAvailable}>
           {newTable.isLoading && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />

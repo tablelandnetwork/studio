@@ -1,5 +1,8 @@
 "use client";
 
+import { FormRootMessage } from "@/components/form-root";
+import InputWithCheck from "@/components/input-with-check";
+import TagInput from "@/components/tag-input";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,8 +20,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import InputWithCheck from "./input-with-check";
-import TagInput from "./tag-input";
 
 const schema = z.object({
   name: z.string().trim().nonempty(),
@@ -41,6 +42,9 @@ export default function NewTeamForm() {
       router.push(`/${res.slug}`);
       router.refresh();
     },
+    onError: (err) => {
+      setError("root", { message: err.message });
+    },
   });
 
   const form = useForm<z.infer<typeof schema>>({
@@ -50,6 +54,8 @@ export default function NewTeamForm() {
       emailInvites: [],
     },
   });
+
+  const { setError } = form;
 
   function onSubmit(values: z.infer<typeof schema>) {
     if (!!pendingEmail) {
@@ -112,6 +118,7 @@ export default function NewTeamForm() {
             </FormItem>
           )}
         />
+        <FormRootMessage />
         <Button type="submit" disabled={newTeam.isLoading || !nameAvailable}>
           {newTeam.isLoading && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />

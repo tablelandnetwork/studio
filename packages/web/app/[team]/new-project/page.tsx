@@ -1,6 +1,6 @@
-import NewProjectForm from "@/components/new-project-form";
 import { api } from "@/trpc/server";
 import { cache } from "react";
+import NewProjectForm from "./_components/new-project-form";
 
 export default async function NewProject({
   params,
