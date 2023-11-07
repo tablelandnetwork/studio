@@ -27,44 +27,28 @@ const defaults = {
 export const command = "init";
 export const desc = "create a tablelandrc config file";
 
-export const builder = (yargs: Yargs) => {
-  return yargs
-    .command(
-      command,
-      desc,
-      function (args) {
-        return args.option("yes", {
-          type: "boolean",
-          description: "Skip the interactive prompts and use default values",
-          default: false,
-        })
-        .option("path", {
-          type: "string",
-          description: "The path at which to create the config file",
-          default: ""
-        }) as yargs.Argv<CommandOptions>;
-      },
-      async function (argv: CommandOptions) {
-        try {
-          const { yes } = argv;
-          const answers = yes ? questions.map(q => q.default) : await ask(questions.map(q => q.message));
 
-          const fileJson: { privateKey?: string; providerUrl?: string; } = {};
-          if (answers[0]) fileJson.privateKey = answers[0];
-          if (answers[1]) fileJson.providerUrl = answers[1];
+export const handler = async (
+  argv: Arguments<GlobalOptions>,
+): Promise<void> => {
+  try {
+    const { yes } = argv;
+    const answers = yes ? questions.map(q => q.default) : await ask(questions.map(q => q.message));
 
-          const configFilePath = answers[2];
-          if (typeof configFilePath !== "string") throw new Error("invalid config file path");
+    const fileJson: { privateKey?: string; providerUrl?: string; } = {};
+    if (answers[0]) fileJson.privateKey = answers[0];
+    if (answers[1]) fileJson.providerUrl = answers[1];
 
-          const fileString = JSON.stringify(fileJson, null, 4);
-          fs.writeFileSync(configFilePath, fileString);
+    const configFilePath = answers[2];
+    if (typeof configFilePath !== "string") throw new Error("invalid config file path");
 
-          logger.log(`Config created at ${configFilePath}`);
-        } catch (err: any) {
-          logger.error(err);
-        }
-      }
-    )
+    const fileString = JSON.stringify(fileJson, null, 4);
+    fs.writeFileSync(configFilePath, fileString);
+
+    logger.log(`Config created at ${configFilePath}`);
+  } catch (err: any) {
+    logger.error(err);
+  }
 };
 
 const questions = [
@@ -84,11 +68,3 @@ const questions = [
     default: resolve(`.tablelandrc.json`)
   }
 ];
-
-/* c8 ignore next 3 */
-export const handler = async (
-  argv: Arguments<CommandOptions>,
-): Promise<void> => {
-  //(args: Arguments<CommandOptions>) => void | Promise<void>
-  // noop
-};
