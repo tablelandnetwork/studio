@@ -17,7 +17,7 @@
   "author": "",
   "license": "MIT AND Apache-2.0",
   "dependencies": {
-    "@tableland/sdk": "^4.5.3",
+    "@tableland/sdk": "^5.0.0",
     "drizzle-orm": "^0.28.5",
     "iron-session": "^6.3.1"
   }
