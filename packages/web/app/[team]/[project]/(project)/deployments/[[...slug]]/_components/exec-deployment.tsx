@@ -109,7 +109,7 @@ export default function ExecDeployment({
         });
 
         const stmt = generateCreateTableStatement(table.name, table.schema);
-        const res = await tbl.exec(stmt);
+        const res = await tbl.prepare(stmt).all();
         if (res.error) {
           throw new Error(res.error);
         }

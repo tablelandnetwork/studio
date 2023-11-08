@@ -25,7 +25,9 @@ export default async function Deployment({
   const openSeaLink = openSeaLinks.get(deployment.chainId);
 
   const tbl = new Database({ baseUrl: helpers.getBaseUrl(deployment.chainId) });
-  const data = await tbl.exec(`SELECT * FROM ${deployment.tableName};`);
+  const data = await tbl
+    .prepare(`SELECT * FROM ${deployment.tableName};`)
+    .all();
   const columns: ColumnDef<unknown>[] = data.results.length
     ? Object.keys(data.results[0] as object).map((col) => ({
         accessorKey: col,
