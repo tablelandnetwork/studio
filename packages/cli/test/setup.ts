@@ -1,7 +1,4 @@
-// TODO: the api won't start without a postmark api key, so anyone running tests needs that
-//       we should probably have a way to configure the mailer to run in "dev"/"test"
-//       mode.  in this mode the email body would be logged to the terminal in a way that
-//       can be spied on instead of sending an actual email.
+import "dotenv/config";
 import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
