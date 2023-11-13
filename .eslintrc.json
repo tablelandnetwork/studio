@@ -32,6 +32,7 @@
     "no-unused-vars": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/restrict-template-expressions": ["error", {"allowAny": true}],
     "@typescript-eslint/strict-boolean-expressions": "off",
     // We use currently all `== null` as a way to check for undefined or null, might as well turn this check off
     "@typescript-eslint/no-non-null-assertion": "off"
