@@ -1,8 +1,8 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import { equal } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { equal } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import * as mod from "../src/commands/team.js";
@@ -11,7 +11,6 @@ import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_REGISTRY_PORT,
-  TEST_TEAM_ID,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));

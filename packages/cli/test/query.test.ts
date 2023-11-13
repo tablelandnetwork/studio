@@ -8,7 +8,6 @@ import mockStd from "mock-stdin";
 import { getAccounts } from "@tableland/local";
 import { type GlobalOptions } from "../src/cli.js";
 import * as modUse from "../src/commands/use.js";
-import * as modUnuse from "../src/commands/unuse.js";
 import * as modLogin from "../src/commands/login.js";
 import * as modLogout from "../src/commands/logout.js";
 import * as mod from "../src/commands/query.js";
@@ -87,7 +86,7 @@ describe("commands/query", function () {
           "error parsing statement: syntax error at position 7 near 'invalid'"
         );
 
-        resolve(void 0);
+        resolve(undefined);
       }, 1000);
     });
   });
@@ -112,7 +111,7 @@ describe("commands/query", function () {
         equal(data.success, true);
         deepStrictEqual(data.results, []);
 
-        resolve(void 0);
+        resolve(undefined);
       }, 1000);
     });
   });

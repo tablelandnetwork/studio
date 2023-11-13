@@ -1,8 +1,7 @@
 import { createInterface } from "readline";
-import type yargs from "yargs";
-import type { Arguments, CommandBuilder } from "yargs";
+import type { Arguments } from "yargs";
 import {
-  helpers as sdkHelpers,
+  type helpers as sdkHelpers,
   Database
 } from "@tableland/sdk";
 import { studioAliases } from "@tableland/studio-client";
@@ -11,7 +10,6 @@ import { type GlobalOptions } from "../cli.js";
 import {
   ERROR_INVALID_PROJECT_ID,
   FileStore,
-  ask,
   getApi,
   getApiUrl,
   getProject,
@@ -23,7 +21,6 @@ import {
   logger,
   normalizePrivateKey
 } from "../utils.js";
-
 
 // TODO: It seems like the sdk should export a single type for the Database config
 type SdkConfig = sdkHelpers.Config & Partial<sdkHelpers.AutoWaitConfig>;
@@ -41,9 +38,9 @@ export const handler = async (
       throw new Error("must provide path to session store file");
     }
 
-    const fileStore = new FileStore(store as string);
+    const fileStore = new FileStore(store);
     const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore})
-    const api = getApi(fileStore, apiUrl as string);
+    const api = getApi(fileStore, apiUrl);
     const projectId = getProject({ ...argv, store: fileStore });
 
     if (typeof projectId !== "string" || !isUUID(projectId)) {
@@ -84,7 +81,10 @@ export const handler = async (
     // readline interfaces don't immediately pause "line" events, so we have to
     // build our own mechanism to pause
     let paused = false;
-    let captureLine: undefined | ((line: string) => void) = undefined;
+    let captureLine: undefined | ((line: string) => void);
+
+    // the _interface handler promise isn't being used, but that is ok in this case
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     _interface.on("line", async function (line: string | undefined) {
       if (typeof line !== "string") return;
       if (paused) {
@@ -126,7 +126,9 @@ export const handler = async (
         if (queryObject.type === "create") {
           throw new Error("you cannot create studio project tables with the cli");
         }
-        if (queryObject.type !== "read" && !argv.privateKey) {
+
+        const privateKey = normalizePrivateKey(argv.privateKey);
+        if (queryObject.type !== "read" && privateKey === "") {
           throw new Error("you did not provide a private key, you can only run read queries");
         }
 
@@ -139,7 +141,7 @@ export const handler = async (
             (await studioAliasMapper.read())[queryObject.tables[0]]
           );
           const wallet = await getWalletWithProvider({
-            privateKey: normalizePrivateKey(argv.privateKey),
+            privateKey,
             chain,
             providerUrl: argv.providerUrl
           });
@@ -147,7 +149,7 @@ export const handler = async (
           pause();
           const proceed = await confirmWrite({chain, wallet: wallet.address});
           resume();
-          if (!proceed) {
+          if (proceed !== true) {
             logger.log("aborting write query.");
             return resetPrompt();
           }
@@ -163,7 +165,6 @@ export const handler = async (
       } catch (err: any) {
         logger.error(err);
         resetPrompt();
-        return;
       }
     });
 
@@ -176,7 +177,6 @@ export const handler = async (
     const setMidPrompt = function () {
       _interface.setPrompt("... ");
       _interface.prompt();
-      return;
     };
 
     const pause = function () {
@@ -194,7 +194,7 @@ export const handler = async (
 Do you want to continue (${chalk.bold("y/n")})? `
       );
 
-      return new Promise(function (resolve, reject) {
+      return await new Promise(function (resolve, reject) {
         captureLine = function (line: string) {
           captureLine = undefined;
           if (line.toLowerCase()[0] !== "y") {

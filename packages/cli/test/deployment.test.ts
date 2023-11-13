@@ -1,23 +1,19 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { equal, match } from "node:assert";
+import { equal } from "node:assert";
 import { getAccounts } from "@tableland/local";
-import { Database } from "@tableland/sdk";
 import mockStd from "mock-stdin";
-import { getDefaultProvider } from "ethers";
 import { afterEach, before, describe, test } from "mocha";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/deployment.js";
-import * as modProject from "../src/commands/project.js";
 import * as modLogin from "../src/commands/login.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_REGISTRY_PORT,
-  TEST_TEAM_ID,
   isUUID,
 } from "./utils";
 

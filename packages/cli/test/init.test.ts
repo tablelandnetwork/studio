@@ -1,26 +1,22 @@
 import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { equal, deepStrictEqual } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { equal, deepStrictEqual } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
-import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/init.js";
-import { CommandOptions } from "../src/commands/init.js";
+import { type CommandOptions } from "../src/commands/init.js";
 import * as modLogout from "../src/commands/logout.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
-  TEST_API_BASE_URL,
-  TEST_API_PORT,
   TEST_REGISTRY_PORT
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const sessionFilePath = path.join(_dirname, ".studioclisession.json");
 const accounts = getAccounts();
 const defaultArgs = [
   "--store",

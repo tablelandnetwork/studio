@@ -1,19 +1,18 @@
 import "dotenv/config";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+import { readFile } from "fs/promises";
+import http from "http";
+import { createHash } from "crypto";
 import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
 import { appRouter, createContext } from "@tableland/studio-api";
 import { init } from "@tableland/studio-store";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { createHash } from "crypto";
-import "dotenv/config";
 import { Wallet, getDefaultProvider } from "ethers";
-import fs from "fs";
-import { readFile } from "fs/promises";
-import http from "http";
 import { after, before } from "mocha";
-import path from "path";
-import { fileURLToPath } from "url";
 import {
   TEST_API_BASE_URL,
   TEST_API_PORT,
@@ -129,14 +128,14 @@ function buildSessionFile() {
 
 function getAliases(tablesFile: string) {
   return {
-    read: async function () {
-      const jsonBuf = fs.readFileSync(await tablesFile);
+    read: function () {
+      const jsonBuf = fs.readFileSync(tablesFile);
       return JSON.parse(jsonBuf.toString()) as helpers.NameMapping;
     },
-    write: async function (nameMap: helpers.NameMapping) {
-      const jsonBuf = fs.readFileSync(await tablesFile);
+    write: function (nameMap: helpers.NameMapping) {
+      const jsonBuf = fs.readFileSync(tablesFile);
       const jsonObj = { ...JSON.parse(jsonBuf.toString()), ...nameMap };
-      fs.writeFileSync(await tablesFile, JSON.stringify(jsonObj, null, 4));
+      fs.writeFileSync(tablesFile, JSON.stringify(jsonObj, null, 4));
     },
   };
 }
@@ -175,14 +174,15 @@ async function startStudioApi({ store }: { store: Store }) {
   );
 
   // Create a local server to receive data from
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const apiServer = http.createServer(async function (req: any, res: any) {
     // TODO: My current solution to running the api with two adapters is to map
     //       a Node.js request and response to and from a Fetch request and response
     try {
-      req.url = `${TEST_API_BASE_URL}${req.url}`;
+      req.url = `${TEST_API_BASE_URL}${req.url as string}`;
       req.headers = new Headers(req.headers);
-      req.text = function () {
-        return new Promise(function (resolve, reject) {
+      req.text = async function () {
+        return await new Promise(function (resolve, reject) {
           const body: any[] = [];
           req
             .on("data", (chunk: any) => {
@@ -206,7 +206,7 @@ async function startStudioApi({ store }: { store: Store }) {
 
       res.writeHead(response.status, responseHeaders);
       // using `as unknown as` because of https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/62651
-      const body = response.body
+      const body = response.body != null
         ? await streamToString(
             response.body as unknown as NodeJS.ReadableStream,
           )
@@ -217,7 +217,7 @@ async function startStudioApi({ store }: { store: Store }) {
 
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(
-        `{"error":{"json":{"message":"${err.message}","code":-32603,"data":{"code":"INTERNAL_SERVER_ERROR","httpStatus":500}}}}`,
+        `{"error":{"json":{"message":"${err.message as string}","code":-32603,"data":{"code":"INTERNAL_SERVER_ERROR","httpStatus":500}}}}`,
       );
     }
   });
@@ -226,7 +226,7 @@ async function startStudioApi({ store }: { store: Store }) {
 }
 
 async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
-  const chunks: Array<any> = [];
+  const chunks: any[] = [];
   for await (const chunk of stream) {
     chunks.push(chunk);
   }

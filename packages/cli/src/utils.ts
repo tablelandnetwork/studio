@@ -4,7 +4,7 @@ import { Wallet, getDefaultProvider, providers } from "ethers";
 import createKeccakHash from "keccak";
 import { helpers } from "@tableland/sdk";
 import { init } from "@tableland/sqlparser";
-import { API, api, ClientConfig } from "@tableland/studio-client";
+import { type API, type ClientConfig, api } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
 const DEFAULT_API_URL = "https://studio.tableland.xyz";
@@ -53,12 +53,12 @@ export const ask = async function (questions: string[]) {
 export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
 
-  if (fileStore) {
+  if (fileStore != null) {
     // read response headers and save cookie in session json file
     apiArgs.fetch = function (res) {
       const setCookie = res.headers.get("set-cookie");
 
-      if (setCookie) {
+      if (setCookie != null && setCookie !== "") {
         fileStore.set(sessionKey, setCookie.split(";").shift());
         fileStore.save();
       }
@@ -74,7 +74,7 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
       return {};
     };
   }
-  if (apiUrl) apiArgs.url = apiUrl;
+  if (apiUrl != null && apiUrl !== "") apiArgs.url = apiUrl;
 
   return api(apiArgs);
 };
@@ -136,7 +136,9 @@ export const getApiUrl = function (
   }
 
   const storeApiUrl = argv.store.get<string>("apiUrl");
-  if (storeApiUrl) return storeApiUrl;
+  if (typeof storeApiUrl === "string" && storeApiUrl !== "") {
+    return storeApiUrl;
+  }
 
   return DEFAULT_API_URL;
 };
@@ -175,6 +177,8 @@ export class FileStore {
   }
 
   remove(key: string) {
+    // the value of key is determined at runtime, we need to use dynamic delete
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this.data[key];
   }
 
@@ -192,12 +196,12 @@ export function constructURL(params: {
   const { baseURL, query, hash } = params;
 
   const url = new URL(baseURL);
-  if (query) {
+  if (query != null) {
     Object.keys(query).forEach((key) => {
       url.searchParams.append(key, query[key] as string);
     });
   }
-  if (hash) {
+  if (hash != null) {
     const h = new URL(
       constructURL({ baseURL, query: hash }),
     ).searchParams.toString();
@@ -368,9 +372,9 @@ export async function getWalletWithProvider({
 // TODO: this helper is used by multiple packages. We should probably create a utils packages.
 export function toChecksumAddress(address: string) {
   address = address.toLowerCase().replace("0x", "");
-  var hash = createKeccakHash("keccak256").update(address).digest("hex");
-  var ret = "0x";
-  for (var i = 0; i < address.length; i++) {
+  const hash = createKeccakHash("keccak256").update(address).digest("hex");
+  let ret = "0x";
+  for (let i = 0; i < address.length; i++) {
     if (parseInt(hash[i], 16) >= 8) {
       ret += address[i].toUpperCase();
     } else {
@@ -387,15 +391,15 @@ export const batchRows = function (
 ) {
   let rowCount = 0;
   const batches = [];
-  while (rows.length) {
+  while (rows.length > 0) {
     let statement = `INSERT INTO ${table}(${headers.join(",")})VALUES`
 
     while (
-      rows.length
+      rows.length > 0
       && byteSize(statement + getNextValues(rows[0])) < MAX_STATEMENT_SIZE
     ) {
       const row = rows.shift();
-      if (!row) continue;
+      if (row == null) continue;
       rowCount += 1;
       if (row.length !== headers.length) {
         throw new Error(`malformed csv file, row ${rowCount} has incorrect number of columns`);
@@ -416,7 +420,7 @@ const byteSize = function (str: string) {
   return new Blob([str]).size;
 };
 
-const getNextValues = function (row: (string | number)[]) {
+const getNextValues = function (row: Array<string | number>) {
   return `(${row.join(",")}),`;
 }
 

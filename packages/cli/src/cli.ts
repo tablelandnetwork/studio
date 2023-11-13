@@ -48,6 +48,7 @@ export interface GlobalOptions {
   store: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _argv = yargs(hideBin(process.argv))
   .parserConfiguration({
     "strip-aliased": true,

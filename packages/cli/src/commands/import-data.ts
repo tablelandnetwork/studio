@@ -1,14 +1,9 @@
 import { readFileSync } from "fs";
-import { join } from "path";
-import { Writable } from "stream";
-import { createInterface } from "readline";
-import type yargs from "yargs";
-import type { Arguments, CommandBuilder } from "yargs";
+import type { Arguments } from "yargs";
 import { parse } from "csv-parse";
 import chalk from "chalk";
-import { Auth } from "@tableland/studio-api";
 import { studioAliases } from "@tableland/studio-client";
-import { Database, helpers } from "@tableland/sdk";
+import { Database } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
 import {
   ask,
@@ -17,7 +12,6 @@ import {
   getChainIdFromTableName,
   getWalletWithProvider,
   normalizePrivateKey,
-  toChecksumAddress,
   getApi,
   getApiUrl,
   getProject,
@@ -38,9 +32,9 @@ export const handler = async (
     if (typeof table !== "string") {
       throw new Error("table name parameter is required");
     }
-    const fileStore = new FileStore(store as string);
+    const fileStore = new FileStore(store );
     const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore})
-    const api = getApi(fileStore, apiUrl as string);
+    const api = getApi(fileStore, apiUrl );
     const projectId = getProject({ ...argv, store: fileStore });
 
     const environmentId = await getEnvironmentId(api, projectId);
@@ -78,7 +72,7 @@ export const handler = async (
 
     const doImport = await confirmImport({
       statementLength: statements.join("").length,
-      rowCount: rowCount,
+      rowCount,
       wallet: signer.address,
       statementCount: statements.length,
       table,
@@ -107,8 +101,8 @@ export const handler = async (
 
 const parseCsvFile = async function (
   file: string
-): Promise<Array<Array<string>>> {
-  return new Promise(function (resolve, reject) {
+): Promise<string[][]> {
+  return await new Promise(function (resolve, reject) {
     const parser = parse();
     const rows: any[] = [];
 

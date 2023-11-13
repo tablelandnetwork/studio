@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { deepStrictEqual, equal } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { deepStrictEqual, equal } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";

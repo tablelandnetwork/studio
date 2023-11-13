@@ -1,16 +1,12 @@
 import type { Arguments } from "yargs";
-import yargs from "yargs";
+import type yargs from "yargs";
 import { helpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
-import { waitForTransaction } from "wagmi/actions";
-// import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
-import { type GlobalOptions } from "../cli.js";
 import {
   ask,
   FileStore,
   getApi,
   getApiUrl,
-  getChainName,
   getProject,
   findOrCreateDefaultEnvironment,
   getWalletWithProvider,
@@ -18,7 +14,7 @@ import {
   normalizePrivateKey,
 } from "../utils.js";
 
-type Yargs = typeof yargs;
+type Yargs = yargs;
 
 export const command = "deployment <sub>";
 export const desc = "manage studio deployments";
@@ -44,7 +40,7 @@ export const builder = function (args: Yargs) {
           const { store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
           const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
-          const api = getApi(fileStore, apiUrl as string);
+          const api = getApi(fileStore, apiUrl );
 
           const projectId = getProject({
             projectId: argv.project,
@@ -83,7 +79,7 @@ export const builder = function (args: Yargs) {
           const privateKey = normalizePrivateKey(argv.privateKey);
           const wallet = await getWalletWithProvider({
             privateKey,
-            chain: chainInfo.chainId as number,
+            chain: chainInfo.chainId ,
             providerUrl: providerUrl as string,
           });
 
@@ -106,11 +102,11 @@ export const builder = function (args: Yargs) {
           // lookup table data from project and name
           const table = await api.tables.tableByProjectIdAndSlug.query({
             // TODO: the type check above isn't working, using `as string` as a work around
-            projectId: projectId as string,
-            slug: name as string,
+            projectId ,
+            slug: name ,
           });
 
-          if (!(table && table.name && table.schema)) {
+          if (!(table?.name && table?.schema)) {
             throw new Error("could not get table to deploy within project");
           }
 
@@ -129,7 +125,7 @@ are you sure you want to continue (y/n)? `
 
           const db = new Database({
             signer: wallet,
-            baseUrl: helpers.getBaseUrl(chainInfo.chainId as number),
+            baseUrl: helpers.getBaseUrl(chainInfo.chainId ),
             autoWait: true,
           });
 
@@ -141,17 +137,17 @@ are you sure you want to continue (y/n)? `
           if (!res.success) {
             throw new Error("Unsucessful call to exec transaction");
           }
-          if (!res.meta.txn) {
+          if (res.meta.txn == null) {
             throw new Error("No transaction found in metadata");
           }
           const txn = res.meta.txn;
 
           const result = await api.deployments.recordDeployment.mutate({
             environmentId,
-            tableName: txn?.name as string,
-            chainId: txn?.chainId as number,
+            tableName: txn?.name ,
+            chainId: txn?.chainId ,
             tableId: table.id,
-            tokenId: txn?.tableId as string,
+            tokenId: txn?.tableId ,
             createdAt: new Date(),
             blockNumber: txn?.blockNumber,
             txnHash: txn?.transactionHash,

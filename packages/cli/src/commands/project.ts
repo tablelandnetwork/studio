@@ -1,5 +1,5 @@
 import type { Arguments } from "yargs";
-import yargs from "yargs";
+import type yargs from "yargs";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
 import { FileStore, getApi, getApiUrl, getTeam, logger } from "../utils.js";
@@ -35,7 +35,7 @@ export const builder = function (args: Yargs) {
           const { teamId, store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
           const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore});
-          const api = getApi(fileStore, apiUrl as string);
+          const api = getApi(fileStore, apiUrl );
 
           const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
           const projects = await api.projects.teamProjects.query(query);
@@ -74,8 +74,8 @@ export const builder = function (args: Yargs) {
       async function (argv: CommandOptions) {
         try {
           const { name, teamId: teamIdArg, description, store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore});
+          const fileStore = new FileStore(store );
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg , store: fileStore});
           const api = getApi(fileStore, apiUrl);
           const teamId = getTeam({store: fileStore, teamId: teamIdArg});
 
@@ -107,6 +107,6 @@ export const builder = function (args: Yargs) {
 export const handler = async (
   argv: Arguments<CommandOptions>,
 ): Promise<void> => {
-  //(args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
+  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
   // noop
 };

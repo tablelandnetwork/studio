@@ -1,28 +1,14 @@
 import fs from "fs";
-import { resolve, dirname } from "path";
-import {
-  type WriteStream,
-  createWriteStream,
-  mkdirSync,
-  writeFileSync,
-} from "fs";
-import type yargs from "yargs";
-import type { Arguments, CommandBuilder } from "yargs";
-import yaml from "js-yaml";
+import { resolve } from "path";
+import type { Arguments } from "yargs";
 import { ask, logger } from "../utils.js";
 import { type GlobalOptions } from "../cli.js";
-
-type Yargs = typeof yargs;
 
 export interface CommandOptions extends GlobalOptions {
   yes?: boolean;
   path?: string;
 }
 
-const defaults = {
-  chain: "maticmum",
-  rpcRelay: false,
-};
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "init";
 export const desc = "create a tablelandrc config file";

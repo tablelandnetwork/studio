@@ -1,9 +1,7 @@
-import type yargs from "yargs";
-import type { Arguments, CommandBuilder } from "yargs";
+import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
   logger,
-  getApi,
   FileStore,
 } from "../utils.js";
 
@@ -32,7 +30,7 @@ export const handler = async (
         fileStore.save();
         break;
       default:
-        throw new Error(`cannot remove context for: ${context}`)
+        throw new Error(`cannot remove context for: ${context as string}`)
     }
 
     logger.log(`your ${context} context has been removed`);

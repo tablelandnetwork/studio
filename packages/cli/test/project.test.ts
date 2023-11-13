@@ -1,9 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { equal, match } from "node:assert";
+import { equal } from "node:assert";
 import { getAccounts } from "@tableland/local";
-import { Database } from "@tableland/sdk";
-import { getDefaultProvider } from "ethers";
 import { afterEach, before, describe, test } from "mocha";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
