@@ -70,6 +70,9 @@ export default function SignInButton({
   };
 
   return (
+    // TODO: `handleSignIn` creates a floating promise, as a result the linter is complaining
+    //    we should figure out if this is ok or not and either change this or the lint config
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <Button onClick={handleSignIn} disabled={!nonce.data || pending}>
       Sign In
     </Button>

@@ -3,7 +3,7 @@ import path from "path";
 import { type helpers } from "@tableland/sdk";
 import { provider } from "./wallet";
 
-const tablesFile = new Promise<string>(async (resolve, reject) => {
+const tablesFile = (async (resolve, reject) => {
   try {
     const { chainId } = await provider.getNetwork();
     const file = path.join(process.cwd(), `tables_${chainId}.json`);
@@ -16,7 +16,7 @@ const tablesFile = new Promise<string>(async (resolve, reject) => {
   } catch (e) {
     reject(e);
   }
-});
+})();
 
 export const databaseAliases = {
   read: async function () {

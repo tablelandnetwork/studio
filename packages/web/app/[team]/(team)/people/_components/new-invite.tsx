@@ -66,6 +66,11 @@ export default function NewInvite({ team }: { team: schema.Team }) {
     <>
       {showForm && (
         <Form {...form}>
+          {
+            // TODO: `form.handleSubmit` creates a floating promise, as a result the linter is complaining
+            //    we should figure out if this is ok or not and either change this or the lint config
+          }
+          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex">
             <Avatar>
               <AvatarFallback>{email.charAt(0)}</AvatarFallback>

@@ -78,8 +78,8 @@ export default async function Project({
         {tables.length ? (
           <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {tables.map((table) => {
-              const columnCount = 0;
-              const deploymentsCount = 0;
+              // const columnCount = 0;
+              // const deploymentsCount = 0;
               const deployment = deploymentsMap.get(table.id);
               return (
                 <Link

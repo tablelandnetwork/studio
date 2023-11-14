@@ -103,6 +103,9 @@ export default function ImportTableForm({ project, team, envs }: Props) {
   return (
     <Form {...form}>
       <form
+        // TODO: `handleSubmit` creates a floating promise, as a result the linter is complaining
+        //    we should figure out if this is ok or not and either change this or the lint config
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={handleSubmit(onSubmit)}
         className="mx-auto max-w-2xl space-y-8"
       >

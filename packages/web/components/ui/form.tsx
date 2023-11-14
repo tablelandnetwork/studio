@@ -22,9 +22,9 @@ interface FormFieldContextValue<
   name: TName;
 }
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
-  {} as FormFieldContextValue,
-);
+const formFieldContextVal: FormFieldContextValue = { name: "" };
+const FormFieldContext =
+  React.createContext<FormFieldContextValue>(formFieldContextVal);
 
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -66,9 +66,9 @@ interface FormItemContextValue {
   id: string;
 }
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue,
-);
+const formItemContextVal: FormItemContextValue = {};
+const FormItemContext =
+  React.createContext<FormItemContextValue>(formItemContextVal);
 
 const FormItem = React.forwardRef<
   HTMLDivElement,

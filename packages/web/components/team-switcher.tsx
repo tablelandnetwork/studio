@@ -76,7 +76,7 @@ export default function TeamSwitcher({
             <CommandEmpty>No team found.</CommandEmpty>
             {teamGroups.map((group) => {
               if (!group.teams.length) {
-                return;
+                return undefined;
               }
               return (
                 <CommandGroup key={group.label} heading={group.label}>

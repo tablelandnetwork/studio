@@ -11,7 +11,11 @@ import Crumb from "@/components/crumb";
 function projectLinks(
   team: schema.Team,
   project: schema.Project,
-): Array<{ label: string; href: string; isActive: (pathname: string) => boolean }> {
+): Array<{
+  label: string;
+  href: string;
+  isActive: (pathname: string) => boolean;
+}> {
   return [
     {
       label: "Blueprint",
@@ -30,7 +34,7 @@ function projectLinks(
 export default function NavProject({
   className,
   ...props
-}: React.HTMLAttributes<HTMLElement> & {}) {
+}: React.HTMLAttributes<HTMLElement> & Record<string, unknown>) {
   const { team: teamSlug, project: projectSlug } = useParams<{
     team: string;
     project: string;

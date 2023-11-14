@@ -67,6 +67,9 @@ export default function NewTeamForm() {
   return (
     <Form {...form}>
       <form
+        // TODO: `form.handleSubmit` creates a floating promise, as a result the linter is complaining
+        //    we should figure out if this is ok or not and either change this or the lint config
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={form.handleSubmit(onSubmit)}
         className="mx-auto max-w-lg space-y-8"
       >

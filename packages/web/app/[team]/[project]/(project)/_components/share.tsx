@@ -45,12 +45,27 @@ export default function Share({
   const { toast } = useToast();
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: "Done!",
-      description: `The ${project.name} Project link has been copied to your clipboard.`,
-      duration: 2000,
-    });
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(function () {
+        toast({
+          title: "Done!",
+          description: `The ${project.name} Project link has been copied to your clipboard.`,
+          duration: 2000,
+        });
+      })
+      .catch(function (err) {
+        toast({
+          title: "Error!",
+          description: [
+            `The ${project.name} Project link could not be copied to your clipboard.`,
+            typeof err?.message === "string" ? err.message : undefined,
+          ]
+            .filter((s) => s)
+            .join(" "),
+          duration: 2000,
+        });
+      });
   };
 
   return (

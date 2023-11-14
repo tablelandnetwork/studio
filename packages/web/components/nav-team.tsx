@@ -32,7 +32,7 @@ function teamLinks(team: schema.Team) {
 export default function NavTeam({
   className,
   ...props
-}: React.HTMLAttributes<HTMLElement> & {}) {
+}: React.HTMLAttributes<HTMLElement> & Record<string, unknown>) {
   const pathname = usePathname();
   const { team: teamSlug } = useParams<{ team: string }>();
   const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
