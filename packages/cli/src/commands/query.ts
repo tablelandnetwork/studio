@@ -127,7 +127,7 @@ export const handler = async (
           throw new Error("you cannot create studio project tables with the cli");
         }
 
-        if (queryObject.type !== "read" && !agrv.privateKey) {
+        if (queryObject.type !== "read" && !argv.privateKey) {
           throw new Error("you did not provide a private key, you can only run read queries");
         }
 

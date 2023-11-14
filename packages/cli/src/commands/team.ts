@@ -1,5 +1,10 @@
 import type { Arguments } from "yargs";
-import type yargs from "yargs";
+// Yargs doesn't seem to export the type of `yargs`.  This causes a conflict
+// between linting and building. Lint complains that yargs is only imported
+// for it's type, and build complains that you cannot use namespace as a type.
+// Solving this by disabling lint here.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
   FileStore,
@@ -9,7 +14,7 @@ import {
   // normalizePrivateKey,
 } from "../utils.js";
 
-type Yargs = yargs;
+type Yargs = typeof yargs;
 
 export const command = "team <sub>";
 export const desc = "manage studio teams";
@@ -36,6 +41,13 @@ export const builder = function (args: Yargs) {
       async function (argv) {
         try {
           const { identifier, store, apiUrl: apiUrlArg } = argv;
+          if (typeof store !== "string") {
+            throw new Error("must provide path to session store file");
+          }
+          if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
+            throw new Error("invalid apiUrl");
+          }
+
           const fileStore = new FileStore(store);
           const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore })
           const api = getApi(fileStore, apiUrl);

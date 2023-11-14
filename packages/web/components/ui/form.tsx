@@ -66,7 +66,7 @@ interface FormItemContextValue {
   id: string;
 }
 
-const formItemContextVal: FormItemContextValue = {};
+const formItemContextVal: FormItemContextValue = { id: "" };
 const FormItemContext =
   React.createContext<FormItemContextValue>(formItemContextVal);
 
