@@ -32,9 +32,9 @@ export const handler = async (
     if (typeof table !== "string") {
       throw new Error("table name parameter is required");
     }
-    const fileStore = new FileStore(store );
+    const fileStore = new FileStore(store);
     const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore})
-    const api = getApi(fileStore, apiUrl );
+    const api = getApi(fileStore, apiUrl);
     const projectId = getProject({ ...argv, store: fileStore });
 
     const environmentId = await getEnvironmentId(api, projectId);

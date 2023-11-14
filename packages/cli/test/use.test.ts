@@ -121,7 +121,7 @@ describe("commands/use", function () {
 
     equal(
       consoleLog.getCall(1).firstArg,
-      `your team context has been set to team_id of: ${teamId as string}`
+      `your team context has been set to team_id of: ${teamId}`
     );
 
     const session = getSession();

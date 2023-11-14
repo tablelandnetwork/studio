@@ -20,9 +20,9 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const { chain, providerUrl, apiUrl: apiUrlArg, store } = argv;
-    const fileStore = new FileStore(store );
+    const fileStore = new FileStore(store);
     const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-    const api = getApi(fileStore, apiUrl );
+    const api = getApi(fileStore, apiUrl);
 
     const user = await api.auth.authenticated.query();
     if (user) {

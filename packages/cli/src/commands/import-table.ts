@@ -24,17 +24,18 @@ export const handler = async (
       apiUrl: apiUrlArg,
       store,
       table: uuTableName,
-      name,
       description,
     } = argv;
+
+    const name = typeof argv.name === "string" ? argv.name.trim() : "";
 
     if (typeof description !== "string" || description.trim() === "") {
       throw new Error(`table description is required`);
     }
 
     const fileStore = new FileStore(store );
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
-    const api = getApi(fileStore, apiUrl );
+    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore })
+    const api = getApi(fileStore, apiUrl);
     const projectId = getProject({ ...argv, store: fileStore });
 
     const environmentId = await getEnvironmentId(api, projectId);
@@ -45,7 +46,7 @@ export const handler = async (
 
     const chainId = getChainIdFromTableName(uuTableName);
     const tableId = getTableIdFromTableName(uuTableName).toString();
-    const prefix = (name as string) || getPrefixFromTableName(uuTableName);
+    const prefix = name || getPrefixFromTableName(uuTableName);
 
     await api.tables.importTable.mutate({
       chainId,
@@ -59,7 +60,7 @@ export const handler = async (
     logger.log(
 `successfully imported ${uuTableName}
   projectId: ${projectId}
-  name: ${name as string}
+  name: ${name}
   description: ${description}`
     );
   } catch (err: any) {

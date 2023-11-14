@@ -53,12 +53,12 @@ export const ask = async function (questions: string[]) {
 export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   const apiArgs: ClientConfig = {};
 
-  if (fileStore != null) {
+  if (fileStore) {
     // read response headers and save cookie in session json file
     apiArgs.fetch = function (res) {
       const setCookie = res.headers.get("set-cookie");
 
-      if (setCookie != null && setCookie !== "") {
+      if (setCookie) {
         fileStore.set(sessionKey, setCookie.split(";").shift());
         fileStore.save();
       }
@@ -74,7 +74,7 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
       return {};
     };
   }
-  if (apiUrl != null && apiUrl !== "") apiArgs.url = apiUrl;
+  if (apiUrl) apiArgs.url = apiUrl;
 
   return api(apiArgs);
 };
@@ -136,9 +136,7 @@ export const getApiUrl = function (
   }
 
   const storeApiUrl = argv.store.get<string>("apiUrl");
-  if (typeof storeApiUrl === "string" && storeApiUrl !== "") {
-    return storeApiUrl;
-  }
+  if (storeApiUrl) return storeApiUrl;
 
   return DEFAULT_API_URL;
 };
@@ -196,12 +194,12 @@ export function constructURL(params: {
   const { baseURL, query, hash } = params;
 
   const url = new URL(baseURL);
-  if (query != null) {
+  if (query) {
     Object.keys(query).forEach((key) => {
       url.searchParams.append(key, query[key] as string);
     });
   }
-  if (hash != null) {
+  if (hash) {
     const h = new URL(
       constructURL({ baseURL, query: hash }),
     ).searchParams.toString();
@@ -391,15 +389,15 @@ export const batchRows = function (
 ) {
   let rowCount = 0;
   const batches = [];
-  while (rows.length > 0) {
+  while (rows.length) {
     let statement = `INSERT INTO ${table}(${headers.join(",")})VALUES`
 
     while (
-      rows.length > 0
+      rows.length
       && byteSize(statement + getNextValues(rows[0])) < MAX_STATEMENT_SIZE
     ) {
       const row = rows.shift();
-      if (row == null) continue;
+      if (!row) continue;
       rowCount += 1;
       if (row.length !== headers.length) {
         throw new Error(`malformed csv file, row ${rowCount} has incorrect number of columns`);

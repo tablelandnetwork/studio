@@ -15,11 +15,13 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const { store, context, id } = argv;
-    const fileStore = new FileStore(store);
 
+    if (typeof context !== "string") throw new Error("invalid context");
     if (typeof id !== "string") {
-      throw new Error(`invalid ${context as string} id: ${id as string}`);
+      throw new Error(`invalid ${context} id}`);
     }
+
+    const fileStore = new FileStore(store);
 
     switch (context) {
       case "team":
@@ -37,7 +39,7 @@ export const handler = async (
         fileStore.save();
         break;
       default:
-        throw new Error(`cannot set context for: ${context as string}`)
+        throw new Error(`cannot set context for: ${context}`)
     }
 
     logger.log(`your ${context} context has been set to ${context}_id of: ${id}`);

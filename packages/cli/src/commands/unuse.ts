@@ -14,6 +14,8 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const { store, context } = argv;
+    if (typeof context !== "string") throw new Error("invalid context");
+
     const fileStore = new FileStore(store);
 
     switch (context) {
@@ -30,7 +32,7 @@ export const handler = async (
         fileStore.save();
         break;
       default:
-        throw new Error(`cannot remove context for: ${context as string}`)
+        throw new Error(`cannot remove context for: ${context}`)
     }
 
     logger.log(`your ${context} context has been removed`);

@@ -10,9 +10,9 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const { apiUrl: apiUrlArg, store } = argv;
-    const fileStore = new FileStore(store );
+    const fileStore = new FileStore(store);
     const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-    const api = getApi(fileStore, apiUrl );
+    const api = getApi(fileStore, apiUrl);
 
     try {
       await api.auth.logout.mutate();

@@ -1,12 +1,3 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { api } from "@/trpc/server";
 import {
   Folders,
   Gem,
@@ -18,6 +9,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { api } from "@/trpc/server";
 
 export default async function Projects({
   params,

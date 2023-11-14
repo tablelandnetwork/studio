@@ -33,9 +33,9 @@ export const builder = function (args: Yargs) {
       async function (argv) {
         try {
           const { teamId, store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore});
-          const api = getApi(fileStore, apiUrl );
+          const fileStore = new FileStore(store);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+          const api = getApi(fileStore, apiUrl);
 
           const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
           const projects = await api.projects.teamProjects.query(query);
@@ -74,8 +74,8 @@ export const builder = function (args: Yargs) {
       async function (argv: CommandOptions) {
         try {
           const { name, teamId: teamIdArg, description, store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store );
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg , store: fileStore});
+          const fileStore = new FileStore(store);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
           const api = getApi(fileStore, apiUrl);
           const teamId = getTeam({store: fileStore, teamId: teamIdArg});
 

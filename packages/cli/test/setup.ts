@@ -179,7 +179,7 @@ async function startStudioApi({ store }: { store: Store }) {
     // TODO: My current solution to running the api with two adapters is to map
     //       a Node.js request and response to and from a Fetch request and response
     try {
-      req.url = `${TEST_API_BASE_URL}${req.url as string}`;
+      req.url = `${TEST_API_BASE_URL}${req.url}`;
       req.headers = new Headers(req.headers);
       req.text = async function () {
         return await new Promise(function (resolve, reject) {
@@ -206,7 +206,7 @@ async function startStudioApi({ store }: { store: Store }) {
 
       res.writeHead(response.status, responseHeaders);
       // using `as unknown as` because of https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/62651
-      const body = response.body != null
+      const body = response.body
         ? await streamToString(
             response.body as unknown as NodeJS.ReadableStream,
           )
@@ -217,7 +217,7 @@ async function startStudioApi({ store }: { store: Store }) {
 
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(
-        `{"error":{"json":{"message":"${err.message as string}","code":-32603,"data":{"code":"INTERNAL_SERVER_ERROR","httpStatus":500}}}}`,
+        `{"error":{"json":{"message":"${err.message}","code":-32603,"data":{"code":"INTERNAL_SERVER_ERROR","httpStatus":500}}}}`,
       );
     }
   });

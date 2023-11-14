@@ -127,8 +127,7 @@ export const handler = async (
           throw new Error("you cannot create studio project tables with the cli");
         }
 
-        const privateKey = normalizePrivateKey(argv.privateKey);
-        if (queryObject.type !== "read" && privateKey === "") {
+        if (queryObject.type !== "read" && !agrv.privateKey) {
           throw new Error("you did not provide a private key, you can only run read queries");
         }
 
@@ -141,7 +140,7 @@ export const handler = async (
             (await studioAliasMapper.read())[queryObject.tables[0]]
           );
           const wallet = await getWalletWithProvider({
-            privateKey,
+            privateKey: normalizePrivateKey(argv.privateKey),
             chain,
             providerUrl: argv.providerUrl
           });
@@ -149,7 +148,7 @@ export const handler = async (
           pause();
           const proceed = await confirmWrite({chain, wallet: wallet.address});
           resume();
-          if (proceed !== true) {
+          if (!proceed) {
             logger.log("aborting write query.");
             return resetPrompt();
           }

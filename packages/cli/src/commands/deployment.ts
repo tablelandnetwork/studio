@@ -40,7 +40,7 @@ export const builder = function (args: Yargs) {
           const { store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
           const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
-          const api = getApi(fileStore, apiUrl );
+          const api = getApi(fileStore, apiUrl);
 
           const projectId = getProject({
             projectId: argv.project,
@@ -79,7 +79,7 @@ export const builder = function (args: Yargs) {
           const privateKey = normalizePrivateKey(argv.privateKey);
           const wallet = await getWalletWithProvider({
             privateKey,
-            chain: chainInfo.chainId ,
+            chain: chainInfo.chainId,
             providerUrl: providerUrl as string,
           });
 
@@ -101,9 +101,8 @@ export const builder = function (args: Yargs) {
 
           // lookup table data from project and name
           const table = await api.tables.tableByProjectIdAndSlug.query({
-            // TODO: the type check above isn't working, using `as string` as a work around
-            projectId ,
-            slug: name ,
+            projectId,
+            slug: name,
           });
 
           if (!(table?.name && table?.schema)) {
@@ -125,7 +124,7 @@ are you sure you want to continue (y/n)? `
 
           const db = new Database({
             signer: wallet,
-            baseUrl: helpers.getBaseUrl(chainInfo.chainId ),
+            baseUrl: helpers.getBaseUrl(chainInfo.chainId),
             autoWait: true,
           });
 
@@ -137,17 +136,17 @@ are you sure you want to continue (y/n)? `
           if (!res.success) {
             throw new Error("Unsucessful call to exec transaction");
           }
-          if (res.meta.txn == null) {
+          if (!res.meta.txn) {
             throw new Error("No transaction found in metadata");
           }
           const txn = res.meta.txn;
 
           const result = await api.deployments.recordDeployment.mutate({
             environmentId,
-            tableName: txn?.name ,
-            chainId: txn?.chainId ,
+            tableName: txn?.name,
+            chainId: txn?.chainId,
             tableId: table.id,
-            tokenId: txn?.tableId ,
+            tokenId: txn?.tableId,
             createdAt: new Date(),
             blockNumber: txn?.blockNumber,
             txnHash: txn?.transactionHash,

@@ -36,9 +36,9 @@ export const builder = function (args: Yargs) {
       async function (argv) {
         try {
           const { identifier, store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
-          const api = getApi(fileStore, apiUrl );
+          const fileStore = new FileStore(store);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore })
+          const api = getApi(fileStore, apiUrl);
 
           let query;
           if (typeof identifier === "string" && identifier.trim() !== "") {
