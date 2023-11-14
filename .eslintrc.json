@@ -12,7 +12,8 @@
   },
   "ignorePatterns": [
     "**/dist/",
-    "*.d.ts"
+    "*.d.ts",
+    "packages/web/components/ui/**/*"
   ],
   "globals": {
     // mocha

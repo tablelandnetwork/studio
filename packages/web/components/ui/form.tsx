@@ -1,11 +1,11 @@
-import type * as LabelPrimitive from "@radix-ui/react-label";
+import * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 import {
   Controller,
-  type ControllerProps,
-  type FieldPath,
-  type FieldValues,
+  ControllerProps,
+  FieldPath,
+  FieldValues,
   FormProvider,
   useFormContext,
 } from "react-hook-form";
@@ -15,16 +15,16 @@ import { cn } from "@/lib/utils";
 
 const Form = FormProvider;
 
-interface FormFieldContextValue<
+type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-> {
+> = {
   name: TName;
-}
+};
 
-const formFieldContextVal: FormFieldContextValue = { name: "" };
-const FormFieldContext =
-  React.createContext<FormFieldContextValue>(formFieldContextVal);
+const FormFieldContext = React.createContext<FormFieldContextValue>(
+  {} as FormFieldContextValue,
+);
 
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -62,13 +62,13 @@ const useFormField = () => {
   };
 };
 
-interface FormItemContextValue {
+type FormItemContextValue = {
   id: string;
-}
+};
 
-const formItemContextVal: FormItemContextValue = { id: "" };
-const FormItemContext =
-  React.createContext<FormItemContextValue>(formItemContextVal);
+const FormItemContext = React.createContext<FormItemContextValue>(
+  {} as FormItemContextValue,
+);
 
 const FormItem = React.forwardRef<
   HTMLDivElement,

@@ -10,7 +10,11 @@ import { authAtom } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 
 const Profile = dynamic(
-  async () => await import("@/components/profile").then((res) => res.default),
+  () => {
+    import("@/components/profile")
+      .then((res) => res.default)
+      .catch((err) => console.log(err));
+  },
   { ssr: false },
 );
 
