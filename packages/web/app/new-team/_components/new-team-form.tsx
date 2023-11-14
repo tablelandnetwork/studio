@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import TagInput from "@/components/tag-input";
@@ -14,12 +20,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 
 const schema = z.object({
   name: z.string().trim().nonempty(),
@@ -58,7 +58,7 @@ export default function NewTeamForm() {
   const { setError } = form;
 
   function onSubmit(values: z.infer<typeof schema>) {
-    if (!!pendingEmail) {
+    if (pendingEmail) {
       values.emailInvites = [...values.emailInvites, pendingEmail];
     }
     newTeam.mutate(values);

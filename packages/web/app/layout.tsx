@@ -1,12 +1,4 @@
-import { JotaiProvider } from "@/components/jotai-provider";
-import MesaSvg from "@/components/mesa-svg";
-import { NavPrimary } from "@/components/nav-primary";
-import PrimaryHeaderItem from "@/components/primary-header-item";
-import { Toaster } from "@/components/ui/toaster";
-import WagmiProvider from "@/components/wagmi-provider";
-import { TRPCReactProvider } from "@/trpc/react";
-import { api } from "@/trpc/server";
-import { RouterOutputs, Session } from "@tableland/studio-api";
+import { type RouterOutputs, Session } from "@tableland/studio-api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
@@ -15,6 +7,14 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { cache } from "react";
 import Footer from "./_components/footer";
+import { api } from "@/trpc/server";
+import { TRPCReactProvider } from "@/trpc/react";
+import WagmiProvider from "@/components/wagmi-provider";
+import { Toaster } from "@/components/ui/toaster";
+import PrimaryHeaderItem from "@/components/primary-header-item";
+import { NavPrimary } from "@/components/nav-primary";
+import MesaSvg from "@/components/mesa-svg";
+import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 
 TimeAgo.addDefaultLocale(en);
@@ -38,7 +38,7 @@ export const metadata = {
 };
 
 const Profile = dynamic(
-  () => import("@/components/profile").then((res) => res.default),
+  async () => await import("@/components/profile").then((res) => res.default),
   { ssr: false },
 );
 
@@ -48,7 +48,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await Session.fromCookies(cookies());
-  var teams: RouterOutputs["teams"]["userTeams"] = [];
+  let teams: RouterOutputs["teams"]["userTeams"] = [];
   if (session.auth) {
     try {
       teams = await cache(api.teams.userTeams.query)({

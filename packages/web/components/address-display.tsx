@@ -1,6 +1,5 @@
 "use client";
 
-import { useToast } from "@/components/ui/use-toast";
 import { Copy } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -9,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function AddressDisplay({
   address,

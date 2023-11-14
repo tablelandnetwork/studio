@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  type ColumnDef,
+  type VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { ChevronDown } from "lucide-react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,19 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ColumnDef,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { ChevronDown } from "lucide-react";
-import React from "react";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+  columns: Array<ColumnDef<TData, TValue>>;
   data: TData[];
 }
 

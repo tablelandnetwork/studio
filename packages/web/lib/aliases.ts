@@ -1,6 +1,6 @@
-import { helpers } from "@tableland/sdk";
 import fs from "fs";
 import path from "path";
+import { type helpers } from "@tableland/sdk";
 import { provider } from "./wallet";
 
 const tablesFile = new Promise<string>(async (resolve, reject) => {

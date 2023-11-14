@@ -2,14 +2,14 @@ import { X } from "lucide-react";
 import React, { forwardRef } from "react";
 import { Input } from "./ui/input";
 
-type Props = {
+interface Props {
   id?: string;
   placeholder: string;
   tags: string[];
   setTags: (tags: string[]) => void;
   pendingValue: string;
   setPendingValue: (value: string) => void;
-};
+}
 
 const TagInput = forwardRef<HTMLDivElement, Props>(
   (

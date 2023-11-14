@@ -1,8 +1,14 @@
 "use client";
 
-import { FormRootMessage } from "@/components/form-root";
-import InputWithCheck from "@/components/input-with-check";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type schema } from "@tableland/studio-store";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import * as z from "zod";
+import { api } from "@/trpc/react";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -12,15 +18,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/trpc/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { schema } from "@tableland/studio-store";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import InputWithCheck from "@/components/input-with-check";
+import { FormRootMessage } from "@/components/form-root";
 
 const formSchema = z.object({
   name: z.string().trim().min(3),

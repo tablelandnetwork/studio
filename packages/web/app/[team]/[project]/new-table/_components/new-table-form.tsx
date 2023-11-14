@@ -1,5 +1,18 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { sqliteKeywords } from "@tableland/studio-client";
+import {
+  cleanSchema,
+  setConstraint,
+  type Schema,
+  type schema,
+} from "@tableland/studio-store";
+import { HelpCircle, Loader2, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import * as z from "zod";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
@@ -37,19 +50,6 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { sqliteKeywords } from "@tableland/studio-client";
-import {
-  cleanSchema,
-  setConstraint,
-  type Schema,
-  type schema,
-} from "@tableland/studio-store";
-import { HelpCircle, Loader2, Plus, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
 
 const formSchema = z.object({
   name: z
@@ -229,7 +229,7 @@ export default function NewTable({ project, team, envs }: Props) {
         />
         <div className="space-y-2">
           <FormLabel>Columns</FormLabel>
-          {!!columnFields.length ? (
+          {columnFields.length ? (
             <Table>
               <TableHeader>
                 <TableRow>

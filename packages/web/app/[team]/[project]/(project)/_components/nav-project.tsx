@@ -1,17 +1,17 @@
 "use client";
 
-import Crumb from "@/components/crumb";
-import { cn } from "@/lib/utils";
-import { api } from "@/trpc/react";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import Share from "./share";
+import { api } from "@/trpc/react";
+import { cn } from "@/lib/utils";
+import Crumb from "@/components/crumb";
 
 function projectLinks(
   team: schema.Team,
   project: schema.Project,
-): { label: string; href: string; isActive: (pathname: string) => boolean }[] {
+): Array<{ label: string; href: string; isActive: (pathname: string) => boolean }> {
   return [
     {
       label: "Blueprint",
@@ -40,7 +40,7 @@ export default function NavProject({
   const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
   const teamId = team?.id;
   const { data: project } = api.projects.projectBySlug.useQuery(
-    { teamId: teamId!, slug: projectSlug },
+    { teamId, slug: projectSlug },
     { enabled: !!teamId },
   );
 

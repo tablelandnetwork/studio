@@ -24,7 +24,7 @@
     "it": true
   },
   "rules": {
-    "import/order": "warn",
+    "import/order": "error",
     "@typescript-eslint/no-confusing-void-expression": "off",
     "node/no-unpublished-import": "off",
     "node/no-missing-import": "off",

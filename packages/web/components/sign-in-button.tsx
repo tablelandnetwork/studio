@@ -1,9 +1,9 @@
-import { api } from "@/trpc/react";
-import { Auth } from "@tableland/studio-api";
+import { type Auth } from "@tableland/studio-api";
 import { useEffect, useTransition } from "react";
 import { SiweMessage } from "siwe";
 import { useAccount, useNetwork, useSignMessage } from "wagmi";
 import { Button } from "./ui/button";
+import { api } from "@/trpc/react";
 
 export default function SignInButton({
   onSuccess,

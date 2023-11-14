@@ -1,5 +1,5 @@
-import { api } from "@/trpc/server";
 import { cache } from "react";
+import { api } from "@/trpc/server";
 
 export default async function TeamSettings({
   params,

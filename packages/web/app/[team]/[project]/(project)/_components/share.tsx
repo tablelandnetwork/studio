@@ -1,5 +1,22 @@
 "use client";
 
+import { type schema } from "@tableland/studio-store";
+import { Copy, Share2 } from "lucide-react";
+import { useState } from "react";
+import {
+  EmailIcon,
+  EmailShareButton,
+  FacebookIcon,
+  FacebookShareButton,
+  RedditIcon,
+  RedditShareButton,
+  TelegramIcon,
+  TelegramShareButton,
+  TwitterIcon,
+  TwitterShareButton,
+  WeiboIcon,
+  WeiboShareButton,
+} from "react-share";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,23 +34,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { schema } from "@tableland/studio-store";
-import { Copy, Share2 } from "lucide-react";
-import { useState } from "react";
-import {
-  EmailIcon,
-  EmailShareButton,
-  FacebookIcon,
-  FacebookShareButton,
-  RedditIcon,
-  RedditShareButton,
-  TelegramIcon,
-  TelegramShareButton,
-  TwitterIcon,
-  TwitterShareButton,
-  WeiboIcon,
-  WeiboShareButton,
-} from "react-share";
 
 const socialIconSize = 48;
 

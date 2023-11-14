@@ -1,5 +1,9 @@
 "use client";
 
+import { type schema } from "@tableland/studio-store";
+import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -15,10 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { schema } from "@tableland/studio-store";
-import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import * as React from "react";
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
@@ -37,7 +37,7 @@ export default function TeamSwitcher({
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
-  const teamGroups: { label: string; teams: schema.Team[] }[] = [
+  const teamGroups: Array<{ label: string; teams: schema.Team[] }> = [
     {
       label: "Personal Team",
       teams: [],

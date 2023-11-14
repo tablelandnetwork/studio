@@ -1,16 +1,16 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { authAtom } from "@/store/auth";
-import { api } from "@/trpc/react";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import { useAtomValue } from "jotai";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { api } from "@/trpc/react";
+import { authAtom } from "@/store/auth";
+import { Button } from "@/components/ui/button";
 
 const Profile = dynamic(
-  () => import("@/components/profile").then((res) => res.default),
+  async () => await import("@/components/profile").then((res) => res.default),
   { ssr: false },
 );
 
