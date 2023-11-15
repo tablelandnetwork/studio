@@ -1,5 +1,3 @@
-"use client";
-
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import TagInput from "@/components/tag-input";
@@ -26,7 +24,15 @@ const schema = z.object({
   emailInvites: z.array(z.string().trim().email()),
 });
 
-export default function NewTeamForm() {
+export default function TeamForm({
+  cancelButtonBehavior,
+  onCancel,
+  showInviteEmials = true,
+}: {
+  cancelButtonBehavior: "always" | "dirty" | undefined;
+  onCancel?: () => void;
+  showInviteEmials?: boolean;
+}) {
   const [teamName, setTeamName] = useState("");
   const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const [pendingEmail, setPendingEmail] = useState("");
@@ -90,41 +96,52 @@ export default function NewTeamForm() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="emailInvites"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Invite emails</FormLabel>
-              <FormControl>
-                <TagInput
-                  id="emails"
-                  placeholder="Email addresses"
-                  tags={form.getValues().emailInvites}
-                  setTags={(tags) => {
-                    form.setValue("emailInvites", tags);
-                    // form.trigger("emailInvites");
-                  }}
-                  pendingValue={pendingEmail}
-                  setPendingValue={setPendingEmail}
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Optionally enter a comma-separated list of email addresses to
-                invite others to your new Team.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {showInviteEmials && (
+          <FormField
+            control={form.control}
+            name="emailInvites"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Invite emails</FormLabel>
+                <FormControl>
+                  <TagInput
+                    id="emails"
+                    placeholder="Email addresses"
+                    tags={form.getValues().emailInvites}
+                    setTags={(tags) => {
+                      form.setValue("emailInvites", tags);
+                      // form.trigger("emailInvites");
+                    }}
+                    pendingValue={pendingEmail}
+                    setPendingValue={setPendingEmail}
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Optionally enter a comma-separated list of email addresses to
+                  invite others to your new Team.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <FormRootMessage />
-        <Button type="submit" disabled={newTeam.isLoading || !nameAvailable}>
-          {newTeam.isLoading && (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          )}
-          Submit
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={newTeam.isLoading || !nameAvailable}>
+            {newTeam.isLoading && (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            )}
+            Save
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={newTeam.isLoading}
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+        </div>
       </form>
     </Form>
   );

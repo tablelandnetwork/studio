@@ -18,9 +18,14 @@ function teamLinks(team: schema.Team) {
       href: `/${team.slug}`,
       isActive: (pathname: string) => pathname === `/${team.slug}`,
     },
+    {
+      label: "Settings",
+      href: `/${team.slug}/settings`,
+      isActive: (pathname: string) => pathname === `/${team.slug}/settings`,
+    },
   ];
   if (!team.personal) {
-    links.push({
+    links.splice(1, 0, {
       label: "People",
       href: `/${team.slug}/people`,
       isActive: (pathname: string) => pathname === `/${team.slug}/people`,

@@ -1,7 +1,7 @@
 import { Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import NewTeamForm from "./_components/new-team-form";
+import NewTeam from "./_components/new-team";
 
 export default async function NewProject() {
   const session = await Session.fromCookies(cookies());
@@ -10,7 +10,7 @@ export default async function NewProject() {
   }
   return (
     <div className="p-4">
-      <NewTeamForm />
+      <NewTeam />
     </div>
   );
 }

@@ -130,5 +130,11 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
       .mutation(async ({ input, ctx }) => {
         await store.teams.removeTeamMember(ctx.teamId, input.userId);
       }),
+    updateTeamName: teamAdminProcedure(store)
+      .input(z.object({ name: z.string().trim() }))
+      .mutation(async ({ input, ctx }) => {
+        const res = await store.teams.updateTeamName(ctx.teamId, input.name);
+        return res;
+      }),
   });
 }

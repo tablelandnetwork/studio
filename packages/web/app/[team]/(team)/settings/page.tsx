@@ -1,5 +1,6 @@
 import { api } from "@/trpc/server";
 import { cache } from "react";
+import SettingsForm from "./_components/settings-form";
 
 export default async function TeamSettings({
   params,
@@ -8,5 +9,10 @@ export default async function TeamSettings({
 }) {
   const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
 
-  return <div>Team settings</div>;
+  return (
+    <div className="container py-4">
+      <p>Team settings {team.name}</p>
+      <SettingsForm team={team} />
+    </div>
+  );
 }

@@ -256,5 +256,11 @@ export function initTeams(
       ];
       await tbl.batch(batch);
     },
+
+    updateTeamName: async function (teamId: string, name: string) {
+      const slug = slugify(name);
+      await db.update(teams).set({ name, slug }).where(eq(teams.id, teamId));
+      return { updatedName: name, updatedSlug: slug };
+    },
   };
 }
