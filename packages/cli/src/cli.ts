@@ -48,6 +48,7 @@ export interface GlobalOptions {
   store: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _argv = yargs(hideBin(process.argv))
   .parserConfiguration({
     "strip-aliased": true,
@@ -69,8 +70,7 @@ const _argv = yargs(hideBin(process.argv))
     type: "string",
     // The logic to get the api url is in utils.ts we don't want a default here
     default: "",
-    description:
-      "RPC URL for the Studio API",
+    description: "RPC URL for the Studio API",
   })
   .option("baseUrl", {
     type: "string",
@@ -100,8 +100,7 @@ const _argv = yargs(hideBin(process.argv))
     alias: "pid",
     type: "string",
     default: "",
-    description:
-      "Project ID the command is scoped to",
+    description: "Project ID the command is scoped to",
   })
   .option("store", {
     type: "string",

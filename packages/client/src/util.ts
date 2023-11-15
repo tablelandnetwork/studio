@@ -5,5 +5,5 @@ export function getBaseUrl() {
 }
 
 export function getUrl(baseUrl?: string) {
-  return (baseUrl || getBaseUrl()) + "/api/trpc";
+  return (baseUrl ?? getBaseUrl()) + "/api/trpc";
 }

@@ -1,25 +1,12 @@
 "use client";
 
-import ChainSelector from "@/components/chain-selector";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { api } from "@/trpc/react";
 import {
   Database,
   Validator,
-  WaitableTransactionReceipt,
+  type WaitableTransactionReceipt,
   helpers,
 } from "@tableland/sdk";
-import { generateCreateTableStatement, schema } from "@tableland/studio-store";
+import { generateCreateTableStatement, type schema } from "@tableland/studio-store";
 import { providers } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -31,6 +18,19 @@ import {
   switchNetwork,
   waitForTransaction,
 } from "wagmi/actions";
+import { api } from "@/trpc/react";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import ChainSelector from "@/components/chain-selector";
 
 export default function ExecDeployment({
   team,

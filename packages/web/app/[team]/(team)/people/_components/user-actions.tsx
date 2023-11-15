@@ -1,5 +1,9 @@
 "use client";
 
+import { type DropdownMenuTriggerProps } from "@radix-ui/react-dropdown-menu";
+import { type schema } from "@tableland/studio-store";
+import { MoreHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,10 +16,6 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import { DropdownMenuTriggerProps } from "@radix-ui/react-dropdown-menu";
-import { schema } from "@tableland/studio-store";
-import { MoreHorizontal } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 type Props = DropdownMenuTriggerProps & {
   team: schema.Team;
@@ -101,7 +101,7 @@ export default function UserActions({
                 toggleAdmin.mutate({ teamId: team.id, userId: member.id })
               }
             >
-              {!!memberMembership.isOwner ? "Remove" : "Make"} admin
+              {memberMembership.isOwner ? "Remove" : "Make"} admin
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() =>

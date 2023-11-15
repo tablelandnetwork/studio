@@ -1,4 +1,4 @@
-import { Store, schema } from "@tableland/studio-store";
+import { type Store, type schema } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -7,7 +7,7 @@ import {
   router,
   teamAdminProcedure,
 } from "../trpc";
-import { SendInviteFunc } from "../utils/sendInvite";
+import { type SendInviteFunc } from "../utils/sendInvite";
 
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
   return router({
@@ -17,6 +17,8 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         if (!ctx.session.auth) {
           return false;
         }
+        // we want to check for null, undefined, and ""
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         const teamId = input?.teamId || ctx.session.auth.user.teamId;
         if (!teamId) {
           throw new TRPCError({
@@ -37,6 +39,8 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
     getTeam: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))
       .query(async ({ input, ctx }) => {
+        // we want to check for null, undefined, and ""
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         const teamId = input?.teamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
           throw new TRPCError({
@@ -64,6 +68,8 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         z.object({ userTeamId: z.string().trim().nonempty() }).or(z.void()),
       )
       .query(async ({ input, ctx }) => {
+        // we want to check for null, undefined, and ""
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         const teamId = input?.userTeamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
           throw new TRPCError({
@@ -102,7 +108,9 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         // Intentionally swallowing any error here since the team is still
         // created and invites can be viewed and resent at any time.
         try {
-          await Promise.all(invites.map((invite) => sendInvite(invite)));
+          await Promise.all(
+            invites.map(async (invite) => await sendInvite(invite)),
+          );
         } catch (e) {}
 
         return team;
@@ -110,6 +118,8 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
     usersForTeam: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))
       .query(async ({ input, ctx }) => {
+        // we want to check for null, undefined, and ""
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         const teamId = input?.teamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
           throw new TRPCError({

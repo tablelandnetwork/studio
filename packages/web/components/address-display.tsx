@@ -1,6 +1,5 @@
 "use client";
 
-import { useToast } from "@/components/ui/use-toast";
 import { Copy } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -9,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function AddressDisplay({
   address,
@@ -22,12 +22,32 @@ export default function AddressDisplay({
   const { toast } = useToast();
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(address);
-    toast({
-      title: "Done!",
-      description: "The address has been copied to your clipboard.",
-      duration: 2000,
-    });
+    // TODO: clickboard write text is probably really fast, so it might not be
+    //    needed here, but some kind lock of the UI when async ops are happening
+    //    could make the ui feel more responsive.
+    navigator.clipboard
+      .writeText(address)
+      .then(function () {
+        toast({
+          title: "Done!",
+          description: "The address has been copied to your clipboard.",
+          duration: 2000,
+        });
+      })
+      .catch(function (err) {
+        const errMessage = [
+          "Could not copy the address to your clipboard.",
+          typeof err.message === "string" ? err.message : undefined,
+        ]
+          .filter((s) => s)
+          .join(" ");
+
+        toast({
+          title: "Error!",
+          description: errMessage,
+          duration: 2000,
+        });
+      });
   };
 
   return (

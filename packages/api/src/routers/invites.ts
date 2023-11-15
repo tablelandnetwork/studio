@@ -1,4 +1,4 @@
-import { Store } from "@tableland/studio-store";
+import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { unsealData } from "iron-session";
 import { z } from "zod";
@@ -8,7 +8,7 @@ import {
   router,
   teamProcedure,
 } from "../trpc";
-import { SendInviteFunc } from "../utils/sendInvite";
+import { type SendInviteFunc } from "../utils/sendInvite";
 
 export function invitesRouter(
   store: Store,
@@ -28,7 +28,9 @@ export function invitesRouter(
           ctx.session.auth.user.teamId,
           input.emails,
         );
-        await Promise.all(invites.map((invite) => sendInvite(invite)));
+        await Promise.all(
+          invites.map(async (invite) => await sendInvite(invite)),
+        );
       }),
     resendInvite: teamProcedure(store)
       .input(z.object({ inviteId: z.string().trim() }))
@@ -70,6 +72,8 @@ export function invitesRouter(
             message: "Invite not found",
           });
         }
+        // we want to make sure and check for "" since these columns are type text
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         if (invite.claimedAt || invite.claimedByTeamId) {
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
@@ -89,6 +93,8 @@ export function invitesRouter(
         if (!invite) {
           throw new Error("Invite not found");
         }
+        // we want to make sure and check for "" since these columns are type text
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         if (invite.claimedAt || invite.claimedByTeamId) {
           throw new TRPCError({
             code: "PRECONDITION_FAILED",

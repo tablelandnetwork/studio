@@ -1,4 +1,4 @@
-import { Database } from "@tableland/sdk";
+import { type Database } from "@tableland/sdk";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
 import { auth } from "./auth.js";

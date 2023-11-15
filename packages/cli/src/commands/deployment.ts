@@ -1,16 +1,17 @@
 import type { Arguments } from "yargs";
+// Yargs doesn't seem to export the type of `yargs`.  This causes a conflict
+// between linting and building. Lint complains that yargs is only imported
+// for it's type, and build complains that you cannot use namespace as a type.
+// Solving this by disabling lint here.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
 import { helpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
-import { waitForTransaction } from "wagmi/actions";
-// import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
-import { type GlobalOptions } from "../cli.js";
 import {
   ask,
   FileStore,
   getApi,
   getApiUrl,
-  getChainName,
   getProject,
   findOrCreateDefaultEnvironment,
   getWalletWithProvider,
@@ -43,12 +44,15 @@ export const builder = function (args: Yargs) {
         try {
           const { store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
-          const api = getApi(fileStore, apiUrl as string);
+          const apiUrl = getApiUrl({
+            apiUrl: apiUrlArg as string,
+            store: fileStore,
+          });
+          const api = getApi(fileStore, apiUrl);
 
           const projectId = getProject({
             projectId: argv.project,
-            store: fileStore
+            store: fileStore,
           });
 
           if (typeof projectId !== "string") {
@@ -83,15 +87,18 @@ export const builder = function (args: Yargs) {
           const privateKey = normalizePrivateKey(argv.privateKey);
           const wallet = await getWalletWithProvider({
             privateKey,
-            chain: chainInfo.chainId as number,
+            chain: chainInfo.chainId,
             providerUrl: providerUrl as string,
           });
 
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
+          const apiUrl = getApiUrl({
+            apiUrl: apiUrlArg as string,
+            store: fileStore,
+          });
           const api = getApi(fileStore, apiUrl);
           const projectId = getProject({
             ...argv,
-            store: fileStore
+            store: fileStore,
           });
 
           if (typeof name !== "string" || name.trim() === "") {
@@ -101,16 +108,18 @@ export const builder = function (args: Yargs) {
             throw new Error("must provide project for deployment");
           }
 
-          const environmentId = await findOrCreateDefaultEnvironment(api, projectId);
+          const environmentId = await findOrCreateDefaultEnvironment(
+            api,
+            projectId,
+          );
 
           // lookup table data from project and name
           const table = await api.tables.tableByProjectIdAndSlug.query({
-            // TODO: the type check above isn't working, using `as string` as a work around
-            projectId: projectId as string,
-            slug: name as string,
+            projectId,
+            slug: name,
           });
 
-          if (!(table && table.name && table.schema)) {
+          if (!(table?.name && table?.schema)) {
             throw new Error("could not get table to deploy within project");
           }
 
@@ -120,7 +129,7 @@ export const builder = function (args: Yargs) {
           // confirm they want to deploy their table
           const confirm = await ask([
             `you are about to use funds from account ${wallet.address} on ${chainInfo.name} to deploy a table
-are you sure you want to continue (y/n)? `
+are you sure you want to continue (y/n)? `,
           ]);
 
           if (confirm[0].length < 1 || confirm[0][0].toLowerCase() !== "y") {
@@ -129,7 +138,7 @@ are you sure you want to continue (y/n)? `
 
           const db = new Database({
             signer: wallet,
-            baseUrl: helpers.getBaseUrl(chainInfo.chainId as number),
+            baseUrl: helpers.getBaseUrl(chainInfo.chainId),
             autoWait: true,
           });
 
@@ -148,10 +157,10 @@ are you sure you want to continue (y/n)? `
 
           const result = await api.deployments.recordDeployment.mutate({
             environmentId,
-            tableName: txn?.name as string,
-            chainId: txn?.chainId as number,
+            tableName: txn?.name,
+            chainId: txn?.chainId,
             tableId: table.id,
-            tokenId: txn?.tableId as string,
+            tokenId: txn?.tableId,
             createdAt: new Date(),
             blockNumber: txn?.blockNumber,
             txnHash: txn?.transactionHash,

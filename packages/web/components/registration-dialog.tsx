@@ -1,5 +1,4 @@
-import { api } from "@/trpc/react";
-import { Auth } from "@tableland/studio-api";
+import { type Auth } from "@tableland/studio-api";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import InputWithCheck from "./input-with-check";
@@ -14,6 +13,7 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { api } from "@/trpc/react";
 
 export default function RegistrationDialog({
   showDialog,

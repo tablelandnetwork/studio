@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function Crumb({
   className,
@@ -7,10 +7,10 @@ export default function Crumb({
   items = [],
 }: React.HTMLAttributes<HTMLElement> & {
   title: string;
-  items?: {
+  items?: Array<{
     label: string;
     href: string;
-  }[];
+  }>;
 }) {
   return (
     <div className={cn("flex", className)}>

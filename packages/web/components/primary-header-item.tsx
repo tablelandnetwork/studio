@@ -1,9 +1,9 @@
 "use client";
 
-import { api } from "@/trpc/react";
-import { RouterOutputs } from "@tableland/studio-api";
+import { type RouterOutputs } from "@tableland/studio-api";
 import { useParams } from "next/navigation";
 import TeamSwitcher from "./team-switcher";
+import { api } from "@/trpc/react";
 
 export default function PrimaryHeaderItem({
   teams,

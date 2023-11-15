@@ -1,5 +1,5 @@
-import { ApiError, Table, Validator, helpers } from "@tableland/sdk";
-import { Schema, Store } from "@tableland/studio-store";
+import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
+import { type Schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { projectProcedure, publicProcedure, router } from "../trpc";

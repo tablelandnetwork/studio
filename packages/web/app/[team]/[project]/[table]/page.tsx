@@ -1,10 +1,10 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { helpers } from "@tableland/sdk";
+import { hasConstraint } from "@tableland/studio-store";
+import TimeAgo from "javascript-time-ago";
+import { Check, Rocket } from "lucide-react";
+import Link from "next/link";
+import { cache } from "react";
+import { api } from "@/trpc/server";
 import {
   Table,
   TableBody,
@@ -13,13 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api } from "@/trpc/server";
-import { helpers } from "@tableland/sdk";
-import { hasConstraint } from "@tableland/studio-store";
-import TimeAgo from "javascript-time-ago";
-import { Check, Rocket } from "lucide-react";
-import Link from "next/link";
-import { cache } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const timeAgo = new TimeAgo("en-US");
 

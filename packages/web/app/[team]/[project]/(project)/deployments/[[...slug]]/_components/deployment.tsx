@@ -1,13 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { blockExplorers } from "@/lib/block-explorers";
-import { openSeaLinks } from "@/lib/open-sea";
 import { Database, helpers } from "@tableland/sdk";
-import { schema } from "@tableland/studio-store";
-import { ColumnDef } from "@tanstack/react-table";
+import { type schema } from "@tableland/studio-store";
+import { type ColumnDef } from "@tanstack/react-table";
 import TimeAgo from "javascript-time-ago";
 import { Blocks, Coins, Hash, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "./data-table";
+import { openSeaLinks } from "@/lib/open-sea";
+import { blockExplorers } from "@/lib/block-explorers";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const timeAgo = new TimeAgo("en-US");
 
@@ -28,7 +28,7 @@ export default async function Deployment({
   const data = await tbl
     .prepare(`SELECT * FROM ${deployment.tableName};`)
     .all();
-  const columns: ColumnDef<unknown>[] = data.results.length
+  const columns: Array<ColumnDef<unknown>> = data.results.length
     ? Object.keys(data.results[0] as object).map((col) => ({
         accessorKey: col,
         header: col,

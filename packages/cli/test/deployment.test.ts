@@ -1,23 +1,19 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { equal, match } from "node:assert";
+import { equal } from "node:assert";
 import { getAccounts } from "@tableland/local";
-import { Database } from "@tableland/sdk";
 import mockStd from "mock-stdin";
-import { getDefaultProvider } from "ethers";
 import { afterEach, before, describe, test } from "mocha";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/deployment.js";
-import * as modProject from "../src/commands/project.js";
 import * as modLogin from "../src/commands/login.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_REGISTRY_PORT,
-  TEST_TEAM_ID,
   isUUID,
 } from "./utils";
 
@@ -34,7 +30,7 @@ const defaultArgs = [
   "--providerUrl",
   `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
   "--apiUrl",
-  TEST_API_BASE_URL
+  TEST_API_BASE_URL,
 ];
 
 describe("commands/deployment", function () {
@@ -56,8 +52,10 @@ describe("commands/deployment", function () {
       "--privateKey",
       accounts[10].privateKey.slice(2),
       "--apiUrl",
-      TEST_API_BASE_URL
-    ]).command<GlobalOptions>(modLogin).parse();
+      TEST_API_BASE_URL,
+    ])
+      .command<GlobalOptions>(modLogin)
+      .parse();
   });
 
   afterEach(function () {
@@ -80,7 +78,9 @@ describe("commands/deployment", function () {
       "--projectId",
       projectId,
       ...defaultArgs,
-    ]).command(mod).parse();
+    ])
+      .command(mod)
+      .parse();
 
     const res = consoleLog.getCall(1).firstArg;
     const value = JSON.parse(res);
@@ -100,7 +100,9 @@ describe("commands/deployment", function () {
 
   test("can list deployments", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["deployment", "ls", projectId, ...defaultArgs]).command(mod).parse();
+    await yargs(["deployment", "ls", projectId, ...defaultArgs])
+      .command(mod)
+      .parse();
 
     const deploymentStr = consoleLog.getCall(0).firstArg;
     const data = JSON.parse(deploymentStr);
