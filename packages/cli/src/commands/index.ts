@@ -21,5 +21,5 @@ export const commands = [
   query,
   importTable,
   use,
-  unuse
+  unuse,
 ];

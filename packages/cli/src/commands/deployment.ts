@@ -44,12 +44,15 @@ export const builder = function (args: Yargs) {
         try {
           const { store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
+          const apiUrl = getApiUrl({
+            apiUrl: apiUrlArg as string,
+            store: fileStore,
+          });
           const api = getApi(fileStore, apiUrl);
 
           const projectId = getProject({
             projectId: argv.project,
-            store: fileStore
+            store: fileStore,
           });
 
           if (typeof projectId !== "string") {
@@ -88,11 +91,14 @@ export const builder = function (args: Yargs) {
             providerUrl: providerUrl as string,
           });
 
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
+          const apiUrl = getApiUrl({
+            apiUrl: apiUrlArg as string,
+            store: fileStore,
+          });
           const api = getApi(fileStore, apiUrl);
           const projectId = getProject({
             ...argv,
-            store: fileStore
+            store: fileStore,
           });
 
           if (typeof name !== "string" || name.trim() === "") {
@@ -102,7 +108,10 @@ export const builder = function (args: Yargs) {
             throw new Error("must provide project for deployment");
           }
 
-          const environmentId = await findOrCreateDefaultEnvironment(api, projectId);
+          const environmentId = await findOrCreateDefaultEnvironment(
+            api,
+            projectId,
+          );
 
           // lookup table data from project and name
           const table = await api.tables.tableByProjectIdAndSlug.query({
@@ -120,7 +129,7 @@ export const builder = function (args: Yargs) {
           // confirm they want to deploy their table
           const confirm = await ask([
             `you are about to use funds from account ${wallet.address} on ${chainInfo.name} to deploy a table
-are you sure you want to continue (y/n)? `
+are you sure you want to continue (y/n)? `,
           ]);
 
           if (confirm[0].length < 1 || confirm[0][0].toLowerCase() !== "y") {

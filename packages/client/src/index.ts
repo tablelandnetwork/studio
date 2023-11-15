@@ -1,17 +1,17 @@
-import { helpers } from "@tableland/sdk";
+import { type helpers } from "@tableland/sdk";
 import { type AppRouter } from "@tableland/studio-api";
 import {
   createTRPCProxyClient,
   httpBatchLink,
-  HTTPHeaders,
-  Operation,
+  type HTTPHeaders,
+  type Operation,
 } from "@trpc/client";
 import superjson from "superjson";
 import { sqliteKeywords } from "./sqlite-keywords.js";
 import { getBaseUrl, getUrl } from "./util.js";
 
 type NonEmptyArray<TItem> = [TItem, ...TItem[]];
-type ClientConfig = {
+interface ClientConfig {
   fetch?: (res: Response) => Response;
   headers?:
     | HTTPHeaders
@@ -19,7 +19,7 @@ type ClientConfig = {
         opList: NonEmptyArray<Operation>;
       }) => HTTPHeaders | Promise<HTTPHeaders>);
   url?: string;
-};
+}
 
 type ProxyClient = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
 
@@ -84,8 +84,8 @@ function studioAliases({
 
 export {
   api,
-  API,
-  ClientConfig,
+  type API,
+  type ClientConfig,
   getBaseUrl,
   getUrl,
   sqliteKeywords,

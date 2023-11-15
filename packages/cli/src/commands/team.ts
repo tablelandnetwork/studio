@@ -44,12 +44,15 @@ export const builder = function (args: Yargs) {
           if (typeof store !== "string") {
             throw new Error("must provide path to session store file");
           }
-          if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
+          if (
+            typeof apiUrlArg !== "string" &&
+            typeof apiUrlArg !== "undefined"
+          ) {
             throw new Error("invalid apiUrl");
           }
 
           const fileStore = new FileStore(store);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore })
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
           const api = getApi(fileStore, apiUrl);
 
           let query;
@@ -93,7 +96,9 @@ export const builder = function (args: Yargs) {
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
-        throw new Error("team create not implemented in CLI yet. use the web application.")
+        throw new Error(
+          "team create not implemented in CLI yet. use the web application.",
+        );
         // console.log("trying to create team...");
         // const { name, personalTeamId, invites, store } = argv;
 

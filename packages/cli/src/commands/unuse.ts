@@ -1,9 +1,6 @@
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import {
-  logger,
-  FileStore,
-} from "../utils.js";
+import { logger, FileStore } from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "unuse [context]";
@@ -32,7 +29,7 @@ export const handler = async (
         fileStore.save();
         break;
       default:
-        throw new Error(`cannot remove context for: ${context}`)
+        throw new Error(`cannot remove context for: ${context}`);
     }
 
     logger.log(`your ${context} context has been removed`);

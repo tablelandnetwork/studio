@@ -27,7 +27,7 @@ const defaultArgs = [
   "--providerUrl",
   `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
   "--apiUrl",
-  TEST_API_BASE_URL
+  TEST_API_BASE_URL,
 ];
 
 describe("commands/project", function () {
@@ -56,8 +56,10 @@ describe("commands/project", function () {
       description,
       "--teamId",
       TEST_TEAM_ID,
-      ...defaultArgs
-    ]).command(mod).parse();
+      ...defaultArgs,
+    ])
+      .command(mod)
+      .parse();
 
     const res = consoleLog.getCall(0).firstArg;
     const value = JSON.parse(res);
@@ -74,12 +76,13 @@ describe("commands/project", function () {
     equal(value.name, projectName);
     equal(value.description, description);
     equal(value.slug, projectName);
-
   });
 
   test("can list projects", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["project", "ls", TEST_TEAM_ID, ...defaultArgs]).command(mod).parse();
+    await yargs(["project", "ls", TEST_TEAM_ID, ...defaultArgs])
+      .command(mod)
+      .parse();
 
     const projectStr = consoleLog.getCall(0).firstArg;
     const data = JSON.parse(projectStr);

@@ -14,18 +14,14 @@ import {
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "import-table <table> <project>   <description> [name]";
-export const desc = "import an existing tableland table  into a project with description and optionally with a new name";
+export const desc =
+  "import an existing tableland table  into a project with description and optionally with a new name";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const {
-      apiUrl: apiUrlArg,
-      store,
-      table: uuTableName,
-      description,
-    } = argv;
+    const { apiUrl: apiUrlArg, store, table: uuTableName, description } = argv;
 
     const name = typeof argv.name === "string" ? argv.name.trim() : "";
 
@@ -33,8 +29,8 @@ export const handler = async (
       throw new Error(`table description is required`);
     }
 
-    const fileStore = new FileStore(store );
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore })
+    const fileStore = new FileStore(store);
+    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
     const api = getApi(fileStore, apiUrl);
     const projectId = getProject({ ...argv, store: fileStore });
 
@@ -58,10 +54,10 @@ export const handler = async (
     });
 
     logger.log(
-`successfully imported ${uuTableName}
+      `successfully imported ${uuTableName}
   projectId: ${projectId}
   name: ${name}
-  description: ${description}`
+  description: ${description}`,
     );
   } catch (err: any) {
     logger.error(err);

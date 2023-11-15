@@ -41,7 +41,10 @@ export const builder = function (args: Yargs) {
           if (typeof store !== "string") {
             throw new Error("must provide path to session store file");
           }
-          if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
+          if (
+            typeof apiUrlArg !== "string" &&
+            typeof apiUrlArg !== "undefined"
+          ) {
             throw new Error("invalid apiUrl");
           }
 
@@ -49,14 +52,19 @@ export const builder = function (args: Yargs) {
           const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
           const api = getApi(fileStore, apiUrl);
 
-          const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
+          const query =
+            typeof teamId === "string" && teamId.trim() !== ""
+              ? { teamId }
+              : undefined;
           const projects = await api.projects.teamProjects.query(query);
 
           const projectsWithTables = [];
 
           for (const proj of projects) {
-            const tables = await api.tables.projectTables.query({ projectId: proj.id });
-            projectsWithTables.push({ tables, ...proj});
+            const tables = await api.tables.projectTables.query({
+              projectId: proj.id,
+            });
+            projectsWithTables.push({ tables, ...proj });
           }
 
           logger.log(JSON.stringify(projectsWithTables, null, 4));
@@ -85,11 +93,17 @@ export const builder = function (args: Yargs) {
       },
       async function (argv: CommandOptions) {
         try {
-          const { name, teamId: teamIdArg, description, store, apiUrl: apiUrlArg } = argv;
+          const {
+            name,
+            teamId: teamIdArg,
+            description,
+            store,
+            apiUrl: apiUrlArg,
+          } = argv;
           const fileStore = new FileStore(store);
           const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
           const api = getApi(fileStore, apiUrl);
-          const teamId = getTeam({store: fileStore, teamId: teamIdArg});
+          const teamId = getTeam({ store: fileStore, teamId: teamIdArg });
 
           if (typeof name !== "string") {
             throw new Error("must provide project name");

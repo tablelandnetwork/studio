@@ -1,4 +1,4 @@
-import { Store } from "@tableland/studio-store";
+import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { generateNonce, SiweMessage } from "siwe";
 import { z } from "zod";
@@ -7,6 +7,8 @@ import { protectedProcedure, publicProcedure, router } from "../trpc";
 export function authRouter(store: Store) {
   return router({
     authenticated: publicProcedure.input(z.void()).query(({ ctx }) => {
+      // we want to check for null, undefined, and ""
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       return ctx.session.auth || false;
     }),
     nonce: publicProcedure.input(z.void()).mutation(async ({ ctx }) => {
@@ -27,7 +29,7 @@ export function authRouter(store: Store) {
             // TODO: do we want to verify domain and time here?
           });
           ctx.session.siweFields = fields.data;
-          let info = await store.auth.userAndPersonalTeamByAddress(
+          const info = await store.auth.userAndPersonalTeamByAddress(
             fields.data.address,
           );
           if (info) {

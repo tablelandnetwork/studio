@@ -14,7 +14,7 @@ import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_API_PORT,
-  TEST_REGISTRY_PORT
+  TEST_REGISTRY_PORT,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,9 +39,10 @@ describe("commands/login", function () {
       "logout",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modLogout).parse();
-
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modLogout)
+      .parse();
   });
 
   afterEach(function () {
@@ -56,14 +57,16 @@ describe("commands/login", function () {
       "--apiUrl",
       TEST_API_BASE_URL,
       "--privateKey",
-      accounts[9].privateKey.slice(2)
-    ]).command<GlobalOptions>(mod).parse();
+      accounts[9].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(mod)
+      .parse();
 
     const res = consoleError.getCall(0).firstArg;
 
     equal(
       res,
-      `Error: cannot login with an unregistered address: ${accounts[9].address}`
+      `Error: cannot login with an unregistered address: ${accounts[9].address}`,
     );
   });
 
@@ -75,15 +78,14 @@ describe("commands/login", function () {
       "--apiUrl",
       TEST_API_BASE_URL,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(mod).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(mod)
+      .parse();
 
     const res = consoleLog.getCall(0).firstArg;
 
-    equal(
-      res,
-      `You are logged in with address: ${accounts[10].address}`
-    );
+    equal(res, `You are logged in with address: ${accounts[10].address}`);
   });
 
   test("login sets the default api url", async function () {
@@ -91,8 +93,10 @@ describe("commands/login", function () {
       "logout",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modLogout).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modLogout)
+      .parse();
 
     // Use the IP instead of `localhost` so we can test the difference
     const customApi = `http://127.0.0.1:${TEST_API_PORT}`;
@@ -102,9 +106,10 @@ describe("commands/login", function () {
       "--privateKey",
       accounts[10].privateKey.slice(2),
       "--apiUrl",
-      customApi
-    ]).command<GlobalOptions>(mod).parse();
-
+      customApi,
+    ])
+      .command<GlobalOptions>(mod)
+      .parse();
 
     const sessionBuf = readFileSync(sessionFilePath);
     const session = JSON.parse(sessionBuf.toString());

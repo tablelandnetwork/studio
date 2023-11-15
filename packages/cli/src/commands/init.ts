@@ -13,20 +13,22 @@ export interface CommandOptions extends GlobalOptions {
 export const command = "init";
 export const desc = "create a tablelandrc config file";
 
-
 export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
     const { yes } = argv;
-    const answers = yes ? questions.map(q => q.default) : await ask(questions.map(q => q.message));
+    const answers = yes
+      ? questions.map((q) => q.default)
+      : await ask(questions.map((q) => q.message));
 
-    const fileJson: { privateKey?: string; providerUrl?: string; } = {};
+    const fileJson: { privateKey?: string; providerUrl?: string } = {};
     if (answers[0]) fileJson.privateKey = answers[0];
     if (answers[1]) fileJson.providerUrl = answers[1];
 
     const configFilePath = answers[2];
-    if (typeof configFilePath !== "string") throw new Error("invalid config file path");
+    if (typeof configFilePath !== "string")
+      throw new Error("invalid config file path");
 
     const fileString = JSON.stringify(fileJson, null, 4);
     fs.writeFileSync(configFilePath, fileString);
@@ -40,17 +42,19 @@ export const handler = async (
 const questions = [
   {
     name: "privateKey",
-    message: "Enter your private key (optional). If provided this will be stored in your `.tablelandrc.json` file ",
-    default: undefined
+    message:
+      "Enter your private key (optional). If provided this will be stored in your `.tablelandrc.json` file ",
+    default: undefined,
   },
   {
     name: "providerUrl",
     message: "Enter a default blockchain provider URL (optional) ",
-    default: undefined
+    default: undefined,
   },
   {
     name: "path",
-    message: "Enter path to store your `.tablelandrc.json` config file (default is `cwd`) ",
-    default: resolve(`.tablelandrc.json`)
-  }
+    message:
+      "Enter path to store your `.tablelandrc.json` config file (default is `cwd`) ",
+    default: resolve(`.tablelandrc.json`),
+  },
 ];

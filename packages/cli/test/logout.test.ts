@@ -13,7 +13,7 @@ import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
-  TEST_REGISTRY_PORT
+  TEST_REGISTRY_PORT,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,7 +28,7 @@ const defaultArgs = [
   "--providerUrl",
   `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
   "--apiUrl",
-  TEST_API_BASE_URL
+  TEST_API_BASE_URL,
 ];
 
 describe("commands/logout", function () {
@@ -47,21 +47,19 @@ describe("commands/logout", function () {
       "login",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modLogin).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modLogin)
+      .parse();
 
     const consoleLog = spy(logger, "log");
 
-    await yargs([
-      "logout",
-      ...defaultArgs,
-    ]).command<GlobalOptions>(modLogout).parse();
+    await yargs(["logout", ...defaultArgs])
+      .command<GlobalOptions>(modLogout)
+      .parse();
 
     const firstCall = consoleLog.getCall(0).firstArg;
-    equal(
-      firstCall,
-      `You are logged out`
-    );
+    equal(firstCall, `You are logged out`);
 
     const sessionBuf = readFileSync(sessionFilePath);
     const session = JSON.parse(sessionBuf.toString());
@@ -72,14 +70,16 @@ describe("commands/logout", function () {
       "login",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modLogin).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modLogin)
+      .parse();
 
     const secondCall = consoleLog.getCall(1).firstArg;
 
     equal(
       secondCall,
-      `You are logged in with address: ${accounts[10].address}`
+      `You are logged in with address: ${accounts[10].address}`,
     );
   });
 });

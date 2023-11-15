@@ -1,6 +1,6 @@
 import { initMailApi } from "@tableland/studio-mail";
-import { Store } from "@tableland/studio-store";
-import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { type Store } from "@tableland/studio-store";
+import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { router } from "../trpc";
 import { createSendInvite } from "../utils/sendInvite";
 import { authRouter } from "./auth";

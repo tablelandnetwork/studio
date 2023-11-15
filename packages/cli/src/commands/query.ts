@@ -1,9 +1,6 @@
 import { createInterface } from "readline";
 import type { Arguments } from "yargs";
-import {
-  type helpers as sdkHelpers,
-  Database
-} from "@tableland/sdk";
+import { type helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { studioAliases } from "@tableland/studio-client";
 import chalk from "chalk";
 import { type GlobalOptions } from "../cli.js";
@@ -19,14 +16,15 @@ import {
   getWalletWithProvider,
   isUUID,
   logger,
-  normalizePrivateKey
+  normalizePrivateKey,
 } from "../utils.js";
 
 // TODO: It seems like the sdk should export a single type for the Database config
 type SdkConfig = sdkHelpers.Config & Partial<sdkHelpers.AutoWaitConfig>;
 
 export const command = "query";
-export const desc = "open a shell to run sql statements  against your selected project";
+export const desc =
+  "open a shell to run sql statements  against your selected project";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
@@ -39,7 +37,7 @@ export const handler = async (
     }
 
     const fileStore = new FileStore(store);
-    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore})
+    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
     const api = getApi(fileStore, apiUrl);
     const projectId = getProject({ ...argv, store: fileStore });
 
@@ -52,7 +50,7 @@ export const handler = async (
 
     const studioAliasMapper = studioAliases({
       environmentId,
-      apiUrl
+      apiUrl,
     });
 
     const _interface = createInterface({
@@ -68,13 +66,16 @@ export const handler = async (
           if (typeof term !== "string" || term === "") return false;
           return term.indexOf(word) === 0;
         });
-        return [hits.map((hit: string) => {
-          words.push(hit);
-          return words.join(" ");
-        }), line];
+        return [
+          hits.map((hit: string) => {
+            words.push(hit);
+            return words.join(" ");
+          }),
+          line,
+        ];
       },
       terminal: true,
-      tabSize: 4
+      tabSize: 4,
     });
 
     let statement = "";
@@ -106,14 +107,16 @@ export const handler = async (
       // if no semicolon exists they are inputting a multi line statement
       // we should change the prompt and save the previous line's text
       if (semiColonIndex < 0) {
-        statement += (line + " ");
+        statement += line + " ";
         return setMidPrompt();
       }
 
       // if a semicolon exists but is not at the end of the statement they are
       // trying to run multiple statments together, which is not allowed
       if (semiColonIndex < line.length - 1) {
-        logger.error("statements must end with `;` and you cannot run more than one statement at a time")
+        logger.error(
+          "statements must end with `;` and you cannot run more than one statement at a time",
+        );
         resetPrompt();
         return;
       }
@@ -124,29 +127,33 @@ export const handler = async (
         const queryObject = await validateQuery(statement);
 
         if (queryObject.type === "create") {
-          throw new Error("you cannot create studio project tables with the cli");
+          throw new Error(
+            "you cannot create studio project tables with the cli",
+          );
         }
 
         if (queryObject.type !== "read" && !argv.privateKey) {
-          throw new Error("you did not provide a private key, you can only run read queries");
+          throw new Error(
+            "you did not provide a private key, you can only run read queries",
+          );
         }
 
         const dbOpts: SdkConfig = {
-          aliases: studioAliasMapper
+          aliases: studioAliasMapper,
         };
         if (queryObject.type !== "read") {
           // TODO: all sub-queries I can think of work here, but ask others for try and break this.
           const chain = getChainIdFromTableName(
-            (await studioAliasMapper.read())[queryObject.tables[0]]
+            (await studioAliasMapper.read())[queryObject.tables[0]],
           );
           const wallet = await getWalletWithProvider({
             privateKey: normalizePrivateKey(argv.privateKey),
             chain,
-            providerUrl: argv.providerUrl
+            providerUrl: argv.providerUrl,
           });
           // We have to pause the sql interface so we can use the confirm interface
           pause();
-          const proceed = await confirmWrite({chain, wallet: wallet.address});
+          const proceed = await confirmWrite({ chain, wallet: wallet.address });
           resume();
           if (!proceed) {
             logger.log("aborting write query.");
@@ -187,10 +194,15 @@ export const handler = async (
 
     // we have to do some trickery here because we can't have two interfaces open
     // at the same time
-    const confirmWrite = async function (info: { wallet: string; chain: number; }) {
+    const confirmWrite = async function (info: {
+      wallet: string;
+      chain: number;
+    }) {
       process.stdout.write(
-        `You are about to use address: ${chalk.yellow(info.wallet)} to write to a table on chain ${chalk.yellow(info.chain)}
-Do you want to continue (${chalk.bold("y/n")})? `
+        `You are about to use address: ${chalk.yellow(
+          info.wallet,
+        )} to write to a table on chain ${chalk.yellow(info.chain)}
+Do you want to continue (${chalk.bold("y/n")})? `,
       );
 
       return await new Promise(function (resolve, reject) {
@@ -202,31 +214,23 @@ Do you want to continue (${chalk.bold("y/n")})? `
 
           resolve(true);
         };
-      })
+      });
     };
-
 
     resetPrompt();
 
     // if the user is midway through a statement and they want to reset the
     // prompt, they can hit control + c, but if hit it twice or are at a fresh
     // prompt already we want to kill the process
-    _interface.on('SIGINT', function () {
+    _interface.on("SIGINT", function () {
       const currentPrompt = _interface.getPrompt();
       if (currentPrompt === "> ") process.exit();
       resetPrompt();
     });
-
   } catch (err: any) {
     logger.error(err);
     logger.error("exiting studio query shell");
   }
 };
 
-const sqlTerms = [
-  "select",
-  "insert",
-  "from",
-  "order",
-  "values"
-];
+const sqlTerms = ["select", "insert", "from", "order", "values"];

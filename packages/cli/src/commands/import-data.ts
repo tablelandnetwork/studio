@@ -33,7 +33,7 @@ export const handler = async (
       throw new Error("table name parameter is required");
     }
     const fileStore = new FileStore(store);
-    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore})
+    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
     const api = getApi(fileStore, apiUrl);
     const projectId = getProject({ ...argv, store: fileStore });
 
@@ -83,41 +83,43 @@ export const handler = async (
     // TODO: split the rows into a set of sql statements that meet the
     //       protocol size requirements and potentially execute the
     //       statement(s) with database batch
-    const results = await db.batch(statements.map(stmt => db.prepare(stmt)));
+    const results = await db.batch(statements.map((stmt) => db.prepare(stmt)));
     // the batch method returns an array of results for reads, but in this case
     // its an Array of length 1 with a single Object containing txn data
     const result = results[0];
 
     logger.log(
-`successfully inserted ${rowCount} row${rowCount === 1 ? "" : "s"} into ${table}
-  transaction receipt: ${chalk.gray.bold(JSON.stringify(result.meta?.txn, null, 4))}
+      `successfully inserted ${rowCount} row${
+        rowCount === 1 ? "" : "s"
+      } into ${table}
+  transaction receipt: ${chalk.gray.bold(
+    JSON.stringify(result.meta?.txn, null, 4),
+  )}
   project id: ${projectId}
-  environment id: ${environmentId}`
+  environment id: ${environmentId}`,
     );
   } catch (err: any) {
     logger.error(err);
   }
 };
 
-const parseCsvFile = async function (
-  file: string
-): Promise<string[][]> {
+const parseCsvFile = async function (file: string): Promise<string[][]> {
   return await new Promise(function (resolve, reject) {
     const parser = parse();
     const rows: any[] = [];
 
-    parser.on('readable', function () {
+    parser.on("readable", function () {
       let row;
       while ((row = parser.read()) !== null) {
         rows.push(row);
       }
     });
 
-    parser.on('error', function(err){
+    parser.on("error", function (err) {
       reject(err);
     });
 
-    parser.on('end', function(){
+    parser.on("end", function () {
       resolve(rows);
     });
 
@@ -138,10 +140,18 @@ async function confirmImport(info: {
   }
 
   const answers = await ask([
-    `You are about to use address: ${chalk.yellow(info.wallet)} to insert ${chalk.yellow(info.rowCount)} row${info.rowCount === 1 ? "" : "s"} into table ${chalk.yellow(info.table)}
-This can be done with a total of ${chalk.yellow(info.statementCount)} statment${info.statementCount === 1 ? "" : "s"}
-The total size of the statment${info.statementCount === 1 ? "" : "s"} is: ${chalk.yellow(info.statementLength)}
-Do you want to continue (${chalk.bold("y/n")})? `
+    `You are about to use address: ${chalk.yellow(
+      info.wallet,
+    )} to insert ${chalk.yellow(info.rowCount)} row${
+      info.rowCount === 1 ? "" : "s"
+    } into table ${chalk.yellow(info.table)}
+This can be done with a total of ${chalk.yellow(info.statementCount)} statment${
+      info.statementCount === 1 ? "" : "s"
+    }
+The total size of the statment${
+      info.statementCount === 1 ? "" : "s"
+    } is: ${chalk.yellow(info.statementLength)}
+Do you want to continue (${chalk.bold("y/n")})? `,
   ]);
   const proceed = answers[0].toLowerCase()[0];
 
