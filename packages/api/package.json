@@ -10,6 +10,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "lint": "eslint '**/*.ts'",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "prettier '**/*.{ts,json}' --check",
+    "prettier:fix": "npm run prettier -- --write",
     "build": "tsc",
     "clean": "rm -rf dist"
   },

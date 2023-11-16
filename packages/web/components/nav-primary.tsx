@@ -9,7 +9,11 @@ import { cn } from "@/lib/utils";
 
 function links(
   team?: schema.Team,
-): Array<{ label: string; href: string; isActive: (pathname: string) => boolean }> {
+): Array<{
+  label: string;
+  href: string;
+  isActive: (pathname: string) => boolean;
+}> {
   const links = [
     {
       label: "Tableland",

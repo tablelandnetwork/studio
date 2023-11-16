@@ -10,11 +10,8 @@
     "allowJs": true,
     "skipLibCheck": true,
     "noErrorTruncation": true,
-    "jsx": "preserve",
-    "plugins": [
-      {
-        "name": "next"
-      }
+    "typeRoots": [
+      "../../packages/api/src"
     ]
   }
 }
