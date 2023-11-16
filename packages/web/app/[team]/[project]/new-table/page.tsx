@@ -1,6 +1,6 @@
-import { api } from "@/trpc/server";
 import { cache } from "react";
 import NewTableForm from "./_components/new-table-form";
+import { api } from "@/trpc/server";
 
 export default async function NewProject({
   params,

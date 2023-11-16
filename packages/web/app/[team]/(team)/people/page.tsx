@@ -1,14 +1,14 @@
-import AddressDisplay from "@/components/address-display";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
-import { api } from "@/trpc/server";
-import { RouterOutputs, Session } from "@tableland/studio-api";
 import { cookies } from "next/headers";
 import { cache } from "react";
+import { type RouterOutputs, Session } from "@tableland/studio-api";
 import Info from "./_components/info";
 import InviteActions from "./_components/invite-actions";
 import NewInvite from "./_components/new-invite";
 import UserActions from "./_components/user-actions";
+import AddressDisplay from "@/components/address-display";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
+import { api } from "@/trpc/server";
 
 export default async function People({ params }: { params: { team: string } }) {
   const { auth } = await Session.fromCookies(cookies());
@@ -32,7 +32,7 @@ export default async function People({ params }: { params: { team: string } }) {
   }
 
   const binnedInvites = invites.reduce<{
-    pending: (typeof invites)[number][];
+    pending: Array<(typeof invites)[number]>;
     claimed: Map<string, (typeof invites)[number]>;
   }>(
     (acc, invite) => {

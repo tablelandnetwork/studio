@@ -6,6 +6,6 @@ export const tbl = new Database({
   signer,
   autoWait: true,
   aliases: databaseAliases,
-  baseUrl: helpers.getBaseUrl(+(process.env.CHAIN_ID || "")),
+  baseUrl: helpers.getBaseUrl(+(process.env.CHAIN_ID ?? "")),
   apiKey: process.env.VALIDATOR_API_KEY,
 });

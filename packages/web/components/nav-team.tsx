@@ -1,18 +1,18 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { api } from "@/trpc/react";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import Crumb from "./crumb";
+import { api } from "@/trpc/react";
+import { cn } from "@/lib/utils";
 
 function teamLinks(team: schema.Team) {
-  const links: {
+  const links: Array<{
     label: string;
     href: string;
     isActive: (pathname: string) => boolean;
-  }[] = [
+  }> = [
     {
       label: "Projects",
       href: `/${team.slug}`,
@@ -37,7 +37,7 @@ function teamLinks(team: schema.Team) {
 export default function NavTeam({
   className,
   ...props
-}: React.HTMLAttributes<HTMLElement> & {}) {
+}: React.HTMLAttributes<HTMLElement> & Record<string, unknown>) {
   const pathname = usePathname();
   const { team: teamSlug } = useParams<{ team: string }>();
   const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });

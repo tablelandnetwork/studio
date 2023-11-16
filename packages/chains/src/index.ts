@@ -3,7 +3,7 @@ import { infuraProvider } from "@wagmi/core/providers/infura";
 import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc";
 import { publicProvider } from "@wagmi/core/providers/public";
 import {
-  Chain,
+  type Chain,
   arbitrum,
   arbitrumGoerli,
   arbitrumNova,

@@ -1,5 +1,22 @@
 "use client";
 
+import { type schema } from "@tableland/studio-store";
+import { Copy, Share2 } from "lucide-react";
+import { useState } from "react";
+import {
+  EmailIcon,
+  EmailShareButton,
+  FacebookIcon,
+  FacebookShareButton,
+  RedditIcon,
+  RedditShareButton,
+  TelegramIcon,
+  TelegramShareButton,
+  TwitterIcon,
+  TwitterShareButton,
+  WeiboIcon,
+  WeiboShareButton,
+} from "react-share";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,23 +34,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { schema } from "@tableland/studio-store";
-import { Copy, Share2 } from "lucide-react";
-import { useState } from "react";
-import {
-  EmailIcon,
-  EmailShareButton,
-  FacebookIcon,
-  FacebookShareButton,
-  RedditIcon,
-  RedditShareButton,
-  TelegramIcon,
-  TelegramShareButton,
-  TwitterIcon,
-  TwitterShareButton,
-  WeiboIcon,
-  WeiboShareButton,
-} from "react-share";
 
 const socialIconSize = 48;
 
@@ -45,12 +45,27 @@ export default function Share({
   const { toast } = useToast();
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: "Done!",
-      description: `The ${project.name} Project link has been copied to your clipboard.`,
-      duration: 2000,
-    });
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(function () {
+        toast({
+          title: "Done!",
+          description: `The ${project.name} Project link has been copied to your clipboard.`,
+          duration: 2000,
+        });
+      })
+      .catch(function (err) {
+        toast({
+          title: "Error!",
+          description: [
+            `The ${project.name} Project link could not be copied to your clipboard.`,
+            typeof err?.message === "string" ? err.message : undefined,
+          ]
+            .filter((s) => s)
+            .join(" "),
+          duration: 2000,
+        });
+      });
   };
 
   return (

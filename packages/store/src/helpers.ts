@@ -16,9 +16,9 @@ export function setConstraint(
 ) {
   const { constraints, ...rest } = column;
   if (value) {
-    return { ...rest, constraints: [...(constraints || []), constraint] };
+    return { ...rest, constraints: [...(constraints ?? []), constraint] };
   } else {
-    const res = [...(constraints || [])].filter((c) => c !== constraint);
+    const res = [...(constraints ?? [])].filter((c) => c !== constraint);
     return { ...rest, constraints: res.length ? res : undefined };
   }
 }
@@ -34,7 +34,7 @@ export function generateCreateTableStatement(
   const columnDefinitions = cleaned.columns
     .map((column) => {
       const definition = `${column.name} ${column.type}`;
-      const columnConstraints = !!column.constraints?.length
+      const columnConstraints = column.constraints?.length
         ? " " + column.constraints.join(" ")
         : "";
       return `${definition}${columnConstraints.toLowerCase()}`;

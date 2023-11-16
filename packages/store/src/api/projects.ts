@@ -1,16 +1,15 @@
-import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
+import { type Database } from "@tableland/sdk";
 import { and, eq } from "drizzle-orm";
-import { DrizzleD1Database } from "drizzle-orm/d1";
+import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
-import {
-  Project,
-  environments,
-  projects,
-  teamProjects,
-  teams,
-} from "../schema/index.js";
 import { slugify } from "./utils.js";
+
+type Project = schema.Project;
+const environments = schema.environments;
+const projects = schema.projects;
+const teamProjects = schema.teamProjects;
+const teams = schema.teams;
 
 export function initProjects(
   db: DrizzleD1Database<typeof schema>,

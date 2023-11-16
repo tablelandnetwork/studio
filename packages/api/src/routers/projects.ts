@@ -1,4 +1,4 @@
-import { Store } from "@tableland/studio-store";
+import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { publicProcedure, router, teamProcedure } from "../trpc";
@@ -8,6 +8,8 @@ export function projectsRouter(store: Store) {
     teamProjects: publicProcedure
       .input(z.object({ teamId: z.string().trim().nonempty() }).or(z.void()))
       .query(async ({ ctx, input }) => {
+        // we want to check for null, undefined, and ""
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         const teamId = input?.teamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
           throw new TRPCError({
@@ -25,6 +27,8 @@ export function projectsRouter(store: Store) {
         }),
       )
       .query(async ({ input, ctx }) => {
+        // we want to check for null, undefined, and ""
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         const teamId = input?.teamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
           throw new TRPCError({
@@ -52,6 +56,8 @@ export function projectsRouter(store: Store) {
         }),
       )
       .query(async ({ input, ctx }) => {
+        // we want to check for null, undefined, and ""
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         const teamId = input?.teamId || ctx.session.auth?.user.teamId;
         if (!teamId) {
           throw new TRPCError({

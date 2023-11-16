@@ -1,8 +1,14 @@
 "use client";
 
-import { FormRootMessage } from "@/components/form-root";
-import InputWithCheck from "@/components/input-with-check";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type schema } from "@tableland/studio-store";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { /* useFieldArray, */ useForm } from "react-hook-form";
+import * as z from "zod";
+import { api } from "@/trpc/react";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -12,15 +18,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/trpc/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { schema } from "@tableland/studio-store";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import InputWithCheck from "@/components/input-with-check";
+import { FormRootMessage } from "@/components/form-root";
 
 const formSchema = z.object({
   name: z.string().trim().min(3),
@@ -57,21 +57,14 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
     },
   });
 
-  const {
-    handleSubmit,
-    register,
-    control,
-    formState: { isValid, errors, isValidating, isDirty },
-    reset,
-    setError,
-  } = form;
+  const { setError } = form;
 
-  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
-    {
-      control,
-      name: "environments",
-    },
-  );
+  // const { fields, append, remove } = useFieldArray(
+  //   {
+  //     control,
+  //     name: "environments",
+  //   },
+  // );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     newProject.mutate({
@@ -84,6 +77,9 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
   return (
     <Form {...form}>
       <form
+        // TODO: `form.handleSubmit` creates a floating promise, as a result the linter is complaining
+        //    we should figure out if this is ok or not and either change this or the lint config
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={form.handleSubmit(onSubmit)}
         className="mx-auto max-w-lg space-y-8"
       >

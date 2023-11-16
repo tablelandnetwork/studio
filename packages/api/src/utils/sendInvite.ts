@@ -1,5 +1,5 @@
-import { MailApi } from "@tableland/studio-mail";
-import { Store, schema } from "@tableland/studio-store";
+import { type MailApi } from "@tableland/studio-mail";
+import { type Store, type schema } from "@tableland/studio-store";
 import { sealData } from "iron-session";
 
 export function createSendInvite(

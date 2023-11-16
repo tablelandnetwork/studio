@@ -1,6 +1,6 @@
-import { api } from "@/trpc/server";
 import { cache } from "react";
 import SettingsForm from "./_components/settings-form";
+import { api } from "@/trpc/server";
 
 export default async function TeamSettings({
   params,

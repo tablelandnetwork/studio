@@ -1,12 +1,12 @@
 "use client";
 
-import { api } from "@/trpc/react";
 import { useParams } from "next/navigation";
 import Crumb from "./crumb";
+import { api } from "@/trpc/react";
 
 export default function NavNewProject({
   className,
-}: React.HTMLAttributes<HTMLElement> & {}) {
+}: React.HTMLAttributes<HTMLElement> & Record<string, unknown>) {
   const { team: teamSlug } = useParams<{ team: string }>();
   const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
 

@@ -1,5 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type schema } from "@tableland/studio-store";
+import { Loader2, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,13 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { schema } from "@tableland/studio-store";
-import { Loader2, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 
 const formSchema = z.object({
   email: z.string().trim().email(),
@@ -66,6 +66,11 @@ export default function NewInvite({ team }: { team: schema.Team }) {
     <>
       {showForm && (
         <Form {...form}>
+          {
+            // TODO: `form.handleSubmit` creates a floating promise, as a result the linter is complaining
+            //    we should figure out if this is ok or not and either change this or the lint config
+          }
+          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex">
             <Avatar>
               <AvatarFallback>{email.charAt(0)}</AvatarFallback>

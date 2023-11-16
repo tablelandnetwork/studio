@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import { Table2 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   environments: schema.Environment[];

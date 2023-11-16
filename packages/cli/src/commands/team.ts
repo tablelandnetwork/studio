@@ -1,13 +1,17 @@
 import type { Arguments } from "yargs";
+// Yargs doesn't seem to export the type of `yargs`.  This causes a conflict
+// between linting and building. Lint complains that yargs is only imported
+// for it's type, and build complains that you cannot use namespace as a type.
+// Solving this by disabling lint here.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
-
 import { type GlobalOptions } from "../cli.js";
 import {
   FileStore,
   getApi,
   getApiUrl,
   logger,
-  normalizePrivateKey,
+  // normalizePrivateKey,
 } from "../utils.js";
 
 type Yargs = typeof yargs;
@@ -37,9 +41,19 @@ export const builder = function (args: Yargs) {
       async function (argv) {
         try {
           const { identifier, store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore})
-          const api = getApi(fileStore, apiUrl as string);
+          if (typeof store !== "string") {
+            throw new Error("must provide path to session store file");
+          }
+          if (
+            typeof apiUrlArg !== "string" &&
+            typeof apiUrlArg !== "undefined"
+          ) {
+            throw new Error("invalid apiUrl");
+          }
+
+          const fileStore = new FileStore(store);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+          const api = getApi(fileStore, apiUrl);
 
           let query;
           if (typeof identifier === "string" && identifier.trim() !== "") {
@@ -82,17 +96,19 @@ export const builder = function (args: Yargs) {
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
-        throw new Error("team create not implemented in CLI yet. use the web application.")
-        console.log("trying to create team...");
-        const { name, personalTeamId, invites, store } = argv;
+        throw new Error(
+          "team create not implemented in CLI yet. use the web application.",
+        );
+        // console.log("trying to create team...");
+        // const { name, personalTeamId, invites, store } = argv;
 
-        const api = getApi(new FileStore(store));
-        const privateKey = normalizePrivateKey(argv.privateKey);
+        // const api = getApi(new FileStore(store));
+        // const privateKey = normalizePrivateKey(argv.privateKey);
 
-        if (typeof name !== "string") throw new Error("must provide team name");
-        if (typeof personalTeamId !== "string") {
-          throw new Error("must provide personal team id");
-        }
+        // if (typeof name !== "string") throw new Error("must provide team name");
+        // if (typeof personalTeamId !== "string") {
+        //   throw new Error("must provide personal team id");
+        // }
 
         // const result = await createTeamByPersonalTeam(
         //   name,
@@ -103,7 +119,7 @@ export const builder = function (args: Yargs) {
         //     .filter((i) => i)
         // );
 
-        //logger.log(JSON.stringify(result));
+        // logger.log(JSON.stringify(result));
       },
     )
     .command(
@@ -121,8 +137,10 @@ export const builder = function (args: Yargs) {
           });
       },
       async function (argv) {
-        const { team, user, privateKey, providerUrl, store } = argv;
-        const api = getApi(new FileStore(store));
+        // const { team, user, privateKey, providerUrl, store } = argv;
+        // const api = getApi(new FileStore(store));
+
+        throw new Error("This needs to be implemented");
       },
     );
 };
@@ -131,6 +149,6 @@ export const builder = function (args: Yargs) {
 export const handler = async (
   argv: Arguments<CommandOptions>,
 ): Promise<void> => {
-  //(args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
+  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
   // noop
 };

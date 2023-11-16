@@ -1,4 +1,13 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { FormRootMessage } from "@/components/form-root";
+import { api } from "@/trpc/react";
 import InputWithCheck from "@/components/input-with-check";
 import TagInput from "@/components/tag-input";
 import { Button } from "@/components/ui/button";
@@ -11,13 +20,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { api } from "@/trpc/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 
 const schema = z.object({
   name: z.string().trim().nonempty(),
@@ -64,7 +66,7 @@ export default function TeamForm({
   const { setError } = form;
 
   function onSubmit(values: z.infer<typeof schema>) {
-    if (!!pendingEmail) {
+    if (pendingEmail) {
       values.emailInvites = [...values.emailInvites, pendingEmail];
     }
     newTeam.mutate(values);
@@ -73,6 +75,9 @@ export default function TeamForm({
   return (
     <Form {...form}>
       <form
+        // TODO: `form.handleSubmit` creates a floating promise, as a result the linter is complaining
+        //    we should figure out if this is ok or not and either change this or the lint config
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={form.handleSubmit(onSubmit)}
         className="mx-auto max-w-lg space-y-8"
       >

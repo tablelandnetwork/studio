@@ -1,21 +1,22 @@
 import "./env";
 
-import { databaseAliases } from "@/lib/aliases";
-import { signer } from "@/lib/wallet";
-import { Database } from "@tableland/sdk";
 import { createHash } from "crypto";
 import { readFile, readdir, stat } from "fs/promises";
 import path from "path";
+import { Database } from "@tableland/sdk";
+import { signer } from "@/lib/wallet";
+import { databaseAliases } from "@/lib/aliases";
 
 const migrationsFolder = "drizzle";
 
 const tbl = new Database({ signer, autoWait: true, aliases: databaseAliases });
 
 async function migrate() {
-  const a = (await databaseAliases.read()) as {
-    [x: string]: string | undefined;
-  };
-  if (!a["migrations"]) {
+  const a = (await databaseAliases.read()) as Record<
+    string,
+    string | undefined
+  >;
+  if (!a.migrations) {
     const res = await tbl
       .prepare(
         "create table migrations (id integer primary key, file text not null unique, hash text not null);",
@@ -76,4 +77,8 @@ async function migrate() {
   console.log("Migrations complete.");
 }
 
-migrate();
+migrate().catch(function (err) {
+  console.log("migrate failed:");
+  console.error(err);
+  process.exit();
+});

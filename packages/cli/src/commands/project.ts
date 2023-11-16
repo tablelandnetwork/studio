@@ -1,5 +1,10 @@
 import type { Arguments } from "yargs";
-import yargs from "yargs";
+// Yargs doesn't seem to export the type of `yargs`.  This causes a conflict
+// between linting and building. Lint complains that yargs is only imported
+// for it's type, and build complains that you cannot use namespace as a type.
+// Solving this by disabling lint here.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import type yargs from "yargs";
 // import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
 import { FileStore, getApi, getApiUrl, getTeam, logger } from "../utils.js";
@@ -33,18 +38,33 @@ export const builder = function (args: Yargs) {
       async function (argv) {
         try {
           const { teamId, store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore});
-          const api = getApi(fileStore, apiUrl as string);
+          if (typeof store !== "string") {
+            throw new Error("must provide path to session store file");
+          }
+          if (
+            typeof apiUrlArg !== "string" &&
+            typeof apiUrlArg !== "undefined"
+          ) {
+            throw new Error("invalid apiUrl");
+          }
 
-          const query = typeof teamId === "string" && teamId.trim() !== "" ? { teamId } : undefined;
+          const fileStore = new FileStore(store);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+          const api = getApi(fileStore, apiUrl);
+
+          const query =
+            typeof teamId === "string" && teamId.trim() !== ""
+              ? { teamId }
+              : undefined;
           const projects = await api.projects.teamProjects.query(query);
 
           const projectsWithTables = [];
 
           for (const proj of projects) {
-            const tables = await api.tables.projectTables.query({ projectId: proj.id });
-            projectsWithTables.push({ tables, ...proj});
+            const tables = await api.tables.projectTables.query({
+              projectId: proj.id,
+            });
+            projectsWithTables.push({ tables, ...proj });
           }
 
           logger.log(JSON.stringify(projectsWithTables, null, 4));
@@ -73,11 +93,17 @@ export const builder = function (args: Yargs) {
       },
       async function (argv: CommandOptions) {
         try {
-          const { name, teamId: teamIdArg, description, store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg as string, store: fileStore});
+          const {
+            name,
+            teamId: teamIdArg,
+            description,
+            store,
+            apiUrl: apiUrlArg,
+          } = argv;
+          const fileStore = new FileStore(store);
+          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
           const api = getApi(fileStore, apiUrl);
-          const teamId = getTeam({store: fileStore, teamId: teamIdArg});
+          const teamId = getTeam({ store: fileStore, teamId: teamIdArg });
 
           if (typeof name !== "string") {
             throw new Error("must provide project name");
@@ -107,6 +133,6 @@ export const builder = function (args: Yargs) {
 export const handler = async (
   argv: Arguments<CommandOptions>,
 ): Promise<void> => {
-  //(args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
+  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
   // noop
 };

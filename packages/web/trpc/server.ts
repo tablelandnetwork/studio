@@ -5,7 +5,7 @@ import {
 } from "@trpc/client";
 import { headers } from "next/headers";
 
-import { AppRouter } from "@tableland/studio-api";
+import { type AppRouter } from "@tableland/studio-api";
 import { getUrl, transformer } from "./shared";
 
 export const api = createTRPCProxyClient<AppRouter>({

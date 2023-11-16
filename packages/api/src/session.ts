@@ -1,9 +1,9 @@
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import { sealData, unsealData } from "iron-session";
-import { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
-import { NextRequest, NextResponse } from "next/server";
-import { SiweMessage } from "siwe";
+import { type ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
+import { type ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { type NextRequest, type NextResponse } from "next/server";
+import { type SiweMessage } from "siwe";
 
 const SESSION_COOKIE_NAME = "STUDIO_SESSION";
 
@@ -17,16 +17,16 @@ type SiweFields = Omit<
   "constructor" | "toMessage" | "prepareMessage" | "validate" | "verify"
 >;
 
-export type Auth = {
+export interface Auth {
   user: schema.User;
   personalTeam: schema.Team;
-};
+}
 
-export type ISession = {
+export interface ISession {
   nonce?: string;
   siweFields?: SiweFields;
   auth?: Auth;
-};
+}
 
 export class Session {
   nonce?: string;
@@ -41,6 +41,8 @@ export class Session {
 
   static async fromCookies(cookies: ReadonlyRequestCookies): Promise<Session> {
     const sessionCookie = cookies.get(
+      // we want to check for null, undefined, and ""
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       process.env.SESSION_COOKIE_NAME || SESSION_COOKIE_NAME,
     )?.value;
 
@@ -52,6 +54,8 @@ export class Session {
 
   static async fromRequest(req: NextRequest): Promise<Session> {
     const sessionCookie = req.cookies.get(
+      // we want to check for null, undefined, and ""
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       process.env.SESSION_COOKIE_NAME || SESSION_COOKIE_NAME,
     )?.value;
 
@@ -61,12 +65,12 @@ export class Session {
     );
   }
 
-  clear(res: NextResponse | ResponseCookies): Promise<void> {
+  async clear(res: NextResponse | ResponseCookies): Promise<void> {
     this.nonce = undefined;
     this.siweFields = undefined;
     this.auth = undefined;
 
-    return this.persist(res);
+    return await this.persist(res);
   }
 
   toJSON(): ISession {
@@ -82,6 +86,8 @@ export class Session {
     }
 
     cookies.set(
+      // we want to check for null, undefined, and ""
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       process.env.SESSION_COOKIE_NAME || SESSION_COOKIE_NAME,
       await sealData(this.toJSON(), SESSION_OPTIONS),
       {

@@ -8,8 +8,6 @@
     "dev:all": "(sleep 30 && npm run dev) & npm run dev:net",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "prepare": "cd ../../ && husky install packages/web/.husky",
     "gen-migrate": "drizzle-kit generate:sqlite",
     "exec-migrate": "tsx scripts/migrate.ts"
   },

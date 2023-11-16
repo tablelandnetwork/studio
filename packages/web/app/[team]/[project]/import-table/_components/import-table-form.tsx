@@ -1,5 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type schema } from "@tableland/studio-store";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import ChainSelector from "@/components/chain-selector";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
@@ -16,13 +23,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { schema } from "@tableland/studio-store";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 
 const formSchema = z.object({
   chainId: z.coerce.number().gt(0),
@@ -103,6 +103,9 @@ export default function ImportTableForm({ project, team, envs }: Props) {
   return (
     <Form {...form}>
       <form
+        // TODO: `handleSubmit` creates a floating promise, as a result the linter is complaining
+        //    we should figure out if this is ok or not and either change this or the lint config
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={handleSubmit(onSubmit)}
         className="mx-auto max-w-2xl space-y-8"
       >

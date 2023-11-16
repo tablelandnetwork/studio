@@ -1,12 +1,3 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { api } from "@/trpc/server";
 import {
   Folders,
   Gem,
@@ -18,6 +9,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { api } from "@/trpc/server";
 
 export default async function Projects({
   params,
@@ -34,17 +34,15 @@ export default async function Projects({
   });
 
   const tables = await Promise.all(
-    projects.map(
-      async (project) =>
-        await cache(api.tables.projectTables.query)({ projectId: project.id }),
+    projects.map(async (project) =>
+      (await cache(api.tables.projectTables.query))({ projectId: project.id }),
     ),
   );
   const deployments = await Promise.all(
-    projects.map(
-      async (project) =>
-        await cache(api.deployments.projectDeployments.query)({
-          projectId: project.id,
-        }),
+    projects.map(async (project) =>
+      (await cache(api.deployments.projectDeployments.query))({
+        projectId: project.id,
+      }),
     ),
   );
 
@@ -63,14 +61,14 @@ export default async function Projects({
           <div className="flex items-center space-x-4">
             <Gem className="flex-shrink-0" />
             <h1 className="text-2xl font-medium">
-              {!!team.personal
+              {team.personal
                 ? "Welcome to Tableland Studio!"
                 : `Team ${team.name} has been created!`}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
             <Users className="flex-shrink-0" />
-            {!!team.personal ? (
+            {team.personal ? (
               <p className="text-muted-foreground">
                 In Studio, Teams are the top level container for your work. You
                 can create new Teams and switch Teams using the Team switcher in
@@ -91,9 +89,9 @@ export default async function Projects({
                 <span className="font-semibold text-foreground">
                   {team.slug}
                 </span>{" "}
-                &mdash; for you. {!!team.personal ? "This" : "It"} is your
+                &mdash; for you. {team.personal ? "This" : "It"} is your
                 personal Team for your own projects &mdash; You can&apos;t
-                invite collaborators {!!team.personal ? "here" : "there"}.
+                invite collaborators {team.personal ? "here" : "there"}.
               </p>
             </div>
           )}

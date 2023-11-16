@@ -1,8 +1,8 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import { equal } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { equal } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import * as mod from "../src/commands/team.js";
@@ -11,7 +11,6 @@ import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_REGISTRY_PORT,
-  TEST_TEAM_ID,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,7 +26,7 @@ const defaultArgs = [
   "--providerUrl",
   `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
   "--apiUrl",
-  TEST_API_BASE_URL
+  TEST_API_BASE_URL,
 ];
 
 describe("commands/team", function () {
@@ -48,7 +47,9 @@ describe("commands/team", function () {
 
   test("can list authenticated user's teams", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["team", "ls", ...defaultArgs]).command(mod).parse();
+    await yargs(["team", "ls", ...defaultArgs])
+      .command(mod)
+      .parse();
 
     const output = consoleLog.getCall(0).firstArg;
     const data = JSON.parse(output);
@@ -75,7 +76,9 @@ describe("commands/team", function () {
   test.skip("can list teams for a specific user", async function () {
     const consoleLog = spy(logger, "log");
     const teamId = "123";
-    await yargs(["team", "ls", teamId, ...defaultArgs]).command(mod).parse();
+    await yargs(["team", "ls", teamId, ...defaultArgs])
+      .command(mod)
+      .parse();
 
     const output = consoleLog.getCall(0).firstArg;
     const data = JSON.parse(output);
