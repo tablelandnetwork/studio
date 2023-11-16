@@ -5,7 +5,7 @@ import { httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { useState } from "react";
 
-import { AppRouter } from "@tableland/studio-api";
+import { type AppRouter } from "@tableland/studio-api";
 import { getUrl, transformer } from "./shared";
 
 export const api = createTRPCReact<AppRouter>();

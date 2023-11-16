@@ -34,15 +34,17 @@ export default async function Projects({
   });
 
   const tables = await Promise.all(
-    projects.map(async (project) =>
-      (await cache(api.tables.projectTables.query))({ projectId: project.id }),
+    projects.map(
+      async (project) =>
+        await cache(api.tables.projectTables.query)({ projectId: project.id }),
     ),
   );
   const deployments = await Promise.all(
-    projects.map(async (project) =>
-      (await cache(api.deployments.projectDeployments.query))({
-        projectId: project.id,
-      }),
+    projects.map(
+      async (project) =>
+        await cache(api.deployments.projectDeployments.query)({
+          projectId: project.id,
+        }),
     ),
   );
 

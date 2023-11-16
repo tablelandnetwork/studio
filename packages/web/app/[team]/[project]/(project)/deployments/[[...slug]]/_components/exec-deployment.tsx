@@ -6,7 +6,10 @@ import {
   type WaitableTransactionReceipt,
   helpers,
 } from "@tableland/sdk";
-import { generateCreateTableStatement, type schema } from "@tableland/studio-store";
+import {
+  generateCreateTableStatement,
+  type schema,
+} from "@tableland/studio-store";
 import { providers } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -239,6 +242,9 @@ export default function ExecDeployment({
           </Button>
           <Button
             type="submit"
+            // TODO: `handleSubmit` creates a floating promise, as a result the linter is complaining
+            //    we should figure out if this is ok or not and either change this or the lint config
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={handleDeploy}
             disabled={pendingDeploy || !chainId}
           >

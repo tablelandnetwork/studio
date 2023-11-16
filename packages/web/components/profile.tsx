@@ -54,7 +54,10 @@ export default function Profile({
   // Fetch user when:
   useEffect(() => {
     const handler = () => {
-      authenticated.refetch();
+      authenticated
+        .refetch()
+        .then(() => console.log("authenticated.refetch success"))
+        .catch((err) => console.error(err));
     };
     // 1. window is focused (in case user logs out of another window)
     window.addEventListener("focus", handler);
@@ -62,6 +65,8 @@ export default function Profile({
   }, [authenticated]);
 
   useEffect(() => {
+    // in order to keep types correct we need to use logical operator
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     setAuth(authenticated.data || undefined);
   }, [authenticated.data, setAuth]);
 

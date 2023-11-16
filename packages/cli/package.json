@@ -33,6 +33,10 @@
     "test": "mocha",
     "coverage": "TEST_TIMEOUT_FACTOR=3 c8 --100 --exclude test mocha --exit",
     "coverage:report": "c8 report --reporter=html",
+    "lint": "eslint '**/*.ts'",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "prettier '**/*.{ts,json}' --check",
+    "prettier:fix": "npm run prettier -- --write",
     "clean": "rm -rf dist",
     "build": "tsc && chmod +x dist/cli.js && ./fixup",
     "studio": "node ./dist/cli.js"

@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "lint": "eslint '**/*.{ts,tsx}'",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "prettier '**/*.{ts,tsx,json,md}' --check",
+    "prettier:fix": "npm run prettier -- --write",
     "dev": "next dev",
     "dev:net": "node scripts/net-start.mjs",
     "dev:all": "(sleep 30 && npm run dev) & npm run dev:net",
