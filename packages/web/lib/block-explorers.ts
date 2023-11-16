@@ -39,11 +39,11 @@ export const blockExplorers = new Map<
     },
   ],
   [
-    421613,
+    421614,
     {
       explorer: "Arbiscan",
-      blockUrl: (block) => `https://testnet.arbiscan.io/block/${block}`,
-      txUrl: (hash) => `https://testnet.arbiscan.io/tx/${hash}`,
+      blockUrl: (block) => `https://sepolia.arbiscan.io/block/${block}`,
+      txUrl: (hash) => `https://sepolia.arbiscan.io/tx/${hash}`,
     },
   ],
   [
