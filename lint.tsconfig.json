@@ -9,9 +9,6 @@
     "strict": true,
     "allowJs": true,
     "skipLibCheck": true,
-    "noErrorTruncation": true,
-    "typeRoots": [
-      "../../packages/api/src"
-    ]
+    "noErrorTruncation": true
   }
 }
