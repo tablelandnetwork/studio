@@ -12,6 +12,13 @@ export const openSeaLinks = new Map<
     },
   ],
   [
+    421613,
+    {
+      tokenUrl: (tokenId) =>
+        `https://testnets.opensea.io/assets/arbitrum-goerli/0x033f69e8d119205089ab15d340f5b797732f646b/${tokenId}`,
+    },
+  ],
+  [
     42161,
     {
       tokenUrl: (tokenId) =>
