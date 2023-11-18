@@ -1,11 +1,6 @@
-import type yargs from "yargs";
-import type { Arguments, CommandBuilder } from "yargs";
+import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import {
-  logger,
-  getApi,
-  FileStore,
-} from "../utils.js";
+import { logger, FileStore } from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "unuse [context]";
@@ -16,6 +11,8 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const { store, context } = argv;
+    if (typeof context !== "string") throw new Error("invalid context");
+
     const fileStore = new FileStore(store);
 
     switch (context) {
@@ -32,7 +29,7 @@ export const handler = async (
         fileStore.save();
         break;
       default:
-        throw new Error(`cannot remove context for: ${context}`)
+        throw new Error(`cannot remove context for: ${context}`);
     }
 
     logger.log(`your ${context} context has been removed`);

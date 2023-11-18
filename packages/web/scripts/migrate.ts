@@ -1,33 +1,36 @@
 import "./env";
 
-import { databaseAliases } from "@/lib/aliases";
-import { signer } from "@/lib/wallet";
-import { Database } from "@tableland/sdk";
 import { createHash } from "crypto";
 import { readFile, readdir, stat } from "fs/promises";
 import path from "path";
+import { Database } from "@tableland/sdk";
+import { signer } from "@/lib/wallet";
+import { databaseAliases } from "@/lib/aliases";
 
 const migrationsFolder = "drizzle";
 
 const tbl = new Database({ signer, autoWait: true, aliases: databaseAliases });
 
 async function migrate() {
-  const a = (await databaseAliases.read()) as {
-    [x: string]: string | undefined;
-  };
-  if (!a["migrations"]) {
-    const res = await tbl.exec(
-      "create table migrations (id integer primary key, file text not null unique, hash text not null);",
-    );
+  const a = (await databaseAliases.read()) as Record<
+    string,
+    string | undefined
+  >;
+  if (!a.migrations) {
+    const res = await tbl
+      .prepare(
+        "create table migrations (id integer primary key, file text not null unique, hash text not null);",
+      )
+      .all();
     if (res.error) {
       throw new Error(res.error);
     }
     console.log("Created migrations table.");
   }
   const files = await readdir(migrationsFolder);
-  const migrations = await tbl.exec<{ id: number; file: string; hash: string }>(
-    "select * from migrations order by id asc",
-  );
+  const migrations = await tbl
+    .prepare("select * from migrations order by id asc")
+    .all<{ id: number; file: string; hash: string }>();
   if (migrations.error) {
     throw new Error(migrations.error);
   }
@@ -74,4 +77,8 @@ async function migrate() {
   console.log("Migrations complete.");
 }
 
-migrate();
+migrate().catch(function (err) {
+  console.log("migrate failed:");
+  console.error(err);
+  process.exit();
+});

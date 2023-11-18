@@ -1,8 +1,8 @@
 "use client";
 
-import { api } from "@/trpc/react";
 import { useParams } from "next/navigation";
 import Crumb from "./crumb";
+import { api } from "@/trpc/react";
 
 export default function NavNewTable({
   crumbTitle,
@@ -14,7 +14,7 @@ export default function NavNewTable({
   }>();
 
   const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
-  const project = api.projects.projectByTeamIdAndSlug.useQuery(
+  const project = api.projects.projectBySlug.useQuery(
     { teamId: team.data!.id, slug: projectSlug },
     { enabled: !!team.data },
   );

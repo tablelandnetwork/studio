@@ -10,4 +10,5 @@ export const apiRouter = appRouter(
   `${baseUrl}/mesa.jpg`,
   (seal) => `${baseUrl}/invite?seal=${seal}`,
   process.env.DATA_SEAL_PASS!,
+  process.env.NODE_ENV === "development",
 );

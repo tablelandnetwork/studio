@@ -1,7 +1,11 @@
 import { eq } from "drizzle-orm";
-import { DrizzleD1Database } from "drizzle-orm/d1";
+import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
-import { deployments, environments, projectTables, tables } from "../schema/index.js";
+
+const deployments = schema.deployments;
+const environments = schema.environments;
+const projectTables = schema.projectTables;
+const tables = schema.tables;
 
 export function initDeployments(db: DrizzleD1Database<typeof schema>) {
   return {
@@ -21,8 +25,8 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
         chainId,
         tableName,
         tokenId,
-        blockNumber: blockNumber || null,
-        txnHash: txnHash || null,
+        blockNumber: blockNumber ?? null,
+        txnHash: txnHash ?? null,
         createdAt: createdAt.toISOString(),
       };
       await db.insert(deployments).values(deployment).run();

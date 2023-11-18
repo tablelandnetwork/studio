@@ -1,5 +1,4 @@
-import { api } from "@/trpc/server";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import { AlertOctagon, HelpCircle, Info, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +6,7 @@ import { cache } from "react";
 import Deployment from "./_components/deployment";
 import ExecDeployment from "./_components/exec-deployment";
 import { Sidebar } from "./_components/sidebar";
+import { api } from "@/trpc/server";
 
 export default async function Deployments({
   params,
@@ -21,7 +21,7 @@ export default async function Deployments({
   const authorized = await cache(api.teams.isAuthorized.query)({
     teamId: team.id,
   });
-  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
+  const project = await cache(api.projects.projectBySlug.query)({
     teamId: team.id,
     slug: params.project,
   });
@@ -62,7 +62,7 @@ export default async function Deployments({
 
   return (
     <div className="flex flex-1">
-      {!!tables.length ? (
+      {tables.length ? (
         <>
           <Sidebar
             className="min-w-[200px sticky top-14 h-fit"

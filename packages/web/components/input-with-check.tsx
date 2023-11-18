@@ -1,6 +1,6 @@
-import { Input, InputProps } from "@/components/ui/input";
 import { CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
-import { ChangeEvent, forwardRef, useEffect, useState } from "react";
+import { type ChangeEvent, forwardRef, useEffect, useState } from "react";
+import { Input, type InputProps } from "@/components/ui/input";
 
 export type CheckStatus = "idle" | "pending" | "passed" | "failed" | "error";
 

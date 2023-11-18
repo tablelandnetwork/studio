@@ -1,17 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { authAtom } from "@/store/auth";
-import { api } from "@/trpc/react";
-import { Auth } from "@tableland/studio-api";
+import { type Auth } from "@tableland/studio-api";
 import { useAtom } from "jotai";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -22,6 +11,17 @@ import RegistrationDialog from "./registration-dialog";
 import SignInButton from "./sign-in-button";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
+import { api } from "@/trpc/react";
+import { authAtom } from "@/store/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Profile({
   hideAddress = false,
@@ -53,8 +53,11 @@ export default function Profile({
 
   // Fetch user when:
   useEffect(() => {
-    const handler = async () => {
-      authenticated.refetch();
+    const handler = () => {
+      authenticated
+        .refetch()
+        .then(() => console.log("authenticated.refetch success"))
+        .catch((err) => console.error(err));
     };
     // 1. window is focused (in case user logs out of another window)
     window.addEventListener("focus", handler);
@@ -62,6 +65,8 @@ export default function Profile({
   }, [authenticated]);
 
   useEffect(() => {
+    // in order to keep types correct we need to use logical operator
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     setAuth(authenticated.data || undefined);
   }, [authenticated.data, setAuth]);
 

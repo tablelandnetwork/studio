@@ -1,21 +1,20 @@
-import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
+import { type Database } from "@tableland/sdk";
 import { and, asc, eq } from "drizzle-orm";
-import { DrizzleD1Database } from "drizzle-orm/d1";
+import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData } from "iron-session";
 import * as schema from "../schema/index.js";
-import {
-  NewTeamInviteSealed,
-  Team,
-  TeamInvite,
-  projects,
-  teamInvites,
-  teamMemberships,
-  teamProjects,
-  teams,
-  users,
-} from "../schema/index.js";
 import { slugify } from "./utils.js";
+
+type NewTeamInviteSealed = schema.NewTeamInviteSealed;
+type Team = schema.Team;
+type TeamInvite = schema.TeamInvite;
+const projects = schema.projects;
+const teamInvites = schema.teamInvites;
+const teamMemberships = schema.teamMemberships;
+const teamProjects = schema.teamProjects;
+const teams = schema.teams;
+const users = schema.users;
 
 export function initTeams(
   db: DrizzleD1Database<typeof schema>,
@@ -66,7 +65,7 @@ export function initTeams(
         tbl.prepare(teamsSql).bind(teamsParams),
         tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
       ];
-      if (!!invites.length) {
+      if (invites.length) {
         const sealedInvites: NewTeamInviteSealed[] = await Promise.all(
           invites.map(async ({ email, ...rest }) => ({
             ...rest,
@@ -99,7 +98,7 @@ export function initTeams(
     },
 
     teamById: async function (id: string) {
-      return db.select().from(teams).where(eq(teams.id, id)).get();
+      return await db.select().from(teams).where(eq(teams.id, id)).get();
     },
 
     teamsByMemberId: async function (memberId: string) {
@@ -133,12 +132,12 @@ export function initTeams(
           new Map<
             string,
             {
-              projects: {
+              projects: Array<{
                 name: string;
                 description: string;
                 id: string;
                 slug: string;
-              }[];
+              }>;
               name: string;
               id: string;
               slug: string;
@@ -207,7 +206,7 @@ export function initTeams(
           ),
         )
         .get();
-      return membership ? membership : false;
+      return membership ?? false;
     },
 
     toggleAdmin: async function (teamId: string, memberId: string) {

@@ -1,18 +1,17 @@
-import { Database } from "@tableland/sdk";
 import { createHash } from "crypto";
+import { type Database } from "@tableland/sdk";
 import { asc, eq } from "drizzle-orm";
-import { DrizzleD1Database } from "drizzle-orm/d1";
+import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { alias } from "drizzle-orm/sqlite-core";
 import { sealData, unsealData } from "iron-session";
 import * as schema from "../schema/index.js";
-import {
-  NewTeamInviteSealed,
-  Team,
-  TeamInvite,
-  teamInvites,
-  teamMemberships,
-  teams,
-} from "../schema/index.js";
+
+type NewTeamInviteSealed = schema.NewTeamInviteSealed;
+type Team = schema.Team;
+type TeamInvite = schema.TeamInvite;
+const teamInvites = schema.teamInvites;
+const teamMemberships = schema.teamMemberships;
+const teams = schema.teams;
 
 export function invites(
   db: DrizzleD1Database<typeof schema>,

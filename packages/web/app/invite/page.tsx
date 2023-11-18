@@ -1,4 +1,8 @@
-import InviteHandler from "@/components/invite-handler";
+import { Session } from "@tableland/studio-api";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { cache } from "react";
+import { api } from "@/trpc/server";
 import {
   Card,
   CardContent,
@@ -7,16 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { api } from "@/trpc/server";
-import { Session } from "@tableland/studio-api";
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
-import { cache } from "react";
+import InviteHandler from "@/components/invite-handler";
 
 export default async function Invite({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Record<string, string | string[] | undefined>;
 }) {
   if (typeof searchParams.seal !== "string") {
     notFound();
@@ -25,13 +25,15 @@ export default async function Invite({
     seal: searchParams.seal,
   });
   // TODO: Return not found if invite is expired
+  // TODO: consider removing this lint rule. We want to check for null, undefined, false, and ""
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if (invite.claimedByTeamId || invite.claimedAt) {
     notFound();
   }
-  const targetTeam = await cache(api.teams.teamById.query)({
+  const targetTeam = await cache(api.teams.getTeam.query)({
     teamId: invite.teamId,
   });
-  const inviterTeam = await cache(api.teams.teamById.query)({
+  const inviterTeam = await cache(api.teams.getTeam.query)({
     teamId: invite.inviterTeamId,
   });
 

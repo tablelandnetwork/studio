@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { equal } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { deepStrictEqual, equal } from "node:assert";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
@@ -16,7 +16,7 @@ import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
-  TEST_REGISTRY_PORT
+  TEST_REGISTRY_PORT,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,13 +31,13 @@ const defaultArgs = [
   "--providerUrl",
   `http://127.0.0.1:${TEST_REGISTRY_PORT}/`,
   "--apiUrl",
-  TEST_API_BASE_URL
+  TEST_API_BASE_URL,
 ];
 
 const getSession = function () {
   const sessionFileBuf = readFileSync(sessionFilePath);
   return JSON.parse(sessionFileBuf.toString());
-}
+};
 
 describe("commands/use", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
@@ -53,8 +53,10 @@ describe("commands/use", function () {
       "logout",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modLogout).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modLogout)
+      .parse();
   });
 
   test("use command throws if project id is not valid", async function () {
@@ -66,8 +68,10 @@ describe("commands/use", function () {
       "invalidprojectid",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modUse).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
 
     const err = consoleError.getCall(0).firstArg;
     equal(err.message, "invalid project id");
@@ -82,8 +86,10 @@ describe("commands/use", function () {
       "invalidteamid",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modUse).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
 
     const err = consoleError.getCall(0).firstArg;
     equal(err.message, "invalid team id");
@@ -94,8 +100,10 @@ describe("commands/use", function () {
       "login",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modLogin).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modLogin)
+      .parse();
 
     const consoleLog = spy(logger, "log");
 
@@ -104,11 +112,15 @@ describe("commands/use", function () {
       "ls",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modTeam).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modTeam)
+      .parse();
 
     const teamStr = consoleLog.getCall(0).firstArg;
     const teamId = JSON.parse(teamStr)[0].id;
+
+    equal(typeof teamId, "string");
 
     await yargs([
       "use",
@@ -116,12 +128,15 @@ describe("commands/use", function () {
       teamId,
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modUse).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
 
     equal(
       consoleLog.getCall(1).firstArg,
-      `your team context has been set to team_id of: ${teamId}`
+      // typescript linting doesn't honor the assertion of the runtime type here, so we need to cast
+      `your team context has been set to team_id of: ${teamId as string}`,
     );
 
     const session = getSession();
@@ -133,8 +148,10 @@ describe("commands/use", function () {
       "login",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modLogin).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modLogin)
+      .parse();
 
     const teamId = "01a2d24d-3805-4a14-8059-7041f8b69aac";
     await yargs([
@@ -143,8 +160,10 @@ describe("commands/use", function () {
       teamId,
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modUse).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
 
     equal(getSession().teamId, teamId);
 
@@ -153,8 +172,10 @@ describe("commands/use", function () {
       "team",
       ...defaultArgs,
       "--privateKey",
-      accounts[10].privateKey.slice(2)
-    ]).command<GlobalOptions>(modUnuse).parse();
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUnuse)
+      .parse();
 
     equal(getSession().teamId, undefined);
   });

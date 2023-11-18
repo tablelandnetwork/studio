@@ -1,5 +1,19 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { sqliteKeywords } from "@tableland/studio-client";
+import {
+  cleanSchema,
+  setConstraint,
+  type Schema,
+  type schema,
+} from "@tableland/studio-store";
+import { HelpCircle, Loader2, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import * as z from "zod";
+import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,19 +50,6 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { sqliteKeywords } from "@tableland/studio-client";
-import {
-  cleanSchema,
-  setConstraint,
-  type Schema,
-  type schema,
-} from "@tableland/studio-store";
-import { HelpCircle, Loader2, Plus, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
 
 const formSchema = z.object({
   name: z
@@ -108,6 +109,9 @@ export default function NewTable({ project, team, envs }: Props) {
       router.refresh();
       router.replace(`/${team.slug}/${project.slug}`);
     },
+    onError: (err) => {
+      setError("root", { message: err.message });
+    },
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -120,12 +124,12 @@ export default function NewTable({ project, team, envs }: Props) {
     },
   });
 
-  const { handleSubmit, register, control, watch } = form;
+  const { handleSubmit, register, control, setError } = form;
 
-  const { fields } = useFieldArray({
-    control,
-    name: "deployments",
-  });
+  // const { fields } = useFieldArray({
+  //   control,
+  //   name: "deployments",
+  // });
 
   const { fields: columnFields } = useFieldArray({
     control,
@@ -181,6 +185,9 @@ export default function NewTable({ project, team, envs }: Props) {
   return (
     <Form {...form}>
       <form
+        // TODO: `handleSubmit` creates a floating promise, as a result the linter is complaining
+        //    we should figure out if this is ok or not and either change this or the lint config
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={handleSubmit(onSubmit)}
         className="mx-auto max-w-2xl space-y-8"
       >
@@ -225,7 +232,7 @@ export default function NewTable({ project, team, envs }: Props) {
         />
         <div className="space-y-2">
           <FormLabel>Columns</FormLabel>
-          {!!columnFields.length ? (
+          {columnFields.length ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -505,6 +512,7 @@ export default function NewTable({ project, team, envs }: Props) {
             );
           })}
         </div> */}
+        <FormRootMessage />
         <Button type="submit" disabled={newTable.isLoading || !nameAvailable}>
           {newTable.isLoading && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />

@@ -1,25 +1,15 @@
 "use client";
 
-import ChainSelector from "@/components/chain-selector";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { api } from "@/trpc/react";
 import {
   Database,
   Validator,
-  WaitableTransactionReceipt,
+  type WaitableTransactionReceipt,
   helpers,
 } from "@tableland/sdk";
-import { generateCreateTableStatement, schema } from "@tableland/studio-store";
+import {
+  generateCreateTableStatement,
+  type schema,
+} from "@tableland/studio-store";
 import { providers } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -31,6 +21,19 @@ import {
   switchNetwork,
   waitForTransaction,
 } from "wagmi/actions";
+import { api } from "@/trpc/react";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import ChainSelector from "@/components/chain-selector";
 
 export default function ExecDeployment({
   team,
@@ -109,7 +112,7 @@ export default function ExecDeployment({
         });
 
         const stmt = generateCreateTableStatement(table.name, table.schema);
-        const res = await tbl.exec(stmt);
+        const res = await tbl.prepare(stmt).all();
         if (res.error) {
           throw new Error(res.error);
         }
@@ -239,6 +242,9 @@ export default function ExecDeployment({
           </Button>
           <Button
             type="submit"
+            // TODO: `handleSubmit` creates a floating promise, as a result the linter is complaining
+            //    we should figure out if this is ok or not and either change this or the lint config
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={handleDeploy}
             disabled={pendingDeploy || !chainId}
           >

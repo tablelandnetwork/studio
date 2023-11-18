@@ -1,19 +1,14 @@
-import { join } from "node:path";
-import { createInterface } from "node:readline/promises";
-import { Writable } from "stream";
-import type yargs from "yargs";
-import type { Arguments, CommandBuilder } from "yargs";
 import { SiweMessage } from "siwe";
-import { Auth } from "@tableland/studio-api";
+import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
-  logger,
-  getWalletWithProvider,
-  normalizePrivateKey,
-  toChecksumAddress,
+  FileStore,
   getApi,
   getApiUrl,
-  FileStore,
+  getWalletWithProvider,
+  logger,
+  normalizePrivateKey,
+  toChecksumAddress,
 } from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
@@ -25,9 +20,9 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const { chain, providerUrl, apiUrl: apiUrlArg, store } = argv;
-    const fileStore = new FileStore(store as string);
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore})
-    const api = getApi(fileStore, apiUrl as string);
+    const fileStore = new FileStore(store);
+    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+    const api = getApi(fileStore, apiUrl);
 
     const user = await api.auth.authenticated.query();
     if (user) {
@@ -60,7 +55,9 @@ export const handler = async (
     const res = await api.auth.login.mutate({ message, signature });
 
     if (typeof res === "undefined") {
-      throw new Error(`cannot login with an unregistered address: ${wallet.address}`);
+      throw new Error(
+        `cannot login with an unregistered address: ${wallet.address}`,
+      );
     }
 
     // When a user logs in we want to make sure they are using same api

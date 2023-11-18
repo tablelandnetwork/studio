@@ -1,6 +1,8 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { type SelectProps } from "@radix-ui/react-select";
+import { supportedChains } from "@tableland/studio-chains";
+import { type Chain } from "viem/chains";
 import {
   Select,
   SelectContent,
@@ -8,12 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { chains } from "@/lib/chains";
-import { SelectProps } from "@radix-ui/react-select";
-import { type Chain } from "wagmi/chains";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const groupedChains = Array.from(
-  chains()
+  supportedChains(
+    typeof window !== "undefined" &&
+      (window.location?.hostname === "localhost" ||
+        window.location?.hostname === "127.0.0.1"),
+  )
     .reduce(
       (acc, chain) => {
         if (chain.testnet === undefined) {
@@ -35,7 +39,7 @@ const groupedChains = Array.from(
 );
 
 type Props = Omit<SelectProps, "onValueChange"> & {
-  onValueChange?(value: number): void;
+  onValueChange?: (value: number) => void;
 };
 
 export default function ChainSelector({
@@ -50,7 +54,7 @@ export default function ChainSelector({
       <SelectContent>
         <ScrollArea className="h-[20rem]">
           {groupedChains.map((group) => {
-            return !!group[1].length ? (
+            return group[1].length ? (
               <div key={group[0]}>
                 <p className="px-2 pt-2 text-xs text-muted-foreground">
                   {group[0]}

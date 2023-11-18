@@ -4,7 +4,7 @@ import { Wallet, getDefaultProvider, providers } from "ethers";
 import createKeccakHash from "keccak";
 import { helpers } from "@tableland/sdk";
 import { init } from "@tableland/sqlparser";
-import { API, api, ClientConfig } from "@tableland/studio-client";
+import { type API, type ClientConfig, api } from "@tableland/studio-client";
 
 const sessionKey = "session-cookie";
 const DEFAULT_API_URL = "https://studio.tableland.xyz";
@@ -21,7 +21,7 @@ export const isUUID = function (value: unknown) {
   if (idParts[1].length !== 4) return false;
   if (idParts[2].length !== 4) return false;
   if (idParts[3].length !== 4) return false;
-  if (idParts[4].length !== 12)return false;
+  if (idParts[4].length !== 12) return false;
 
   return true;
 };
@@ -36,7 +36,7 @@ export const getQueryValidator = async function () {
 export const ask = async function (questions: string[]) {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
   const answers = [];
@@ -79,9 +79,10 @@ export const getApi = function (fileStore?: FileStore, apiUrl?: string): API {
   return api(apiArgs);
 };
 
-export const getProject = function (
-  argv: { store: FileStore; projectId?: string; }
-) {
+export const getProject = function (argv: {
+  store: FileStore;
+  projectId?: string;
+}) {
   if (typeof argv.projectId === "string" && argv.projectId.trim() !== "") {
     return argv.projectId.trim();
   }
@@ -89,9 +90,7 @@ export const getProject = function (
   return argv.store.get<string>("projectId");
 };
 
-export const getTeam = function (
-  argv: { store: FileStore; teamId?: string; }
-) {
+export const getTeam = function (argv: { store: FileStore; teamId?: string }) {
   if (typeof argv.teamId === "string" && argv.teamId.trim() !== "") {
     return argv.teamId.trim();
   }
@@ -99,20 +98,25 @@ export const getTeam = function (
   return argv.store.get<string>("teamId");
 };
 
-
 const NO_DEFAULT_ENV_ERR = "could not get default environment";
 export const getEnvironmentId = async function (api: any, projectId: string) {
   // lookup environmentId by projectId
-  const environments = await api.environments.projectEnvironments.query({ projectId });
-  const environmentId = environments.find((env: any) => env.name === "default")?.id;
+  const environments = await api.environments.projectEnvironments.query({
+    projectId,
+  });
+  const environmentId = environments.find((env: any) => env.name === "default")
+    ?.id;
   if (typeof environmentId !== "string") {
     throw new Error(NO_DEFAULT_ENV_ERR);
   }
 
   return environmentId;
-}
+};
 
-export const findOrCreateDefaultEnvironment = async function (api: any, projectId: string) {
+export const findOrCreateDefaultEnvironment = async function (
+  api: any,
+  projectId: string,
+) {
   try {
     const environmentId = await getEnvironmentId(api, projectId);
     return environmentId;
@@ -124,13 +128,14 @@ export const findOrCreateDefaultEnvironment = async function (api: any, projectI
     name: "default",
     projectId,
   });
-console.log("environment", environment);
-  return environment.id;
-}
 
-export const getApiUrl = function (
-  argv: { store: FileStore; apiUrl?: string; }
-) {
+  return environment.id;
+};
+
+export const getApiUrl = function (argv: {
+  store: FileStore;
+  apiUrl?: string;
+}) {
   if (typeof argv.apiUrl === "string" && argv.apiUrl.trim() !== "") {
     return argv.apiUrl.trim();
   }
@@ -154,7 +159,7 @@ export class FileStore {
     try {
       const fileBuf = readFileSync(filePath);
       return JSON.parse(fileBuf.toString());
-    }  catch (err: any) {
+    } catch (err: any) {
       if (err.code !== "ENOENT") throw err;
     }
 
@@ -175,6 +180,8 @@ export class FileStore {
   }
 
   remove(key: string) {
+    // the value of key is determined at runtime, we need to use dynamic delete
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this.data[key];
   }
 
@@ -368,9 +375,9 @@ export async function getWalletWithProvider({
 // TODO: this helper is used by multiple packages. We should probably create a utils packages.
 export function toChecksumAddress(address: string) {
   address = address.toLowerCase().replace("0x", "");
-  var hash = createKeccakHash("keccak256").update(address).digest("hex");
-  var ret = "0x";
-  for (var i = 0; i < address.length; i++) {
+  const hash = createKeccakHash("keccak256").update(address).digest("hex");
+  let ret = "0x";
+  for (let i = 0; i < address.length; i++) {
     if (parseInt(hash[i], 16) >= 8) {
       ret += address[i].toUpperCase();
     } else {
@@ -383,22 +390,24 @@ export function toChecksumAddress(address: string) {
 export const batchRows = function (
   rows: Array<Array<string | number>>,
   headers: string[],
-  table: string
+  table: string,
 ) {
   let rowCount = 0;
   const batches = [];
   while (rows.length) {
-    let statement = `INSERT INTO ${table}(${headers.join(",")})VALUES`
+    let statement = `INSERT INTO ${table}(${headers.join(",")})VALUES`;
 
     while (
-      rows.length
-      && byteSize(statement + getNextValues(rows[0])) < MAX_STATEMENT_SIZE
+      rows.length &&
+      byteSize(statement + getNextValues(rows[0])) < MAX_STATEMENT_SIZE
     ) {
       const row = rows.shift();
       if (!row) continue;
       rowCount += 1;
       if (row.length !== headers.length) {
-        throw new Error(`malformed csv file, row ${rowCount} has incorrect number of columns`);
+        throw new Error(
+          `malformed csv file, row ${rowCount} has incorrect number of columns`,
+        );
       }
       // include comma between
       statement += getNextValues(row);
@@ -416,9 +425,9 @@ const byteSize = function (str: string) {
   return new Blob([str]).size;
 };
 
-const getNextValues = function (row: (string | number)[]) {
+const getNextValues = function (row: Array<string | number>) {
   return `(${row.join(",")}),`;
-}
+};
 
 // Headers need to be enclosed in tick marks to comply with Studio table
 // creation and users may not realize this. If they provide a csv without

@@ -1,14 +1,5 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { api } from "@/trpc/server";
 import { helpers } from "@tableland/sdk";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import {
   Construction,
   FileSearch,
@@ -20,6 +11,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
+import { api } from "@/trpc/server";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default async function Project({
   params,
@@ -27,7 +27,7 @@ export default async function Project({
   params: { team: string; project: string };
 }) {
   const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
-  const project = await cache(api.projects.projectByTeamIdAndSlug.query)({
+  const project = await cache(api.projects.projectBySlug.query)({
     teamId: team.id,
     slug: params.project,
   });
@@ -75,11 +75,11 @@ export default async function Project({
             </div>
           )}
         </div>
-        {!!tables.length ? (
+        {tables.length ? (
           <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {tables.map((table) => {
-              const columnCount = 0;
-              const deploymentsCount = 0;
+              // const columnCount = 0;
+              // const deploymentsCount = 0;
               const deployment = deploymentsMap.get(table.id);
               return (
                 <Link

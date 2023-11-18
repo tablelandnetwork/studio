@@ -1,15 +1,17 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { authAtom } from "@/store/auth";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import { useAtomValue } from "jotai";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authAtom } from "@/store/auth";
+import { cn } from "@/lib/utils";
 
-function links(
-  team?: schema.Team,
-): { label: string; href: string; isActive: (pathname: string) => boolean }[] {
+function links(team?: schema.Team): Array<{
+  label: string;
+  href: string;
+  isActive: (pathname: string) => boolean;
+}> {
   const links = [
     {
       label: "Tableland",

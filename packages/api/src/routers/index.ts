@@ -1,6 +1,6 @@
 import { initMailApi } from "@tableland/studio-mail";
-import { Store } from "@tableland/studio-store";
-import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { type Store } from "@tableland/studio-store";
+import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { router } from "../trpc";
 import { createSendInvite } from "../utils/sendInvite";
 import { authRouter } from "./auth";
@@ -8,6 +8,7 @@ import { deploymentsRouter } from "./deployments";
 import { environmentsRouter } from "./environments";
 import { invitesRouter } from "./invites";
 import { projectsRouter } from "./projects";
+import { providersRouter } from "./providers";
 import { tablesRouter } from "./tables";
 import { teamsRouter } from "./teams";
 
@@ -17,6 +18,7 @@ export function appRouter(
   inviteImageLink: string,
   createInviteLink: (seal: string) => string,
   dataSealPass: string,
+  isLocalDev: boolean,
 ) {
   const mailApi = initMailApi(mailApiKey);
   const sendInvite = createSendInvite(
@@ -34,6 +36,7 @@ export function appRouter(
     invites: invitesRouter(store, sendInvite, dataSealPass),
     environments: environmentsRouter(store),
     deployments: deploymentsRouter(store),
+    providers: providersRouter(isLocalDev),
   });
 }
 

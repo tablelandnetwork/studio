@@ -1,4 +1,4 @@
-import { Store } from "@tableland/studio-store";
+import { type Store } from "@tableland/studio-store";
 import { z } from "zod";
 import { projectProcedure, publicProcedure, router } from "../trpc";
 

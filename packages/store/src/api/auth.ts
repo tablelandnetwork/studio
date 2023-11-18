@@ -1,9 +1,9 @@
-import { Database } from "@tableland/sdk";
 import { randomUUID } from "crypto";
+import { type Database } from "@tableland/sdk";
 import { eq } from "drizzle-orm";
-import { DrizzleD1Database } from "drizzle-orm/d1";
+import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData, unsealData } from "iron-session";
-import * as schema from "../schema/index.js";
+import type * as schema from "../schema/index.js";
 import { teamMemberships, teams, users } from "../schema/index.js";
 import { slugify } from "./utils.js";
 

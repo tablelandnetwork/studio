@@ -3,6 +3,7 @@
   "private": true,
   "workspaces": [
     "packages/api",
+    "packages/chains",
     "packages/web",
     "packages/cli",
     "packages/client",
@@ -12,10 +13,14 @@
   "scripts": {
     "test": "lerna run test",
     "lint": "lerna run lint",
+    "lint:fix": "lerna run lint:fix",
+    "prettier": "lerna run prettier",
+    "prettier:fix": "lerna run prettier:fix",
+    "format": "npm run prettier:fix && npm run lint:fix",
     "build": "lerna run build"
   },
   "devDependencies": {
-    "@tableland/local": "^2.1.0",
+    "@tableland/local": "^2.1.1",
     "@types/cosmiconfig": "^6.0.0",
     "@types/inquirer": "^9.0.2",
     "@types/js-yaml": "^4.0.5",

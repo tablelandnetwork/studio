@@ -1,4 +1,4 @@
-import { Schema as SDKSchema } from "@tableland/sdk";
+import { type Schema as SDKSchema } from "@tableland/sdk";
 import { customType } from "drizzle-orm/sqlite-core";
 
 export type Schema = SDKSchema;

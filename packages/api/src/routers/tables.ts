@@ -1,5 +1,5 @@
-import { ApiError, Table, Validator, helpers } from "@tableland/sdk";
-import { Schema, Store } from "@tableland/studio-store";
+import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
+import { type Schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { projectProcedure, publicProcedure, router } from "../trpc";
@@ -55,12 +55,20 @@ export function tablesRouter(store: Store) {
         }),
       )
       .mutation(async ({ input }) => {
-        return await store.tables.createTable(
-          input.projectId,
-          input.name,
-          input.description,
-          input.schema,
-        );
+        try {
+          return await store.tables.createTable(
+            input.projectId,
+            input.name,
+            input.description,
+            input.schema,
+          );
+        } catch (err) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error saving table record.",
+            cause: err,
+          });
+        }
       }),
     importTable: projectProcedure(store)
       .input(

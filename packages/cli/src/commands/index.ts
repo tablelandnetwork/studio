@@ -1,6 +1,7 @@
 import * as deployment from "./deployment.js";
 import * as importData from "./import-data.js";
 import * as importTable from "./import-table.js";
+import * as init from "./init.js";
 import * as login from "./login.js";
 import * as logout from "./logout.js";
 import * as project from "./project.js";
@@ -13,11 +14,12 @@ export const commands = [
   login,
   logout,
   team,
+  init,
   project,
   deployment,
   importData,
   query,
   importTable,
   use,
-  unuse
+  unuse,
 ];

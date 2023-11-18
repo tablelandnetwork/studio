@@ -1,20 +1,20 @@
+import TimeAgo from "javascript-time-ago";
+import {
+  Cake,
+  Hourglass,
+  InfoIcon,
+  type LucideProps,
+  MailQuestion,
+  Merge,
+  UserPlus,
+} from "lucide-react";
+import { type schema } from "@tableland/studio-store";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
-import { schema } from "@tableland/studio-store";
-import TimeAgo from "javascript-time-ago";
-import {
-  Cake,
-  Hourglass,
-  InfoIcon,
-  LucideProps,
-  MailQuestion,
-  Merge,
-  UserPlus,
-} from "lucide-react";
 
 const timeAgo = new TimeAgo("en-US");
 
