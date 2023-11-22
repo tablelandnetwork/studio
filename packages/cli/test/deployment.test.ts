@@ -4,7 +4,7 @@ import { equal } from "node:assert";
 import { getAccounts } from "@tableland/local";
 import mockStd from "mock-stdin";
 import { afterEach, before, describe, test } from "mocha";
-import { restore, spy, mock } from "sinon";
+import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/deployment.js";
@@ -65,7 +65,6 @@ describe("commands/deployment", function () {
   const tableName = "table1";
 
   test("uses studio providerUrl if none supplied", async function () {
-    const consoleLog = spy(logger, "log");
     const fetchSpy = spy(global, "fetch");
     const stdin = mockStd.stdin();
 

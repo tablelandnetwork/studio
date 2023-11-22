@@ -70,7 +70,6 @@ describe("commands/query", function () {
 
   // TODO: can't currently test this since the "local-tableland" chain is treated differently
   test.skip("uses studio providerUrl if none supplied", async function () {
-    const consoleLog = spy(logger, "log");
     const fetchSpy = spy(global, "fetch");
     const stdin = mockStd.stdin();
 
