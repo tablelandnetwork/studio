@@ -393,7 +393,8 @@ export async function getWalletWithProvider({
 
   let providerChainId: number | undefined;
   try {
-    providerChainId = (await provider.getNetwork()).chainId;
+    const providerNetwork = await provider.getNetwork();
+    providerChainId = providerNetwork.chainId;
   } catch (err) {
     throw new Error("cannot determine provider chain ID");
   }
