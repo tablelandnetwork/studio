@@ -65,14 +65,26 @@ export function authRouter(store: Store) {
             message: "No SIWE fields found in session",
           });
         }
-        const auth = await store.auth.createUserAndPersonalTeam(
-          ctx.session.siweFields.address,
-          input.username,
-          input.email,
-        );
-        ctx.session.auth = auth;
-        await ctx.session.persist(ctx.responseCookies);
-        return ctx.session.auth;
+        try {
+          const auth = await store.auth.createUserAndPersonalTeam(
+            ctx.session.siweFields.address,
+            input.username,
+            input.email,
+          );
+          ctx.session.auth = auth;
+          await ctx.session.persist(ctx.responseCookies);
+          return ctx.session.auth;
+        } catch (error) {
+          console.error(
+            "Error from store registering user:",
+            JSON.stringify(error, null, 4),
+          );
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error registering user",
+            cause: error,
+          });
+        }
       }),
     logout: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
       await ctx.session.clear(ctx.responseCookies);
