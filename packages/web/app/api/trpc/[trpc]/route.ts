@@ -9,6 +9,9 @@ const handler = async (req: Request) => {
     req,
     router: apiRouter,
     createContext,
+    onError: function (opts) {
+      console.error("Error:", JSON.stringify(opts, null, 4));
+    },
   });
 };
 
