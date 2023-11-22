@@ -4,7 +4,7 @@ import { equal } from "node:assert";
 import { getAccounts } from "@tableland/local";
 import mockStd from "mock-stdin";
 import { afterEach, before, describe, test } from "mocha";
-import { restore, spy } from "sinon";
+import { restore, spy, mock } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/deployment.js";
@@ -63,12 +63,57 @@ describe("commands/deployment", function () {
   });
 
   const tableName = "table1";
+
+  test("uses studio providerUrl if none supplied", async function () {
+    const consoleLog = spy(logger, "log");
+    const fetchSpy = spy(global, "fetch");
+    const stdin = mockStd.stdin();
+
+    setTimeout(() => {
+      // We are testing that the public provider url is used, we don't want to
+      // actually create a deployment on maticmum.
+      stdin.send("no\n").end();
+      stdin.restore();
+    }, 1500);
+
+    await yargs([
+      "deployment",
+      "create",
+      tableName,
+      "--projectId",
+      projectId,
+      "--store",
+      path.join(_dirname, ".studioclisession.json"),
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+      "--chain",
+      "maticmum",
+      "--apiUrl",
+      TEST_API_BASE_URL,
+    ])
+      .command(mod)
+      .parse();
+
+    // assert that fetch spy was called with api's url for getting studio public provider
+    const callOne = fetchSpy.getCall(0);
+
+    equal(
+      callOne.firstArg,
+      "http://localhost:2999/api/trpc/providers.providerForChain?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22chainId%22%3A80001%7D%7D%7D"
+    );
+    equal(callOne.lastArg.method, "GET");
+
+    const res = await callOne.returnValue;
+    equal(res.status, 200);
+  });
+
   test("can create a deployment", async function () {
     const consoleLog = spy(logger, "log");
     const stdin = mockStd.stdin();
 
     setTimeout(() => {
       stdin.send("y\n").end();
+      stdin.restore();
     }, 1000);
 
     await yargs([
@@ -122,4 +167,5 @@ describe("commands/deployment", function () {
     equal(isNaN(deployment.blockNumber), false);
     equal(typeof deployment.blockNumber, "number");
   });
+
 });

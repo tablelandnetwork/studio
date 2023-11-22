@@ -240,6 +240,21 @@ export function getChainName(
   return chain;
 }
 
+export function getChainId(
+  chain: number | helpers.ChainName,
+): number {
+  if (typeof chain === "number") {
+    // convert chainId to chain name
+    return chain;
+  }
+  const chainId = helpers.getChainInfo(chain)?.chainId;
+  if (typeof chainId !== "number") {
+    throw new Error(`cannot get id for unsupported chain: ${chain}`);
+  }
+
+  return chainId;
+}
+
 export function getChainIdFromTableName(tableName: string) {
   return getIdFromTableName(tableName, 2);
 }
@@ -271,6 +286,7 @@ export interface Options {
   privateKey: string;
   chain: number | helpers.ChainName;
   providerUrl: string | undefined;
+  api?: API;
 }
 
 export interface NormalizedStatement {
@@ -313,6 +329,7 @@ export async function getWalletWithProvider({
   privateKey,
   chain,
   providerUrl,
+  api,
 }: Options): Promise<Wallet> {
   if (privateKey == null) {
     throw new Error("missing required flag (`-k` or `--privateKey`)");
@@ -329,7 +346,7 @@ export async function getWalletWithProvider({
   // We want to aquire a provider using the params given by the caller.
   let provider: providers.BaseProvider | undefined;
   // first we check if a providerUrl was given.
-  if (typeof providerUrl === "string") {
+  if (typeof providerUrl === "string" && providerUrl.trim() !== "") {
     provider = new providers.JsonRpcProvider(providerUrl, network.name);
   }
 
@@ -339,8 +356,25 @@ export async function getWalletWithProvider({
     provider = new providers.JsonRpcProvider("http://127.0.0.1:8545");
   }
 
-  // Finally we use the default provider
+  // Here we try to use the studio public provider
+  if (
+    provider == null &&
+    (providerUrl == null || providerUrl === "") &&
+    typeof api !== "undefined" && api != null
+  ) {
+    try {
+      const chainId = getChainId(network.chainName);
+      const providerUrl = await getStudioProvider(chainId, api);
+
+      provider = new providers.JsonRpcProvider(providerUrl, network.name);
+    } catch (err) {
+      // TODO: not a big fan of swallowing this error, but seems ok here since
+      //    we need to try to use the ethers default provider
+    }
+  }
+
   /* c8 ignore start */
+  // Finally we use the ethers default provider
   if (provider == null) {
     try {
       // This will be significantly rate limited, but we only need to run it once
@@ -370,6 +404,10 @@ export async function getWalletWithProvider({
 
   /* c8 ignore stop */
   return wallet.connect(provider);
+}
+
+export async function getStudioProvider(chainId: number, api: API) {
+  return await api.providers.providerForChain.query({ chainId });
 }
 
 // TODO: this helper is used by multiple packages. We should probably create a utils packages.
