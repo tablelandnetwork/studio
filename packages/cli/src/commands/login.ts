@@ -36,7 +36,7 @@ export const handler = async (
       privateKey,
       chain,
       providerUrl,
-      api
+      api,
     });
 
     const rawMessage = new SiweMessage({

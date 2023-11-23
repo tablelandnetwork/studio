@@ -93,20 +93,18 @@ describe("commands/query", function () {
       stdin.restore();
 
       setTimeout(function () {
-
         // assert that fetch spy was called with api's url for getting studio public provider
         const callOne = fetchSpy.getCall(4);
 
         equal(
           callOne.firstArg,
-          "http://localhost:2999/api/trpc/providers.providerForChain?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22chainId%22%3A80001%7D%7D%7D"
+          "http://localhost:2999/api/trpc/providers.providerForChain?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22chainId%22%3A80001%7D%7D%7D",
         );
         equal(callOne.lastArg.method, "GET");
 
         resolve(undefined);
       }, 1000);
     });
-
   });
 
   test("fails with invalid statement", async function () {

@@ -98,7 +98,7 @@ describe("commands/deployment", function () {
 
     equal(
       callOne.firstArg,
-      "http://localhost:2999/api/trpc/providers.providerForChain?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22chainId%22%3A80001%7D%7D%7D"
+      "http://localhost:2999/api/trpc/providers.providerForChain?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22chainId%22%3A80001%7D%7D%7D",
     );
     equal(callOne.lastArg.method, "GET");
 
@@ -166,5 +166,4 @@ describe("commands/deployment", function () {
     equal(isNaN(deployment.blockNumber), false);
     equal(typeof deployment.blockNumber, "number");
   });
-
 });

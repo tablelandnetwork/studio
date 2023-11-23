@@ -240,9 +240,7 @@ export function getChainName(
   return chain;
 }
 
-export function getChainId(
-  chain: number | helpers.ChainName,
-): number {
+export function getChainId(chain: number | helpers.ChainName): number {
   if (typeof chain === "number") {
     // convert chainId to chain name
     return chain;
@@ -360,7 +358,8 @@ export async function getWalletWithProvider({
   if (
     provider == null &&
     (providerUrl == null || providerUrl === "") &&
-    typeof api !== "undefined" && api != null
+    typeof api !== "undefined" &&
+    api != null
   ) {
     try {
       const chainId = getChainId(network.chainName);
