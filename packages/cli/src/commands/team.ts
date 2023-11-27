@@ -109,24 +109,53 @@ export const builder = function (args: Yargs) {
       },
     )
     .command(
-      "add <user>",
-      "add user to a team. team id must either be a command option or available in the context.",
+      "invite <emails>",
+      "invite a list of emails to a team. team id must either be a command option or available in the context.",
       function (args) {
         return args
-          .positional("user", {
+          .positional("emails", {
             type: "string",
-            description: "user to be added to team",
+            description: "comma separated list of emails to be invited to team",
           })
           .option("team", {
             type: "string",
-            description: "name of team to add to",
+            description: "id of team to add to",
           });
       },
       async function (argv) {
-        // const { team, user, privateKey, providerUrl, store } = argv;
-        // const api = getApi(new FileStore(store));
+        const { team, emails, store, apiUrl: apiUrlArg } = argv;
 
-        throw new Error("This needs to be implemented");
+        if (typeof emails !== "string") throw new Error("must provide emails");
+        if (typeof team !== "string") throw new Error("must provide team");
+        if (typeof store !== "string") {
+          throw new Error("must provide path to session store file");
+        }
+        if (
+          typeof apiUrlArg !== "string" &&
+          typeof apiUrlArg !== "undefined"
+        ) {
+          throw new Error("invalid apiUrl");
+        }
+        
+        const emailInvites = (emails ?? "")
+          .split(",")
+          .map((email) => email.trim())
+          .filter((i) => i);
+
+        if (emails.length < 1) {
+          throw new Error("you must provide at least one email");
+        }
+
+        const fileStore = new FileStore(store);
+        const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+        const api = getApi(fileStore, apiUrl);
+
+        const result = await api.invites.inviteEmails.mutate({
+          name,
+          emails: emailInvites
+        });
+
+        logger.log(JSON.stringify(result));
       },
     );
 };
