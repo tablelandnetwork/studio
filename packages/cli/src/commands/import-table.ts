@@ -7,7 +7,6 @@ import {
   getPrefixFromTableName,
   getApi,
   getApiUrl,
-  getProject,
   getEnvironmentId,
   FileStore,
 } from "../utils.js";
@@ -21,19 +20,27 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { apiUrl: apiUrlArg, store, table: uuTableName, description } = argv;
+    const {
+      apiUrl: apiUrlArg,
+      store,
+      table: uuTableName,
+      project,
+      description,
+    } = argv;
 
     const name = typeof argv.name === "string" ? argv.name.trim() : "";
 
     if (typeof description !== "string" || description.trim() === "") {
-      throw new Error(`table description is required`);
+      throw new Error("table description is required");
+    }
+    if (typeof project !== "string" || project.trim() === "") {
+      throw new Error("project id is required");
     }
 
     const fileStore = new FileStore(store);
     const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
     const api = getApi(fileStore, apiUrl);
-    const projectId = getProject({ ...argv, store: fileStore });
-
+    const projectId = project;
     const environmentId = await getEnvironmentId(api, projectId);
 
     if (typeof uuTableName !== "string") {
