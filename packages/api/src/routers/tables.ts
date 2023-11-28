@@ -3,6 +3,7 @@ import { type Schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { projectProcedure, publicProcedure, router } from "../trpc";
+import { internalError } from "../utils/internalError";
 
 const schemaSchema: z.ZodType<Schema> = z.object({
   columns: z.array(
@@ -63,11 +64,7 @@ export function tablesRouter(store: Store) {
             input.schema,
           );
         } catch (err) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error saving table record.",
-            cause: err,
-          });
+          throw internalError("Error saving table record.", err);
         }
       }),
     importTable: projectProcedure(store)
