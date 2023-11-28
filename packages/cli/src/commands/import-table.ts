@@ -7,7 +7,6 @@ import {
   getPrefixFromTableName,
   getApi,
   getApiUrl,
-  getProject,
   getEnvironmentId,
   FileStore,
 } from "../utils.js";
@@ -21,7 +20,13 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { apiUrl: apiUrlArg, store, table: uuTableName, project, description } = argv;
+    const {
+      apiUrl: apiUrlArg,
+      store,
+      table: uuTableName,
+      project,
+      description,
+    } = argv;
 
     const name = typeof argv.name === "string" ? argv.name.trim() : "";
 
