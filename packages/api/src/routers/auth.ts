@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { generateNonce, SiweMessage } from "siwe";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
+import { internalError } from "../utils/internalError";
 
 export function authRouter(store: Store) {
   return router({
@@ -74,13 +75,8 @@ export function authRouter(store: Store) {
           ctx.session.auth = auth;
           await ctx.session.persist(ctx.responseCookies);
           return ctx.session.auth;
-        } catch (error) {
-          console.error("Error from store registering user:", error);
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error registering user",
-            cause: error,
-          });
+        } catch (err) {
+          throw internalError("Error registering user", err);
         }
       }),
     logout: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {

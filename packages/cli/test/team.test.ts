@@ -124,7 +124,5 @@ describe("commands/team", function () {
     equal(team.slug, teamName);
   });
 
-  test.skip("can add a user to a team", async function () {
-
-  });
+  test.skip("can add a user to a team", async function () {});
 });

@@ -2,6 +2,7 @@ import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { publicProcedure, router, teamProcedure } from "../trpc";
+import { internalError } from "../utils/internalError";
 
 export function projectsRouter(store: Store) {
   return router({
@@ -87,12 +88,8 @@ export function projectsRouter(store: Store) {
             name: "default",
           });
           return project;
-        } catch (error) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error creating project",
-            cause: error,
-          });
+        } catch (err) {
+          throw internalError("Error creating project", err);
         }
       }),
   });
