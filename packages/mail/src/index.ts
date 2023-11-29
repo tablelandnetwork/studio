@@ -2,9 +2,6 @@ import { render } from "@react-email/render";
 import * as postmark from "postmark";
 import Invite from "./emails/invite";
 
-
-// here is a comment that we want to merge
-
 export function initMailApi(apiKey?: string) {
   const client = getClient(apiKey);
   return {
