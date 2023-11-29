@@ -68,6 +68,45 @@ describe("commands/query", function () {
     await wait(500);
   });
 
+  // TODO: can't currently test this since the "local-tableland" chain is treated differently
+  test.skip("uses studio providerUrl if none supplied", async function () {
+    const fetchSpy = spy(global, "fetch");
+    const stdin = mockStd.stdin();
+
+    await yargs([
+      "query",
+      "--store",
+      sessionFilePath,
+      "--chain",
+      "80001",
+      "--apiUrl",
+      TEST_API_BASE_URL,
+      "--providerUrl=''",
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(mod)
+      .parse();
+
+    await new Promise(function (resolve, reject) {
+      stdin.send("insert into table1 (info) values ('foo');\n").end();
+      stdin.restore();
+
+      setTimeout(function () {
+        // assert that fetch spy was called with api's url for getting studio public provider
+        const callOne = fetchSpy.getCall(4);
+
+        equal(
+          callOne.firstArg,
+          "http://localhost:2999/api/trpc/providers.providerForChain?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22chainId%22%3A80001%7D%7D%7D",
+        );
+        equal(callOne.lastArg.method, "GET");
+
+        resolve(undefined);
+      }, 1000);
+    });
+  });
+
   test("fails with invalid statement", async function () {
     const consoleError = spy(logger, "error");
     const stdin = mockStd.stdin();
@@ -116,4 +155,6 @@ describe("commands/query", function () {
       }, 1000);
     });
   });
+
+  test.skip("can run a write query", async function () {});
 });

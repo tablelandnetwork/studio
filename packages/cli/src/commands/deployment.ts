@@ -85,11 +85,6 @@ export const builder = function (args: Yargs) {
           const chainInfo = helpers.getChainInfo(chain as number);
           const fileStore = new FileStore(store as string);
           const privateKey = normalizePrivateKey(argv.privateKey);
-          const wallet = await getWalletWithProvider({
-            privateKey,
-            chain: chainInfo.chainId,
-            providerUrl: providerUrl as string,
-          });
 
           const apiUrl = getApiUrl({
             apiUrl: apiUrlArg as string,
@@ -99,6 +94,13 @@ export const builder = function (args: Yargs) {
           const projectId = getProject({
             ...argv,
             store: fileStore,
+          });
+
+          const wallet = await getWalletWithProvider({
+            privateKey,
+            chain: chainInfo.chainId,
+            providerUrl: providerUrl as string,
+            api,
           });
 
           if (typeof name !== "string" || name.trim() === "") {
