@@ -11,7 +11,6 @@ import {
   getApi,
   getApiUrl,
   logger,
-  // normalizePrivateKey,
 } from "../utils.js";
 
 type Yargs = typeof yargs;
@@ -82,12 +81,6 @@ export const builder = function (args: Yargs) {
             description:
               "optional team name, if not provided all teams are returned",
           })
-          .option("personalTeamId", {
-            // TODO: can we look this up instead of asking for it as an option?
-            type: "string",
-            default: "",
-            description: "id of your personal team",
-          })
           .option("invites", {
             type: "string",
             default: "",
@@ -96,30 +89,31 @@ export const builder = function (args: Yargs) {
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
-        throw new Error(
-          "team create not implemented in CLI yet. use the web application.",
-        );
-        // console.log("trying to create team...");
-        // const { name, personalTeamId, invites, store } = argv;
+        const { name, invites, store, apiUrl: apiUrlArg } = argv;
+        if (typeof name !== "string") throw new Error("must provide team name");
+        if (typeof store !== "string") {
+          throw new Error("must provide path to session store file");
+        }
+        if (
+          typeof apiUrlArg !== "string" &&
+          typeof apiUrlArg !== "undefined"
+        ) {
+          throw new Error("invalid apiUrl");
+        }
 
-        // const api = getApi(new FileStore(store));
-        // const privateKey = normalizePrivateKey(argv.privateKey);
+        const fileStore = new FileStore(store);
+        const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+        const api = getApi(fileStore, apiUrl);
 
-        // if (typeof name !== "string") throw new Error("must provide team name");
-        // if (typeof personalTeamId !== "string") {
-        //   throw new Error("must provide personal team id");
-        // }
+        const result = await api.teams.newTeam.mutate({
+          name,
+          emailInvites:(invites ?? "")
+            .split(",")
+            .map((email) => email.trim())
+            .filter((i) => i)
+        });
 
-        // const result = await createTeamByPersonalTeam(
-        //   name,
-        //   personalTeamId,
-        //   (invites ?? "")
-        //     .split(",")
-        //     .map((email) => email.trim())
-        //     .filter((i) => i)
-        // );
-
-        // logger.log(JSON.stringify(result));
+        logger.log(JSON.stringify(result));
       },
     )
     .command(
