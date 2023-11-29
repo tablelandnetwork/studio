@@ -6,12 +6,7 @@ import type { Arguments } from "yargs";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import {
-  FileStore,
-  getApi,
-  getApiUrl,
-  logger,
-} from "../utils.js";
+import { FileStore, getApi, getApiUrl, logger } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -94,10 +89,7 @@ export const builder = function (args: Yargs) {
         if (typeof store !== "string") {
           throw new Error("must provide path to session store file");
         }
-        if (
-          typeof apiUrlArg !== "string" &&
-          typeof apiUrlArg !== "undefined"
-        ) {
+        if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
           throw new Error("invalid apiUrl");
         }
 
@@ -107,10 +99,10 @@ export const builder = function (args: Yargs) {
 
         const result = await api.teams.newTeam.mutate({
           name,
-          emailInvites:(invites ?? "")
+          emailInvites: (invites ?? "")
             .split(",")
             .map((email) => email.trim())
-            .filter((i) => i)
+            .filter((i) => i),
         });
 
         logger.log(JSON.stringify(result));

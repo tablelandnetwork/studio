@@ -95,11 +95,7 @@ export function tablesRouter(store: Store) {
               message: `Table id ${input.tableId} not found on chain ${input.chainId}.`,
             });
           }
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error getting table by id.",
-            cause: err,
-          });
+          throw internalError("Error getting table by id.", err);
         }
 
         const createdAttr = tablelandTable.attributes?.find(
@@ -130,11 +126,10 @@ export function tablesRouter(store: Store) {
           });
           return { table, deployment };
         } catch (err) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error saving table and deployment records.",
-            cause: err,
-          });
+          throw internalError(
+            "Error saving table and deployment records.",
+            err,
+          );
         }
       }),
   });
