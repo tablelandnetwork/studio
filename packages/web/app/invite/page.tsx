@@ -25,6 +25,8 @@ export default async function Invite({
     seal: searchParams.seal,
   });
   // TODO: Return not found if invite is expired
+  // TODO: consider removing this lint rule. We want to check for null, undefined, false, and ""
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if (invite.claimedByTeamId || invite.claimedAt) {
     notFound();
   }

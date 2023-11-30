@@ -5,7 +5,6 @@ import type { Arguments } from "yargs";
 // Solving this by disabling lint here.
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type yargs from "yargs";
-// import { createTeamByPersonalTeam } from "../../../db/api/teams.js";
 import { type GlobalOptions } from "../cli.js";
 import { FileStore, getApi, getApiUrl, getTeam, logger } from "../utils.js";
 

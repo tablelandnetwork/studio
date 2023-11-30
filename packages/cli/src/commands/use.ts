@@ -4,7 +4,8 @@ import { logger, FileStore, isUUID } from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "use [context] [id]";
-export const desc = "use the given context id for all    ensuing commands";
+export const desc =
+  "use the given context id for all    ensuing commands. context can be one of (team, project, or api). ";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,

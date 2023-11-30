@@ -101,4 +101,28 @@ describe("commands/team", function () {
     equal(project.name, projectName);
     equal(project.description, projectDescription);
   });
+
+  test("can create a team", async function () {
+    const consoleLog = spy(logger, "log");
+    const teamName = "mynewteam";
+    await yargs(["team", "create", teamName, ...defaultArgs])
+      .command(mod)
+      .parse();
+
+    const output = consoleLog.getCall(0).firstArg;
+    const team = JSON.parse(output);
+
+    const idParts = team.id.split("-");
+    equal(idParts.length, 5);
+    equal(idParts[0].length, 8);
+    equal(idParts[1].length, 4);
+    equal(idParts[2].length, 4);
+    equal(idParts[3].length, 4);
+    equal(idParts[4].length, 12);
+
+    equal(team.name, teamName);
+    equal(team.slug, teamName);
+  });
+
+  test.skip("can add a user to a team", async function () {});
 });

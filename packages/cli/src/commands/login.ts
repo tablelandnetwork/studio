@@ -19,7 +19,7 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { chain, providerUrl, apiUrl: apiUrlArg, store } = argv;
+    const { chain, apiUrl: apiUrlArg, providerUrl, store } = argv;
     const fileStore = new FileStore(store);
     const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
     const api = getApi(fileStore, apiUrl);
@@ -36,6 +36,7 @@ export const handler = async (
       privateKey,
       chain,
       providerUrl,
+      api,
     });
 
     const rawMessage = new SiweMessage({

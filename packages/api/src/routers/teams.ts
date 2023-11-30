@@ -8,6 +8,7 @@ import {
   teamAdminProcedure,
 } from "../trpc";
 import { type SendInviteFunc } from "../utils/sendInvite";
+import { internalError } from "../utils/internalError";
 
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
   return router({
@@ -97,12 +98,8 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
           );
           team = res.team;
           invites = res.invites;
-        } catch (e) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error creating team",
-            cause: e,
-          });
+        } catch (err) {
+          throw internalError("Error creating team", err);
         }
 
         // Intentionally swallowing any error here since the team is still

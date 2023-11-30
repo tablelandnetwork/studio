@@ -9,12 +9,6 @@
     "strict": true,
     "allowJs": true,
     "skipLibCheck": true,
-    "noErrorTruncation": true,
-    "jsx": "preserve",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "noErrorTruncation": true
   }
 }

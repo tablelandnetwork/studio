@@ -5,7 +5,7 @@ import { publicProvider } from "@wagmi/core/providers/public";
 import {
   type Chain,
   arbitrum,
-  arbitrumGoerli,
+  arbitrumSepolia,
   arbitrumNova,
   filecoin,
   filecoinCalibration,
@@ -21,7 +21,7 @@ import {
 function supportedChains(isLocalDev = false) {
   const res: Chain[] = [
     { ...arbitrum, testnet: false },
-    { ...arbitrumGoerli, testnet: true },
+    { ...arbitrumSepolia, testnet: true },
     { ...arbitrumNova, testnet: false },
     { ...filecoin, testnet: false },
     { ...filecoinCalibration, testnet: true },

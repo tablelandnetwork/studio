@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { generateNonce, SiweMessage } from "siwe";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
+import { internalError } from "../utils/internalError";
 
 export function authRouter(store: Store) {
   return router({
@@ -65,14 +66,18 @@ export function authRouter(store: Store) {
             message: "No SIWE fields found in session",
           });
         }
-        const auth = await store.auth.createUserAndPersonalTeam(
-          ctx.session.siweFields.address,
-          input.username,
-          input.email,
-        );
-        ctx.session.auth = auth;
-        await ctx.session.persist(ctx.responseCookies);
-        return ctx.session.auth;
+        try {
+          const auth = await store.auth.createUserAndPersonalTeam(
+            ctx.session.siweFields.address,
+            input.username,
+            input.email,
+          );
+          ctx.session.auth = auth;
+          await ctx.session.persist(ctx.responseCookies);
+          return ctx.session.auth;
+        } catch (err) {
+          throw internalError("Error registering user", err);
+        }
       }),
     logout: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
       await ctx.session.clear(ctx.responseCookies);

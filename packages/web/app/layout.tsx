@@ -38,10 +38,8 @@ export const metadata = {
 };
 
 const Profile = dynamic(
-  () => {
-    import("@/components/profile")
-      .then((res) => res.default)
-      .catch((err) => console.log(err));
+  async function () {
+    return await import("@/components/profile");
   },
   { ssr: false },
 );

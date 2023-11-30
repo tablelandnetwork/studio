@@ -30,7 +30,7 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { store } = argv;
+    const { store, providerUrl } = argv;
 
     if (typeof store !== "string" || store.trim() === "") {
       throw new Error("must provide path to session store file");
@@ -143,13 +143,15 @@ export const handler = async (
         };
         if (queryObject.type !== "read") {
           // TODO: all sub-queries I can think of work here, but ask others for try and break this.
+          const aliasMap = await studioAliasMapper.read();
           const chain = getChainIdFromTableName(
-            (await studioAliasMapper.read())[queryObject.tables[0]],
+            aliasMap[queryObject.tables[0]],
           );
           const wallet = await getWalletWithProvider({
             privateKey: normalizePrivateKey(argv.privateKey),
             chain,
-            providerUrl: argv.providerUrl,
+            providerUrl,
+            api,
           });
           // We have to pause the sql interface so we can use the confirm interface
           pause();

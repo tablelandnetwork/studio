@@ -9,6 +9,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "lint": "eslint '**/*.ts'",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "prettier '**/*.{ts,json}' --check",
+    "prettier:fix": "npm run prettier -- --write",
     "dev": "email dev --dir src/emails",
     "export": "email export --dir src/emails",
     "build": "tsc",

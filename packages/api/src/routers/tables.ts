@@ -3,6 +3,7 @@ import { type Schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { projectProcedure, publicProcedure, router } from "../trpc";
+import { internalError } from "../utils/internalError";
 
 const schemaSchema: z.ZodType<Schema> = z.object({
   columns: z.array(
@@ -63,11 +64,7 @@ export function tablesRouter(store: Store) {
             input.schema,
           );
         } catch (err) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error saving table record.",
-            cause: err,
-          });
+          throw internalError("Error saving table record.", err);
         }
       }),
     importTable: projectProcedure(store)
@@ -98,11 +95,7 @@ export function tablesRouter(store: Store) {
               message: `Table id ${input.tableId} not found on chain ${input.chainId}.`,
             });
           }
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error getting table by id.",
-            cause: err,
-          });
+          throw internalError("Error getting table by id.", err);
         }
 
         const createdAttr = tablelandTable.attributes?.find(
@@ -133,11 +126,10 @@ export function tablesRouter(store: Store) {
           });
           return { table, deployment };
         } catch (err) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Error saving table and deployment records.",
-            cause: err,
-          });
+          throw internalError(
+            "Error saving table and deployment records.",
+            err,
+          );
         }
       }),
   });

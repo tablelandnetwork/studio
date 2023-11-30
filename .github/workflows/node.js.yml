@@ -37,7 +37,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm install
+      - run: npx lerna run build
       - run: npx lerna run lint
-      - run: npx lerna run build --scope=@tableland/studio-api
-      - run: npx lerna run build --scope=@tableland/studio-client
+      - run: npx lerna run prettier
       - run: npx lerna run test
