@@ -7,15 +7,8 @@ import { type GlobalOptions } from "../cli.js";
 import {
   ERROR_INVALID_PROJECT_ID,
   FileStore,
-  getApi,
-  getApiUrl,
-  getProject,
-  getChainIdFromTableName,
-  getEnvironmentId,
-  getQueryValidator,
-  getWalletWithProvider,
-  isUUID,
   logger,
+  helpers,
   normalizePrivateKey,
 } from "../utils.js";
 
@@ -37,16 +30,16 @@ export const handler = async (
     }
 
     const fileStore = new FileStore(store);
-    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
-    const api = getApi(fileStore, apiUrl);
-    const projectId = getProject({ ...argv, store: fileStore });
+    const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
+    const api = helpers.getApi(fileStore, apiUrl);
+    const projectId = helpers.getProject({ ...argv, store: fileStore });
 
-    if (typeof projectId !== "string" || !isUUID(projectId)) {
+    if (typeof projectId !== "string" || !helpers.isUUID(projectId)) {
       throw new Error(ERROR_INVALID_PROJECT_ID);
     }
 
-    const environmentId = await getEnvironmentId(api, projectId);
-    const validateQuery = await getQueryValidator();
+    const environmentId = await helpers.getEnvironmentId(api, projectId);
+    const validateQuery = await helpers.getQueryValidator();
 
     const studioAliasMapper = studioAliases({
       environmentId,
@@ -144,10 +137,10 @@ export const handler = async (
         if (queryObject.type !== "read") {
           // TODO: all sub-queries I can think of work here, but ask others for try and break this.
           const aliasMap = await studioAliasMapper.read();
-          const chain = getChainIdFromTableName(
+          const chain = helpers.getChainIdFromTableName(
             aliasMap[queryObject.tables[0]],
           );
-          const wallet = await getWalletWithProvider({
+          const wallet = await helpers.getWalletWithProvider({
             privateKey: normalizePrivateKey(argv.privateKey),
             chain,
             providerUrl,

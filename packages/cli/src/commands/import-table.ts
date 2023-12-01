@@ -1,13 +1,8 @@
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
+  helpers,
   logger,
-  getChainIdFromTableName,
-  getTableIdFromTableName,
-  getPrefixFromTableName,
-  getApi,
-  getApiUrl,
-  getEnvironmentId,
   FileStore,
 } from "../utils.js";
 
@@ -38,18 +33,18 @@ export const handler = async (
     }
 
     const fileStore = new FileStore(store);
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-    const api = getApi(fileStore, apiUrl);
+    const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+    const api = helpers.getApi(fileStore, apiUrl);
     const projectId = project;
-    const environmentId = await getEnvironmentId(api, projectId);
+    const environmentId = await helpers.getEnvironmentId(api, projectId);
 
     if (typeof uuTableName !== "string") {
       throw new Error("must provide full tableland table name");
     }
 
-    const chainId = getChainIdFromTableName(uuTableName);
-    const tableId = getTableIdFromTableName(uuTableName).toString();
-    const prefix = name || getPrefixFromTableName(uuTableName);
+    const chainId = helpers.getChainIdFromTableName(uuTableName);
+    const tableId = helpers.getTableIdFromTableName(uuTableName).toString();
+    const prefix = name || helpers.getPrefixFromTableName(uuTableName);
 
     await api.tables.importTable.mutate({
       chainId,

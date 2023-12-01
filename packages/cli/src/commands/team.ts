@@ -6,7 +6,7 @@ import type { Arguments } from "yargs";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, logger } from "../utils.js";
+import { FileStore, helpers, logger } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -46,8 +46,8 @@ export const builder = function (args: Yargs) {
           }
 
           const fileStore = new FileStore(store);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-          const api = getApi(fileStore, apiUrl);
+          const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+          const api = helpers.getApi(fileStore, apiUrl);
 
           let query;
           if (typeof identifier === "string" && identifier.trim() !== "") {
@@ -94,8 +94,8 @@ export const builder = function (args: Yargs) {
         }
 
         const fileStore = new FileStore(store);
-        const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-        const api = getApi(fileStore, apiUrl);
+        const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+        const api = helpers.getApi(fileStore, apiUrl);
 
         const result = await api.teams.newTeam.mutate({
           name,
@@ -117,16 +117,15 @@ export const builder = function (args: Yargs) {
             type: "string",
             description: "comma separated list of emails to be invited to team",
           })
-          .option("team", {
+          .option("teamId", {
             type: "string",
             description: "id of team to add to",
           });
       },
       async function (argv) {
-        const { team, emails, store, apiUrl: apiUrlArg } = argv;
+        const { teamId, emails, store, apiUrl: apiUrlArg } = argv;
 
         if (typeof emails !== "string") throw new Error("must provide emails");
-        if (typeof team !== "string") throw new Error("must provide team");
         if (typeof store !== "string") {
           throw new Error("must provide path to session store file");
         }
@@ -136,7 +135,7 @@ export const builder = function (args: Yargs) {
         ) {
           throw new Error("invalid apiUrl");
         }
-        
+
         const emailInvites = (emails ?? "")
           .split(",")
           .map((email) => email.trim())
@@ -147,11 +146,17 @@ export const builder = function (args: Yargs) {
         }
 
         const fileStore = new FileStore(store);
-        const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-        const api = getApi(fileStore, apiUrl);
+        const team = helpers.getTeam({ teamId, store: fileStore });
+
+        if (typeof team !== "string" || team.trim() === "") {
+          throw new Error("must provide teamId as arg or context");
+        }
+
+        const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+        const api = helpers.getApi(fileStore, apiUrl);
 
         const result = await api.invites.inviteEmails.mutate({
-          name,
+          teamId: team,
           emails: emailInvites
         });
 

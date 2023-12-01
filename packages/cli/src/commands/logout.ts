@@ -1,6 +1,6 @@
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, logger } from "../utils.js";
+import { FileStore, helpers, logger } from "../utils.js";
 
 export const command = "logout";
 export const desc = "logout current session";
@@ -11,8 +11,8 @@ export const handler = async (
   try {
     const { apiUrl: apiUrlArg, store } = argv;
     const fileStore = new FileStore(store);
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-    const api = getApi(fileStore, apiUrl);
+    const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+    const api = helpers.getApi(fileStore, apiUrl);
 
     try {
       await api.auth.logout.mutate();

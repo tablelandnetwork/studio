@@ -1,7 +1,7 @@
 import fs from "fs";
 import { dirname, resolve, sep, isAbsolute } from "path";
 import type { Arguments } from "yargs";
-import { ask, logger } from "../utils.js";
+import { helpers, logger } from "../utils.js";
 import { type GlobalOptions } from "../cli.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
@@ -35,7 +35,7 @@ export const handler = async (
     const { yes } = argv;
     const answers = yes
       ? questions.map((q) => q.default)
-      : await ask(questions.map((q) => q.message));
+      : await helpers.ask(questions.map((q) => q.message));
 
     const fileJson: { privateKey?: string; providerUrl?: string } = {};
     if (answers[0]) fileJson.privateKey = answers[0];
