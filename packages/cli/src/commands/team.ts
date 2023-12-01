@@ -46,7 +46,10 @@ export const builder = function (args: Yargs) {
           }
 
           const fileStore = new FileStore(store);
-          const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: apiUrlArg,
+            store: fileStore,
+          });
           const api = helpers.getApi(fileStore, apiUrl);
 
           let query;
@@ -94,7 +97,10 @@ export const builder = function (args: Yargs) {
         }
 
         const fileStore = new FileStore(store);
-        const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+        const apiUrl = helpers.getApiUrl({
+          apiUrl: apiUrlArg,
+          store: fileStore,
+        });
         const api = helpers.getApi(fileStore, apiUrl);
 
         const result = await api.teams.newTeam.mutate({
@@ -129,10 +135,7 @@ export const builder = function (args: Yargs) {
         if (typeof store !== "string") {
           throw new Error("must provide path to session store file");
         }
-        if (
-          typeof apiUrlArg !== "string" &&
-          typeof apiUrlArg !== "undefined"
-        ) {
+        if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
           throw new Error("invalid apiUrl");
         }
 
@@ -152,12 +155,15 @@ export const builder = function (args: Yargs) {
           throw new Error("must provide teamId as arg or context");
         }
 
-        const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+        const apiUrl = helpers.getApiUrl({
+          apiUrl: apiUrlArg,
+          store: fileStore,
+        });
         const api = helpers.getApi(fileStore, apiUrl);
 
         const result = await api.invites.inviteEmails.mutate({
           teamId: team,
-          emails: emailInvites
+          emails: emailInvites,
         });
 
         logger.log(JSON.stringify(result));

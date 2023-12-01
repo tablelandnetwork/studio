@@ -48,7 +48,10 @@ export const builder = function (args: Yargs) {
           }
 
           const fileStore = new FileStore(store);
-          const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: apiUrlArg,
+            store: fileStore,
+          });
           const api = helpers.getApi(fileStore, apiUrl);
 
           const query =
@@ -100,9 +103,15 @@ export const builder = function (args: Yargs) {
             apiUrl: apiUrlArg,
           } = argv;
           const fileStore = new FileStore(store);
-          const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: apiUrlArg,
+            store: fileStore,
+          });
           const api = helpers.getApi(fileStore, apiUrl);
-          const teamId = helpers.getTeam({ store: fileStore, teamId: teamIdArg });
+          const teamId = helpers.getTeam({
+            store: fileStore,
+            teamId: teamIdArg,
+          });
 
           if (typeof name !== "string") {
             throw new Error("must provide project name");

@@ -7,12 +7,7 @@ import type { Arguments } from "yargs";
 import yargs from "yargs";
 import { helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
-import {
-  FileStore,
-  helpers,
-  logger,
-  normalizePrivateKey,
-} from "../utils.js";
+import { FileStore, helpers, logger, normalizePrivateKey } from "../utils.js";
 
 type Yargs = typeof yargs;
 

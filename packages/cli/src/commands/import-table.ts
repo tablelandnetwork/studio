@@ -1,10 +1,6 @@
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import {
-  helpers,
-  logger,
-  FileStore,
-} from "../utils.js";
+import { helpers, logger, FileStore } from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "import-table <table> <project>   <description> [name]";

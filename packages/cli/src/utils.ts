@@ -245,10 +245,7 @@ export const helpers = {
     }
     return url.toString();
   },
-  findOrCreateDefaultEnvironment: async function (
-    api: any,
-    projectId: string,
-  ) {
+  findOrCreateDefaultEnvironment: async function (api: any, projectId: string) {
     try {
       const environmentId = await helpers.getEnvironmentId(api, projectId);
       return environmentId;
@@ -291,10 +288,7 @@ export const helpers = {
 
     return api(apiArgs);
   },
-  getApiUrl: function (argv: {
-    store: FileStore;
-    apiUrl?: string;
-  }) {
+  getApiUrl: function (argv: { store: FileStore; apiUrl?: string }) {
     if (typeof argv.apiUrl === "string" && argv.apiUrl.trim() !== "") {
       return argv.apiUrl.trim();
     }
@@ -333,8 +327,9 @@ export const helpers = {
     const environments = await api.environments.projectEnvironments.query({
       projectId,
     });
-    const environmentId = environments.find((env: any) => env.name === "default")
-      ?.id;
+    const environmentId = environments.find(
+      (env: any) => env.name === "default",
+    )?.id;
     if (typeof environmentId !== "string") {
       throw new Error(NO_DEFAULT_ENV_ERR);
     }
@@ -347,10 +342,7 @@ export const helpers = {
 
     return parts.slice(0, -2).join("_");
   },
-  getProject: function (argv: {
-    store: FileStore;
-    projectId?: string;
-  }) {
+  getProject: function (argv: { store: FileStore; projectId?: string }) {
     if (typeof argv.projectId === "string" && argv.projectId.trim() !== "") {
       return argv.projectId.trim();
     }
@@ -363,7 +355,7 @@ export const helpers = {
       return await globalThis.sqlparser.normalize(query);
     };
   },
-  getStudioProvider: async function(chainId: number, api: API) {
+  getStudioProvider: async function (chainId: number, api: API) {
     return await api.providers.providerForChain.query({ chainId });
   },
   getTableIdFromTableName: function (tableName: string) {
@@ -376,7 +368,7 @@ export const helpers = {
 
     return argv.store.get<string>("teamId");
   },
-  getWalletWithProvider: async function({
+  getWalletWithProvider: async function ({
     privateKey,
     chain,
     providerUrl,

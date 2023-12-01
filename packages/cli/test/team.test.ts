@@ -3,7 +3,7 @@ import { fileURLToPath } from "url";
 import { equal, deepStrictEqual } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { restore, spy, stub, mock } from "sinon";
+import { restore, spy, stub } from "sinon";
 import yargs from "yargs/yargs";
 import * as mod from "../src/commands/team.js";
 import { type FileStore, logger, wait, helpers } from "../src/utils.js";
@@ -127,16 +127,19 @@ describe("commands/team", function () {
 
   test("can invite a user to a team", async function () {
     const consoleLog = spy(logger, "log");
-    const mutateStub = stub().returns({message: "spy success"});
-    // @ts-ignore
-    const apiStub = stub(helpers, "getApi").callsFake(function (fileStore?: FileStore, apiUrl?: string) {
+    const mutateStub = stub().returns({ message: "spy success" });
+    // @ts-expect-error Don't need to mock all the types test will fail if anything doesn't work
+    stub(helpers, "getApi").callsFake(function (
+      fileStore?: FileStore,
+      apiUrl?: string,
+    ) {
       return {
         invites: {
           inviteEmails: {
-            mutate: mutateStub
-          }
-        }
-      }
+            mutate: mutateStub,
+          },
+        },
+      };
     });
 
     await yargs([
@@ -145,7 +148,7 @@ describe("commands/team", function () {
       "test@textile.io,test2@textile.io",
       "--teamId",
       TEST_TEAM_ID,
-      ...defaultArgs
+      ...defaultArgs,
     ])
       .command(mod)
       .parse();
@@ -154,12 +157,9 @@ describe("commands/team", function () {
     const response = JSON.parse(out);
 
     equal(response.message, "spy success");
-    deepStrictEqual(
-      mutateStub.firstCall.args[0],
-      {
-        emails: ["test@textile.io", "test2@textile.io"],
-        teamId: TEST_TEAM_ID
-      }
-    );
+    deepStrictEqual(mutateStub.firstCall.args[0], {
+      emails: ["test@textile.io", "test2@textile.io"],
+      teamId: TEST_TEAM_ID,
+    });
   });
 });
