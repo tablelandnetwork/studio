@@ -90,7 +90,7 @@ export const builder = function (args: Yargs) {
           })
           .option("teamId", {
             type: "string",
-            description: "the team associated with the project",
+            description: "the team id associated with the project",
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
