@@ -11,11 +11,13 @@ export interface QueryStatus {
   isSuccess: boolean;
 }
 
-export type Props = InputProps & {
+export type Props = Omit<InputProps, "defaultValue"> & {
+  defaultValue?: string;
   updateQuery: (inputValue: string) => void;
   queryStatus: QueryStatus;
   onResult?: (result: boolean | undefined) => void;
   debounceDuration?: number;
+  successMessage?: string;
   failedMessage?: string;
   errorMessage?: string;
 };
@@ -23,18 +25,20 @@ export type Props = InputProps & {
 const InputWithCheck = forwardRef<HTMLDivElement, Props>(
   (
     {
+      defaultValue,
       updateQuery,
       queryStatus,
       onResult,
       onChange,
       debounceDuration = 500,
+      successMessage = "available",
       failedMessage = "unavailable",
       errorMessage = "error checking availability",
       ...props
     }: Props,
     ref,
   ) => {
-    const [inputValue, setInputValue] = useState("");
+    const [inputValue, setInputValue] = useState(defaultValue ?? "");
     const [debouncing, setDebouncing] = useState(false);
     const [debouncedValue, setDebouncedValue] = useState("");
     const [result, setResult] = useState<boolean | undefined>(undefined);
@@ -98,7 +102,7 @@ const InputWithCheck = forwardRef<HTMLDivElement, Props>(
         return <Loader2 className="animate-spin" />;
       } else if (queryStatus.isSuccess) {
         if (queryStatus.data) {
-          return <CheckCircle2 />;
+          return <p className="text-xs text-green-500">{successMessage}</p>;
         } else {
           return <p className="text-xs text-red-500">{failedMessage}</p>;
         }

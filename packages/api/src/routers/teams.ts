@@ -137,10 +137,20 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
       .mutation(async ({ input, ctx }) => {
         await store.teams.removeTeamMember(ctx.teamId, input.userId);
       }),
-    updateTeamName: teamAdminProcedure(store)
-      .input(z.object({ name: z.string().trim() }))
+    updateTeam: teamAdminProcedure(store)
+      .input(z.object({ name: z.string().trim().nonempty() }))
       .mutation(async ({ input, ctx }) => {
-        const res = await store.teams.updateTeamName(ctx.teamId, input.name);
+        const available = await store.teams.nameAvailable(input.name);
+        if (!available) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Team name is already taken",
+          });
+        }
+        const res = await store.teams.updateTeam({
+          id: ctx.teamId,
+          name: input.name,
+        });
         return res;
       }),
   });
