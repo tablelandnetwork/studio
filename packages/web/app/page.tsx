@@ -1,4 +1,11 @@
-import { Construction, Info, LogIn, Sparkles, Wallet } from "lucide-react";
+import {
+  Construction,
+  Info,
+  LogIn,
+  Sparkles,
+  Wallet,
+  AlertTriangle,
+} from "lucide-react";
 
 export default function Page() {
   return (
@@ -17,6 +24,15 @@ export default function Page() {
             Tableland, collaborate with teammates on projects, integate your
             project with the Studio CLI, and discover what other users are
             building on Tableland.
+          </p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <AlertTriangle className="flex-shrink-0" />
+          <p className="text-muted-foreground">
+            Remember, everything you do on the blockchain is public. Don&apos;t
+            use the Studio for any private, illegal, or harmful activities.
+            Respect the law, our community, and each other. Let&apos;s create
+            together responsibly!
           </p>
         </div>
         <div className="flex items-center space-x-4">
