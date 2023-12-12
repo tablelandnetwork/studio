@@ -3,7 +3,7 @@
 import { type Auth } from "@tableland/studio-api";
 import { useAtom } from "jotai";
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAccount, useConnect } from "wagmi";
 import AddressDisplay from "./address-display";
@@ -50,16 +50,30 @@ export default function Profile({
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Fetch user when:
   useEffect(() => {
-    const handler = () => {
-      authenticated
-        .refetch()
-        .then(() => console.log("authenticated.refetch success"))
-        .catch((err) => console.error(err));
+    // 1. check if user is already authenticated and redirect to personal team
+    //    slug if not already there
+    const handler = async () => {
+      try {
+        const authResponse = await authenticated.refetch();
+        console.log("authenticated.refetch success");
+
+        const fetchedAuth = authResponse.data;
+        if (fetchedAuth && !dontRedirect) {
+          const userSlug = fetchedAuth.personalTeam.slug;
+          if (pathname !== `/${userSlug}`) {
+            router.push(`/${userSlug}`);
+          }
+        }
+      } catch (error: any) {
+        console.error(error);
+      }
     };
-    // 1. window is focused (in case user logs out of another window)
+    handler();
+    // 2. window is focused (in case user logs out of another window)
     window.addEventListener("focus", handler);
     return () => window.removeEventListener("focus", handler);
   }, [authenticated]);
