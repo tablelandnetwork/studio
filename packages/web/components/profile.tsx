@@ -56,27 +56,30 @@ export default function Profile({
   useEffect(() => {
     // 1. check if user is already authenticated and redirect to personal team
     //    slug if not already there
-    const handler = async () => {
-      try {
-        const authResponse = await authenticated.refetch();
-        console.log("authenticated.refetch success");
+    const handler = () => {
+      void authenticated
+        .refetch()
+        .then((authResponse) => {
+          console.log("authenticated.refetch success");
+          const fetchedAuth = authResponse.data;
 
-        const fetchedAuth = authResponse.data;
-        if (fetchedAuth && !dontRedirect) {
-          const userSlug = fetchedAuth.personalTeam.slug;
-          if (pathname !== `/${userSlug}`) {
-            router.push(`/${userSlug}`);
+          if (fetchedAuth && !dontRedirect) {
+            const userSlug = fetchedAuth.personalTeam.slug;
+            if (pathname !== `/${userSlug}`) {
+              router.push(`/${userSlug}`);
+            }
           }
-        }
-      } catch (error: any) {
-        console.error(error);
-      }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     };
     handler();
     // 2. window is focused (in case user logs out of another window)
-    window.addEventListener("focus", handler);
-    return () => window.removeEventListener("focus", handler);
-  }, [authenticated]);
+    const focusHandler = () => handler();
+    window.addEventListener("focus", focusHandler);
+    return () => window.removeEventListener("focus", focusHandler);
+  }, [authenticated, dontRedirect, pathname, router]);
 
   useEffect(() => {
     // in order to keep types correct we need to use logical operator
