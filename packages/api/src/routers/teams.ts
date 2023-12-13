@@ -9,6 +9,7 @@ import {
 } from "../trpc";
 import { type SendInviteFunc } from "../utils/sendInvite";
 import { internalError } from "../utils/internalError";
+import { zeroNine } from "../utils/fourHundredError";
 
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
   return router({
@@ -91,6 +92,19 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         let team: schema.Team;
         let invites: schema.TeamInvite[];
         try {
+          const nameAvailable = await store.teams.nameAvailable(input.name);
+
+          if (!nameAvailable) {
+            throw zeroNine(`the team name ${input.name} is not available`);
+          }
+        } catch (err: any) {
+          if (err.status !== 409) {
+            throw internalError("Error validating team name", err);
+          }
+          throw err;
+        }
+
+        try {
           const res = await store.teams.createTeamByPersonalTeam(
             input.name,
             ctx.session.auth.user.teamId,
@@ -108,7 +122,16 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
           await Promise.all(
             invites.map(async (invite) => await sendInvite(invite)),
           );
-        } catch (e) {}
+        } catch (err) {
+          // TODO: just noticing that if someone tries to invite 3 addresses
+          //    and the first one causes an error I don't think other two
+          //    addresses will be invited, which seems like incorrect behavior.
+          //    i'm not sure this is the case, we should probably test this.
+          console.log(
+            `invalid invites: ${invites.map((i) => i.email).join(", ")}`,
+          );
+          console.error(err);
+        }
 
         return team;
       }),
