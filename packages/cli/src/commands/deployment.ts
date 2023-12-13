@@ -5,19 +5,9 @@ import type { Arguments } from "yargs";
 // Solving this by disabling lint here.
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
-import { helpers, Database } from "@tableland/sdk";
+import { helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
-import {
-  ask,
-  FileStore,
-  getApi,
-  getApiUrl,
-  getProject,
-  findOrCreateDefaultEnvironment,
-  getWalletWithProvider,
-  logger,
-  normalizePrivateKey,
-} from "../utils.js";
+import { FileStore, helpers, logger, normalizePrivateKey } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -44,13 +34,13 @@ export const builder = function (args: Yargs) {
         try {
           const { store, apiUrl: apiUrlArg } = argv;
           const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({
+          const apiUrl = helpers.getApiUrl({
             apiUrl: apiUrlArg as string,
             store: fileStore,
           });
-          const api = getApi(fileStore, apiUrl);
+          const api = helpers.getApi(fileStore, apiUrl);
 
-          const projectId = getProject({
+          const projectId = helpers.getProject({
             projectId: argv.project,
             store: fileStore,
           });
@@ -82,21 +72,21 @@ export const builder = function (args: Yargs) {
         try {
           const { chain, name, store, apiUrl: apiUrlArg, providerUrl } = argv;
 
-          const chainInfo = helpers.getChainInfo(chain as number);
+          const chainInfo = sdkHelpers.getChainInfo(chain as number);
           const fileStore = new FileStore(store as string);
           const privateKey = normalizePrivateKey(argv.privateKey);
 
-          const apiUrl = getApiUrl({
+          const apiUrl = helpers.getApiUrl({
             apiUrl: apiUrlArg as string,
             store: fileStore,
           });
-          const api = getApi(fileStore, apiUrl);
-          const projectId = getProject({
+          const api = helpers.getApi(fileStore, apiUrl);
+          const projectId = helpers.getProject({
             ...argv,
             store: fileStore,
           });
 
-          const wallet = await getWalletWithProvider({
+          const wallet = await helpers.getWalletWithProvider({
             privateKey,
             chain: chainInfo.chainId,
             providerUrl: providerUrl as string,
@@ -110,7 +100,7 @@ export const builder = function (args: Yargs) {
             throw new Error("must provide project for deployment");
           }
 
-          const environmentId = await findOrCreateDefaultEnvironment(
+          const environmentId = await helpers.findOrCreateDefaultEnvironment(
             api,
             projectId,
           );
@@ -129,7 +119,7 @@ export const builder = function (args: Yargs) {
           //       the deployment is created
 
           // confirm they want to deploy their table
-          const confirm = await ask([
+          const confirm = await helpers.ask([
             `you are about to use funds from account ${wallet.address} on ${chainInfo.name} to deploy a table
 are you sure you want to continue (y/n)? `,
           ]);
@@ -140,7 +130,7 @@ are you sure you want to continue (y/n)? `,
 
           const db = new Database({
             signer: wallet,
-            baseUrl: helpers.getBaseUrl(chainInfo.chainId),
+            baseUrl: sdkHelpers.getBaseUrl(chainInfo.chainId),
             autoWait: true,
           });
 

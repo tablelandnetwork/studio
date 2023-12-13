@@ -1,16 +1,17 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { equal } from "assert";
+import { equal, deepStrictEqual } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { restore, spy } from "sinon";
+import { restore, spy, stub } from "sinon";
 import yargs from "yargs/yargs";
 import * as mod from "../src/commands/team.js";
-import { logger, wait } from "../src/utils.js";
+import { type FileStore, logger, wait, helpers } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_REGISTRY_PORT,
+  TEST_TEAM_ID,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -124,5 +125,41 @@ describe("commands/team", function () {
     equal(team.slug, teamName);
   });
 
-  test.skip("can add a user to a team", async function () {});
+  test("can invite a user to a team", async function () {
+    const consoleLog = spy(logger, "log");
+    const mutateStub = stub().returns({ message: "spy success" });
+    // @ts-expect-error Don't need to mock all the types test will fail if anything doesn't work
+    stub(helpers, "getApi").callsFake(function (
+      fileStore?: FileStore,
+      apiUrl?: string,
+    ) {
+      return {
+        invites: {
+          inviteEmails: {
+            mutate: mutateStub,
+          },
+        },
+      };
+    });
+
+    await yargs([
+      "team",
+      "invite",
+      "test@textile.io,test2@textile.io",
+      "--teamId",
+      TEST_TEAM_ID,
+      ...defaultArgs,
+    ])
+      .command(mod)
+      .parse();
+
+    const out = consoleLog.getCall(0).firstArg;
+    const response = JSON.parse(out);
+
+    equal(response.message, "spy success");
+    deepStrictEqual(mutateStub.firstCall.args[0], {
+      emails: ["test@textile.io", "test2@textile.io"],
+      teamId: TEST_TEAM_ID,
+    });
+  });
 });

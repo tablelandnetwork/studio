@@ -3,9 +3,7 @@ import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
   FileStore,
-  getApi,
-  getApiUrl,
-  getWalletWithProvider,
+  helpers,
   logger,
   normalizePrivateKey,
   toChecksumAddress,
@@ -21,8 +19,8 @@ export const handler = async (
   try {
     const { chain, apiUrl: apiUrlArg, providerUrl, store } = argv;
     const fileStore = new FileStore(store);
-    const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-    const api = getApi(fileStore, apiUrl);
+    const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+    const api = helpers.getApi(fileStore, apiUrl);
 
     const user = await api.auth.authenticated.query();
     if (user) {
@@ -32,7 +30,7 @@ export const handler = async (
 
     const host = new URL(apiUrl).host;
     const privateKey = normalizePrivateKey(argv.privateKey);
-    const wallet = await getWalletWithProvider({
+    const wallet = await helpers.getWalletWithProvider({
       privateKey,
       chain,
       providerUrl,

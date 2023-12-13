@@ -6,7 +6,7 @@ import type { Arguments } from "yargs";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, logger } from "../utils.js";
+import { FileStore, helpers, logger } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -46,8 +46,11 @@ export const builder = function (args: Yargs) {
           }
 
           const fileStore = new FileStore(store);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-          const api = getApi(fileStore, apiUrl);
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: apiUrlArg,
+            store: fileStore,
+          });
+          const api = helpers.getApi(fileStore, apiUrl);
 
           let query;
           if (typeof identifier === "string" && identifier.trim() !== "") {
@@ -94,8 +97,11 @@ export const builder = function (args: Yargs) {
         }
 
         const fileStore = new FileStore(store);
-        const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-        const api = getApi(fileStore, apiUrl);
+        const apiUrl = helpers.getApiUrl({
+          apiUrl: apiUrlArg,
+          store: fileStore,
+        });
+        const api = helpers.getApi(fileStore, apiUrl);
 
         const result = await api.teams.newTeam.mutate({
           name,
@@ -109,24 +115,58 @@ export const builder = function (args: Yargs) {
       },
     )
     .command(
-      "add <user>",
-      "add user to a team. team id must either be a command option or available in the context.",
+      "invite <emails>",
+      "invite a list of emails to a team. team id must either be a command option or available in the context.",
       function (args) {
         return args
-          .positional("user", {
+          .positional("emails", {
             type: "string",
-            description: "user to be added to team",
+            description: "comma separated list of emails to be invited to team",
           })
-          .option("team", {
+          .option("teamId", {
             type: "string",
-            description: "name of team to add to",
+            description: "id of team to add to",
           });
       },
       async function (argv) {
-        // const { team, user, privateKey, providerUrl, store } = argv;
-        // const api = getApi(new FileStore(store));
+        const { teamId, emails, store, apiUrl: apiUrlArg } = argv;
 
-        throw new Error("This needs to be implemented");
+        if (typeof emails !== "string") throw new Error("must provide emails");
+        if (typeof store !== "string") {
+          throw new Error("must provide path to session store file");
+        }
+        if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
+          throw new Error("invalid apiUrl");
+        }
+
+        const emailInvites = (emails ?? "")
+          .split(",")
+          .map((email) => email.trim())
+          .filter((i) => i);
+
+        if (emails.length < 1) {
+          throw new Error("you must provide at least one email");
+        }
+
+        const fileStore = new FileStore(store);
+        const team = helpers.getTeam({ teamId, store: fileStore });
+
+        if (typeof team !== "string" || team.trim() === "") {
+          throw new Error("must provide teamId as arg or context");
+        }
+
+        const apiUrl = helpers.getApiUrl({
+          apiUrl: apiUrlArg,
+          store: fileStore,
+        });
+        const api = helpers.getApi(fileStore, apiUrl);
+
+        const result = await api.invites.inviteEmails.mutate({
+          teamId: team,
+          emails: emailInvites,
+        });
+
+        logger.log(JSON.stringify(result));
       },
     );
 };

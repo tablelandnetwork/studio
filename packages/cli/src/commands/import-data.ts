@@ -6,17 +6,10 @@ import { studioAliases } from "@tableland/studio-client";
 import { Database } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
 import {
-  ask,
-  batchRows,
+  csvHelp,
+  helpers,
   logger,
-  getChainIdFromTableName,
-  getWalletWithProvider,
   normalizePrivateKey,
-  getApi,
-  getApiUrl,
-  getProject,
-  getEnvironmentId,
-  prepareCsvHeaders,
   FileStore,
 } from "../utils.js";
 
@@ -33,11 +26,11 @@ export const handler = async (
       throw new Error("table name parameter is required");
     }
     const fileStore = new FileStore(store);
-    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
-    const api = getApi(fileStore, apiUrl);
-    const projectId = getProject({ ...argv, store: fileStore });
+    const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
+    const api = helpers.getApi(fileStore, apiUrl);
+    const projectId = helpers.getProject({ ...argv, store: fileStore });
 
-    const environmentId = await getEnvironmentId(api, projectId);
+    const environmentId = await helpers.getEnvironmentId(api, projectId);
 
     const aliases = studioAliases({ environmentId, apiUrl });
     const uuTableName = (await aliases.read())[table];
@@ -46,9 +39,9 @@ export const handler = async (
     }
     // need to reverse lookup uuTableName from table and projectId so
     // that the wallet can be connected to the right provider
-    const chain = getChainIdFromTableName(uuTableName);
+    const chain = helpers.getChainIdFromTableName(uuTableName);
     const privateKey = normalizePrivateKey(argv.privateKey);
-    const signer = await getWalletWithProvider({
+    const signer = await helpers.getWalletWithProvider({
       privateKey,
       chain,
       providerUrl,
@@ -63,12 +56,12 @@ export const handler = async (
     const dataObject = await parseCsvFile(fileString);
 
     // parse csv and enforce the existence of the right header format
-    const headers = prepareCsvHeaders(dataObject[0]);
+    const headers = csvHelp.prepareCsvHeaders(dataObject[0]);
     const rows = dataObject.slice(1);
     // need to capture row length now since `batchRows` will mutate the
     // rows Array to reduce memory overhead
     const rowCount = Number(rows.length);
-    const statements = batchRows(rows, headers, table);
+    const statements = csvHelp.batchRows(rows, headers, table);
 
     const doImport = await confirmImport({
       statementLength: statements.join("").length,
@@ -139,7 +132,7 @@ async function confirmImport(info: {
     throw new Error("table name is required");
   }
 
-  const answers = await ask([
+  const answers = await helpers.ask([
     `You are about to use address: ${chalk.yellow(
       info.wallet,
     )} to insert ${chalk.yellow(info.rowCount)} row${

@@ -6,7 +6,7 @@ import type { Arguments } from "yargs";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, getTeam, logger } from "../utils.js";
+import { FileStore, logger, helpers } from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -48,8 +48,11 @@ export const builder = function (args: Yargs) {
           }
 
           const fileStore = new FileStore(store);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-          const api = getApi(fileStore, apiUrl);
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: apiUrlArg,
+            store: fileStore,
+          });
+          const api = helpers.getApi(fileStore, apiUrl);
 
           const query =
             typeof teamId === "string" && teamId.trim() !== ""
@@ -87,7 +90,7 @@ export const builder = function (args: Yargs) {
           })
           .option("teamId", {
             type: "string",
-            description: "the team associated with the project",
+            description: "the team id associated with the project",
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
@@ -100,9 +103,15 @@ export const builder = function (args: Yargs) {
             apiUrl: apiUrlArg,
           } = argv;
           const fileStore = new FileStore(store);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-          const api = getApi(fileStore, apiUrl);
-          const teamId = getTeam({ store: fileStore, teamId: teamIdArg });
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: apiUrlArg,
+            store: fileStore,
+          });
+          const api = helpers.getApi(fileStore, apiUrl);
+          const teamId = helpers.getTeam({
+            store: fileStore,
+            teamId: teamIdArg,
+          });
 
           if (typeof name !== "string") {
             throw new Error("must provide project name");

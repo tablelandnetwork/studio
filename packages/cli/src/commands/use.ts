@@ -1,6 +1,6 @@
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { logger, FileStore, isUUID } from "../utils.js";
+import { logger, FileStore, helpers } from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "use [context] [id]";
@@ -22,12 +22,12 @@ export const handler = async (
 
     switch (context) {
       case "team":
-        if (!isUUID(id)) throw new Error("invalid team id");
+        if (!helpers.isUUID(id)) throw new Error("invalid team id");
         fileStore.set("teamId", id);
         fileStore.save();
         break;
       case "project":
-        if (!isUUID(id)) throw new Error("invalid project id");
+        if (!helpers.isUUID(id)) throw new Error("invalid project id");
         fileStore.set("projectId", id);
         fileStore.save();
         break;
