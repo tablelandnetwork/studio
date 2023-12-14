@@ -1,6 +1,12 @@
 import readline from "node:readline/promises";
 import { readFileSync, writeFileSync } from "node:fs";
-import { Wallet, getDefaultProvider, providers } from "ethers";
+import {
+  BigNumber,
+  Wallet,
+  type Signer,
+  getDefaultProvider,
+  providers,
+} from "ethers";
 import createKeccakHash from "keccak";
 import { helpers as sdkHelpers } from "@tableland/sdk";
 import { init } from "@tableland/sqlparser";
@@ -244,6 +250,30 @@ export const helpers = {
       url.hash = h;
     }
     return url.toString();
+  },
+  estimateGas: async function (params: {
+    signer: Signer;
+    chainId: number;
+    method: string;
+    args: any[];
+  }) {
+    const contract = await sdkHelpers.getContractAndOverrides(
+      params.signer,
+      params.chainId,
+    );
+
+    // using `any` to enable indexing unknown method name by string
+    const estGas = contract.contract.estimateGas as any;
+    const gas = await estGas[params.method].apply(
+      estGas[params.method],
+      params.args,
+    );
+
+    if (!(gas instanceof BigNumber)) {
+      throw new Error("could not get gas estimation");
+    }
+
+    return gas;
   },
   findOrCreateDefaultEnvironment: async function (api: any, projectId: string) {
     try {

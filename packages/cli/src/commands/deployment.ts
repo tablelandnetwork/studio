@@ -5,6 +5,7 @@ import type { Arguments } from "yargs";
 // Solving this by disabling lint here.
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
+import chalk from "chalk";
 import { helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
 import { FileStore, helpers, logger, normalizePrivateKey } from "../utils.js";
@@ -118,10 +119,22 @@ export const builder = function (args: Yargs) {
           // TODO: setup a "ping" endpoint in the api so we can be sure the api is responding before
           //       the deployment is created
 
+          const stmt = generateCreateTableStatement(table.name, table.schema);
+
+          const gas = await helpers.estimateGas({
+            signer: wallet,
+            chainId: chain as number,
+            method: "create(address,string)",
+            args: [wallet.address, stmt],
+          });
+
           // confirm they want to deploy their table
           const confirm = await helpers.ask([
-            `you are about to use funds from account ${wallet.address} on ${chainInfo.name} to deploy a table
-are you sure you want to continue (y/n)? `,
+            `You are about to use address: ${chalk.yellow(
+              wallet.address,
+            )} to deploy a table on chain ${chain as number}
+The estimated gas required is ${gas.toString()}
+Do you want to continue (y/n)? `,
           ]);
 
           if (confirm[0].length < 1 || confirm[0][0].toLowerCase() !== "y") {
@@ -134,7 +147,6 @@ are you sure you want to continue (y/n)? `,
             autoWait: true,
           });
 
-          const stmt = generateCreateTableStatement(table.name, table.schema);
           const res = await db.prepare(stmt).all();
           if (res.error) {
             throw new Error(res.error);

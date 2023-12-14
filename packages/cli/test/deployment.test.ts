@@ -71,9 +71,9 @@ describe("commands/deployment", function () {
     setTimeout(() => {
       // We are testing that the public provider url is used, we don't want to
       // actually create a deployment on maticmum.
-      stdin.send("no\n").end();
+      stdin.send("n\n").end();
       stdin.restore();
-    }, 1500);
+    }, 3500);
 
     await yargs([
       "deployment",
