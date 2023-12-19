@@ -135,7 +135,7 @@ async function confirmImport(info: {
   const statementCount = info.statements.length;
   const tableId = helpers.getTableIdFromTableName(info.table);
 
-  const gas = await helpers.estimateGas({
+  const cost = await helpers.estimateCost({
     signer: info.wallet,
     chainId: helpers.getChainIdFromTableName(info.table),
     method: "mutate(address,(uint256,string)[])",
@@ -154,7 +154,7 @@ This can be done with a total of ${chalk.yellow(statementCount)} statment${
 The total size of the statment${
       statementCount === 1 ? "" : "s"
     } is: ${chalk.yellow(statementLength)}
-The estimated gas required is ${gas.toString()}
+The estimated cost is ${cost}
 Do you want to continue (${chalk.bold("y/n")})? `,
   ]);
   const proceed = answers[0].toLowerCase()[0];

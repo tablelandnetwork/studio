@@ -190,7 +190,7 @@ export const handler = async (
       chainId: number;
       args: any[];
     }) {
-      const gas = await helpers.estimateGas({
+      const cost = await helpers.estimateCost({
         signer: info.wallet,
         chainId: info.chainId,
         method: "mutate(address,uint256,string)",
@@ -201,7 +201,7 @@ export const handler = async (
         `You are about to use address: ${chalk.yellow(
           info.wallet.address,
         )} to write to a table on chain ${chalk.yellow(info.chainId)}
-The estimated gas required is ${gas.toString()}
+The estimated cost is ${cost}
 Do you want to continue (${chalk.bold("y/n")})? `,
       );
 

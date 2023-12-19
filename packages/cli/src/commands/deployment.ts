@@ -121,7 +121,7 @@ export const builder = function (args: Yargs) {
 
           const stmt = generateCreateTableStatement(table.name, table.schema);
 
-          const gas = await helpers.estimateGas({
+          const cost = await helpers.estimateCost({
             signer: wallet,
             chainId: chain as number,
             method: "create(address,string)",
@@ -133,7 +133,7 @@ export const builder = function (args: Yargs) {
             `You are about to use address: ${chalk.yellow(
               wallet.address,
             )} to deploy a table on chain ${chain as number}
-The estimated gas required is ${gas.toString()}
+The estimated cost is ${cost}
 Do you want to continue (y/n)? `,
           ]);
 
