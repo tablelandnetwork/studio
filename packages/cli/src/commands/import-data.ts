@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import type { Arguments } from "yargs";
 import { parse } from "csv-parse";
 import chalk from "chalk";
+import { type Wallet } from "ethers";
 import { studioAliases } from "@tableland/studio-client";
 import { Database } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
@@ -64,11 +65,10 @@ export const handler = async (
     const statements = csvHelp.batchRows(rows, headers, table);
 
     const doImport = await confirmImport({
-      statementLength: statements.join("").length,
+      statements,
       rowCount,
-      wallet: signer.address,
-      statementCount: statements.length,
-      table,
+      wallet: signer,
+      table: uuTableName,
     });
 
     if (!doImport) return logger.log("aborting");
@@ -122,28 +122,39 @@ const parseCsvFile = async function (file: string): Promise<string[][]> {
 };
 
 async function confirmImport(info: {
-  statementLength: number;
-  statementCount: number;
+  statements: string[];
   rowCount: number;
   table: unknown;
-  wallet: string;
+  wallet: Wallet;
 }): Promise<boolean> {
   if (typeof info.table !== "string") {
     throw new Error("table name is required");
   }
 
+  const statementLength = info.statements.join("").length;
+  const statementCount = info.statements.length;
+  const tableId = helpers.getTableIdFromTableName(info.table);
+
+  const cost = await helpers.estimateCost({
+    signer: info.wallet,
+    chainId: helpers.getChainIdFromTableName(info.table),
+    method: "mutate(address,(uint256,string)[])",
+    args: [info.wallet.address, info.statements.map((s) => [tableId, s])],
+  });
+
   const answers = await helpers.ask([
     `You are about to use address: ${chalk.yellow(
-      info.wallet,
+      info.wallet.address,
     )} to insert ${chalk.yellow(info.rowCount)} row${
       info.rowCount === 1 ? "" : "s"
     } into table ${chalk.yellow(info.table)}
-This can be done with a total of ${chalk.yellow(info.statementCount)} statment${
-      info.statementCount === 1 ? "" : "s"
+This can be done with a total of ${chalk.yellow(statementCount)} statment${
+      statementCount === 1 ? "" : "s"
     }
 The total size of the statment${
-      info.statementCount === 1 ? "" : "s"
-    } is: ${chalk.yellow(info.statementLength)}
+      statementCount === 1 ? "" : "s"
+    } is: ${chalk.yellow(statementLength)}
+The estimated cost is ${cost}
 Do you want to continue (${chalk.bold("y/n")})? `,
   ]);
   const proceed = answers[0].toLowerCase()[0];

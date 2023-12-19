@@ -1,6 +1,13 @@
 import readline from "node:readline/promises";
 import { readFileSync, writeFileSync } from "node:fs";
-import { Wallet, getDefaultProvider, providers } from "ethers";
+import {
+  type Signer,
+  BigNumber,
+  Wallet,
+  getDefaultProvider,
+  providers,
+  utils as ethersUtils,
+} from "ethers";
 import createKeccakHash from "keccak";
 import { helpers as sdkHelpers } from "@tableland/sdk";
 import { init } from "@tableland/sqlparser";
@@ -207,6 +214,26 @@ function getIdFromTableName(tableName: string, revIndx: number) {
   return id;
 }
 
+// currency symbols for chains that don't use ETH
+const symbols: Record<number, string> = {
+  // matic
+  137: "MATIC",
+  // filecoin
+  314: "FIL",
+  // maticmum
+  80001: "MATIC",
+  // filecoin calibration
+  314159: "tFIL",
+};
+
+function getCurrencySymbol(chainId: number) {
+  if (typeof symbols[chainId] === "string") {
+    return symbols[chainId];
+  }
+
+  return "ETH";
+}
+
 export const helpers = {
   ask: async function (questions: string[]) {
     const rl = readline.createInterface({
@@ -244,6 +271,44 @@ export const helpers = {
       url.hash = h;
     }
     return url.toString();
+  },
+  estimateCost: async function (params: {
+    signer: Signer;
+    chainId: number;
+    method: string;
+    args: any[];
+  }) {
+    const contract = await sdkHelpers.getContractAndOverrides(
+      params.signer,
+      params.chainId,
+    );
+
+    // using `any` to enable indexing unknown method name by string
+    const estGas = contract.contract.estimateGas as any;
+    const gas = await estGas[params.method].apply(
+      estGas[params.method],
+      params.args,
+    );
+
+    if (!(gas instanceof BigNumber)) {
+      throw new Error("could not get gas estimation");
+    }
+
+    const feeData = await params.signer.provider?.getFeeData();
+    // {
+    //   gasPrice: { BigNumber: "23238878592" },
+    //   lastBaseFeePerGas: { BigNumber: "23169890320" },
+    //   maxFeePerGas: { BigNumber: "47839780640" },
+    //   maxPriorityFeePerGas: { BigNumber: "1500000000" }
+    // }
+
+    if (feeData?.gasPrice) {
+      const costGwei = feeData?.gasPrice.mul(gas);
+      return `${ethersUtils.formatUnits(costGwei, 18)} ${getCurrencySymbol(
+        params.chainId,
+      )}`;
+    }
+    return "UNKNOWN";
   },
   findOrCreateDefaultEnvironment: async function (api: any, projectId: string) {
     try {

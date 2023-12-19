@@ -1,5 +1,6 @@
 import { createInterface } from "readline";
 import type { Arguments } from "yargs";
+import type { Wallet } from "ethers";
 import { type helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { studioAliases } from "@tableland/studio-client";
 import chalk from "chalk";
@@ -7,8 +8,8 @@ import { type GlobalOptions } from "../cli.js";
 import {
   ERROR_INVALID_PROJECT_ID,
   FileStore,
-  logger,
   helpers,
+  logger,
   normalizePrivateKey,
 } from "../utils.js";
 
@@ -49,24 +50,7 @@ export const handler = async (
     const _interface = createInterface({
       input: process.stdin,
       output: process.stdout,
-      completer: function (line: string) {
-        // TODO: check against all table names in this project and add to common sql terms
-        const words = line.split(" ");
-        const word = words.pop();
-        if (typeof word !== "string") return [[], line];
-
-        const hits = sqlTerms.filter(function (term: string | undefined) {
-          if (typeof term !== "string" || term === "") return false;
-          return term.indexOf(word) === 0;
-        });
-        return [
-          hits.map((hit: string) => {
-            words.push(hit);
-            return words.join(" ");
-          }),
-          line,
-        ];
-      },
+      completer,
       terminal: true,
       tabSize: 4,
     });
@@ -137,18 +121,30 @@ export const handler = async (
         if (queryObject.type !== "read") {
           // TODO: all sub-queries I can think of work here, but ask others for try and break this.
           const aliasMap = await studioAliasMapper.read();
-          const chain = helpers.getChainIdFromTableName(
+          const chainId = helpers.getChainIdFromTableName(
+            aliasMap[queryObject.tables[0]],
+          );
+          const tableId = helpers.getTableIdFromTableName(
             aliasMap[queryObject.tables[0]],
           );
           const wallet = await helpers.getWalletWithProvider({
             privateKey: normalizePrivateKey(argv.privateKey),
-            chain,
+            chain: chainId,
             providerUrl,
             api,
           });
           // We have to pause the sql interface so we can use the confirm interface
           pause();
-          const proceed = await confirmWrite({ chain, wallet: wallet.address });
+          const proceed = await confirmWrite({
+            chainId,
+            wallet,
+            args: [
+              // args for contract `mutate` methods
+              wallet.address,
+              tableId,
+              statement,
+            ],
+          });
           resume();
           if (!proceed) {
             logger.log("aborting write query.");
@@ -190,13 +186,22 @@ export const handler = async (
     // we have to do some trickery here because we can't have two interfaces open
     // at the same time
     const confirmWrite = async function (info: {
-      wallet: string;
-      chain: number;
+      wallet: Wallet;
+      chainId: number;
+      args: any[];
     }) {
+      const cost = await helpers.estimateCost({
+        signer: info.wallet,
+        chainId: info.chainId,
+        method: "mutate(address,uint256,string)",
+        args: info.args,
+      });
+
       process.stdout.write(
         `You are about to use address: ${chalk.yellow(
-          info.wallet,
-        )} to write to a table on chain ${chalk.yellow(info.chain)}
+          info.wallet.address,
+        )} to write to a table on chain ${chalk.yellow(info.chainId)}
+The estimated cost is ${cost}
 Do you want to continue (${chalk.bold("y/n")})? `,
       );
 
@@ -229,3 +234,21 @@ Do you want to continue (${chalk.bold("y/n")})? `,
 };
 
 const sqlTerms = ["select", "insert", "from", "order", "values"];
+const completer = function (line: string) {
+  // TODO: check against all table names in this project and add to common sql terms
+  const words = line.split(" ");
+  const word = words.pop();
+  if (typeof word !== "string") return [[], line];
+
+  const hits = sqlTerms.filter(function (term: string | undefined) {
+    if (typeof term !== "string" || term === "") return false;
+    return term.indexOf(word) === 0;
+  });
+  return [
+    hits.map((hit: string) => {
+      words.push(hit);
+      return words.join(" ");
+    }),
+    line,
+  ];
+};
