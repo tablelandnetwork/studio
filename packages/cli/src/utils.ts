@@ -414,6 +414,16 @@ export const helpers = {
 
     return argv.store.get<string>("projectId");
   },
+  getProviderUrl: function (argv: { store: FileStore; providerUrl: unknown }) {
+    if (
+      typeof argv.providerUrl === "string" &&
+      argv.providerUrl.trim() !== ""
+    ) {
+      return argv.providerUrl.trim();
+    }
+
+    return argv.store.get<string>("providerUrl");
+  },
   getQueryValidator: async function () {
     await init();
     return async function (query: string) {

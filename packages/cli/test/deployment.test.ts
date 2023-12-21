@@ -152,6 +152,9 @@ describe("commands/deployment", function () {
         question: async function (qstn: string) {
           message = qstn;
         },
+        close: function () {
+          rlStub.restore();
+        },
       };
     });
 
@@ -173,7 +176,6 @@ describe("commands/deployment", function () {
       .command(mod)
       .parse();
 
-    rlStub.restore();
     const lines = message.split("\n");
 
     equal(

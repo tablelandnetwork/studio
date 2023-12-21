@@ -5,7 +5,7 @@ import { logger, FileStore, helpers } from "../utils.js";
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "use [context] [id]";
 export const desc =
-  "use the given context id for all    ensuing commands. context can be one of (team, project, or api). ";
+  "use the given context id for all    ensuing commands. context can be one of (api, chain, team, project, or  provider). ";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
@@ -35,13 +35,19 @@ export const handler = async (
         fileStore.set("apiUrl", id);
         fileStore.save();
         break;
+      case "chain":
+        fileStore.set("chain", id);
+        fileStore.save();
+        break;
+      case "provider":
+        fileStore.set("providerUrl", id);
+        fileStore.save();
+        break;
       default:
         throw new Error(`cannot set context for: ${context}`);
     }
 
-    logger.log(
-      `your ${context} context has been set to ${context}_id of: ${id}`,
-    );
+    logger.log(`your ${context} context has been set to: ${id}`);
   } catch (err: any) {
     logger.error(err);
   }

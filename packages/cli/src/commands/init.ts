@@ -37,11 +37,16 @@ export const handler = async (
       ? questions.map((q) => q.default)
       : await helpers.ask(questions.map((q) => q.message));
 
-    const fileJson: { privateKey?: string; providerUrl?: string } = {};
+    const fileJson: {
+      privateKey?: string;
+      providerUrl?: string;
+      chain?: string;
+    } = {};
     if (answers[0]) fileJson.privateKey = answers[0];
     if (answers[1]) fileJson.providerUrl = answers[1];
+    if (answers[2]) fileJson.chain = answers[2];
 
-    const configFilePath = getFullConfigPath(answers[2]);
+    const configFilePath = getFullConfigPath(answers[3]);
     if (typeof configFilePath !== "string") {
       throw new Error("invalid config file path");
     }
@@ -67,6 +72,11 @@ const questions = [
   {
     name: "providerUrl",
     message: "Enter a default blockchain provider URL (optional) ",
+    default: undefined,
+  },
+  {
+    name: "chain",
+    message: "Enter a default chain (optional) ",
     default: undefined,
   },
   {
