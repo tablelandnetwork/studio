@@ -214,6 +214,7 @@ function getIdFromTableName(tableName: string, revIndx: number) {
   return id;
 }
 
+// TODO: move these to the `chains` package
 // currency symbols for chains that don't use ETH
 const symbols: Record<number, string> = {
   // matic
