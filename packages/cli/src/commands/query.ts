@@ -24,7 +24,7 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { store, providerUrl } = argv;
+    const { store } = argv;
 
     if (typeof store !== "string" || store.trim() === "") {
       throw new Error("must provide path to session store file");
@@ -34,6 +34,10 @@ export const handler = async (
     const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
     const api = helpers.getApi(fileStore, apiUrl);
     const projectId = helpers.getProject({ ...argv, store: fileStore });
+    const providerUrl = helpers.getProviderUrl({
+      providerUrl: argv.providerUrl,
+      store: fileStore,
+    });
 
     if (typeof projectId !== "string" || !helpers.isUUID(projectId)) {
       throw new Error(ERROR_INVALID_PROJECT_ID);

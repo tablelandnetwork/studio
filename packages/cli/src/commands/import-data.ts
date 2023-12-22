@@ -22,7 +22,7 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { providerUrl, store, table, file } = argv;
+    const { store, table, file } = argv;
     if (typeof table !== "string") {
       throw new Error("table name parameter is required");
     }
@@ -30,6 +30,10 @@ export const handler = async (
     const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
     const api = helpers.getApi(fileStore, apiUrl);
     const projectId = helpers.getProject({ ...argv, store: fileStore });
+    const providerUrl = helpers.getProviderUrl({
+      providerUrl: argv.providerUrl,
+      store: fileStore,
+    });
 
     const environmentId = await helpers.getEnvironmentId(api, projectId);
 

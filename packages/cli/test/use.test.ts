@@ -136,11 +136,55 @@ describe("commands/use", function () {
     equal(
       consoleLog.getCall(1).firstArg,
       // typescript linting doesn't honor the assertion of the runtime type here, so we need to cast
-      `your team context has been set to team_id of: ${teamId as string}`,
+      `your team context has been set to: ${teamId as string}`,
     );
 
     const session = getSession();
     equal(session.teamId, teamId);
+  });
+
+  test("use command can set chain", async function () {
+    const chain = "local-tableland";
+    const consoleLog = spy(logger, "log");
+
+    await yargs([
+      "use",
+      "chain",
+      chain,
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
+
+    equal(
+      consoleLog.getCall(0).firstArg,
+      // typescript linting doesn't honor the assertion of the runtime type here, so we need to cast
+      `your chain context has been set to: ${chain}`,
+    );
+  });
+
+  test("use command can set provider url", async function () {
+    const providerUrl = "http://localhost:8000";
+    const consoleLog = spy(logger, "log");
+
+    await yargs([
+      "use",
+      "provider",
+      providerUrl,
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
+
+    equal(
+      consoleLog.getCall(0).firstArg,
+      // typescript linting doesn't honor the assertion of the runtime type here, so we need to cast
+      `your provider context has been set to: ${providerUrl}`,
+    );
   });
 
   test("unuse command clears existing context", async function () {

@@ -74,8 +74,11 @@ describe("commands/init", function () {
         stdin.send("\n");
       }, 1500);
       setTimeout(() => {
-        stdin.send("\n").end();
+        stdin.send("\n");
       }, 2500);
+      setTimeout(() => {
+        stdin.send("\n").end();
+      }, 4500);
 
       // run the command
       await yargs(["init"]).command<GlobalOptions>(mod).parse();
@@ -97,6 +100,7 @@ describe("commands/init", function () {
       const privateKey =
         "0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd";
       const providerUrl = "http://127.0.0.1:8545";
+      const chain = "local-tableland";
       // put the session file in a non default spot
       const sessionPath = path.join("test", "validator");
       // setup user input entry with values
@@ -107,8 +111,11 @@ describe("commands/init", function () {
         stdin.send(`${providerUrl}\n`);
       }, 1500);
       setTimeout(() => {
+        stdin.send(`${chain}\n`);
+      }, 3000);
+      setTimeout(() => {
         stdin.send(`${sessionPath}\n`).end();
-      }, 2500);
+      }, 5000);
 
       // run the command
       await yargs(["init"]).command<GlobalOptions>(mod).parse();
@@ -129,6 +136,7 @@ describe("commands/init", function () {
         privateKey:
           "0x47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd",
         providerUrl: "http://127.0.0.1:8545",
+        chain: "local-tableland",
       });
     });
   });
