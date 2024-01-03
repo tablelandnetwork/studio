@@ -92,7 +92,7 @@ export default async function Projects({
                   {team.slug}
                 </span>{" "}
                 &mdash; for you. {team.personal ? "This" : "It"} is your
-                personal Team for your own projects &mdash; You can&apos;t
+                personal account for your own projects &mdash; You can&apos;t
                 invite collaborators {team.personal ? "here" : "there"}.
               </p>
             </div>

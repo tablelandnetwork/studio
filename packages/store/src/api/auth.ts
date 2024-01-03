@@ -78,7 +78,7 @@ export function auth(
       ]);
       const info = await userAndPersonalTeamByAddress(address);
       if (!info) {
-        throw new Error("Failed to create user and personal team.");
+        throw new Error("Failed to create user and personal account.");
       }
       return info;
     },
