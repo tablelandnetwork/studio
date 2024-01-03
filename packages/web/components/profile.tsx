@@ -125,8 +125,6 @@ export default function Profile({
     <div className="flex flex-row gap-2">
       {isConnected && (
         <>
-          {/* Wallet content goes here */}
-          {address && !hideAddress && <AddressDisplay address={address} copy />}
           {auth ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -145,7 +143,7 @@ export default function Profile({
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
@@ -162,6 +160,11 @@ export default function Profile({
                 {/* </DropdownMenuItem> */}
                 {/* </DropdownMenuGroup> */}
                 {/* <DropdownMenuSeparator /> */}
+                {address && !hideAddress && (
+                  <DropdownMenuItem>
+                    <AddressDisplay address={address} copy />
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => logout.mutate()}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign out</span>
