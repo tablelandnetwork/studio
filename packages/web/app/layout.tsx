@@ -4,7 +4,6 @@ import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import { cookies, headers } from "next/headers";
-import Link from "next/link";
 import { cache } from "react";
 import Footer from "./_components/footer";
 import { api } from "@/trpc/server";
@@ -13,7 +12,6 @@ import WagmiProvider from "@/components/wagmi-provider";
 import { Toaster } from "@/components/ui/toaster";
 import PrimaryHeaderItem from "@/components/primary-header-item";
 import { NavPrimary } from "@/components/nav-primary";
-import MesaSvg from "@/components/mesa-svg";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 
@@ -72,12 +70,7 @@ export default async function RootLayout({
           <body className="flex min-h-screen flex-col">
             <TRPCReactProvider headers={headers()}>
               <header className="flex items-center justify-between px-4 py-3">
-                <div className="flex flex-row items-center gap-x-2">
-                  <Link href="/">
-                    <MesaSvg />
-                  </Link>
-                  <PrimaryHeaderItem teams={teams} />
-                </div>
+                <PrimaryHeaderItem teams={teams} />
                 <div className="ml-auto flex items-center space-x-4">
                   <NavPrimary />
                   <Profile />

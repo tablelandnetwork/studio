@@ -94,7 +94,7 @@ export const builder = function (args: Yargs) {
           const wallet = await helpers.getWalletWithProvider({
             privateKey,
             chain: chainInfo.chainId,
-            providerUrl: providerUrl,
+            providerUrl,
             api,
           });
 
