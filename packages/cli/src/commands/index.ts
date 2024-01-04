@@ -6,20 +6,22 @@ import * as login from "./login.js";
 import * as logout from "./logout.js";
 import * as project from "./project.js";
 import * as query from "./query.js";
+import * as status from "./status.js";
 import * as team from "./team.js";
 import * as use from "./use.js";
 import * as unuse from "./unuse.js";
 
 export const commands = [
+  deployment,
+  init,
+  importData,
+  importTable,
   login,
   logout,
-  team,
-  init,
   project,
-  deployment,
-  importData,
   query,
-  importTable,
+  status,
+  team,
   use,
   unuse,
 ];
