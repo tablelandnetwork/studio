@@ -28,6 +28,14 @@ export const handler = async (
         fileStore.remove("apiUrl");
         fileStore.save();
         break;
+      case "chain":
+        fileStore.remove("chain");
+        fileStore.save();
+        break;
+      case "provider":
+        fileStore.remove("providerUrl");
+        fileStore.save();
+        break;
       default:
         throw new Error(`cannot remove context for: ${context}`);
     }

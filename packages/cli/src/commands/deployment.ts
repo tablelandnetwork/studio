@@ -86,16 +86,15 @@ export const builder = function (args: Yargs) {
             ...argv,
             store: fileStore,
           });
-          const providerUrl = helpers.getProviderUrl({
-            providerUrl: argv.providerUrl,
-            store: fileStore,
-          });
 
           const wallet = await helpers.getWalletWithProvider({
+            api,
             privateKey,
             chain: chainInfo.chainId,
-            providerUrl: providerUrl,
-            api,
+            providerUrl: helpers.getProviderUrl({
+              providerUrl: argv.providerUrl,
+              store: fileStore,
+            }),
           });
 
           if (typeof name !== "string" || name.trim() === "") {
