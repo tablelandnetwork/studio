@@ -44,148 +44,18 @@ export const handler = async (
     }
 
     const environmentId = await helpers.getEnvironmentId(api, projectId);
-    const validateQuery = await helpers.getQueryValidator();
+    const queryValidator = await helpers.getQueryValidator();
 
     const studioAliasMapper = studioAliases({
       environmentId,
+      providerUrl,
       apiUrl,
     });
 
-    const _interface = createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      completer,
-      terminal: true,
-      tabSize: 4,
+    const shell = new QueryShell({
+      aliasMap,
+      queryValidator,
     });
-
-    let statement = "";
-    // readline interfaces don't immediately pause "line" events, so we have to
-    // build our own mechanism to pause
-    let paused = false;
-    let captureLine: undefined | ((line: string) => void);
-
-    // the _interface handler promise isn't being used, but that is ok in this case
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    _interface.on("line", async function (line: string | undefined) {
-      if (typeof line !== "string") return;
-      if (paused) {
-        if (typeof captureLine === "function") captureLine(line);
-        return;
-      }
-
-      line = line.trim();
-      if (line === "") {
-        if (statement === "") return resetPrompt();
-        return setMidPrompt();
-      }
-
-      // note: this gives the first index of ";", if there is more than one
-      //   semicolon the check below will ensure the user isn't trying to run
-      //   multiple statements at the same time.
-      const semiColonIndex = line.indexOf(";");
-
-      // if no semicolon exists they are inputting a multi line statement
-      // we should change the prompt and save the previous line's text
-      if (semiColonIndex < 0) {
-        statement += line + " ";
-        return setMidPrompt();
-      }
-
-      // if a semicolon exists but is not at the end of the statement they are
-      // trying to run multiple statments together, which is not allowed
-      if (semiColonIndex < line.length - 1) {
-        logger.error(
-          "statements must end with `;` and you cannot run more than one statement at a time",
-        );
-        resetPrompt();
-        return;
-      }
-
-      statement += line;
-      // at this point we have a full statement, we should attempt to run it
-      try {
-        const queryObject = await validateQuery(statement);
-
-        if (queryObject.type === "create") {
-          throw new Error(
-            "you cannot create studio project tables with the cli",
-          );
-        }
-
-        if (queryObject.type !== "read" && !argv.privateKey) {
-          throw new Error(
-            "you did not provide a private key, you can only run read queries",
-          );
-        }
-
-        const dbOpts: SdkConfig = {
-          aliases: studioAliasMapper,
-        };
-        if (queryObject.type !== "read") {
-          // TODO: all sub-queries I can think of work here, but ask others for try and break this.
-          const aliasMap = await studioAliasMapper.read();
-          const chainId = helpers.getChainIdFromTableName(
-            aliasMap[queryObject.tables[0]],
-          );
-          const tableId = helpers.getTableIdFromTableName(
-            aliasMap[queryObject.tables[0]],
-          );
-          const wallet = await helpers.getWalletWithProvider({
-            privateKey: normalizePrivateKey(argv.privateKey),
-            chain: chainId,
-            providerUrl,
-            api,
-          });
-          // We have to pause the sql interface so we can use the confirm interface
-          pause();
-          const proceed = await confirmWrite({
-            chainId,
-            wallet,
-            args: [
-              // args for contract `mutate` methods
-              wallet.address,
-              tableId,
-              statement,
-            ],
-          });
-          resume();
-          if (!proceed) {
-            logger.log("aborting write query.");
-            return resetPrompt();
-          }
-          dbOpts.signer = wallet;
-        }
-
-        const db = new Database(dbOpts);
-        const preparedStatement = db.prepare(statement);
-        const result = await preparedStatement.all();
-
-        logger.log(JSON.stringify(result, null, 4));
-        resetPrompt();
-      } catch (err: any) {
-        logger.error(err);
-        resetPrompt();
-      }
-    });
-
-    const resetPrompt = function () {
-      statement = "";
-      _interface.setPrompt("> ");
-      _interface.prompt();
-    };
-
-    const setMidPrompt = function () {
-      _interface.setPrompt("... ");
-      _interface.prompt();
-    };
-
-    const pause = function () {
-      paused = true;
-    };
-    const resume = function () {
-      paused = false;
-    };
 
     // we have to do some trickery here because we can't have two interfaces open
     // at the same time
@@ -236,6 +106,173 @@ Do you want to continue (${chalk.bold("y/n")})? `,
     logger.error("exiting studio query shell");
   }
 };
+
+class QueryShell {
+  statement = "";
+    // readline interfaces don't immediately pause "line" events, so we have to
+  // build our own mechanism to pause
+  paused = false;
+  captureLine: undefined | ((line: string) => void);
+  databases: Record<string, Database> = {};
+
+  constructor(opts) {
+    this.aliasMap = opts.aliasMap;
+    this.db = new Database({
+      aliases: opts.aliasMap,
+    });
+    this.queryValidator = opts.queryValidator;
+    this.providerUrl = opts.providerUrl;
+    this.privateKey = opts.privateKey;
+
+    this._interface = createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      completer,
+      terminal: true,
+      tabSize: 4,
+    });
+
+    // the _interface handler promise isn't being used, but that is ok in this case
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    this._interface.on("line", this.handler);
+  }
+
+  async handler(line: string | undefined) {
+    if (typeof line !== "string") return;
+    if (this.paused) {
+      if (typeof this.captureLine === "function") this.captureLine(line);
+      return;
+    }
+
+    line = line.trim();
+    if (line === "") {
+      if (this.statement === "") return this.resetPrompt();
+      return this.setMidPrompt();
+    }
+
+    // note: this gives the first index of ";", if there is more than one
+    //   semicolon the check below will ensure the user isn't trying to run
+    //   multiple statements at the same time.
+    const semiColonIndex = line.indexOf(";");
+
+    // if no semicolon exists they are inputting a multi line statement
+    // we should change the prompt and save the previous line's text
+    if (semiColonIndex < 0) {
+      this.statement += line + " ";
+      return this.setMidPrompt();
+    }
+
+    // if a semicolon exists but is not at the end of the statement they are
+    // trying to run multiple statments together, which is not allowed
+    if (semiColonIndex < line.length - 1) {
+      logger.error(
+        "statements must end with `;` and you cannot run more than one statement at a time",
+      );
+      this.resetPrompt();
+      return;
+    }
+
+    this.statement += line;
+    // at this point we have a full statement, we should attempt to run it
+    await this.runQuery()
+  }
+
+  async runQuery() {
+    try {
+      const queryObject = await validateQuery(this.statement);
+
+      if (queryObject.type === "create") {
+        throw new Error(
+          "you cannot create studio project tables with the cli",
+        );
+      }
+
+      if (queryObject.type !== "read" && !argv.privateKey) {
+        throw new Error(
+          "you did not provide a private key, you can only run read queries",
+        );
+      }
+
+      if (queryObject.type !== "read") {
+        // TODO: all sub-queries I can think of work here, but ask others for try and break this.
+        const aliasMap = await this.aliasMap.read();
+        const chainId = helpers.getChainIdFromTableName(
+          aliasMap[queryObject.tables[0]],
+        );
+        const tableId = helpers.getTableIdFromTableName(
+          aliasMap[queryObject.tables[0]],
+        );
+        const wallet = await helpers.getWalletWithProvider({
+          privateKey: normalizePrivateKey(argv.privateKey),
+          chain: chainId,
+          providerUrl: this.providerUrl,
+          api,
+        });
+        // We have to pause the sql interface so we can use the confirm interface
+        this.pause();
+        const proceed = await confirmWrite({
+          chainId,
+          wallet,
+          args: [
+            // args for contract `mutate` methods
+            wallet.address,
+            tableId,
+            this.statement,
+          ],
+        });
+        this.resume();
+
+        if (!proceed) {
+          logger.log("aborting write query.");
+          return this.resetPrompt();
+        }
+
+        dbOpts.signer = wallet;
+      }
+
+      const db = new Database(dbOpts);
+      const preparedStatement = db.prepare(statement);
+      const result = await preparedStatement.all();
+
+      logger.log(JSON.stringify(result, null, 4));
+      this.resetPrompt();
+    } catch (err: any) {
+      logger.error(err);
+      this.resetPrompt();
+    }
+  }
+
+  resetPrompt() {
+    this.statement = "";
+    this._interface.setPrompt("> ");
+    this._interface.prompt();
+  };
+
+  setMidPrompt() {
+    this._interface.setPrompt("... ");
+    this._interface.prompt();
+  };
+
+  pause() {
+    this.paused = true;
+  };
+  
+  resume() {
+    this.paused = false;
+  };
+
+  getDatabase(chainId) {
+    if (this.databases[chainId]) return this.databases[chainId];
+
+    const wallet = await helpers.getWalletWithProvider({
+      privateKey: normalizePrivateKey(argv.privateKey),
+      chain: chainId,
+      providerUrl: this.providerUrl,
+      api,
+    });
+
+  }
+}
 
 const sqlTerms = ["select", "insert", "from", "order", "values"];
 const completer = function (line: string) {
