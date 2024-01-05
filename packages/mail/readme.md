@@ -1,26 +1,6 @@
-# React Email Starter
+## Overview
 
-A live preview right in your browser so you don't need to keep sending real emails during development.
-
-## Getting Started
-
-First, install the dependencies:
-
-```sh
-npm install
-# or
-yarn
-```
-
-Then, run the development server:
-
-```sh
-npm run dev
-# or
-yarn dev
-```
-
-Open [localhost:3000](http://localhost:3000) with your browser to see the result.
+Encapsulates email sending in Studio.  This package only exports a single function `initMailApi`, which takes an optional apiKey.  If the api key is not provided emails will be logged to the console.  If an api key is provided emails will actually be sent.
 
 ## License
 
