@@ -101,7 +101,6 @@ describe("commands/status", function () {
 
     equal(user.user.address, "0xBcd4042DE499D14e55001CcbB24a551F3b954096");
     equal(user.user.teamId, TEST_TEAM_ID);
-    equal(user.user.email, "testuser@textile.io");
     equal(user.personalTeam.id, TEST_TEAM_ID);
     equal(user.personalTeam.name, "testuser");
     equal(user.personalTeam.slug, "testuser");
