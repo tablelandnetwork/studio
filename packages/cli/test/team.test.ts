@@ -5,7 +5,10 @@ import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
 import { restore, spy, stub } from "sinon";
 import yargs from "yargs/yargs";
+import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/team.js";
+import * as modLogin from "../src/commands/login.js";
+import * as modLogout from "../src/commands/logout.js";
 import { type FileStore, logger, wait, helpers } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
@@ -35,10 +38,24 @@ describe("commands/team", function () {
 
   before(async function () {
     await wait(1000);
+
+    await yargs(["logout", ...defaultArgs])
+      .command<GlobalOptions>(modLogout)
+      .parse();
   });
 
-  afterEach(function () {
+  beforeEach(async function () {
+    await yargs(["login", ...defaultArgs])
+      .command<GlobalOptions>(modLogin)
+      .parse();
+  });
+
+  afterEach(async function () {
     restore();
+
+    await yargs(["logout", ...defaultArgs])
+      .command<GlobalOptions>(modLogout)
+      .parse();
   });
 
   // TODO: all the tests depend on previous tests, need to fix this
