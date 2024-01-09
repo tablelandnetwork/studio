@@ -1,11 +1,12 @@
 import { createInterface } from "readline";
 import type { Arguments } from "yargs";
-import type { Wallet } from "ethers";
+import { Wallet, type Signer } from "ethers";
 import { type helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { studioAliases } from "@tableland/studio-client";
 import chalk from "chalk";
 import { type GlobalOptions } from "../cli.js";
 import {
+  type NormalizedStatement,
   ERROR_INVALID_PROJECT_ID,
   FileStore,
   helpers,
@@ -34,73 +35,26 @@ export const handler = async (
     const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
     const api = helpers.getApi(fileStore, apiUrl);
     const projectId = helpers.getProject({ ...argv, store: fileStore });
-    const providerUrl = helpers.getProviderUrl({
-      providerUrl: argv.providerUrl,
-      store: fileStore,
-    });
 
     if (typeof projectId !== "string" || !helpers.isUUID(projectId)) {
       throw new Error(ERROR_INVALID_PROJECT_ID);
     }
 
-    const environmentId = await helpers.getEnvironmentId(api, projectId);
     const queryValidator = await helpers.getQueryValidator();
-
-    const studioAliasMapper = studioAliases({
-      environmentId,
-      providerUrl,
-      apiUrl,
-    });
-
     const shell = new QueryShell({
-      aliasMap,
-      queryValidator,
+      aliasMap: studioAliases({
+        environmentId: await helpers.getEnvironmentId(api, projectId),
+        apiUrl,
+      }),
+      queryValidator: queryValidator,
+      providerUrl: helpers.getProviderUrl({
+        providerUrl: argv.providerUrl,
+        store: fileStore,
+      }),
+      api,
     });
 
-    // we have to do some trickery here because we can't have two interfaces open
-    // at the same time
-    const confirmWrite = async function (info: {
-      wallet: Wallet;
-      chainId: number;
-      args: any[];
-    }) {
-      const cost = await helpers.estimateCost({
-        signer: info.wallet,
-        chainId: info.chainId,
-        method: "mutate(address,uint256,string)",
-        args: info.args,
-      });
-
-      process.stdout.write(
-        `You are about to use address: ${chalk.yellow(
-          info.wallet.address,
-        )} to write to a table on chain ${chalk.yellow(info.chainId)}
-The estimated cost is ${cost}
-Do you want to continue (${chalk.bold("y/n")})? `,
-      );
-
-      return await new Promise(function (resolve, reject) {
-        captureLine = function (line: string) {
-          captureLine = undefined;
-          if (line.toLowerCase()[0] !== "y") {
-            resolve(false);
-          }
-
-          resolve(true);
-        };
-      });
-    };
-
-    resetPrompt();
-
-    // if the user is midway through a statement and they want to reset the
-    // prompt, they can hit control + c, but if hit it twice or are at a fresh
-    // prompt already we want to kill the process
-    _interface.on("SIGINT", function () {
-      const currentPrompt = _interface.getPrompt();
-      if (currentPrompt === "> ") process.exit();
-      resetPrompt();
-    });
+    shell.start();
   } catch (err: any) {
     logger.error(err);
     logger.error("exiting studio query shell");
@@ -114,8 +68,22 @@ class QueryShell {
   paused = false;
   captureLine: undefined | ((line: string) => void);
   databases: Record<string, Database> = {};
+  aliasMap: ReturnType<typeof studioAliases>;
+  db: Database;
+  api: ReturnType<typeof helpers.getApi>;
+  queryValidator: (query: string) => Promise<NormalizedStatement>;
+  providerUrl: string;
+  privateKey: string | undefined;
+  _interface: ReturnType<typeof createInterface>;
 
-  constructor(opts) {
+  constructor(opts: {
+    aliasMap: ReturnType<typeof studioAliases>;
+    api: ReturnType<typeof helpers.getApi>;
+    queryValidator: (query: string) => Promise<NormalizedStatement>;
+    providerUrl: string;
+    privateKey?: string;
+  }) {
+    this.api = opts.api;
     this.aliasMap = opts.aliasMap;
     this.db = new Database({
       aliases: opts.aliasMap,
@@ -131,10 +99,23 @@ class QueryShell {
       terminal: true,
       tabSize: 4,
     });
+  }
 
+  start() {
     // the _interface handler promise isn't being used, but that is ok in this case
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this._interface.on("line", this.handler);
+
+    // if the user is midway through a statement and they want to reset the
+    // prompt, they can hit control + c, but if hit it twice or are at a fresh
+    // prompt already we want to kill the process
+    this._interface.on("SIGINT", () => {
+      const currentPrompt = this._interface.getPrompt();
+      if (currentPrompt === "> ") process.exit();
+      this.resetPrompt();
+    });
+
+    this.resetPrompt();
   }
 
   async handler(line: string | undefined) {
@@ -179,7 +160,7 @@ class QueryShell {
 
   async runQuery() {
     try {
-      const queryObject = await validateQuery(this.statement);
+      const queryObject = await this.queryValidator(this.statement);
 
       if (queryObject.type === "create") {
         throw new Error(
@@ -187,32 +168,35 @@ class QueryShell {
         );
       }
 
-      if (queryObject.type !== "read" && !argv.privateKey) {
+      if (queryObject.type !== "read" && !this.privateKey) {
         throw new Error(
           "you did not provide a private key, you can only run read queries",
         );
       }
 
+      const aliasMap = await this.aliasMap.read();
+      const chainId = helpers.getChainIdFromTableName(
+        aliasMap[queryObject.tables[0]],
+      );
+
+      const db = await this.getDatabase(chainId);
+
       if (queryObject.type !== "read") {
         // TODO: all sub-queries I can think of work here, but ask others for try and break this.
-        const aliasMap = await this.aliasMap.read();
-        const chainId = helpers.getChainIdFromTableName(
-          aliasMap[queryObject.tables[0]],
-        );
         const tableId = helpers.getTableIdFromTableName(
           aliasMap[queryObject.tables[0]],
         );
-        const wallet = await helpers.getWalletWithProvider({
-          privateKey: normalizePrivateKey(argv.privateKey),
-          chain: chainId,
-          providerUrl: this.providerUrl,
-          api,
-        });
+
+        if (typeof this.privateKey !== "string" || typeof db.config.signer === "undefined") {
+          throw new Error("cannot get wallet");
+        }
+        const wallet = new Wallet(this.privateKey);
+
         // We have to pause the sql interface so we can use the confirm interface
         this.pause();
-        const proceed = await confirmWrite({
+        const proceed = await this.confirmWrite({
           chainId,
-          wallet,
+          signer: db.config.signer,
           args: [
             // args for contract `mutate` methods
             wallet.address,
@@ -227,11 +211,9 @@ class QueryShell {
           return this.resetPrompt();
         }
 
-        dbOpts.signer = wallet;
       }
 
-      const db = new Database(dbOpts);
-      const preparedStatement = db.prepare(statement);
+      const preparedStatement = this.db.prepare(this.statement);
       const result = await preparedStatement.all();
 
       logger.log(JSON.stringify(result, null, 4));
@@ -241,6 +223,40 @@ class QueryShell {
       this.resetPrompt();
     }
   }
+
+  // we have to do some trickery here because we can't have two interfaces open
+  // at the same time
+  async confirmWrite(info: {
+    signer: Signer;
+    chainId: number;
+    args: any[];
+  }) {
+    const cost = await helpers.estimateCost({
+      signer: info.signer,
+      chainId: info.chainId,
+      method: "mutate(address,uint256,string)",
+      args: info.args,
+    });
+
+    process.stdout.write(
+      `You are about to use address: ${chalk.yellow(
+        info.args[0],
+      )} to write to a table on chain ${chalk.yellow(info.chainId)}
+The estimated cost is ${cost}
+Do you want to continue (${chalk.bold("y/n")})? `,
+    );
+
+    return await new Promise((resolve, reject) => {
+      this.captureLine = function (line: string) {
+        this.captureLine = undefined;
+        if (line.toLowerCase()[0] !== "y") {
+          resolve(false);
+        }
+
+        resolve(true);
+      };
+    });
+  };
 
   resetPrompt() {
     this.statement = "";
@@ -261,22 +277,31 @@ class QueryShell {
     this.paused = false;
   };
 
-  getDatabase(chainId) {
+  async getDatabase(chainId: string | number) {
+    if (typeof chainId === "number") chainId = chainId.toString();
     if (this.databases[chainId]) return this.databases[chainId];
 
     const wallet = await helpers.getWalletWithProvider({
-      privateKey: normalizePrivateKey(argv.privateKey),
-      chain: chainId,
+      privateKey: normalizePrivateKey(this.privateKey),
+      chain: parseInt(chainId, 10),
       providerUrl: this.providerUrl,
-      api,
+      api: this.api,
     });
 
+    this.databases[chainId] = new Database({
+      signer: wallet,
+      aliases: this.aliasMap,
+    });
+
+    return this.databases[chainId];
   }
 }
 
 const sqlTerms = ["select", "insert", "from", "order", "values"];
 const completer = function (line: string) {
-  // TODO: check against all table names in this project and add to common sql terms
+  // TODO:
+  //    - add more common sql terms
+  //    - make completer a method then check against all table names in this project
   const words = line.split(" ");
   const word = words.pop();
   if (typeof word !== "string") return [[], line];
