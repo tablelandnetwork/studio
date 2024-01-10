@@ -1,7 +1,7 @@
 import { createInterface } from "readline";
 import type { Arguments } from "yargs";
 import { Wallet, type Signer } from "ethers";
-import { type helpers as sdkHelpers, Database } from "@tableland/sdk";
+import { Database } from "@tableland/sdk";
 import { studioAliases } from "@tableland/studio-client";
 import chalk from "chalk";
 import { type GlobalOptions } from "../cli.js";
@@ -13,9 +13,6 @@ import {
   logger,
   normalizePrivateKey,
 } from "../utils.js";
-
-// TODO: It seems like the sdk should export a single type for the Database config
-type SdkConfig = sdkHelpers.Config & Partial<sdkHelpers.AutoWaitConfig>;
 
 export const command = "query";
 export const desc =
@@ -46,11 +43,14 @@ export const handler = async (
         environmentId: await helpers.getEnvironmentId(api, projectId),
         apiUrl,
       }),
-      queryValidator: queryValidator,
+      queryValidator,
       providerUrl: helpers.getProviderUrl({
         providerUrl: argv.providerUrl,
         store: fileStore,
       }),
+      privateKey: argv.privateKey
+        ? normalizePrivateKey(argv.privateKey)
+        : undefined,
       api,
     });
 
@@ -63,13 +63,12 @@ export const handler = async (
 
 class QueryShell {
   statement = "";
-    // readline interfaces don't immediately pause "line" events, so we have to
+  // readline interfaces don't immediately pause "line" events, so we have to
   // build our own mechanism to pause
   paused = false;
   captureLine: undefined | ((line: string) => void);
   databases: Record<string, Database> = {};
   aliasMap: ReturnType<typeof studioAliases>;
-  db: Database;
   api: ReturnType<typeof helpers.getApi>;
   queryValidator: (query: string) => Promise<NormalizedStatement>;
   providerUrl: string;
@@ -85,9 +84,6 @@ class QueryShell {
   }) {
     this.api = opts.api;
     this.aliasMap = opts.aliasMap;
-    this.db = new Database({
-      aliases: opts.aliasMap,
-    });
     this.queryValidator = opts.queryValidator;
     this.providerUrl = opts.providerUrl;
     this.privateKey = opts.privateKey;
@@ -104,7 +100,7 @@ class QueryShell {
   start() {
     // the _interface handler promise isn't being used, but that is ok in this case
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._interface.on("line", this.handler);
+    this._interface.on("line", this.handler.bind(this));
 
     // if the user is midway through a statement and they want to reset the
     // prompt, they can hit control + c, but if hit it twice or are at a fresh
@@ -155,7 +151,7 @@ class QueryShell {
 
     this.statement += line;
     // at this point we have a full statement, we should attempt to run it
-    await this.runQuery()
+    await this.runQuery();
   }
 
   async runQuery() {
@@ -163,9 +159,7 @@ class QueryShell {
       const queryObject = await this.queryValidator(this.statement);
 
       if (queryObject.type === "create") {
-        throw new Error(
-          "you cannot create studio project tables with the cli",
-        );
+        throw new Error("you cannot create studio project tables with the cli");
       }
 
       if (queryObject.type !== "read" && !this.privateKey) {
@@ -187,7 +181,10 @@ class QueryShell {
           aliasMap[queryObject.tables[0]],
         );
 
-        if (typeof this.privateKey !== "string" || typeof db.config.signer === "undefined") {
+        if (
+          typeof this.privateKey !== "string" ||
+          typeof db.config.signer === "undefined"
+        ) {
           throw new Error("cannot get wallet");
         }
         const wallet = new Wallet(this.privateKey);
@@ -210,10 +207,9 @@ class QueryShell {
           logger.log("aborting write query.");
           return this.resetPrompt();
         }
-
       }
 
-      const preparedStatement = this.db.prepare(this.statement);
+      const preparedStatement = db.prepare(this.statement);
       const result = await preparedStatement.all();
 
       logger.log(JSON.stringify(result, null, 4));
@@ -226,11 +222,7 @@ class QueryShell {
 
   // we have to do some trickery here because we can't have two interfaces open
   // at the same time
-  async confirmWrite(info: {
-    signer: Signer;
-    chainId: number;
-    args: any[];
-  }) {
+  async confirmWrite(info: { signer: Signer; chainId: number; args: any[] }) {
     const cost = await helpers.estimateCost({
       signer: info.signer,
       chainId: info.chainId,
@@ -256,37 +248,40 @@ Do you want to continue (${chalk.bold("y/n")})? `,
         resolve(true);
       };
     });
-  };
+  }
 
   resetPrompt() {
     this.statement = "";
     this._interface.setPrompt("> ");
     this._interface.prompt();
-  };
+  }
 
   setMidPrompt() {
     this._interface.setPrompt("... ");
     this._interface.prompt();
-  };
+  }
 
   pause() {
     this.paused = true;
-  };
-  
+  }
+
   resume() {
     this.paused = false;
-  };
+  }
 
   async getDatabase(chainId: string | number) {
     if (typeof chainId === "number") chainId = chainId.toString();
     if (this.databases[chainId]) return this.databases[chainId];
 
-    const wallet = await helpers.getWalletWithProvider({
-      privateKey: normalizePrivateKey(this.privateKey),
-      chain: parseInt(chainId, 10),
-      providerUrl: this.providerUrl,
-      api: this.api,
-    });
+    // if no private key was given, the databases will be read only
+    const wallet = this.privateKey
+      ? await helpers.getWalletWithProvider({
+          privateKey: this.privateKey,
+          chain: parseInt(chainId, 10),
+          providerUrl: this.providerUrl,
+          api: this.api,
+        })
+      : undefined;
 
     this.databases[chainId] = new Database({
       signer: wallet,
