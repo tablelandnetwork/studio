@@ -81,6 +81,22 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         }
         return await store.teams.teamsByMemberId(teamId);
       }),
+    userTeamsFromAddress: publicProcedure
+      .input(z.object({ userAddress: z.string().trim().nonempty() }))
+      .query(async ({ input, ctx }) => {
+        const defaultTeam = await store.users.userDefaultTeam(
+          input?.userAddress,
+        );
+
+        if (!defaultTeam) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: `No default team found for ${input?.userAddress}`,
+          });
+        }
+
+        return await store.teams.teamsByMemberId(defaultTeam);
+      }),
     newTeam: protectedProcedure
       .input(
         z.object({

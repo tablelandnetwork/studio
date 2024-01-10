@@ -15,7 +15,7 @@ export const desc = "manage studio teams";
 
 export interface CommandOptions extends GlobalOptions {
   name?: string;
-  identifier?: string;
+  address?: string;
   personalTeamId?: string;
   invites?: string;
 }
@@ -23,18 +23,18 @@ export interface CommandOptions extends GlobalOptions {
 export const builder = function (args: Yargs) {
   return args
     .command(
-      "ls [identifier]",
+      "ls [public key]",
       "Get a list of your teams, or the teams for a default team id",
       function (args) {
-        return args.positional("identifier", {
+        return args.positional("address", {
           type: "string",
           description:
-            "Optional team identifier. If not provided the current user's session is used",
+            "Optional filter by user based on public key. If not provided the current user's session is used",
         });
       },
       async function (argv) {
         try {
-          const { identifier, store, apiUrl: apiUrlArg } = argv;
+          const { address, store, apiUrl: apiUrlArg } = argv;
           if (typeof store !== "string") {
             throw new Error("must provide path to session store file");
           }
@@ -52,15 +52,17 @@ export const builder = function (args: Yargs) {
           });
           const api = helpers.getApi(fileStore, apiUrl);
 
-          let query;
-          if (typeof identifier === "string" && identifier.trim() !== "") {
-            // TODO: `identifier` needs to be converted to teamId for this to work.
-            //       Alternatively we could create a new rpc endpoint that takes
-            //       wallet or email or whatever account identifier we want.
-            query = { userTeamId: identifier };
+          if (typeof address === "string" && address.trim() !== "") {
+            // if address exists we will query based on address
+            const teams = await api.teams.userTeamsFromAddress.query({
+              userAddress: address,
+            });
+
+            const pretty = JSON.stringify(teams, null, 4);
+            return logger.log(pretty);
           }
 
-          const teams = await api.teams.userTeams.query(query);
+          const teams = await api.teams.userTeams.query();
           const pretty = JSON.stringify(teams, null, 4);
 
           logger.log(pretty);

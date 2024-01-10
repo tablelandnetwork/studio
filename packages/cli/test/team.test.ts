@@ -91,10 +91,10 @@ describe("commands/team", function () {
     equal(project.description, projectDescription);
   });
 
-  test.skip("can list teams for a specific user", async function () {
+  test("can list teams for a specific user", async function () {
     const consoleLog = spy(logger, "log");
-    const teamId = "123";
-    await yargs(["team", "ls", teamId, ...defaultArgs])
+    const userAddress = "0xBcd4042DE499D14e55001CcbB24a551F3b954096";
+    await yargs(["team", "ls", userAddress, ...defaultArgs])
       .command(mod)
       .parse();
 
@@ -114,7 +114,7 @@ describe("commands/team", function () {
     equal(team.name, teamName);
     equal(team.slug, teamName);
 
-    equal(team.projects.length, 1);
+    equal(team.projects.length, 2);
     const project = team.projects[0];
     equal(project.name, projectName);
     equal(project.description, projectDescription);
