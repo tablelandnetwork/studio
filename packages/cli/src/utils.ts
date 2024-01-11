@@ -450,8 +450,10 @@ export const helpers = {
     providerUrl,
     api,
   }: Options): Promise<Wallet> {
-    if (privateKey == null) {
-      throw new Error("missing required flag (`-k` or `--privateKey`)");
+    if (privateKey == null || privateKey?.trim() === "") {
+      throw new Error(
+        "missing required private key (use `.tablelandrc.json` file, or include `-k` or `--privateKey` flag)",
+      );
     }
     let network: sdkHelpers.ChainInfo;
     try {

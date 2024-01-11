@@ -75,7 +75,7 @@ describe("commands/deployment", function () {
       // actually create a deployment on maticmum.
       stdin.send("n\n").end();
       stdin.restore();
-    }, 5000);
+    }, 7000);
 
     await yargs([
       "deployment",
