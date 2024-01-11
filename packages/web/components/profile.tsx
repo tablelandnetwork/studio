@@ -43,7 +43,7 @@ export default function Profile({
   const logout = api.auth.logout.useMutation({
     onSuccess: () => {
       setAuth(undefined);
-      router.refresh();
+      router.push("/");
     },
   });
   const [signInError, setSignInError] = useState<Error | undefined>(undefined);
