@@ -24,13 +24,17 @@ export const handler = async (
     const notSet = "undefined";
     logger.log(
       `logged in as: ${JSON.stringify(user, null, 4)}
-context: ${JSON.stringify({
-        team: fileStore.get("teamId") ?? notSet,
-        project: fileStore.get("projectId") ?? notSet,
-        api: fileStore.get("apiUrl") ?? notSet,
-        chain: fileStore.get("chain") ?? notSet,
-        provider: fileStore.get("providerUrl") ?? argv.providerUrl ?? notSet,
-      })}`,
+context: ${JSON.stringify(
+        {
+          team: fileStore.get("teamId") ?? notSet,
+          project: fileStore.get("projectId") ?? notSet,
+          api: fileStore.get("apiUrl") ?? notSet,
+          chain: fileStore.get("chain") ?? notSet,
+          provider: fileStore.get("providerUrl") ?? argv.providerUrl ?? notSet,
+        },
+        null,
+        4,
+      )}`,
     );
   } catch (err: any) {
     logger.error(err);
