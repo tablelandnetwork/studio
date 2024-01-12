@@ -8,6 +8,7 @@ import {
   providers,
   utils as ethersUtils,
 } from "ethers";
+import { z } from "zod";
 import createKeccakHash from "keccak";
 import { helpers as sdkHelpers } from "@tableland/sdk";
 import { init } from "@tableland/sqlparser";
@@ -17,7 +18,10 @@ const sessionKey = "session-cookie";
 const DEFAULT_API_URL = "https://studio.tableland.xyz";
 const MAX_STATEMENT_SIZE = 34999;
 
+export const ERROR_INVALID_API_URL = "invalid api url";
 export const ERROR_INVALID_PROJECT_ID = "you must provide project id";
+export const ERROR_INVALID_STORE_PATH =
+  "must provide path to session store file";
 export const NO_DEFAULT_ENV_ERR = "could not get default environment";
 
 export class FileStore {
@@ -235,6 +239,9 @@ function getCurrencySymbol(chainId: number) {
   return "ETH";
 }
 
+const ValidStringValue = z.string().trim().nonempty();
+const ValidString = z.string();
+
 export const helpers = {
   ask: async function (questions: string[]) {
     const rl = readline.createInterface({
@@ -354,7 +361,7 @@ export const helpers = {
 
     return api(apiArgs);
   },
-  getApiUrl: function (argv: { store: FileStore; apiUrl?: string }) {
+  getApiUrl: function (argv: { store: FileStore; apiUrl?: unknown }) {
     if (typeof argv.apiUrl === "string" && argv.apiUrl.trim() !== "") {
       return argv.apiUrl.trim();
     }
@@ -431,18 +438,45 @@ export const helpers = {
       return await globalThis.sqlparser.normalize(query);
     };
   },
+  // get a command argument which must be a string with a value
+  getStringValue: function (arg: unknown, errorMessage: string) {
+    // This zod validator requires a string and it cannot be empty
+    const parsed = ValidStringValue.safeParse(arg);
+    if (!parsed.success) {
+      throw new Error(errorMessage);
+    }
+
+    return parsed.data.trim();
+  },
+  // get a command argument which must be a string, but can be empty
+  getString: function (arg: unknown, errorMessage: string) {
+    // This zod validator requires a string and it CAN be empty
+    const parsed = ValidString.safeParse(arg);
+    if (!parsed.success) {
+      throw new Error(errorMessage);
+    }
+
+    return parsed.data.trim();
+  },
   getStudioProvider: async function (chainId: number, api: API) {
     return await api.providers.providerForChain.query({ chainId });
   },
   getTableIdFromTableName: function (tableName: string) {
     return getIdFromTableName(tableName, 1);
   },
-  getTeam: function (argv: { store: FileStore; teamId?: string }) {
+  getTeam: function (argv: { store: FileStore; teamId?: unknown }) {
     if (typeof argv.teamId === "string" && argv.teamId.trim() !== "") {
       return argv.teamId.trim();
     }
 
     return argv.store.get<string>("teamId");
+  },
+  getUUID: function (arg: unknown, errorMessage: string) {
+    if (!this.isUUID(arg)) {
+      throw new Error(errorMessage);
+    }
+
+    return this.getStringValue(arg, errorMessage);
   },
   getWalletWithProvider: async function ({
     privateKey,
