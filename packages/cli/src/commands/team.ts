@@ -24,7 +24,7 @@ export const builder = function (args: Yargs) {
   return args
     .command(
       "ls [public key]",
-      "Get a list of your teams, or the teams for a default team id",
+      "Get a list of your teams, or the teams for a public key address",
       function (args) {
         return args.positional("address", {
           type: "string",

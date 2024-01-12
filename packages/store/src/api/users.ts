@@ -6,8 +6,8 @@ const users = schema.users;
 
 export function initUsers(db: DrizzleD1Database<typeof schema>) {
   return {
-    // NOTE: the users table only has the default team, i.e. this won't return all teams for a user
-    userDefaultTeam: async function (userAddress: string) {
+    // NOTE: the users table only has the personal team, i.e. this won't return all teams for a user
+    userPersonalTeam: async function (userAddress: string) {
       const user = await db
         .select({ teamId: users.teamId })
         .from(users)
