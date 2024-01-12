@@ -44,6 +44,7 @@ export default function Profile({
     onSuccess: () => {
       setAuth(undefined);
       router.push("/");
+      router.refresh();
     },
   });
   const [signInError, setSignInError] = useState<Error | undefined>(undefined);
