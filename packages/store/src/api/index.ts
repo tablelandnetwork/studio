@@ -8,6 +8,7 @@ import { invites } from "./invites.js";
 import { initProjects } from "./projects.js";
 import { initTables } from "./tables.js";
 import { initTeams } from "./teams.js";
+import { initUsers } from "./users.js";
 
 export function init(tbl: Database, dataSealPass: string) {
   const db = drizzle(tbl, { logger: false, schema });
@@ -19,5 +20,6 @@ export function init(tbl: Database, dataSealPass: string) {
     teams: initTeams(db, tbl, dataSealPass),
     environments: initEnvironments(db, tbl),
     deployments: initDeployments(db),
+    users: initUsers(db),
   };
 }

@@ -81,6 +81,22 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         }
         return await store.teams.teamsByMemberId(teamId);
       }),
+    userTeamsFromAddress: publicProcedure
+      .input(z.object({ userAddress: z.string().trim().nonempty() }))
+      .query(async ({ input, ctx }) => {
+        const personalTeam = await store.users.userPersonalTeam(
+          input?.userAddress,
+        );
+
+        if (!personalTeam) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: `No personal team found for ${input?.userAddress}`,
+          });
+        }
+
+        return await store.teams.teamsByMemberId(personalTeam);
+      }),
     newTeam: protectedProcedure
       .input(
         z.object({
