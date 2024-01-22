@@ -14,7 +14,7 @@ export default function Page() {
           <Info className="flex-shrink-0" />
           <p className="text-muted-foreground">
             Tableland Studio makes it easy to design and deploy tables on
-            Tableland, collaborate with teammates on projects, integate your
+            Tableland, collaborate with teammates on projects, integrate your
             project with the Studio CLI, and discover what other users are
             building on Tableland.
           </p>
