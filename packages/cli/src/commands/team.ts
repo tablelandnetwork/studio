@@ -6,7 +6,12 @@ import type { Arguments } from "yargs";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, helpers, logger } from "../utils.js";
+import {
+  ERROR_INVALID_STORE_PATH,
+  FileStore,
+  helpers,
+  logger,
+} from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -34,20 +39,15 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          const { address, store, apiUrl: apiUrlArg } = argv;
-          if (typeof store !== "string") {
-            throw new Error("must provide path to session store file");
-          }
-          if (
-            typeof apiUrlArg !== "string" &&
-            typeof apiUrlArg !== "undefined"
-          ) {
-            throw new Error("invalid apiUrl");
-          }
+          const { address } = argv;
+          const store = helpers.getStringValue(
+            argv.store,
+            ERROR_INVALID_STORE_PATH,
+          );
 
           const fileStore = new FileStore(store);
           const apiUrl = helpers.getApiUrl({
-            apiUrl: apiUrlArg,
+            apiUrl: argv.apiUrl,
             store: fileStore,
           });
           const api = helpers.getApi(fileStore, apiUrl);
@@ -55,7 +55,7 @@ export const builder = function (args: Yargs) {
           if (typeof address === "string" && address.trim() !== "") {
             // if address exists we will query based on address
             const teams = await api.teams.userTeamsFromAddress.query({
-              userAddress: address,
+              userAddress: address.trim(),
             });
 
             const pretty = JSON.stringify(teams, null, 4);
@@ -89,18 +89,19 @@ export const builder = function (args: Yargs) {
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
-        const { name, invites, store, apiUrl: apiUrlArg } = argv;
-        if (typeof name !== "string") throw new Error("must provide team name");
-        if (typeof store !== "string") {
-          throw new Error("must provide path to session store file");
-        }
-        if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
-          throw new Error("invalid apiUrl");
-        }
+        const { invites } = argv;
+        const name = helpers.getStringValue(
+          argv.name,
+          "must provide team name",
+        );
+        const store = helpers.getStringValue(
+          argv.store,
+          ERROR_INVALID_STORE_PATH,
+        );
 
         const fileStore = new FileStore(store);
         const apiUrl = helpers.getApiUrl({
-          apiUrl: apiUrlArg,
+          apiUrl: argv.apiUrl,
           store: fileStore,
         });
         const api = helpers.getApi(fileStore, apiUrl);
@@ -131,17 +132,16 @@ export const builder = function (args: Yargs) {
           });
       },
       async function (argv) {
-        const { teamId, emails, store, apiUrl: apiUrlArg } = argv;
+        const emails = helpers.getStringValue(
+          argv.emails,
+          "must provide emails",
+        );
+        const store = helpers.getStringValue(
+          argv.store,
+          ERROR_INVALID_STORE_PATH,
+        );
 
-        if (typeof emails !== "string") throw new Error("must provide emails");
-        if (typeof store !== "string") {
-          throw new Error("must provide path to session store file");
-        }
-        if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
-          throw new Error("invalid apiUrl");
-        }
-
-        const emailInvites = (emails ?? "")
+        const emailInvites = emails
           .split(",")
           .map((email) => email.trim())
           .filter((i) => i);
@@ -151,14 +151,13 @@ export const builder = function (args: Yargs) {
         }
 
         const fileStore = new FileStore(store);
-        const team = helpers.getTeam({ teamId, store: fileStore });
-
-        if (typeof team !== "string" || team.trim() === "") {
-          throw new Error("must provide teamId as arg or context");
-        }
+        const team = helpers.getStringValue(
+          helpers.getTeam({ teamId: argv.teamId, store: fileStore }),
+          "must provide teamId as arg or context",
+        );
 
         const apiUrl = helpers.getApiUrl({
-          apiUrl: apiUrlArg,
+          apiUrl: argv.apiUrl,
           store: fileStore,
         });
         const api = helpers.getApi(fileStore, apiUrl);

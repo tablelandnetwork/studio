@@ -1,6 +1,11 @@
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { helpers, logger, FileStore } from "../utils.js";
+import {
+  ERROR_INVALID_STORE_PATH,
+  helpers,
+  logger,
+  FileStore,
+} from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "import-table <table> <project>   <description> [name]";
@@ -11,32 +16,25 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const {
-      apiUrl: apiUrlArg,
-      store,
-      table: uuTableName,
-      project,
-      description,
-    } = argv;
-
+    const store = helpers.getStringValue(argv.store, ERROR_INVALID_STORE_PATH);
+    const description = helpers.getStringValue(
+      argv.description,
+      "table description is required",
+    );
+    const projectId = helpers.getStringValue(
+      argv.project,
+      "project id is required",
+    );
+    const uuTableName = helpers.getStringValue(
+      argv.table,
+      "must provide full tableland table name",
+    );
     const name = typeof argv.name === "string" ? argv.name.trim() : "";
 
-    if (typeof description !== "string" || description.trim() === "") {
-      throw new Error("table description is required");
-    }
-    if (typeof project !== "string" || project.trim() === "") {
-      throw new Error("project id is required");
-    }
-
     const fileStore = new FileStore(store);
-    const apiUrl = helpers.getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
+    const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
     const api = helpers.getApi(fileStore, apiUrl);
-    const projectId = project;
     const environmentId = await helpers.getEnvironmentId(api, projectId);
-
-    if (typeof uuTableName !== "string") {
-      throw new Error("must provide full tableland table name");
-    }
 
     const chainId = helpers.getChainIdFromTableName(uuTableName);
     const tableId = helpers.getTableIdFromTableName(uuTableName).toString();

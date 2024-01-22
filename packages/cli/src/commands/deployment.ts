@@ -8,7 +8,14 @@ import yargs from "yargs";
 import chalk from "chalk";
 import { helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
-import { FileStore, helpers, logger, normalizePrivateKey } from "../utils.js";
+import {
+  ERROR_INVALID_API_URL,
+  ERROR_INVALID_STORE_PATH,
+  FileStore,
+  helpers,
+  logger,
+  normalizePrivateKey,
+} from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -33,22 +40,25 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          const { store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store as string);
+          const store = helpers.getStringValue(
+            argv.store,
+            ERROR_INVALID_STORE_PATH,
+          );
+          const fileStore = new FileStore(store);
           const apiUrl = helpers.getApiUrl({
-            apiUrl: apiUrlArg as string,
+            apiUrl: helpers.getString(argv.apiUrl, ERROR_INVALID_API_URL),
             store: fileStore,
           });
+
           const api = helpers.getApi(fileStore, apiUrl);
 
-          const projectId = helpers.getProject({
-            projectId: argv.project,
-            store: fileStore,
-          });
-
-          if (typeof projectId !== "string") {
-            throw new Error("must provide project for deployment");
-          }
+          const projectId = helpers.getStringValue(
+            helpers.getProject({
+              projectId: argv.project,
+              store: fileStore,
+            }),
+            "must provide project for deployment",
+          );
 
           const deployments = await api.deployments.projectDeployments.query({
             projectId,

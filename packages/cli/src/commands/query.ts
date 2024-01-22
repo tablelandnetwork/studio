@@ -8,6 +8,7 @@ import { type GlobalOptions } from "../cli.js";
 import {
   type NormalizedStatement,
   ERROR_INVALID_PROJECT_ID,
+  ERROR_INVALID_STORE_PATH,
   FileStore,
   helpers,
   logger,
@@ -22,20 +23,15 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { store } = argv;
-
-    if (typeof store !== "string" || store.trim() === "") {
-      throw new Error("must provide path to session store file");
-    }
+    const store = helpers.getStringValue(argv.store, ERROR_INVALID_STORE_PATH);
 
     const fileStore = new FileStore(store);
     const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
     const api = helpers.getApi(fileStore, apiUrl);
-    const projectId = helpers.getProject({ ...argv, store: fileStore });
-
-    if (typeof projectId !== "string" || !helpers.isUUID(projectId)) {
-      throw new Error(ERROR_INVALID_PROJECT_ID);
-    }
+    const projectId = helpers.getUUID(
+      helpers.getProject({ ...argv, store: fileStore }),
+      ERROR_INVALID_PROJECT_ID,
+    );
 
     const queryValidator = await helpers.getQueryValidator();
     const shell = new QueryShell({

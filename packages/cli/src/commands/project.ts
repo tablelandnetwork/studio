@@ -6,7 +6,12 @@ import type { Arguments } from "yargs";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, logger, helpers } from "../utils.js";
+import {
+  ERROR_INVALID_STORE_PATH,
+  FileStore,
+  logger,
+  helpers,
+} from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -36,20 +41,16 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          const { teamId, store, apiUrl: apiUrlArg } = argv;
-          if (typeof store !== "string") {
-            throw new Error("must provide path to session store file");
-          }
-          if (
-            typeof apiUrlArg !== "string" &&
-            typeof apiUrlArg !== "undefined"
-          ) {
-            throw new Error("invalid apiUrl");
-          }
+          const { teamId } = argv;
+
+          const store = helpers.getStringValue(
+            argv.store,
+            ERROR_INVALID_STORE_PATH,
+          );
 
           const fileStore = new FileStore(store);
           const apiUrl = helpers.getApiUrl({
-            apiUrl: apiUrlArg,
+            apiUrl: argv.apiUrl,
             store: fileStore,
           });
           const api = helpers.getApi(fileStore, apiUrl);
@@ -95,33 +96,32 @@ export const builder = function (args: Yargs) {
       },
       async function (argv: CommandOptions) {
         try {
-          const {
-            name,
-            teamId: teamIdArg,
-            description,
-            store,
-            apiUrl: apiUrlArg,
-          } = argv;
+          const name = helpers.getStringValue(
+            argv.name,
+            "`name` argument is required to create a project",
+          );
+          const description = helpers.getStringValue(
+            argv.description,
+            "`description` argument is required to create a project",
+          );
+          const store = helpers.getStringValue(
+            argv.store,
+            ERROR_INVALID_STORE_PATH,
+          );
+
           const fileStore = new FileStore(store);
           const apiUrl = helpers.getApiUrl({
-            apiUrl: apiUrlArg,
+            apiUrl: argv.apiUrl,
             store: fileStore,
           });
           const api = helpers.getApi(fileStore, apiUrl);
-          const teamId = helpers.getTeam({
-            store: fileStore,
-            teamId: teamIdArg,
-          });
-
-          if (typeof name !== "string") {
-            throw new Error("must provide project name");
-          }
-          if (typeof description !== "string") {
-            throw new Error("must provide project description");
-          }
-          if (typeof teamId !== "string") {
-            throw new Error("must provide team for project");
-          }
+          const teamId = helpers.getStringValue(
+            helpers.getTeam({
+              store: fileStore,
+              teamId: argv.teamId,
+            }),
+            "must provide team for project",
+          );
 
           const result = await api.projects.newProject.mutate({
             teamId,

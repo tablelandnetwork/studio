@@ -7,6 +7,7 @@ import { studioAliases } from "@tableland/studio-client";
 import { Database } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
 import {
+  ERROR_INVALID_STORE_PATH,
   csvHelp,
   helpers,
   logger,
@@ -22,10 +23,10 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { store, table, file } = argv;
-    if (typeof table !== "string") {
-      throw new Error("table name parameter is required");
-    }
+    const table = helpers.getStringValue(argv.table, "table name is required");
+    const file = helpers.getStringValue(argv.file, "file path is required");
+    const store = helpers.getStringValue(argv.store, ERROR_INVALID_STORE_PATH);
+
     const fileStore = new FileStore(store);
     const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
     const api = helpers.getApi(fileStore, apiUrl);
@@ -38,10 +39,11 @@ export const handler = async (
     const environmentId = await helpers.getEnvironmentId(api, projectId);
 
     const aliases = studioAliases({ environmentId, apiUrl });
-    const uuTableName = (await aliases.read())[table];
-    if (typeof uuTableName !== "string") {
-      throw new Error("could not find table in project");
-    }
+    const uuTableName = helpers.getStringValue(
+      (await aliases.read())[table],
+      "could not find table in project",
+    );
+
     // need to reverse lookup uuTableName from table and projectId so
     // that the wallet can be connected to the right provider
     const chain = helpers.getChainIdFromTableName(uuTableName);
@@ -57,7 +59,7 @@ export const handler = async (
       aliases,
     });
 
-    const fileString = readFileSync(file as string).toString();
+    const fileString = readFileSync(file).toString();
     const dataObject = await parseCsvFile(fileString);
 
     // parse csv and enforce the existence of the right header format
@@ -77,9 +79,6 @@ export const handler = async (
 
     if (!doImport) return logger.log("aborting");
 
-    // TODO: split the rows into a set of sql statements that meet the
-    //       protocol size requirements and potentially execute the
-    //       statement(s) with database batch
     const results = await db.batch(statements.map((stmt) => db.prepare(stmt)));
     // the batch method returns an array of results for reads, but in this case
     // its an Array of length 1 with a single Object containing txn data
