@@ -1,0 +1,26 @@
+{
+  "name": "@tableland/nonce",
+  "version": "0.0.0-pre.0",
+  "description": "",
+  "repository": "https://github.com/tablelandnetwork/studio/nonce",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "lint": "eslint '**/*.ts'",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "prettier '**/*.{ts,json}' --check",
+    "prettier:fix": "npm run prettier -- --write",
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT AND Apache-2.0",
+  "dependencies": {
+    "ethers": "^5.7.0"
+  }
+}

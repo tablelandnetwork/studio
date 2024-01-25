@@ -8,7 +8,8 @@
     "packages/cli",
     "packages/client",
     "packages/store",
-    "packages/mail"
+    "packages/mail",
+    "packages/nonce"
   ],
   "scripts": {
     "test": "lerna run test",
