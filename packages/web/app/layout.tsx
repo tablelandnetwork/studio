@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
+import Script from "next/script";
 import { cache } from "react";
 import Footer from "./_components/footer";
 import { api } from "@/trpc/server";
@@ -69,6 +70,12 @@ export default async function RootLayout({
           lang="en"
           className={`${sourceSans3.variable} ${sourceCodePro.variable}`}
         >
+          <Script
+            id="hotjar"
+            dangerouslySetInnerHTML={{
+              __html: `(function(h,o,t,j,a,r){ h.hj=h.hjfunction(){(h.hj.q=h.hj.q[]).push(arguments)}; h._hjSettings={hjid:3842183,hjsv:6}; a=o.getElementsByTagName('head')[0]; r=o.createElement('script');r.async=1; r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv; a.appendChild(r); })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');`,
+            }}
+          ></Script>
           <body className="flex min-h-screen flex-col">
             <TRPCReactProvider headers={headers()}>
               <header className="flex items-center justify-between px-4 py-3">
