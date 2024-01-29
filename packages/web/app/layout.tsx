@@ -89,7 +89,7 @@ export default async function RootLayout({
               <Toaster />
             </TRPCReactProvider>
             <Script
-              id="hotjar"
+              id="maze"
               strategy="beforeInteractive"
               dangerouslySetInnerHTML={{
                 __html: `(function (m, a, z, e) {var s, t;try {t = m.sessionStorage.getItem('maze-us');} catch (err) {} if (!t) {t = new Date().getTime();try {m.sessionStorage.setItem('maze-us', t);} catch (err) {}} s = a.createElement('script');s.src = z + '?apiKey=' + e;s.async = true;a.getElementsByTagName('head')[0].appendChild(s);m.mazeUniversalSnippetApiKey = e;})(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'ee647aa6-0377-4302-b3f0-67b50f58c48b');`,
