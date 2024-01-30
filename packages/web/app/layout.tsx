@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/toaster";
 import PrimaryHeaderItem from "@/components/primary-header-item";
 import { NavPrimary } from "@/components/nav-primary";
 import MesaSvg from "@/components/mesa-svg";
+import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 
@@ -71,6 +72,7 @@ export default async function RootLayout({
           className={`${sourceSans3.variable} ${sourceCodePro.variable}`}
         >
           <body className="flex min-h-screen flex-col">
+            <Hotjar></Hotjar>
             <TRPCReactProvider headers={headers()}>
               <header className="flex items-center justify-between px-4 py-3">
                 <div className="flex flex-row items-center gap-x-2">
@@ -93,13 +95,6 @@ export default async function RootLayout({
               strategy="beforeInteractive"
               dangerouslySetInnerHTML={{
                 __html: `(function (m, a, z, e) {var s, t;try {t = m.sessionStorage.getItem('maze-us');} catch (err) {} if (!t) {t = new Date().getTime();try {m.sessionStorage.setItem('maze-us', t);} catch (err) {}} s = a.createElement('script');s.src = z + '?apiKey=' + e;s.async = true;a.getElementsByTagName('head')[0].appendChild(s);m.mazeUniversalSnippetApiKey = e;})(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'ee647aa6-0377-4302-b3f0-67b50f58c48b');`,
-              }}
-            ></Script>
-            <Script
-              id="hotjar"
-              strategy="beforeInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `(function(h,o,t,j,a,r){ h.hj=h.hjfunction(){(h.hj.q=h.hj.q[]).push(arguments)}; h._hjSettings={hjid:3842183,hjsv:6}; a=o.getElementsByTagName('head')[0]; r=o.createElement('script');r.async=1; r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv; a.appendChild(r); })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');`,
               }}
             ></Script>
           </body>
