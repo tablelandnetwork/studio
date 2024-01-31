@@ -21,6 +21,7 @@
   "author": "",
   "license": "MIT AND Apache-2.0",
   "dependencies": {
+    "@vercel/kv": "^1.0.1",
     "ethers": "^5.7.0"
   }
 }
