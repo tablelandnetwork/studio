@@ -10,6 +10,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "test": "mocha",
     "lint": "eslint '**/*.ts'",
     "lint:fix": "npm run lint -- --fix",
     "prettier": "prettier '**/*.{ts,json}' --check",

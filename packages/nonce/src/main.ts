@@ -16,12 +16,12 @@ export class NonceManager extends ethers.Signer {
 
     // TODO: need to make sure the redis delta key for this signer address exists
 
-    ethers.utils.defineReadOnly(this, "signer", signer);
-    ethers.utils.defineReadOnly(this, "provider", signer.provider ?? null);
+    this._initialPromise = null;
+    this.signer = signer;
   }
 
-  connect(provider: ethers.providers.Provider): NonceManager {
-    this.signer.connect(provider);
+  connect(provider: ethers.providers.Provider): ethers.Signer {
+    throw new Error("changing providers in not supported");
   }
 
   async getAddress(): Promise<string> {
@@ -79,6 +79,7 @@ export class NonceManager extends ethers.Signer {
   async sendTransaction(
     transaction: ethers.utils.Deferrable<ethers.providers.TransactionRequest>,
   ): Promise<ethers.providers.TransactionResponse> {
+    if (transaction.nonce instanceof Promise) transaction.nonce = await transaction.nonce;
     if (transaction.nonce == null) {
       transaction = ethers.utils.shallowCopy(transaction);
       transaction.nonce = await this.getTransactionCount("pending");
