@@ -1,11 +1,16 @@
+import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import { kv } from "@vercel/kv";
+
+// `kv` needs the connection env vars
+dotenv.config();
 
 // @TODO: Keep a per-NonceManager pool of sent but unmined transactions for
 //        rebroadcasting, in case we overrun the transaction pool
 
 export class NonceManager extends ethers.Signer {
   readonly signer: ethers.Signer;
+  readonly provider: ethers.providers.Provider;
   // NOTE: this kv instance is shared with all NonceManager instances
   readonly memStore = kv;
 
@@ -13,11 +18,15 @@ export class NonceManager extends ethers.Signer {
 
   constructor(signer: ethers.Signer) {
     super();
+    if (typeof signer.provider === "undefined") {
+      throw new Error("NonceManager requires a provider at instantiation");
+    }
 
     // TODO: need to make sure the redis delta key for this signer address exists
 
     this._initialPromise = null;
     this.signer = signer;
+    this.provider = signer.provider;
   }
 
   connect(provider: ethers.providers.Provider): ethers.Signer {
@@ -42,6 +51,7 @@ export class NonceManager extends ethers.Signer {
       // TODO: this `_initialPromise` concept might need to be replaced with
       //       something that works across processes
       const initial = await this._initialPromise;
+console.log("getTransactionCount:", initial, deltaCount);
       return initial + (typeof deltaCount === "number" ? deltaCount : 0);
     }
 
@@ -60,6 +70,7 @@ export class NonceManager extends ethers.Signer {
   }
 
   async incrementTransactionCount(count?: number): Promise<number> {
+console.log("incrementTransactionCount");
     return await this.memStore.incrby(
       `delta:${await this.getAddress()}`,
       count == null ? 1 : count,
@@ -79,7 +90,10 @@ export class NonceManager extends ethers.Signer {
   async sendTransaction(
     transaction: ethers.utils.Deferrable<ethers.providers.TransactionRequest>,
   ): Promise<ethers.providers.TransactionResponse> {
-    if (transaction.nonce instanceof Promise) transaction.nonce = await transaction.nonce;
+    if (transaction.nonce instanceof Promise) {
+      transaction.nonce = await transaction.nonce;
+    }
+console.log("txn.onoce", transaction.nonce);
     if (transaction.nonce == null) {
       transaction = ethers.utils.shallowCopy(transaction);
       transaction.nonce = await this.getTransactionCount("pending");
@@ -88,7 +102,7 @@ export class NonceManager extends ethers.Signer {
       await this.setTransactionCount(transaction.nonce);
       await this.memStore.incr(`delta:${await this.getAddress()}`);
     }
-
+console.log("sending actual txn:", transaction);
     const tx = await this.signer.sendTransaction(transaction)
     return tx;
   }

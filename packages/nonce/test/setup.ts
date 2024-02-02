@@ -1,4 +1,4 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { NonceManager } from "@ethersproject/experimental";
@@ -10,6 +10,9 @@ import {
   TEST_TIMEOUT_FACTOR,
   TEST_VALIDATOR_URL,
 } from "./utils";
+
+// `kv` needs the connection env vars
+dotenv.config();
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 // this sets default values globally

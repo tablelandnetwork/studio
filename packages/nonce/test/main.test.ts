@@ -9,8 +9,8 @@ const sendTxn = async function (prom: Promise<any>) {
   try {
     const result = await prom;
     return { result, threw: false };
-  } catch (err) {
-    return { error: err, threw: true };
+  } catch (err: any) {
+    return { error: err.message, threw: true };
   }
 }
 
@@ -35,8 +35,7 @@ describe("NonceManager", function () {
 
     const didThrow = results.find(r => r.threw);
     equal(!!didThrow, true);
-console.log(didThrow);
-    // equal(didThrow.error?.message?.match("nonce has already been used").index > 0, true);
+    equal(didThrow?.error.match("nonce has already been used").index, 11);
   });
 
   test("sending two transactions at the same time WITH nonce manager succeeds", async function () {
@@ -54,7 +53,7 @@ console.log(didThrow);
       sendTxn(db1.prepare("create table one (a int);").all()),
       sendTxn(db2.prepare("create table two (a int);").all())
     ]);
-console.log(results);
+console.log("results", results);
     equal(results[0].threw, false);
     equal(results[1].threw, false);
   });
