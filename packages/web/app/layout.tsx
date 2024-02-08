@@ -69,7 +69,7 @@ export default async function RootLayout({
         >
           <body className="flex min-h-screen flex-col">
             <TRPCReactProvider headers={headers()}>
-              <header className="flex items-center justify-between px-4 py-3">
+              <header className="sticky top-0 z-50 flex w-full items-center justify-between border-b border-border/40 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <PrimaryHeaderItem teams={teams} />
                 <div className="ml-auto flex items-center space-x-4">
                   <NavPrimary />
