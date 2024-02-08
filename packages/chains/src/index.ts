@@ -41,6 +41,7 @@ function supportedChains(isLocalDev = false) {
 
 function configuredChains(isLocalDev = false) {
   return configureChains(supportedChains(isLocalDev), [
+    // TODO: this key should not be committed to github, make it an ENV var
     infuraProvider({ apiKey: "92f6902cf1214401ae5b08a1e117eb91" }),
     jsonRpcProvider({
       rpc: (chain) => {
@@ -49,6 +50,7 @@ function configuredChains(isLocalDev = false) {
           slug = "nova-mainnet";
         }
         return {
+          // TODO: this key should not be committed to github, make it an ENV var
           http: `https://neat-dark-dust.${slug}.quiknode.pro/2d4bbaa84ce4721fc6576c47051cd505e16fb325/`,
         };
       },

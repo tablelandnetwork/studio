@@ -5,16 +5,14 @@ import type { Arguments } from "yargs";
 // Solving this by disabling lint here.
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
-import { helpers, Database } from "@tableland/sdk";
+import chalk from "chalk";
+import { helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
 import {
-  ask,
+  ERROR_INVALID_API_URL,
+  ERROR_INVALID_STORE_PATH,
   FileStore,
-  getApi,
-  getApiUrl,
-  getProject,
-  findOrCreateDefaultEnvironment,
-  getWalletWithProvider,
+  helpers,
   logger,
   normalizePrivateKey,
 } from "../utils.js";
@@ -42,22 +40,25 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          const { store, apiUrl: apiUrlArg } = argv;
-          const fileStore = new FileStore(store as string);
-          const apiUrl = getApiUrl({
-            apiUrl: apiUrlArg as string,
-            store: fileStore,
-          });
-          const api = getApi(fileStore, apiUrl);
-
-          const projectId = getProject({
-            projectId: argv.project,
+          const store = helpers.getStringValue(
+            argv.store,
+            ERROR_INVALID_STORE_PATH,
+          );
+          const fileStore = new FileStore(store);
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: helpers.getString(argv.apiUrl, ERROR_INVALID_API_URL),
             store: fileStore,
           });
 
-          if (typeof projectId !== "string") {
-            throw new Error("must provide project for deployment");
-          }
+          const api = helpers.getApi(fileStore, apiUrl);
+
+          const projectId = helpers.getStringValue(
+            helpers.getProject({
+              projectId: argv.project,
+              store: fileStore,
+            }),
+            "must provide project for deployment",
+          );
 
           const deployments = await api.deployments.projectDeployments.query({
             projectId,
@@ -80,27 +81,30 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          const { chain, name, store, apiUrl: apiUrlArg, providerUrl } = argv;
+          const { chain, name, store, apiUrl: apiUrlArg } = argv;
 
-          const chainInfo = helpers.getChainInfo(chain as number);
+          const chainInfo = sdkHelpers.getChainInfo(chain as number);
           const fileStore = new FileStore(store as string);
           const privateKey = normalizePrivateKey(argv.privateKey);
 
-          const apiUrl = getApiUrl({
+          const apiUrl = helpers.getApiUrl({
             apiUrl: apiUrlArg as string,
             store: fileStore,
           });
-          const api = getApi(fileStore, apiUrl);
-          const projectId = getProject({
+          const api = helpers.getApi(fileStore, apiUrl);
+          const projectId = helpers.getProject({
             ...argv,
             store: fileStore,
           });
 
-          const wallet = await getWalletWithProvider({
+          const wallet = await helpers.getWalletWithProvider({
+            api,
             privateKey,
             chain: chainInfo.chainId,
-            providerUrl: providerUrl as string,
-            api,
+            providerUrl: helpers.getProviderUrl({
+              providerUrl: argv.providerUrl,
+              store: fileStore,
+            }),
           });
 
           if (typeof name !== "string" || name.trim() === "") {
@@ -110,7 +114,7 @@ export const builder = function (args: Yargs) {
             throw new Error("must provide project for deployment");
           }
 
-          const environmentId = await findOrCreateDefaultEnvironment(
+          const environmentId = await helpers.findOrCreateDefaultEnvironment(
             api,
             projectId,
           );
@@ -128,10 +132,22 @@ export const builder = function (args: Yargs) {
           // TODO: setup a "ping" endpoint in the api so we can be sure the api is responding before
           //       the deployment is created
 
+          const stmt = generateCreateTableStatement(table.name, table.schema);
+
+          const cost = await helpers.estimateCost({
+            signer: wallet,
+            chainId: chain as number,
+            method: "create(address,string)",
+            args: [wallet.address, stmt],
+          });
+
           // confirm they want to deploy their table
-          const confirm = await ask([
-            `you are about to use funds from account ${wallet.address} on ${chainInfo.name} to deploy a table
-are you sure you want to continue (y/n)? `,
+          const confirm = await helpers.ask([
+            `You are about to use address: ${chalk.yellow(
+              wallet.address,
+            )} to deploy a table on chain ${chain as number}
+The estimated cost is ${cost}
+Do you want to continue (y/n)? `,
           ]);
 
           if (confirm[0].length < 1 || confirm[0][0].toLowerCase() !== "y") {
@@ -140,11 +156,10 @@ are you sure you want to continue (y/n)? `,
 
           const db = new Database({
             signer: wallet,
-            baseUrl: helpers.getBaseUrl(chainInfo.chainId),
+            baseUrl: sdkHelpers.getBaseUrl(chainInfo.chainId),
             autoWait: true,
           });
 
-          const stmt = generateCreateTableStatement(table.name, table.schema);
           const res = await db.prepare(stmt).all();
           if (res.error) {
             throw new Error(res.error);

@@ -1,10 +1,12 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import { equal } from "node:assert";
+import readline from "node:readline/promises";
 import { getAccounts } from "@tableland/local";
 import mockStd from "mock-stdin";
+import chalk from "chalk";
 import { afterEach, before, describe, test } from "mocha";
-import { restore, spy } from "sinon";
+import { restore, spy, stub } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/deployment.js";
@@ -71,9 +73,9 @@ describe("commands/deployment", function () {
     setTimeout(() => {
       // We are testing that the public provider url is used, we don't want to
       // actually create a deployment on maticmum.
-      stdin.send("no\n").end();
+      stdin.send("n\n").end();
       stdin.restore();
-    }, 1500);
+    }, 7000);
 
     await yargs([
       "deployment",
@@ -140,6 +142,50 @@ describe("commands/deployment", function () {
     equal(tokenIdNumber > 10, true);
     equal(isNaN(value.blockNumber), false);
     equal(typeof value.blockNumber, "number");
+  });
+
+  test("create deployment confirms with cost", async function () {
+    let message = "";
+    // @ts-expect-error we don't need the mock readline interface to have the right types
+    const rlStub = stub(readline, "createInterface").callsFake(function () {
+      return {
+        question: async function (qstn: string) {
+          message = qstn;
+        },
+        close: function () {
+          rlStub.restore();
+        },
+      };
+    });
+
+    const stdin = mockStd.stdin();
+
+    setTimeout(() => {
+      stdin.send("n\n").end();
+      stdin.restore();
+    }, 1000);
+
+    await yargs([
+      "deployment",
+      "create",
+      "table2",
+      "--projectId",
+      projectId,
+      ...defaultArgs,
+    ])
+      .command(mod)
+      .parse();
+
+    const lines = message.split("\n");
+
+    equal(
+      lines[0],
+      `You are about to use address: ${chalk.yellow(
+        "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
+      )} to deploy a table on chain local-tableland`,
+    );
+    equal(lines[1].startsWith("The estimated cost is"), true);
+    equal(lines[2], "Do you want to continue (y/n)? ");
   });
 
   test("can list deployments", async function () {

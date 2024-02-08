@@ -4,15 +4,13 @@ import { fileURLToPath } from "url";
 import { equal } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as modUse from "../src/commands/use.js";
 import * as modUnuse from "../src/commands/unuse.js";
 import * as modLogin from "../src/commands/login.js";
 import * as modLogout from "../src/commands/logout.js";
-import * as modTeam from "../src/commands/team.js";
-import { logger, wait } from "../src/utils.js";
+import { wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
@@ -39,16 +37,25 @@ const getSession = function () {
   return JSON.parse(sessionFileBuf.toString());
 };
 
-describe("commands/use", function () {
+describe("commands/unuse", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
   before(async function () {
     await wait(1000);
   });
 
-  afterEach(async function () {
-    restore();
+  beforeEach(async function () {
+    await yargs([
+      "login",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modLogin)
+      .parse();
+  });
 
+  afterEach(async function () {
     await yargs([
       "logout",
       ...defaultArgs,
@@ -59,13 +66,12 @@ describe("commands/use", function () {
       .parse();
   });
 
-  test("use command throws if project id is not valid", async function () {
-    const consoleError = spy(logger, "error");
-
+  test("unuse command can clear project id", async function () {
+    const projectId = "01a2d24d-3805-4a14-8059-7041f8b69aac";
     await yargs([
       "use",
       "project",
-      "invalidprojectid",
+      projectId,
       ...defaultArgs,
       "--privateKey",
       accounts[10].privateKey.slice(2),
@@ -73,130 +79,22 @@ describe("commands/use", function () {
       .command<GlobalOptions>(modUse)
       .parse();
 
-    const err = consoleError.getCall(0).firstArg;
-    equal(err.message, "invalid project id");
+    equal(getSession().projectId, projectId);
+
+    await yargs([
+      "unuse",
+      "project",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUnuse)
+      .parse();
+
+    equal(getSession().projectId, undefined);
   });
 
-  test("use command throws if team id is not valid", async function () {
-    const consoleError = spy(logger, "error");
-
-    await yargs([
-      "use",
-      "team",
-      "invalidteamid",
-      ...defaultArgs,
-      "--privateKey",
-      accounts[10].privateKey.slice(2),
-    ])
-      .command<GlobalOptions>(modUse)
-      .parse();
-
-    const err = consoleError.getCall(0).firstArg;
-    equal(err.message, "invalid team id");
-  });
-
-  test("use command sets teamId for project command", async function () {
-    await yargs([
-      "login",
-      ...defaultArgs,
-      "--privateKey",
-      accounts[10].privateKey.slice(2),
-    ])
-      .command<GlobalOptions>(modLogin)
-      .parse();
-
-    const consoleLog = spy(logger, "log");
-
-    await yargs([
-      "team",
-      "ls",
-      ...defaultArgs,
-      "--privateKey",
-      accounts[10].privateKey.slice(2),
-    ])
-      .command<GlobalOptions>(modTeam)
-      .parse();
-
-    const teamStr = consoleLog.getCall(0).firstArg;
-    const teamId = JSON.parse(teamStr)[0].id;
-
-    equal(typeof teamId, "string");
-
-    await yargs([
-      "use",
-      "team",
-      teamId,
-      ...defaultArgs,
-      "--privateKey",
-      accounts[10].privateKey.slice(2),
-    ])
-      .command<GlobalOptions>(modUse)
-      .parse();
-
-    equal(
-      consoleLog.getCall(1).firstArg,
-      // typescript linting doesn't honor the assertion of the runtime type here, so we need to cast
-      `your team context has been set to: ${teamId as string}`,
-    );
-
-    const session = getSession();
-    equal(session.teamId, teamId);
-  });
-
-  test("use command can set chain", async function () {
-    const chain = "local-tableland";
-    const consoleLog = spy(logger, "log");
-
-    await yargs([
-      "use",
-      "chain",
-      chain,
-      ...defaultArgs,
-      "--privateKey",
-      accounts[10].privateKey.slice(2),
-    ])
-      .command<GlobalOptions>(modUse)
-      .parse();
-
-    equal(
-      consoleLog.getCall(0).firstArg,
-      // typescript linting doesn't honor the assertion of the runtime type here, so we need to cast
-      `your chain context has been set to: ${chain}`,
-    );
-  });
-
-  test("use command can set provider url", async function () {
-    const providerUrl = "http://localhost:8000";
-    const consoleLog = spy(logger, "log");
-
-    await yargs([
-      "use",
-      "provider",
-      providerUrl,
-      ...defaultArgs,
-      "--privateKey",
-      accounts[10].privateKey.slice(2),
-    ])
-      .command<GlobalOptions>(modUse)
-      .parse();
-
-    equal(
-      consoleLog.getCall(0).firstArg,
-      // typescript linting doesn't honor the assertion of the runtime type here, so we need to cast
-      `your provider context has been set to: ${providerUrl}`,
-    );
-  });
-
-  test("unuse command clears existing context", async function () {
-    await yargs([
-      "login",
-      ...defaultArgs,
-      "--privateKey",
-      accounts[10].privateKey.slice(2),
-    ])
-      .command<GlobalOptions>(modLogin)
-      .parse();
-
+  test("unuse command can clear team id", async function () {
     const teamId = "01a2d24d-3805-4a14-8059-7041f8b69aac";
     await yargs([
       "use",
@@ -222,5 +120,89 @@ describe("commands/use", function () {
       .parse();
 
     equal(getSession().teamId, undefined);
+  });
+
+  test("unuse command can clear api url", async function () {
+    const apiUrl = "http://127.0.0.1:9000";
+    await yargs([
+      "use",
+      "api",
+      apiUrl,
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
+
+    equal(getSession().apiUrl, apiUrl);
+
+    await yargs([
+      "unuse",
+      "api",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUnuse)
+      .parse();
+
+    equal(getSession().apiUrl, undefined);
+  });
+
+  test("unuse command can clear chain", async function () {
+    const chain = "testchain";
+    await yargs([
+      "use",
+      "chain",
+      chain,
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
+
+    equal(getSession().chain, chain);
+
+    await yargs([
+      "unuse",
+      "chain",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUnuse)
+      .parse();
+
+    equal(getSession().chain, undefined);
+  });
+
+  test("unuse command can clear provider url", async function () {
+    const providerUrl = "https://alchemy.com/api-key";
+    await yargs([
+      "use",
+      "provider",
+      providerUrl,
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUse)
+      .parse();
+
+    equal(getSession().providerUrl, providerUrl);
+
+    await yargs([
+      "unuse",
+      "provider",
+      ...defaultArgs,
+      "--privateKey",
+      accounts[10].privateKey.slice(2),
+    ])
+      .command<GlobalOptions>(modUnuse)
+      .parse();
+
+    equal(getSession().providerUrl, undefined);
   });
 });

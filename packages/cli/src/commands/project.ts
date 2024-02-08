@@ -6,7 +6,12 @@ import type { Arguments } from "yargs";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, getTeam, logger } from "../utils.js";
+import {
+  ERROR_INVALID_STORE_PATH,
+  FileStore,
+  logger,
+  helpers,
+} from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -27,7 +32,7 @@ export const builder = function (args: Yargs) {
   return args
     .command(
       "ls [teamId]",
-      "list the projects for the given team id, or if no id is given, for currenlty logged in user's default team",
+      "list the projects for the given team id, or if no id is given, for currenlty logged in user's personal team",
       function (args) {
         return args.positional("teamId", {
           type: "string",
@@ -36,20 +41,19 @@ export const builder = function (args: Yargs) {
       },
       async function (argv) {
         try {
-          const { teamId, store, apiUrl: apiUrlArg } = argv;
-          if (typeof store !== "string") {
-            throw new Error("must provide path to session store file");
-          }
-          if (
-            typeof apiUrlArg !== "string" &&
-            typeof apiUrlArg !== "undefined"
-          ) {
-            throw new Error("invalid apiUrl");
-          }
+          const { teamId } = argv;
+
+          const store = helpers.getStringValue(
+            argv.store,
+            ERROR_INVALID_STORE_PATH,
+          );
 
           const fileStore = new FileStore(store);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-          const api = getApi(fileStore, apiUrl);
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: argv.apiUrl,
+            store: fileStore,
+          });
+          const api = helpers.getApi(fileStore, apiUrl);
 
           const query =
             typeof teamId === "string" && teamId.trim() !== ""
@@ -87,32 +91,37 @@ export const builder = function (args: Yargs) {
           })
           .option("teamId", {
             type: "string",
-            description: "the team associated with the project",
+            description: "the team id associated with the project",
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
         try {
-          const {
-            name,
-            teamId: teamIdArg,
-            description,
-            store,
-            apiUrl: apiUrlArg,
-          } = argv;
-          const fileStore = new FileStore(store);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-          const api = getApi(fileStore, apiUrl);
-          const teamId = getTeam({ store: fileStore, teamId: teamIdArg });
+          const name = helpers.getStringValue(
+            argv.name,
+            "`name` argument is required to create a project",
+          );
+          const description = helpers.getStringValue(
+            argv.description,
+            "`description` argument is required to create a project",
+          );
+          const store = helpers.getStringValue(
+            argv.store,
+            ERROR_INVALID_STORE_PATH,
+          );
 
-          if (typeof name !== "string") {
-            throw new Error("must provide project name");
-          }
-          if (typeof description !== "string") {
-            throw new Error("must provide project description");
-          }
-          if (typeof teamId !== "string") {
-            throw new Error("must provide team for project");
-          }
+          const fileStore = new FileStore(store);
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: argv.apiUrl,
+            store: fileStore,
+          });
+          const api = helpers.getApi(fileStore, apiUrl);
+          const teamId = helpers.getStringValue(
+            helpers.getTeam({
+              store: fileStore,
+              teamId: argv.teamId,
+            }),
+            "must provide team for project",
+          );
 
           const result = await api.projects.newProject.mutate({
             teamId,

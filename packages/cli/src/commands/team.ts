@@ -6,7 +6,12 @@ import type { Arguments } from "yargs";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { FileStore, getApi, getApiUrl, logger } from "../utils.js";
+import {
+  ERROR_INVALID_STORE_PATH,
+  FileStore,
+  helpers,
+  logger,
+} from "../utils.js";
 
 type Yargs = typeof yargs;
 
@@ -15,7 +20,7 @@ export const desc = "manage studio teams";
 
 export interface CommandOptions extends GlobalOptions {
   name?: string;
-  identifier?: string;
+  address?: string;
   personalTeamId?: string;
   invites?: string;
 }
@@ -23,41 +28,41 @@ export interface CommandOptions extends GlobalOptions {
 export const builder = function (args: Yargs) {
   return args
     .command(
-      "ls [identifier]",
-      "Get a list of your teams, or the teams for a default team id",
+      "ls [public key]",
+      "Get a list of your teams, or the teams for a public key address",
       function (args) {
-        return args.positional("identifier", {
+        return args.positional("address", {
           type: "string",
           description:
-            "Optional team identifier. If not provided the current user's session is used",
+            "Optional filter by user based on public key. If not provided the current user's session is used",
         });
       },
       async function (argv) {
         try {
-          const { identifier, store, apiUrl: apiUrlArg } = argv;
-          if (typeof store !== "string") {
-            throw new Error("must provide path to session store file");
-          }
-          if (
-            typeof apiUrlArg !== "string" &&
-            typeof apiUrlArg !== "undefined"
-          ) {
-            throw new Error("invalid apiUrl");
-          }
+          const { address } = argv;
+          const store = helpers.getStringValue(
+            argv.store,
+            ERROR_INVALID_STORE_PATH,
+          );
 
           const fileStore = new FileStore(store);
-          const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-          const api = getApi(fileStore, apiUrl);
+          const apiUrl = helpers.getApiUrl({
+            apiUrl: argv.apiUrl,
+            store: fileStore,
+          });
+          const api = helpers.getApi(fileStore, apiUrl);
 
-          let query;
-          if (typeof identifier === "string" && identifier.trim() !== "") {
-            // TODO: `identifier` needs to be converted to teamId for this to work.
-            //       Alternatively we could create a new rpc endpoint that takes
-            //       wallet or email or whatever account identifier we want.
-            query = { userTeamId: identifier };
+          if (typeof address === "string" && address.trim() !== "") {
+            // if address exists we will query based on address
+            const teams = await api.teams.userTeamsFromAddress.query({
+              userAddress: address.trim(),
+            });
+
+            const pretty = JSON.stringify(teams, null, 4);
+            return logger.log(pretty);
           }
 
-          const teams = await api.teams.userTeams.query(query);
+          const teams = await api.teams.userTeams.query();
           const pretty = JSON.stringify(teams, null, 4);
 
           logger.log(pretty);
@@ -84,18 +89,22 @@ export const builder = function (args: Yargs) {
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
-        const { name, invites, store, apiUrl: apiUrlArg } = argv;
-        if (typeof name !== "string") throw new Error("must provide team name");
-        if (typeof store !== "string") {
-          throw new Error("must provide path to session store file");
-        }
-        if (typeof apiUrlArg !== "string" && typeof apiUrlArg !== "undefined") {
-          throw new Error("invalid apiUrl");
-        }
+        const { invites } = argv;
+        const name = helpers.getStringValue(
+          argv.name,
+          "must provide team name",
+        );
+        const store = helpers.getStringValue(
+          argv.store,
+          ERROR_INVALID_STORE_PATH,
+        );
 
         const fileStore = new FileStore(store);
-        const apiUrl = getApiUrl({ apiUrl: apiUrlArg, store: fileStore });
-        const api = getApi(fileStore, apiUrl);
+        const apiUrl = helpers.getApiUrl({
+          apiUrl: argv.apiUrl,
+          store: fileStore,
+        });
+        const api = helpers.getApi(fileStore, apiUrl);
 
         const result = await api.teams.newTeam.mutate({
           name,
@@ -109,24 +118,56 @@ export const builder = function (args: Yargs) {
       },
     )
     .command(
-      "add <user>",
-      "add user to a team. team id must either be a command option or available in the context.",
+      "invite <emails>",
+      "invite a list of emails to a team. team id must either be a command option or available in the context.",
       function (args) {
         return args
-          .positional("user", {
+          .positional("emails", {
             type: "string",
-            description: "user to be added to team",
+            description: "comma separated list of emails to be invited to team",
           })
-          .option("team", {
+          .option("teamId", {
             type: "string",
-            description: "name of team to add to",
+            description: "id of team to add to",
           });
       },
       async function (argv) {
-        // const { team, user, privateKey, providerUrl, store } = argv;
-        // const api = getApi(new FileStore(store));
+        const emails = helpers.getStringValue(
+          argv.emails,
+          "must provide emails",
+        );
+        const store = helpers.getStringValue(
+          argv.store,
+          ERROR_INVALID_STORE_PATH,
+        );
 
-        throw new Error("This needs to be implemented");
+        const emailInvites = emails
+          .split(",")
+          .map((email) => email.trim())
+          .filter((i) => i);
+
+        if (emails.length < 1) {
+          throw new Error("you must provide at least one email");
+        }
+
+        const fileStore = new FileStore(store);
+        const team = helpers.getStringValue(
+          helpers.getTeam({ teamId: argv.teamId, store: fileStore }),
+          "must provide teamId as arg or context",
+        );
+
+        const apiUrl = helpers.getApiUrl({
+          apiUrl: argv.apiUrl,
+          store: fileStore,
+        });
+        const api = helpers.getApi(fileStore, apiUrl);
+
+        const result = await api.invites.inviteEmails.mutate({
+          teamId: team,
+          emails: emailInvites,
+        });
+
+        logger.log(JSON.stringify(result));
       },
     );
 };

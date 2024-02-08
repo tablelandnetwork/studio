@@ -191,7 +191,7 @@ export default function ExecDeployment({
 
   return (
     <Dialog open={showDialog} onOpenChange={handleOnOpenChange}>
-      <DialogContent>
+      <DialogContent className="flex flex-auto flex-col gap-y-4 overflow-auto">
         <DialogHeader>
           <DialogTitle>Deploy Table: {table.name}</DialogTitle>
           <DialogDescription>
@@ -271,23 +271,25 @@ function DeployStep({
   return (
     <div
       className={cn(
-        "flex items-center gap-2",
+        "flex-auto items-center overflow-auto",
         state === "pending" && "opacity-40",
       )}
     >
-      {state === "pending" && (
-        <CircleDashed className="mr-2 h-5 w-5 flex-shrink-0" />
-      )}
-      {state === "processing" && (
-        <Loader2 className="mr-2 h-5 w-5 flex-shrink-0 animate-spin" />
-      )}
-      {state === "complete" && (
-        <CheckCircle2 className="mr-2 h-5 w-5 flex-shrink-0 text-green-500" />
-      )}
-      {state instanceof Error && (
-        <AlertCircle className="mr-2 h-5 w-5 flex-shrink-0 text-red-500" />
-      )}
-      <p className="text-sm">{text()}</p>
+      <div className="grid grid-cols-12">
+        {state === "pending" && (
+          <CircleDashed className="mr-2 h-5 w-5 flex-shrink-0" />
+        )}
+        {state === "processing" && (
+          <Loader2 className="mr-2 h-5 w-5 flex-shrink-0 animate-spin" />
+        )}
+        {state === "complete" && (
+          <CheckCircle2 className="mr-2 h-5 w-5 flex-shrink-0 text-green-500" />
+        )}
+        {state instanceof Error && (
+          <AlertCircle className="mr-2 h-5 w-5 flex-shrink-0 text-red-500" />
+        )}
+        <p className="col-span-11 text-sm">{text()}</p>
+      </div>
     </div>
   );
 

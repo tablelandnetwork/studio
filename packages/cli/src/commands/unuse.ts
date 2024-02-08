@@ -1,6 +1,11 @@
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
-import { logger, FileStore } from "../utils.js";
+import {
+  ERROR_INVALID_STORE_PATH,
+  helpers,
+  logger,
+  FileStore,
+} from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "unuse [context]";
@@ -10,9 +15,8 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { store, context } = argv;
-    if (typeof context !== "string") throw new Error("invalid context");
-
+    const context = helpers.getStringValue(argv.context, "invalid context");
+    const store = helpers.getStringValue(argv.store, ERROR_INVALID_STORE_PATH);
     const fileStore = new FileStore(store);
 
     switch (context) {
@@ -26,6 +30,14 @@ export const handler = async (
         break;
       case "api":
         fileStore.remove("apiUrl");
+        fileStore.save();
+        break;
+      case "chain":
+        fileStore.remove("chain");
+        fileStore.save();
+        break;
+      case "provider":
+        fileStore.remove("providerUrl");
         fileStore.save();
         break;
       default:

@@ -87,3 +87,25 @@ insert into `tables` (
 	'first test table',
 	'{"columns":[{"name":"id","type":"integer","constraints":["primary key"]},{"name":"info","type":"text"}]}'
 );
+--> statement-breakpoint
+insert into `project_tables` (
+	`project_id`,
+	`table_id`
+) values (
+	'2f403473-de7b-41ba-8d97-12a0344aeccb',
+	'48bcca5e-33ee-4461-a926-9ae5a1ce73f9'
+);
+--> statement-breakpoint
+insert into `tables` (
+	`id`,
+	`slug`,
+	`name`,
+	`description`,
+	`schema`
+) values (
+	'48bcca5e-33ee-4461-a926-9ae5a1ce73f9',
+	'table2',
+	'table2',
+	'second test table',
+	'{"columns":[{"name":"id","type":"integer","constraints":["primary key"]},{"name":"data","type":"text"}]}'
+);

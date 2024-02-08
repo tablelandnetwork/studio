@@ -2,21 +2,16 @@ import { readFileSync } from "fs";
 import type { Arguments } from "yargs";
 import { parse } from "csv-parse";
 import chalk from "chalk";
+import { type Wallet } from "ethers";
 import { studioAliases } from "@tableland/studio-client";
 import { Database } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
 import {
-  ask,
-  batchRows,
+  ERROR_INVALID_STORE_PATH,
+  csvHelp,
+  helpers,
   logger,
-  getChainIdFromTableName,
-  getWalletWithProvider,
   normalizePrivateKey,
-  getApi,
-  getApiUrl,
-  getProject,
-  getEnvironmentId,
-  prepareCsvHeaders,
   FileStore,
 } from "../utils.js";
 
@@ -28,27 +23,32 @@ export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const { providerUrl, store, table, file } = argv;
-    if (typeof table !== "string") {
-      throw new Error("table name parameter is required");
-    }
-    const fileStore = new FileStore(store);
-    const apiUrl = getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
-    const api = getApi(fileStore, apiUrl);
-    const projectId = getProject({ ...argv, store: fileStore });
+    const table = helpers.getStringValue(argv.table, "table name is required");
+    const file = helpers.getStringValue(argv.file, "file path is required");
+    const store = helpers.getStringValue(argv.store, ERROR_INVALID_STORE_PATH);
 
-    const environmentId = await getEnvironmentId(api, projectId);
+    const fileStore = new FileStore(store);
+    const apiUrl = helpers.getApiUrl({ apiUrl: argv.apiUrl, store: fileStore });
+    const api = helpers.getApi(fileStore, apiUrl);
+    const projectId = helpers.getProject({ ...argv, store: fileStore });
+    const providerUrl = helpers.getProviderUrl({
+      providerUrl: argv.providerUrl,
+      store: fileStore,
+    });
+
+    const environmentId = await helpers.getEnvironmentId(api, projectId);
 
     const aliases = studioAliases({ environmentId, apiUrl });
-    const uuTableName = (await aliases.read())[table];
-    if (typeof uuTableName !== "string") {
-      throw new Error("could not find table in project");
-    }
+    const uuTableName = helpers.getStringValue(
+      (await aliases.read())[table],
+      "could not find table in project",
+    );
+
     // need to reverse lookup uuTableName from table and projectId so
     // that the wallet can be connected to the right provider
-    const chain = getChainIdFromTableName(uuTableName);
+    const chain = helpers.getChainIdFromTableName(uuTableName);
     const privateKey = normalizePrivateKey(argv.privateKey);
-    const signer = await getWalletWithProvider({
+    const signer = await helpers.getWalletWithProvider({
       privateKey,
       chain,
       providerUrl,
@@ -59,30 +59,26 @@ export const handler = async (
       aliases,
     });
 
-    const fileString = readFileSync(file as string).toString();
+    const fileString = readFileSync(file).toString();
     const dataObject = await parseCsvFile(fileString);
 
     // parse csv and enforce the existence of the right header format
-    const headers = prepareCsvHeaders(dataObject[0]);
+    const headers = csvHelp.prepareCsvHeaders(dataObject[0]);
     const rows = dataObject.slice(1);
     // need to capture row length now since `batchRows` will mutate the
     // rows Array to reduce memory overhead
     const rowCount = Number(rows.length);
-    const statements = batchRows(rows, headers, table);
+    const statements = csvHelp.batchRows(rows, headers, table);
 
     const doImport = await confirmImport({
-      statementLength: statements.join("").length,
+      statements,
       rowCount,
-      wallet: signer.address,
-      statementCount: statements.length,
-      table,
+      wallet: signer,
+      table: uuTableName,
     });
 
     if (!doImport) return logger.log("aborting");
 
-    // TODO: split the rows into a set of sql statements that meet the
-    //       protocol size requirements and potentially execute the
-    //       statement(s) with database batch
     const results = await db.batch(statements.map((stmt) => db.prepare(stmt)));
     // the batch method returns an array of results for reads, but in this case
     // its an Array of length 1 with a single Object containing txn data
@@ -129,28 +125,39 @@ const parseCsvFile = async function (file: string): Promise<string[][]> {
 };
 
 async function confirmImport(info: {
-  statementLength: number;
-  statementCount: number;
+  statements: string[];
   rowCount: number;
   table: unknown;
-  wallet: string;
+  wallet: Wallet;
 }): Promise<boolean> {
   if (typeof info.table !== "string") {
     throw new Error("table name is required");
   }
 
-  const answers = await ask([
+  const statementLength = info.statements.join("").length;
+  const statementCount = info.statements.length;
+  const tableId = helpers.getTableIdFromTableName(info.table);
+
+  const cost = await helpers.estimateCost({
+    signer: info.wallet,
+    chainId: helpers.getChainIdFromTableName(info.table),
+    method: "mutate(address,(uint256,string)[])",
+    args: [info.wallet.address, info.statements.map((s) => [tableId, s])],
+  });
+
+  const answers = await helpers.ask([
     `You are about to use address: ${chalk.yellow(
-      info.wallet,
+      info.wallet.address,
     )} to insert ${chalk.yellow(info.rowCount)} row${
       info.rowCount === 1 ? "" : "s"
     } into table ${chalk.yellow(info.table)}
-This can be done with a total of ${chalk.yellow(info.statementCount)} statment${
-      info.statementCount === 1 ? "" : "s"
+This can be done with a total of ${chalk.yellow(statementCount)} statment${
+      statementCount === 1 ? "" : "s"
     }
 The total size of the statment${
-      info.statementCount === 1 ? "" : "s"
-    } is: ${chalk.yellow(info.statementLength)}
+      statementCount === 1 ? "" : "s"
+    } is: ${chalk.yellow(statementLength)}
+The estimated cost is ${cost}
 Do you want to continue (${chalk.bold("y/n")})? `,
   ]);
   const proceed = answers[0].toLowerCase()[0];
