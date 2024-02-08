@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
+import Script from "next/script";
 import { cache } from "react";
 import Footer from "./_components/footer";
 import { api } from "@/trpc/server";
@@ -14,6 +15,7 @@ import { Toaster } from "@/components/ui/toaster";
 import PrimaryHeaderItem from "@/components/primary-header-item";
 import { NavPrimary } from "@/components/nav-primary";
 import MesaSvg from "@/components/mesa-svg";
+import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 
@@ -70,6 +72,7 @@ export default async function RootLayout({
           className={`${sourceSans3.variable} ${sourceCodePro.variable}`}
         >
           <body className="flex min-h-screen flex-col">
+            <Hotjar></Hotjar>
             <TRPCReactProvider headers={headers()}>
               <header className="flex items-center justify-between px-4 py-3">
                 <div className="flex flex-row items-center gap-x-2">
@@ -87,6 +90,13 @@ export default async function RootLayout({
               <Footer />
               <Toaster />
             </TRPCReactProvider>
+            <Script
+              id="maze"
+              strategy="beforeInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `(function (m, a, z, e) {var s, t;try {t = m.sessionStorage.getItem('maze-us');} catch (err) {} if (!t) {t = new Date().getTime();try {m.sessionStorage.setItem('maze-us', t);} catch (err) {}} s = a.createElement('script');s.src = z + '?apiKey=' + e;s.async = true;a.getElementsByTagName('head')[0].appendChild(s);m.mazeUniversalSnippetApiKey = e;})(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'ee647aa6-0377-4302-b3f0-67b50f58c48b');`,
+              }}
+            ></Script>
           </body>
         </html>
       </JotaiProvider>
