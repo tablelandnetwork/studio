@@ -38,9 +38,17 @@ export function initProjects(
     ) {
       const projectId = randomUUID();
       const slug = slugify(name);
+      const now = new Date();
       const { sql: projectsSql, params: projectsParams } = db
         .insert(projects)
-        .values({ id: projectId, name, description, slug })
+        .values({
+          id: projectId,
+          name,
+          description,
+          slug,
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
+        })
         .toSQL();
       const { sql: teamProjectsSql, params: teamProjectsParams } = db
         .insert(teamProjects)
@@ -50,7 +58,14 @@ export function initProjects(
         tbl.prepare(projectsSql).bind(projectsParams),
         tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
       ]);
-      const project: Project = { id: projectId, name, description, slug };
+      const project: Project = {
+        id: projectId,
+        name,
+        description,
+        slug,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      };
       return project;
     },
 

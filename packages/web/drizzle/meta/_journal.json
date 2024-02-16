@@ -8,6 +8,13 @@
       "when": 1695941964042,
       "tag": "0000_mixed_invisible_woman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1708034038964,
+      "tag": "0001_rich_harpoon",
+      "breakpoints": true
     }
   ]
 }
