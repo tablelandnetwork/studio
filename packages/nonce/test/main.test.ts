@@ -1,5 +1,5 @@
-import { afterEach, before, describe, test } from "mocha";
 import { equal } from "assert";
+import { afterEach, before, describe, test } from "mocha";
 import { Wallet, getDefaultProvider } from "ethers";
 import { Database } from "@tableland/sdk";
 import { NonceManager } from "../src/main";
@@ -12,14 +12,19 @@ const sendTxn = async function (prom: Promise<any>) {
   } catch (err: any) {
     return { error: err.message, threw: true };
   }
-}
+};
 
 describe("NonceManager", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
-  const account2 = "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
-  const provider1 = getDefaultProvider(`http://127.0.0.1:${TEST_REGISTRY_PORT}`);
-  const provider2 = getDefaultProvider(`http://127.0.0.1:${TEST_REGISTRY_PORT}`);
+  const account2 =
+    "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
+  const provider1 = getDefaultProvider(
+    `http://127.0.0.1:${TEST_REGISTRY_PORT}`,
+  );
+  const provider2 = getDefaultProvider(
+    `http://127.0.0.1:${TEST_REGISTRY_PORT}`,
+  );
 
   test("sending two transactions at the same time WITHOUT nonce manager fails", async function () {
     const wallet1 = new Wallet(account2);
@@ -30,10 +35,10 @@ describe("NonceManager", function () {
 
     const results = await Promise.all([
       sendTxn(db1.prepare("create table one (a int);").all()),
-      sendTxn(db2.prepare("create table two (a int);").all())
+      sendTxn(db2.prepare("create table two (a int);").all()),
     ]);
 
-    const didThrow = results.find(r => r.threw);
+    const didThrow = results.find((r) => r.threw);
     equal(!!didThrow, true);
     equal(didThrow?.error.match("nonce has already been used").index, 11);
   });
@@ -43,17 +48,17 @@ describe("NonceManager", function () {
     const wallet2 = new Wallet(account2);
 
     const db1 = new Database({
-      signer: new NonceManager(wallet1.connect(provider1))
+      signer: new NonceManager(wallet1.connect(provider1)),
     });
     const db2 = new Database({
-      signer: new NonceManager(wallet2.connect(provider2))
+      signer: new NonceManager(wallet2.connect(provider2)),
     });
 
     const results = await Promise.all([
       sendTxn(db1.prepare("create table one (a int);").all()),
-      sendTxn(db2.prepare("create table two (a int);").all())
+      sendTxn(db2.prepare("create table two (a int);").all()),
     ]);
-console.log("results", results);
+    console.log("results", results);
     equal(results[0].threw, false);
     equal(results[1].threw, false);
   });
