@@ -6,7 +6,7 @@ import {
   text,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
-import { schema } from "../custom-types/index";
+import { schema } from "../custom-types/index.js";
 
 export const users = sqliteTable(
   "users",
