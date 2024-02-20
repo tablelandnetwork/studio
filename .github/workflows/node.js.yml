@@ -21,6 +21,8 @@ env:
   SESSION_COOKIE_PASS: "ci test session pass ci test session pass ci test session pass"
   DATA_SEAL_PASS: "ci test data seal pass ci test data seal pass ci test data seal pass"
   POSTMARK_API_KEY: ${{ secrets.POSTMARK_API_KEY }}
+  KV_REST_API_URL: ${{ vars.KV_REST_API_URL }}
+  KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
 
 jobs:
   review:
