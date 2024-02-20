@@ -1,6 +1,5 @@
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
-// import { kv } from "@vercel/kv";
 import { Redis } from "@upstash/redis";
 
 // `kv` needs the connection env vars
@@ -11,18 +10,19 @@ dotenv.config();
 //        rebroadcasting, in case we overrun the transaction pool
 
 if (
-  typeof process.env.KV_REST_API_URL !== "string"
-  || typeof process.env.KV_REST_API_TOKEN !== "string"
+  typeof process.env.KV_REST_API_URL !== "string" ||
+  typeof process.env.KV_REST_API_TOKEN !== "string"
 ) {
   throw new Error("Vercel KV api env variables are not available");
 }
+
 const redis = new Redis({
   url: process.env.KV_REST_API_URL,
   token: process.env.KV_REST_API_TOKEN,
 });
 
 // The logic we need to implement here should follow the ethers.js
-// implementation logic, but the delta from on chain nonce 
+// implementation logic, but the delta from on chain nonce
 
 export class NonceManager extends ethers.Signer {
   readonly signer: ethers.Signer;
@@ -39,8 +39,6 @@ export class NonceManager extends ethers.Signer {
     if (typeof signer.provider === "undefined") {
       throw new Error("NonceManager requires a provider at instantiation");
     }
-
-    // TODO: need to make sure the redis delta key for this signer address exists
 
     this._initialPromise = null;
     this.signer = signer;
@@ -62,8 +60,9 @@ export class NonceManager extends ethers.Signer {
       if (!this._initialPromise) {
         this._initialPromise = this.signer.getTransactionCount("pending");
       }
-      // this returns null if the key doesn't exist
+
       await this._acquireLock();
+      // this returns null if the key doesn't exist
       const deltaCount = await this.memStore.get(
         `delta:${await this.getAddress()}`,
       );
@@ -72,7 +71,7 @@ export class NonceManager extends ethers.Signer {
       // TODO: this `_initialPromise` concept might need to be replaced with
       //       something that works across processes
       const initial = await this._initialPromise;
-      console.log("getTransactionCount:", initial, deltaCount);
+      // console.log("getTransactionCount:", initial, deltaCount);
       return initial + (typeof deltaCount === "number" ? deltaCount : 0);
     }
 
@@ -94,7 +93,7 @@ export class NonceManager extends ethers.Signer {
   }
 
   async incrementTransactionCount(count?: number): Promise<number> {
-    console.log("incrementTransactionCount");
+    // console.log("incrementTransactionCount");
     return await this.memStore.incrby(
       `delta:${await this.getAddress()}`,
       count == null ? 1 : count,
@@ -117,7 +116,7 @@ export class NonceManager extends ethers.Signer {
     if (transaction.nonce instanceof Promise) {
       transaction.nonce = await transaction.nonce;
     }
-    console.log("txn.onoce", transaction.nonce);
+    // console.log("txn.onoce", transaction.nonce);
     if (transaction.nonce == null) {
       transaction = ethers.utils.shallowCopy(transaction);
       transaction.nonce = await this.getTransactionCount("pending");
@@ -126,47 +125,62 @@ export class NonceManager extends ethers.Signer {
       await this.setTransactionCount(transaction.nonce);
       await this.memStore.incr(`delta:${await this.getAddress()}`);
     }
-    console.log("sending actual txn:", transaction);
+    // console.log("sending actual txn:", transaction);
     const tx = await this.signer.sendTransaction(transaction);
     return tx;
+  }
+
+  async _setLock() {
+    if (!this._lock) {
+      throw new Error("must have a value to set lock");
+    }
+    return await this.memStore.set(
+      `lock:${await this.getAddress()}`,
+      this._lock,
+      // `nx` specifies we will only set if the key does NOT exist
+      // `px` specifies the key expires after a given number of milliseconds
+      { nx: true, px: 3000 },
+    );
   }
 
   async _acquireLock() {
     // make sure we don't try to aquire multiple times
     if (this._lock) {
-      throw new Error("cannot aquire a lock simultaneously in one process");
+      throw new Error("cannot aquire a lock simultaneously in one instance");
     }
+    this._lock = Math.random().toString();
 
-    this._lock = Math.random().toString()
+    // If the lock was not acquired, we want to retry using increasing backoff
+    // combined with "jitter".  For a nice overview of the reasoning here, read
+    // https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter
 
-    const acquire = async () => {
-      return await this.memStore.set(
-        `lock:${await this.getAddress()}`,
-        this._lock,
-        { nx: true, px: 3000 }
-      );
-    }
-
-    // If the lock was not acquired, we want to retry at a reducing interval
-    // value to reduce the chance of lock starvation.
-
+    const acquire = this._setLock.bind(this);
     const backoffRate = 50; // ms
     const maxWait = 2000; // ms
     let trys = 0;
     const doTry = async function () {
       trys += 1;
       await new Promise(function (resolve, reject) {
-        const wait =  Math.random() * Math.min(maxWait, trys * backoffRate);
-        setTimeout(async function () {
+        const wait = Math.random() * Math.min(maxWait, trys * backoffRate);
+
+        // capture resolve & reject in scope
+        const run = async function () {
+          // returns null or "OK"
           const res = await acquire();
-console.log("_acquireLock", res);
 
           if (res === null) {
-            return resolve(await doTry())
+            return resolve(await doTry());
           }
+
           resolve(res);
-        }, wait)
-      })
+        };
+
+        // `setTimeout`'s function should return void so we don't swallow a
+        // Promise, hence using `catch` instead of `await`ing.
+        setTimeout(function () {
+          run().catch((err) => reject(err));
+        }, wait);
+      });
     };
 
     await doTry();
@@ -186,7 +200,7 @@ console.log("_acquireLock", res);
           return 0
       end`,
       [`lock:${await this.getAddress()}`],
-      [this._lock]
+      [this._lock],
     );
     this._lock = undefined;
   }

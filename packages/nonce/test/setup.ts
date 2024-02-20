@@ -1,7 +1,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import * as dotenv from "dotenv";
-import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { helpers } from "@tableland/sdk";
 import { after, before } from "mocha";
