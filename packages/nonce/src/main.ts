@@ -71,7 +71,6 @@ export class NonceManager extends ethers.Signer {
       // TODO: this `_initialPromise` concept might need to be replaced with
       //       something that works across processes
       const initial = await this._initialPromise;
-      // console.log("getTransactionCount:", initial, deltaCount);
       return initial + (typeof deltaCount === "number" ? deltaCount : 0);
     }
 
@@ -93,7 +92,6 @@ export class NonceManager extends ethers.Signer {
   }
 
   async incrementTransactionCount(count?: number): Promise<number> {
-    // console.log("incrementTransactionCount");
     return await this.memStore.incrby(
       `delta:${await this.getAddress()}`,
       count == null ? 1 : count,
@@ -116,7 +114,7 @@ export class NonceManager extends ethers.Signer {
     if (transaction.nonce instanceof Promise) {
       transaction.nonce = await transaction.nonce;
     }
-    // console.log("txn.onoce", transaction.nonce);
+
     if (transaction.nonce == null) {
       transaction = ethers.utils.shallowCopy(transaction);
       transaction.nonce = await this.getTransactionCount("pending");
@@ -125,7 +123,7 @@ export class NonceManager extends ethers.Signer {
       await this.setTransactionCount(transaction.nonce);
       await this.memStore.incr(`delta:${await this.getAddress()}`);
     }
-    // console.log("sending actual txn:", transaction);
+
     const tx = await this.signer.sendTransaction(transaction);
     return tx;
   }

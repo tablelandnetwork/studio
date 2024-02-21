@@ -1,10 +1,16 @@
+import { join } from "path";
+import { fork } from "child_process";
 import { equal } from "assert";
 import { after, beforeEach, describe, test } from "mocha";
 import { Wallet, getDefaultProvider } from "ethers";
 import { Redis } from "@upstash/redis";
 import { Database } from "@tableland/sdk";
 import { NonceManager } from "../src/main";
-import { TEST_TIMEOUT_FACTOR, TEST_REGISTRY_PORT } from "./utils";
+import {
+  TEST_TIMEOUT_FACTOR,
+  TEST_REGISTRY_PORT,
+  TEST_VALIDATOR_URL,
+} from "./utils";
 
 const sendTxn = async function (prom: Promise<any>) {
   try {
@@ -76,8 +82,98 @@ describe("NonceManager", function () {
       sendTxn(db1.prepare("create table one (a int);").all()),
       sendTxn(db2.prepare("create table two (a int);").all()),
     ]);
-    console.log("results", results);
+
     equal(results[0].threw, false);
     equal(results[1].threw, false);
+  });
+
+  const parallelFork = async function (without: boolean) {
+    const filePath = join(
+      process.cwd(),
+      "test",
+      `process-${without ? "without" : "with"}.js`,
+    );
+    const forkEnv = {
+      ...process.env,
+      TEST_REGISTRY_PORT: TEST_REGISTRY_PORT.toString(),
+      TEST_VALIDATOR_URL,
+    };
+
+    const results: {
+      messages: any;
+      err: any;
+      success: any;
+    } = {
+      messages: [],
+      err: null,
+      success: null,
+    };
+
+    const forkPs = fork(filePath, {
+      env: forkEnv,
+      cwd: process.cwd(),
+    });
+
+    return await new Promise(function (resolve, reject) {
+      forkPs.on("message", function (message: any) {
+        results.messages.push(message);
+        if (message.startsWith("err:")) {
+          results.success = false;
+        }
+        if (message.startsWith("res:")) {
+          results.success = true;
+        }
+      });
+
+      let done = false;
+      forkPs.on("close", function () {
+        if (done) return;
+        done = true;
+        resolve(results);
+      });
+      forkPs.on("error", function (err: any) {
+        if (done) return;
+        done = true;
+        results.err = err;
+        resolve(results);
+      });
+    });
+  };
+
+  test("sending transactions from two processes WITHOUT nonce manager fails", async function () {
+    // We can't guarantee that sending 4 transactions from the same wallet will
+    // result in a nonce failure, but it's very likely.  This means that this
+    // test might fail occasionally.
+    const results = await Promise.all([
+      parallelFork(true),
+      parallelFork(true),
+      parallelFork(true),
+      parallelFork(true),
+    ]);
+
+    const fork1 = results[0];
+    const fork2 = results[1];
+    const hasError: any = [fork1, fork2].find((f: any) => !f.success);
+
+    equal(!!hasError, true);
+    equal(
+      !!hasError.messages.find((m: any) =>
+        m.includes("nonce has already been used"),
+      ),
+      true,
+    );
+  });
+
+  test("sending transactions from two processes WITH nonce manager succeeds", async function () {
+    const results = await Promise.all([
+      parallelFork(false),
+      parallelFork(false),
+    ]);
+
+    const fork1 = results[0];
+    const fork2 = results[1];
+    const hasError: any = [fork1, fork2].find((f: any) => !f.success);
+
+    equal(!!hasError, false);
   });
 });
