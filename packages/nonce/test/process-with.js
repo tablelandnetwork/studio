@@ -1,3 +1,10 @@
+/**
+ * This is a Javascript script that will try to run a Tableland create
+ * statement while using the NonceManager as the signer. It can be used to test
+ * that the NonceManager correctly sends parallel transactions across
+ * processes.
+ */
+
 import { Wallet, getDefaultProvider } from "ethers";
 import { Database, helpers } from "@tableland/sdk";
 import { NonceManager } from "../src/main";

@@ -2,12 +2,11 @@ import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import { Redis } from "@upstash/redis";
 
-// `kv` needs the connection env vars
 dotenv.config();
 
-// TODO: from ethers.js NonceManager experimental implementation
-// @TODO: Keep a per-NonceManager pool of sent but unmined transactions for
-//        rebroadcasting, in case we overrun the transaction pool
+// from ethers.js experimental NonceManager implementation
+// TODO: Keep a per-NonceManager pool of sent but unmined transactions for
+//    rebroadcasting, in case we overrun the transaction pool
 
 if (
   typeof process.env.KV_REST_API_URL !== "string" ||
@@ -27,8 +26,9 @@ const redis = new Redis({
 export class NonceManager extends ethers.Signer {
   readonly signer: ethers.Signer;
   readonly provider: ethers.providers.Provider;
-  // NOTE: this client instance is shared with all NonceManager instances in
-  //     this process.
+
+  // This redis instance is a singleton in the scope of all NonceManager
+  // instances in this process, i.e. each process gets a single redis client.
   readonly memStore = redis;
 
   _lock: string | undefined;
@@ -68,8 +68,8 @@ export class NonceManager extends ethers.Signer {
       );
       await this._releaseLock();
 
-      // TODO: this `_initialPromise` concept might need to be replaced with
-      //       something that works across processes
+      // TODO: this `_initialPromise` may no longer serve any purpose. It's
+      //     here because that is how ethers implements NonceManager.
       const initial = await this._initialPromise;
       return initial + (typeof deltaCount === "number" ? deltaCount : 0);
     }
@@ -83,9 +83,8 @@ export class NonceManager extends ethers.Signer {
     this._initialPromise = Promise.resolve(transactionCount).then((nonce) => {
       return ethers.BigNumber.from(nonce).toNumber();
     });
-    // TODO: we can't set like this because different nonce manageer instances spread
-    //       across processes might be competing to set 0 and increment the delta
-    //    Aquire the lock first!!
+
+    // aquire the lock that protects all nonce managers using the same redis db
     await this._acquireLock();
     await this.memStore.set(`delta:${await this.getAddress()}`, 0);
     await this._releaseLock();
@@ -128,6 +127,10 @@ export class NonceManager extends ethers.Signer {
     return tx;
   }
 
+  // There is one lock per public key.  The "key" is the public key, and the
+  // value is something only a single nonce manager instance knows.  This
+  // ensures that only the nonce manager that aquired the lock will release the
+  // lock.
   async _setLock() {
     if (!this._lock) {
       throw new Error("must have a value to set lock");
@@ -161,22 +164,20 @@ export class NonceManager extends ethers.Signer {
       await new Promise(function (resolve, reject) {
         const wait = Math.random() * Math.min(maxWait, trys * backoffRate);
 
-        // capture resolve & reject in scope
-        const run = async function () {
-          // returns null or "OK"
-          const res = await acquire();
-
-          if (res === null) {
-            return resolve(await doTry());
-          }
-
-          resolve(res);
-        };
-
         // `setTimeout`'s function should return void so we don't swallow a
         // Promise, hence using `catch` instead of `await`ing.
         setTimeout(function () {
-          run().catch((err) => reject(err));
+          // capture resolve & reject in scope
+          (async function () {
+            // returns null or "OK"
+            const res = await acquire();
+
+            if (res === null) {
+              return resolve(await doTry());
+            }
+
+            resolve(res);
+          })().catch((err) => reject(err));
         }, wait);
       });
     };
