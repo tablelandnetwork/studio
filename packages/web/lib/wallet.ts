@@ -1,4 +1,4 @@
-import { NonceManager } from "@ethersproject/experimental";
+import { NonceManager } from "@tableland/nonce";
 import { Wallet, getDefaultProvider } from "ethers";
 
 if (!process.env.PRIVATE_KEY) {

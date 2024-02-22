@@ -38,6 +38,7 @@
     "@tableland/studio-chains": "^0.0.0-pre.0",
     "@tableland/studio-client": "^0.0.0-pre.2",
     "@tableland/studio-store": "^0.0.0-pre.1",
+    "@tableland/nonce": "^0.0.0-pre.0",
     "@tanstack/react-table": "^8.10.1",
     "@trpc/client": "^10.38.4",
     "@trpc/next": "^10.38.4",
