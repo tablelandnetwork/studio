@@ -153,7 +153,14 @@ describe("NonceManager", function () {
 
     const fork1 = results[0];
     const fork2 = results[1];
-    const hasError: any = [fork1, fork2].find((f: any) => !f.success);
+    const fork3 = results[2];
+    const fork4 = results[3];
+    const hasError: any = [
+      fork1,
+      fork2,
+      fork3,
+      fork4
+    ].find((f: any) => !f.success);
 
     equal(!!hasError, true);
     equal(
