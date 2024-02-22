@@ -1,14 +1,14 @@
 {
   "name": "@tableland/nonce",
-  "version": "0.0.0-pre.0",
+  "version": "0.0.0-pre.1",
   "description": "",
   "repository": "https://github.com/tablelandnetwork/studio/nonce",
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
   "scripts": {
     "test": "mocha",
     "lint": "eslint '**/*.ts'",
