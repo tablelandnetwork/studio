@@ -50,7 +50,8 @@
       "EventFeed": {
         "ChainAPIBackoff": "15s",
         "NewBlockPollFreq": "1s",
-        "MinBlockDepth": 1
+        "MinBlockDepth": 1,
+        "PersistEvents": true
       },
       "EventProcessor": {
         "BlockFailedExecutionBackoff": "10s"

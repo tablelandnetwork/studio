@@ -1,5 +1,5 @@
 import { Wallet, getDefaultProvider } from "ethers";
-import { NonceManager } from "@tableland/nonce";
+import { NonceManager } from "@ethersproject/experimental";
 
 if (!process.env.PRIVATE_KEY) {
   throw new Error("Must provide PRIVATE_KEY env var.");

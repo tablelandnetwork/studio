@@ -117,7 +117,11 @@ export default function ImportTableForm({ project, team, envs }: Props) {
               <FormLabel>Chain ID</FormLabel>
               <FormControl>
                 <ChainSelector
-                  onValueChange={(val) => setValue("chainId", val)}
+                  onValueChange={(val) => {
+                    if (typeof val === "number") {
+                      setValue("chainId", val);
+                    }
+                  }}
                 />
               </FormControl>
               <FormDescription>

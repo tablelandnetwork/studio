@@ -1,5 +1,3 @@
-"use client";
-
 import { type SelectProps } from "@radix-ui/react-select";
 import { supportedChains } from "@tableland/studio-chains";
 import { type Chain } from "viem/chains";
@@ -39,20 +37,44 @@ const groupedChains = Array.from(
 );
 
 type Props = Omit<SelectProps, "onValueChange"> & {
-  onValueChange?: (value: number) => void;
+  onValueChange?: (value: number | "mainnets" | "testnets") => void;
+  showAll?: boolean;
 };
 
 export default function ChainSelector({
   onValueChange = () => {},
+  showAll = false,
   ...rest
 }: Props) {
+  function handleOnValueChange(val: string) {
+    if (val === "mainnets" || val === "testnets") {
+      onValueChange(val);
+    } else {
+      onValueChange(parseInt(val, 10));
+    }
+  }
+
   return (
-    <Select {...rest} onValueChange={(val) => onValueChange(parseInt(val, 10))}>
+    <Select
+      {...rest}
+      onValueChange={handleOnValueChange}
+      defaultValue={showAll ? "mainnets" : undefined}
+    >
       <SelectTrigger className="w-fit gap-x-2">
         <SelectValue placeholder="Select chain" />
       </SelectTrigger>
       <SelectContent>
         <ScrollArea className="h-[20rem]">
+          {showAll && (
+            <>
+              <SelectItem key="mainnets" value="mainnets">
+                All mainnets
+              </SelectItem>
+              <SelectItem key="testnets" value="testnets">
+                All testnets
+              </SelectItem>
+            </>
+          )}
           {groupedChains.map((group) => {
             return group[1].length ? (
               <div key={group[0]}>
