@@ -10,10 +10,20 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Table, getLatestTables } from "@/lib/validator-queries";
 import { Paginator } from "./paginator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const timeAgo = new TimeAgo("en-US");
 
 export function LatestTables({ initialData }: { initialData: Table[] }) {
+  const [showAlert, setShowAlert] = useState(false);
   const [latestTables, setLatestTables] = useState<Table[]>(initialData);
   const [selectedChain, setSelectedChain] = useState<
     number | "mainnets" | "testnets"
@@ -33,6 +43,20 @@ export function LatestTables({ initialData }: { initialData: Table[] }) {
 
   return (
     <>
+      <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Coming soon!</AlertDialogTitle>
+            <AlertDialogDescription>
+              We're working hard to lauch Tableland table pages as soon as
+              possible. Check back shortly.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Got it!</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div className="mt-8 flex items-end gap-4">
         <TypographyH3>Latest Tableland tables</TypographyH3>
         <div className="ml-auto flex items-center gap-2">
@@ -51,6 +75,10 @@ export function LatestTables({ initialData }: { initialData: Table[] }) {
             key={`${table.chain_id}-${table.id}`}
             href={`/tables/${table.prefix}_${table.chain_id}_${table.id}`}
             className="flex flex-col items-start gap-2 rounded-lg border p-4 text-left text-sm transition-all hover:bg-accent"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowAlert(true);
+            }}
           >
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center gap-2">
