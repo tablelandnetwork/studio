@@ -27,7 +27,7 @@ export function LatestTables({ initialData }: { initialData: Table[] }) {
   const [latestTables, setLatestTables] = useState<Table[]>(initialData);
   const [selectedChain, setSelectedChain] = useState<
     number | "mainnets" | "testnets"
-  >("mainnets");
+  >("testnets");
   const [loading, setLoading] = useState(false);
   const [pageSize, _] = useState(10);
   const [page, setPage] = useState(0);
