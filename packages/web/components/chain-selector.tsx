@@ -58,7 +58,7 @@ export default function ChainSelector({
     <Select
       {...rest}
       onValueChange={handleOnValueChange}
-      defaultValue={showAll ? "mainnets" : undefined}
+      defaultValue={showAll ? "testnets" : undefined}
     >
       <SelectTrigger className="w-fit gap-x-2">
         <SelectValue placeholder="Select chain" />
