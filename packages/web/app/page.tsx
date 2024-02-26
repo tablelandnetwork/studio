@@ -144,11 +144,11 @@ export default async function Page() {
         <TypographyP>
           User's work in Studio is organized into Projects. Learn about any
           Project by reading it's description and viewing it's table
-          definitions. Clone any project to your personal team to start working
-          on it.
+          definitions. Soon we'll be launching a feature allowing you to clone
+          any project as a quick way to get started.
         </TypographyP>
         <TypographyH3>Featured Studio Projects</TypographyH3>
-        <div className="mt-4 flex flex-col gap-4 sm:flex-row">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {featuredProjects.map((item) => (
             <Link
               key={item.project.id}
@@ -176,11 +176,11 @@ export default async function Page() {
       <section>
         <TypographyH2>Explore the wider Tableland landscape</TypographyH2>
         <TypographyP>
-          Studio is built to make using Tableland easier and visual, however
-          many people use Tableland directly as well. Below, you can explore
-          tables on Tableland that aren't necessairily part of any Studio
-          project. You may find inspiration, or even a table you want to use in
-          your own Studio project.
+          Studio is built to make using Tableland easier and more visual,
+          however many people use Tableland directly as well. Below, you can
+          explore tables on Tableland that aren't necessairily part of any
+          Studio project. You may find inspiration, or even a table you want to
+          use in your own Studio project.
         </TypographyP>
         <LatestTables initialData={latestTables} />
         <PopularTables initialData={popularTables} />
