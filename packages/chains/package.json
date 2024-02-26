@@ -19,7 +19,6 @@
     "prettier": "prettier '**/*.{ts,json}' --check",
     "prettier:fix": "npm run prettier -- --write",
     "build": "tsc",
-    "build:ci": "npm run build",
     "clean": "rm -rf dist"
   },
   "keywords": [
