@@ -16,6 +16,7 @@
     "dev": "email dev --dir src/emails",
     "export": "email export --dir src/emails",
     "build": "tsc",
+    "build:ci": "npm run build",
     "clean": "rm -rf dist"
   },
   "license": "MIT AND Apache-2.0",

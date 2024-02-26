@@ -39,6 +39,7 @@
     "prettier:fix": "npm run prettier -- --write",
     "clean": "rm -rf dist",
     "build": "tsc && chmod +x dist/cli.js && ./fixup",
+    "build:ci": "npm run build",
     "studio": "node ./dist/cli.js"
   },
   "license": "MIT AND Apache-2.0",
