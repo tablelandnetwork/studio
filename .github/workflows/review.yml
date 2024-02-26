@@ -21,7 +21,7 @@ env:
   KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
 
 jobs:
-  build:
+  review:
     environment: staging
     runs-on: ubuntu-latest
     strategy:

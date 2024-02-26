@@ -23,7 +23,7 @@ env:
   KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
 
 jobs:
-  review:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
