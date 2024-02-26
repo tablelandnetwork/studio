@@ -10,10 +10,6 @@ export async function featuredProjectSlugs() {
       { team: "aaron", project: "with-timestamp" },
     ];
   } else {
-    return [
-      { team: "team1", project: "project1" },
-      { team: "team2", project: "project2" },
-      { team: "team3", project: "project3" },
-    ];
+    return [];
   }
 }
