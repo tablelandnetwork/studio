@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { TypographyH3 } from "@/components/typography-h3";
 import { useEffect, useState } from "react";
 import { chainsMap } from "../../lib/chains-map";
+import { Paginator } from "./paginator";
+import { TypographyH3 } from "@/components/typography-h3";
 import ChainSelector from "@/components/chain-selector";
 import { Label } from "@/components/ui/label";
-import { PopularTable, getPopularTables } from "@/lib/validator-queries";
+import { type PopularTable, getPopularTables } from "@/lib/validator-queries";
 import { TypographyP } from "@/components/typography-p";
 import { cn } from "@/lib/utils";
-import { Paginator } from "./paginator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,14 +32,17 @@ export function PopularTables({
     number | "mainnets" | "testnets"
   >("testnets");
   const [loading, setLoading] = useState(false);
-  const [pageSize, _] = useState(10);
+  const [pageSize] = useState(10);
   const [page, setPage] = useState(0);
   useEffect(() => {
-    setLoading(true);
-    getPopularTables(selectedChain).then((tables) => {
-      setPopularTables(tables);
-      setLoading(false);
-    });
+    async function fetchPopularTables() {
+      setLoading(true);
+      await getPopularTables(selectedChain).then((tables) => {
+        setPopularTables(tables);
+        setLoading(false);
+      });
+    }
+    fetchPopularTables().catch(() => {});
   }, [selectedChain]);
 
   const offset = page * pageSize;
@@ -51,7 +54,7 @@ export function PopularTables({
           <AlertDialogHeader>
             <AlertDialogTitle>Coming soon!</AlertDialogTitle>
             <AlertDialogDescription>
-              We're working hard to lauch Tableland table pages as soon as
+              We&apos;re working hard to lauch Tableland table pages as soon as
               possible. Check back shortly.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -109,7 +112,7 @@ export function PopularTables({
                   </div>
                 </div>
                 <div className="ml-auto text-sm text-muted-foreground">
-                  {table.count + (table.count === 1 ? " write" : " writes")}
+                  {`${table.count} write${table.count === 1 ? "" : "s"}`}
                 </div>
               </div>
             </div>

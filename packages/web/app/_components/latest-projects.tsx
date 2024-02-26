@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import TimeAgo from "javascript-time-ago";
-import { TypographyH3 } from "@/components/typography-h3";
 import { useState } from "react";
-import { store } from "@/lib/store";
-import TeamAvatar from "@/components/team-avatar";
 import { Paginator } from "./paginator";
+import { TypographyH3 } from "@/components/typography-h3";
+import { type store } from "@/lib/store";
+import TeamAvatar from "@/components/team-avatar";
 
 const timeAgo = new TimeAgo("en-US");
 
@@ -15,7 +15,7 @@ export type Projects = Awaited<
 >;
 
 export function LatestProjects({ projects }: { projects: Projects }) {
-  const [pageSize, _] = useState(10);
+  const [pageSize] = useState(10);
   const [page, setPage] = useState(0);
 
   const offset = page * pageSize;

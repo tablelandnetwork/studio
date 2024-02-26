@@ -1,5 +1,5 @@
+import { type schema } from "@tableland/studio-store";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { schema } from "@tableland/studio-store";
 
 export default function TeamAvatar({ team }: { team: schema.Team }) {
   return (

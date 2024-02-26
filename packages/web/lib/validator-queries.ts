@@ -1,17 +1,17 @@
-import { chainsMap } from "./chains-map";
 import { helpers } from "@tableland/sdk";
+import { chainsMap } from "./chains-map";
 
-export type Table = {
+export interface Table {
   chain_id: number;
   controller: string;
   created_at: number;
   id: number;
   prefix: string;
   structure: string;
-};
+}
 
 export async function getLatestTables(chain: number | "mainnets" | "testnets") {
-  var query = "select * from registry ";
+  let query = "select * from registry ";
   if (typeof chain === "number") {
     query += `where chain_id = ${chain} `;
   }
@@ -28,14 +28,14 @@ export async function getLatestTables(chain: number | "mainnets" | "testnets") {
   return res.json() as unknown as Table[];
 }
 
-export type PopularTable = {
+export interface PopularTable {
   chain_id: number;
   count: number;
   prefix: string;
   controller: string;
   table_id: number;
   max_timestamp: number;
-};
+}
 
 export async function getPopularTables(
   chain: number | "mainnets" | "testnets",
@@ -43,7 +43,7 @@ export async function getPopularTables(
   const d = new Date();
   const dayAgo = Math.round(d.getTime() / 1000) - 24 * 60 * 60;
 
-  var query = `select tr.chain_id, tr.table_id, prefix, r.controller, max(timestamp) as max_timestamp, count(*) as count from system_evm_events e join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash inner join registry r on r.chain_id = tr.chain_id and r.id = tr.table_id where event_type = 'ContractRunSQL' and error is null and timestamp > ${dayAgo} `;
+  let query = `select tr.chain_id, tr.table_id, prefix, r.controller, max(timestamp) as max_timestamp, count(*) as count from system_evm_events e join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash inner join registry r on r.chain_id = tr.chain_id and r.id = tr.table_id where event_type = 'ContractRunSQL' and error is null and timestamp > ${dayAgo} `;
   if (typeof chain === "number") {
     query += `and tr.chain_id = ${chain} `;
   }
@@ -66,7 +66,6 @@ export async function getPopularTables(
 }
 
 function baseUrlForChain(chainId: number | "mainnets" | "testnets") {
-  var baseUrl: string = "";
   if (chainId === "mainnets") {
     return helpers.getBaseUrl(1);
   } else if (chainId === "testnets") {

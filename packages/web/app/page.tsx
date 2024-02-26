@@ -8,7 +8,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { RouterOutputs, Session } from "@tableland/studio-api";
+import { type RouterOutputs, Session } from "@tableland/studio-api";
+import { cache } from "react";
+import { LatestTables } from "./_components/latest-tables";
+import { PopularTables } from "./_components/popular-tables";
+import { LatestProjects } from "./_components/latest-projects";
 import { TypographyH1 } from "@/components/typography-h1";
 import { TypographyH2 } from "@/components/typography-h2";
 import { TypographyH3 } from "@/components/typography-h3";
@@ -16,11 +20,7 @@ import { TypographyP } from "@/components/typography-p";
 import { featuredProjectSlugs } from "@/lib/featured-projects";
 import { store } from "@/lib/store";
 import TeamAvatar from "@/components/team-avatar";
-import { LatestTables } from "./_components/latest-tables";
 import { getLatestTables, getPopularTables } from "@/lib/validator-queries";
-import { PopularTables } from "./_components/popular-tables";
-import { LatestProjects } from "./_components/latest-projects";
-import { cache } from "react";
 import { api } from "@/trpc/server";
 
 export default async function Page() {
@@ -41,13 +41,19 @@ export default async function Page() {
   const projectSlugs = await featuredProjectSlugs();
   const featuredProjects = (
     await Promise.all(
-      projectSlugs.map((slugs) =>
-        store.projects.projectByTeamAndProjectSlugs(slugs.team, slugs.project),
+      projectSlugs.map(
+        async (slugs) =>
+          await store.projects.projectByTeamAndProjectSlugs(
+            slugs.team,
+            slugs.project,
+          ),
       ),
     )
-  ).filter((p) => !!p) as NonNullable<
-    Awaited<ReturnType<typeof store.projects.projectByTeamAndProjectSlugs>>
-  >[];
+  ).filter((p) => !!p) as Array<
+    NonNullable<
+      Awaited<ReturnType<typeof store.projects.projectByTeamAndProjectSlugs>>
+    >
+  >;
   const latestProjects = await store.projects.latestProjects(0, 1000);
   const latestTables = await getLatestTables("mainnets");
   const popularTables = await getPopularTables("mainnets");
@@ -63,7 +69,7 @@ export default async function Page() {
             <>
               <div className="flex items-center space-x-4">
                 <UserCircle className="flex-shrink-0" />
-                <p>You're logged in!</p>
+                <p>You&apos;re logged in!</p>
               </div>
               <div className="flex items-center space-x-4">
                 <Play className="flex-shrink-0" />
@@ -142,10 +148,10 @@ export default async function Page() {
         <TypographyH2>Explore Studio Projects</TypographyH2>
         {/* </div> */}
         <TypographyP>
-          User's work in Studio is organized into Projects. Learn about any
-          Project by reading it's description and viewing it's table
-          definitions. Soon we'll be launching a feature allowing you to clone
-          any project as a quick way to get started.
+          User&apos;s work in Studio is organized into Projects. Learn about any
+          Project by reading it&apos;s description and viewing it&apos;s table
+          definitions. Soon we&apos;ll be launching a feature allowing you to
+          clone any project as a quick way to get started.
         </TypographyP>
         <TypographyH3>Featured Studio Projects</TypographyH3>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -178,7 +184,7 @@ export default async function Page() {
         <TypographyP>
           Studio is built to make using Tableland easier and more visual,
           however many people use Tableland directly as well. Below, you can
-          explore tables on Tableland that aren't necessairily part of any
+          explore tables on Tableland that aren&apos;t necessairily part of any
           Studio project. You may find inspiration, or even a table you want to
           use in your own Studio project.
         </TypographyP>
