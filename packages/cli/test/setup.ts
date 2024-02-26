@@ -141,12 +141,12 @@ function getAliases(tablesFile: string) {
 }
 
 function startTablelandApi(tablesFile: string, provider: Provider) {
-  if (typeof process.env.API_PRIVATE_KEY !== "string") {
+  if (typeof process.env.STORE_PRIVATE_KEY !== "string") {
     throw new Error("you must provide api private key");
   }
 
   // should be hardhat account #1
-  const wallet = new Wallet(process.env.API_PRIVATE_KEY);
+  const wallet = new Wallet(process.env.STORE_PRIVATE_KEY);
   const signer = new NonceManager(wallet.connect(provider));
 
   const db = new Database({

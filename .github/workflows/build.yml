@@ -10,9 +10,7 @@ on:
     branches: ["main", "staging"]
 
 env:
-  # This is local hardhat account #7 key.
-  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-  API_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+  STORE_PRIVATE_KEY: ${{ secrets.STORE_PRIVATE_KEY }}
   PROVIDER_URL: ${{ vars.PROVIDER_URL }}
   CHAIN_ID: ${{ vars.CHAIN_ID }}
   SESSION_COOKIE_NAME: ${{ vars.SESSION_COOKIE_NAME }}
