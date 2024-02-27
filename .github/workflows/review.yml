@@ -1,7 +1,7 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Node.js CI
+name: Review
 
 on:
   push:
@@ -10,22 +10,19 @@ on:
     branches: ["main", "staging"]
 
 env:
-  # This is local hardhat account #7 key.
-  PRIVATE_KEY: "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
-  # This is local hardhat account #1 key.
-  API_PRIVATE_KEY: "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-  PROVIDER_URL: "http://127.0.0.1:8546"
-  CHAIN: "local-tableland"
-  CHAIN_ID: 31337
-  SESSION_COOKIE_NAME: "STUDIO_SESSION"
-  SESSION_COOKIE_PASS: "ci test session pass ci test session pass ci test session pass"
-  DATA_SEAL_PASS: "ci test data seal pass ci test data seal pass ci test data seal pass"
+  STORE_PRIVATE_KEY: ${{ secrets.STORE_PRIVATE_KEY }}
+  PROVIDER_URL: ${{ vars.PROVIDER_URL }}
+  CHAIN_ID: ${{ vars.CHAIN_ID }}
+  SESSION_COOKIE_NAME: ${{ vars.SESSION_COOKIE_NAME }}
+  SESSION_COOKIE_PASS: ${{ secrets.SESSION_COOKIE_PASS }}
+  DATA_SEAL_PASS: ${{ secrets.DATA_SEAL_PASS }}
   POSTMARK_API_KEY: ${{ secrets.POSTMARK_API_KEY }}
   KV_REST_API_URL: ${{ vars.KV_REST_API_URL }}
   KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
 
 jobs:
   review:
+    environment: staging
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -39,7 +36,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm install
-      - run: npx lerna run build
-      - run: npx lerna run lint
-      - run: npx lerna run prettier
-      - run: npx lerna run test
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run prettier

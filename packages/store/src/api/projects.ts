@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { type Database } from "@tableland/sdk";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
 import { slugify } from "./utils.js";
@@ -67,6 +67,46 @@ export function initProjects(
         updatedAt: now.toISOString(),
       };
       return project;
+    },
+
+    firstNProjectSlugs: async function (n: number) {
+      const res = await db
+        .select({ team: teams.slug, project: projects.slug })
+        .from(projects)
+        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
+        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .orderBy(projects.name)
+        .limit(n)
+        .all();
+      return res;
+    },
+
+    projectByTeamAndProjectSlugs: async function (
+      teamSlug: string,
+      projectSlug: string,
+    ) {
+      const res = await db
+        .select({ team: teams, project: projects })
+        .from(projects)
+        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
+        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .where(and(eq(teams.slug, teamSlug), eq(projects.slug, projectSlug)))
+        .get();
+      return res;
+    },
+
+    latestProjects: async function (offset: number, count: number) {
+      const res = await db
+        .select({ projects, teams })
+        .from(projects)
+        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
+        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .where(isNotNull(projects.createdAt))
+        .orderBy(desc(projects.createdAt))
+        .offset(offset)
+        .limit(count)
+        .all();
+      return res.map((r) => ({ team: r.teams, project: r.projects }));
     },
 
     projectsByTeamId: async function (teamId: string) {
