@@ -50,7 +50,9 @@ export default function ChainSelector({
     if (val === "mainnets" || val === "testnets") {
       onValueChange(val);
     } else {
-      onValueChange(parseInt(val, 10));
+      const num = parseInt(val, 10);
+      if (isNaN(num)) return;
+      onValueChange(num);
     }
   }
 

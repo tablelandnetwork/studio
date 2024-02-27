@@ -29,17 +29,20 @@ export function LatestTables({ initialData }: { initialData: Table[] }) {
     number | "mainnets" | "testnets"
   >("testnets");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
   const [pageSize] = useState(10);
   const [page, setPage] = useState(0);
   useEffect(() => {
     async function fetchLatestTables() {
       setLoading(true);
-      await getLatestTables(selectedChain).then((tables) => {
-        setLatestTables(tables);
-        setLoading(false);
-      });
+      const tables = await getLatestTables(selectedChain);
+      setLatestTables(tables);
+      setLoading(false);
     }
-    fetchLatestTables().catch(() => {});
+    fetchLatestTables().catch((e) => {
+      setLoading(false);
+      setError(typeof e === "string" ? e : e.message);
+    });
   }, [selectedChain]);
 
   const offset = page * pageSize;
@@ -67,12 +70,14 @@ export function LatestTables({ initialData }: { initialData: Table[] }) {
           <ChainSelector
             showAll
             onValueChange={(v) => {
+              setPage(0);
               setSelectedChain(v);
             }}
           />
         </div>
       </div>
       <div className={cn("mt-4 flex flex-col gap-4", loading && "opacity-30")}>
+        {error && <div className="text-red-500">{error}</div>}
         {latestTables.slice(offset, offset + pageSize).map((table) => (
           <Link
             key={`${table.chain_id}-${table.id}`}

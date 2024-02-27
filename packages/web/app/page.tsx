@@ -32,9 +32,8 @@ export default async function Page() {
       teams = await cache(api.teams.userTeams.query)({
         userTeamId: session.auth.user.teamId,
       });
-    } catch {
-      // This is fine, we just don't have any teams if the user
-      // is unauthorized or some other error happens.
+    } catch (e) {
+      console.log("Failed to fetch user teams:", e);
     }
   }
 
