@@ -57,6 +57,8 @@ export const projects = sqliteTable("projects", {
   name: text("name").notNull(),
   slug: text("slug").notNull(),
   description: text("description").notNull(),
+  createdAt: text("created_at"),
+  updatedAt: text("updated_at"),
 });
 
 export const teamProjects = sqliteTable(

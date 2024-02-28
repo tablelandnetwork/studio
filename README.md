@@ -10,6 +10,7 @@ The `packages` directory contains the different packages used by studio.
  - `cli`: command line Studio client built with node.js
  - `client`: http client for the studio api
  - `mail`: email sending interfaces
+ - `nonce`: redis based nonce manager
  - `store`: an internal Studio data store
  - `web`: a web base Studio client built with Next.js
 

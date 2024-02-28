@@ -28,7 +28,9 @@ CREATE TABLE `projects` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
-	`description` text NOT NULL
+	`description` text NOT NULL,
+	`created_at` text,
+	`updated_at` text
 );
 --> statement-breakpoint
 CREATE TABLE `tables` (

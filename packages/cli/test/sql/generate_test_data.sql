@@ -36,12 +36,16 @@ insert into `projects` (
 	`id`,
 	`name`,
 	`slug`,
-	`description`
+	`description`,
+	`created_at`,
+	`updated_at`
 ) values (
 	'2f403473-de7b-41ba-8d97-12a0344aeccb',
 	'test_project',
 	'test_project',
-	'project for automated testing'
+	'project for automated testing',
+	'2023-10-16T07:14:06.661Z',
+	'2023-10-16T07:14:06.661Z'
 );
 --> statement-breakpoint
 insert into `team_projects` (
