@@ -141,43 +141,55 @@ export default async function Page() {
           </div>
         </section>
       )}
-      <section>
-        {/* <div className="flex items-baseline gap-4">
+      {featuredProjects.length > 0 ||
+        (latestProjects.length > 0 && (
+          <section>
+            {/* <div className="flex items-baseline gap-4">
           <Search /> */}
-        <TypographyH2>Explore Studio Projects</TypographyH2>
-        {/* </div> */}
-        <TypographyP>
-          User&apos;s work in Studio is organized into Projects. Learn about any
-          Project by reading it&apos;s description and viewing it&apos;s table
-          definitions. Soon we&apos;ll be launching a feature allowing you to
-          clone any project as a quick way to get started.
-        </TypographyP>
-        <TypographyH3>Featured Studio Projects</TypographyH3>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {featuredProjects.map((item) => (
-            <Link
-              key={item.project.id}
-              href={`/${item.team.slug}/${item.project.slug}`}
-              className="flex grow basis-1 flex-col items-start gap-2 rounded-lg border p-4 text-left text-sm transition-all hover:bg-accent"
-            >
-              <div className="flex w-full flex-col gap-4">
-                <div className="flex items-center gap-2">
-                  <TeamAvatar team={item.team} />
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm font-semibold">
-                      {item.team.name}/{item.project.name}
-                    </div>
-                  </div>
+            <TypographyH2>Explore Studio Projects</TypographyH2>
+            {/* </div> */}
+            <TypographyP>
+              User&apos;s work in Studio is organized into Projects. Learn about
+              any Project by reading it&apos;s description and viewing it&apos;s
+              table definitions. Soon we&apos;ll be launching a feature allowing
+              you to clone any project as a quick way to get started.
+            </TypographyP>
+            {featuredProjects.length === 0 ? null : (
+              <>
+                <TypographyH3>Featured Studio Projects</TypographyH3>
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {featuredProjects.length === 0 && (
+                    <div>No featured Projects to display</div>
+                  )}
+                  {featuredProjects.map((item) => (
+                    <Link
+                      key={item.project.id}
+                      href={`/${item.team.slug}/${item.project.slug}`}
+                      className="flex grow basis-1 flex-col items-start gap-2 rounded-lg border p-4 text-left text-sm transition-all hover:bg-accent"
+                    >
+                      <div className="flex w-full flex-col gap-4">
+                        <div className="flex items-center gap-2">
+                          <TeamAvatar team={item.team} />
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm font-semibold">
+                              {item.team.name}/{item.project.name}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="line-clamp-5 text-sm text-muted-foreground">
+                          {item.project.description}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-                <div className="line-clamp-5 text-sm text-muted-foreground">
-                  {item.project.description}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <LatestProjects projects={latestProjects} />
-      </section>
+              </>
+            )}
+            {latestProjects.length === 0 ? null : (
+              <LatestProjects projects={latestProjects} />
+            )}
+          </section>
+        ))}
       <section>
         <TypographyH2>Explore the wider Tableland landscape</TypographyH2>
         <TypographyP>
