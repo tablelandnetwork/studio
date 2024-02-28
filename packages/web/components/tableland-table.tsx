@@ -1,4 +1,4 @@
-import { Database, Schema, helpers } from "@tableland/sdk";
+import { Database, type Schema, helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
 import TimeAgo from "javascript-time-ago";
@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const timeAgo = new TimeAgo("en-US");
 
-type Props = {
+interface Props {
   displayName: string;
   tableName: string;
   chainId: number;
@@ -21,21 +21,21 @@ type Props = {
   environment?: schema.Environment;
   tableData?: TableData;
   deploymentData?: DeploymentData;
-};
+}
 
-type TableData = {
+interface TableData {
   id: string;
   name: string;
   slug: string;
   description: string;
-};
+}
 
-type DeploymentData = {
+interface DeploymentData {
   tableId: string;
   environmentId: string;
   blockNumber: number | null;
   txnHash: string | null;
-};
+}
 
 export default async function TablelandTable({
   displayName,

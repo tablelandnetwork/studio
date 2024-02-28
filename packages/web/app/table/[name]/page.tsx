@@ -1,5 +1,5 @@
-import TablelandTable from "@/components/tableland-table";
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
+import TablelandTable from "@/components/tableland-table";
 
 export default async function TablePage({
   params,
@@ -15,12 +15,9 @@ export default async function TablePage({
     );
   }
 
-  const [tokenId, chainIdString, ...rest] = [
-    parts.pop()!,
-    parts.pop()!,
-    ...parts,
-  ];
-  const prefix = rest.join("_");
+  // const [tokenId, chainIdString, ...rest] = [
+  const [tokenId, chainIdString] = [parts.pop()!, parts.pop()!, ...parts];
+  // const prefix = rest.join("_");
   const chainId = parseInt(chainIdString, 10);
   if (isNaN(chainId)) {
     return (
@@ -37,7 +34,7 @@ export default async function TablePage({
   let tablelandTable: Table;
   try {
     tablelandTable = await validator.getTableById({
-      chainId: chainId,
+      chainId,
       tableId: tokenId,
     });
   } catch (err) {

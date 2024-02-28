@@ -3,9 +3,9 @@ import { AlertOctagon, HelpCircle, Info, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import TablelandTable from "@/components/tableland-table";
 import ExecDeployment from "./_components/exec-deployment";
 import { Sidebar } from "./_components/sidebar";
+import TablelandTable from "@/components/tableland-table";
 import { api } from "@/trpc/server";
 
 export default async function Deployments({
