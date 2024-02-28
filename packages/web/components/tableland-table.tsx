@@ -37,7 +37,7 @@ type DeploymentData = {
   txnHash: string | null;
 };
 
-export default async function Deployment({
+export default async function TablelandTable({
   displayName,
   tableName,
   chainId,
