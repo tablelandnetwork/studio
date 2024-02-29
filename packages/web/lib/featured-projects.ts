@@ -10,6 +10,27 @@ export async function featuredProjectSlugs() {
       { team: "aaron", project: "with-timestamp" },
     ];
   } else {
-    return [];
+    return [
+      {
+        team: "partners",
+        project: "dimo", // Only a sample of non-active testnet tables (over 140 total)
+      },
+      {
+        team: "partners",
+        project: "hideout-labs", // Non-active testnets tables
+      },
+      // {
+      //   team: "partners",
+      //   project: "drvrs", // No tables
+      // },
+      {
+        team: "tableland",
+        project: "studio", // Active Tableland Studio tables
+      },
+      {
+        team: "tableland",
+        project: "rigs", // Active Tableland Rigs tables
+      },
+    ];
   }
 }
