@@ -24,7 +24,7 @@ import { FormRootMessage } from "@/components/form-root";
 
 const formSchema = z.object({
   name: z.string().trim().min(3),
-  description: z.string().trim().nonempty(),
+  description: z.string().trim().nonempty().max(1024),
   environments: z.array(z.object({ name: z.string().trim().min(3) })),
 });
 
