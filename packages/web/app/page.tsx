@@ -61,7 +61,7 @@ export default async function Page() {
     <main className="container flex max-w-4xl flex-1 flex-col gap-y-32 p-4 py-32">
       <section>
         <div className="flex items-center justify-center space-x-4">
-          <TypographyH1>Welcome to Tableland Studio!</TypographyH1>
+          <TypographyH1>Welcome to the Tableland Studio!</TypographyH1>
         </div>
         <div className="m-auto flex flex-1 flex-col justify-center gap-4 pt-16">
           {session.auth ? (
@@ -83,10 +83,10 @@ export default async function Page() {
               <div className="flex items-center space-x-4">
                 <Info className="flex-shrink-0" />
                 <p>
-                  Tableland Studio makes it easy to design and deploy tables on
-                  Tableland, collaborate with teammates on projects, integrate
-                  your project with the Studio CLI, and discover what other
-                  users are building on Tableland.
+                  The Tableland Studio makes it easy to design and deploy tables
+                  on Tableland, collaborate with teammates on projects,
+                  integrate your project with the Studio CLI, and discover what
+                  other users are building on Tableland.
                 </p>
               </div>
               <div className="flex items-center space-x-4">
@@ -108,9 +108,9 @@ export default async function Page() {
               <div className="flex items-center space-x-4">
                 <LogIn className="flex-shrink-0" />
                 <p>
-                  Then log into Studio using the button in the upper right
+                  Then, log into the Studio using the button in the upper right
                   corner of the screen. You&apos;ll be prompted to choose a
-                  Studio username and then you&apos;ll be redirected to the
+                  Studio username, and then you&apos;ll be redirected to the
                   Studio page for your personal Team.
                 </p>
               </div>
@@ -148,10 +148,10 @@ export default async function Page() {
           <TypographyH2>Explore Studio Projects</TypographyH2>
           {/* </div> */}
           <TypographyP>
-            User&apos;s work in Studio is organized into Projects. Learn about
-            any Project by reading it&apos;s description and viewing it&apos;s
-            table definitions. Soon we&apos;ll be launching a feature allowing
-            you to clone any project as a quick way to get started.
+            Your work in the Studio is organized into Projects. Learn about any
+            Project by reading its description and viewing its table
+            definitions. Soon, we&apos;ll be launching a feature allowing you to
+            clone any project as a quick way to get started.
           </TypographyP>
           {featuredProjects.length === 0 ? null : (
             <>
@@ -189,11 +189,11 @@ export default async function Page() {
       <section>
         <TypographyH2>Explore the wider Tableland landscape</TypographyH2>
         <TypographyP>
-          Studio is built to make using Tableland easier and more visual,
-          however many people use Tableland directly as well. Below, you can
-          explore tables on Tableland that aren&apos;t necessairily part of any
+          The Studio is built to make using Tableland easier and more visual;
+          however, many people use Tableland directly as well. Below, you can
+          explore tables on Tableland that aren&apos;t necessarily part of any
           Studio project. You may find inspiration, or even a table you want to
-          use in your own Studio project.
+          use in your own Studio project!
         </TypographyP>
         <LatestTables initialData={latestTables} />
         <PopularTables initialData={popularTables} />
