@@ -10,22 +10,12 @@ import { Label } from "@/components/ui/label";
 import { type PopularTable, getPopularTables } from "@/lib/validator-queries";
 import { TypographyP } from "@/components/typography-p";
 import { cn } from "@/lib/utils";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 export function PopularTables({
   initialData,
 }: {
   initialData: PopularTable[];
 }) {
-  const [showAlert, setShowAlert] = useState(false);
   const [popularTables, setPopularTables] =
     useState<PopularTable[]>(initialData);
   const [selectedChain, setSelectedChain] = useState<
@@ -52,20 +42,6 @@ export function PopularTables({
 
   return (
     <>
-      <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Coming soon!</AlertDialogTitle>
-            <AlertDialogDescription>
-              We&apos;re working hard to lauch Tableland table pages as soon as
-              possible. Check back shortly.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Got it!</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
       <div className="mt-8 flex items-end gap-4">
         <div className="flex flex-col">
           <TypographyH3>Active Tableland tables</TypographyH3>
@@ -94,12 +70,8 @@ export function PopularTables({
         {popularTables.slice(offset, offset + pageSize).map((table, n) => (
           <Link
             key={`${table.chain_id}-${table.table_id}`}
-            href={`/tables/${table.prefix}_${table.chain_id}_${table.table_id}`}
+            href={`/table/${table.prefix}_${table.chain_id}_${table.table_id}`}
             className="flex flex-col items-start gap-2 rounded-lg border p-4 text-left text-sm transition-all hover:bg-accent"
-            onClick={(e) => {
-              e.preventDefault();
-              setShowAlert(true);
-            }}
           >
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center gap-4">

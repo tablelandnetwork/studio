@@ -3,9 +3,9 @@ import { AlertOctagon, HelpCircle, Info, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import Deployment from "./_components/deployment";
 import ExecDeployment from "./_components/exec-deployment";
 import { Sidebar } from "./_components/sidebar";
+import TablelandTable from "@/components/tableland-table";
 import { api } from "@/trpc/server";
 
 export default async function Deployments({
@@ -77,10 +77,16 @@ export default async function Deployments({
           />
           {selectedEnvironment && selectedTable ? (
             deployment ? (
-              <Deployment
+              <TablelandTable
+                displayName={selectedTable.name}
+                tableName={deployment.tableName}
+                chainId={deployment.chainId}
+                tokenId={deployment.tokenId}
+                createdAt={new Date(deployment.createdAt)}
+                schema={selectedTable.schema}
                 environment={selectedEnvironment}
-                table={selectedTable}
-                deployment={deployment}
+                tableData={selectedTable}
+                deploymentData={deployment}
               />
             ) : (
               <ExecDeployment

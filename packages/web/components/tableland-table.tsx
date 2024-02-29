@@ -1,33 +1,58 @@
-import { Database, helpers } from "@tableland/sdk";
+import { Database, type Schema, helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
 import TimeAgo from "javascript-time-ago";
 import { Blocks, Coins, Hash, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
-import { DataTable } from "./data-table";
+import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
 import { openSeaLinks } from "@/lib/open-sea";
 import { blockExplorers } from "@/lib/block-explorers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const timeAgo = new TimeAgo("en-US");
 
-export default async function Deployment({
-  environment,
-  table,
-  deployment,
-}: {
-  environment: schema.Environment;
-  table: schema.Table;
-  deployment: schema.Deployment;
-}) {
-  const chainInfo = helpers.getChainInfo(deployment.chainId);
-  const blockExplorer = blockExplorers.get(deployment.chainId);
-  const openSeaLink = openSeaLinks.get(deployment.chainId);
+interface Props {
+  displayName: string;
+  tableName: string;
+  chainId: number;
+  tokenId: string;
+  createdAt: Date;
+  schema: Schema;
+  environment?: schema.Environment;
+  tableData?: TableData;
+  deploymentData?: DeploymentData;
+}
 
-  const tbl = new Database({ baseUrl: helpers.getBaseUrl(deployment.chainId) });
-  const data = await tbl
-    .prepare(`SELECT * FROM ${deployment.tableName};`)
-    .all();
+interface TableData {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+}
+
+interface DeploymentData {
+  tableId: string;
+  environmentId: string;
+  blockNumber: number | null;
+  txnHash: string | null;
+}
+
+export default async function TablelandTable({
+  displayName,
+  tableName,
+  chainId,
+  tokenId,
+  createdAt,
+  environment,
+  tableData,
+  deploymentData,
+}: Props) {
+  const chainInfo = helpers.getChainInfo(chainId);
+  const blockExplorer = blockExplorers.get(chainId);
+  const openSeaLink = openSeaLinks.get(chainId);
+
+  const tbl = new Database({ baseUrl: helpers.getBaseUrl(chainId) });
+  const data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   const columns: Array<ColumnDef<unknown>> = data.results.length
     ? Object.keys(data.results[0] as object).map((col) => ({
         accessorKey: col,
@@ -38,7 +63,7 @@ export default async function Deployment({
   return (
     <div className="flex-1 space-y-4 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-medium">{table.name}</h1>
+        <h1 className="text-3xl font-medium">{displayName}</h1>
         {/* <Select>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Staging" />
@@ -61,7 +86,7 @@ export default async function Deployment({
           <CardContent>
             <div className="text-2xl font-semibold">{chainInfo.chainName}</div>
             <p className="text-xs text-muted-foreground">
-              {timeAgo.format(new Date(deployment.createdAt))}
+              {timeAgo.format(createdAt)}
             </p>
           </CardContent>
         </Card>
@@ -73,10 +98,10 @@ export default async function Deployment({
             <Table2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold">{deployment.tableName}</div>
+            <div className="text-2xl font-semibold">{tableName}</div>
             <Link
               className="text-xs text-muted-foreground"
-              href={`https://tablescan.io/${deployment.tableName}`}
+              href={`https://tablescan.io/${tableName}`}
             >
               View on Tablescan
             </Link>
@@ -88,11 +113,11 @@ export default async function Deployment({
             <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold">{deployment.tokenId}</div>
+            <div className="text-2xl font-semibold">{tokenId}</div>
             {openSeaLink && (
               <Link
                 target="_blank"
-                href={openSeaLink.tokenUrl(deployment.tokenId)}
+                href={openSeaLink.tokenUrl(tokenId)}
                 className="text-xs text-muted-foreground"
               >
                 View on OpenSea
@@ -100,7 +125,7 @@ export default async function Deployment({
             )}
           </CardContent>
         </Card>
-        {deployment.txnHash && (
+        {deploymentData?.txnHash && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -110,13 +135,13 @@ export default async function Deployment({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-semibold">
-                {deployment.txnHash.slice(0, 5)}...
-                {deployment.txnHash.slice(-5)}
+                {deploymentData.txnHash.slice(0, 5)}...
+                {deploymentData.txnHash.slice(-5)}
               </div>
               {blockExplorer && (
                 <Link
                   target="_blank"
-                  href={blockExplorer.txUrl(deployment.txnHash)}
+                  href={blockExplorer.txUrl(deploymentData.txnHash)}
                   className="text-xs text-muted-foreground"
                 >
                   View on {blockExplorer.explorer}
@@ -125,7 +150,7 @@ export default async function Deployment({
             </CardContent>
           </Card>
         )}
-        {deployment.blockNumber && (
+        {deploymentData?.blockNumber && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -135,12 +160,12 @@ export default async function Deployment({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-semibold">
-                {deployment.blockNumber}
+                {deploymentData.blockNumber}
               </div>
               {blockExplorer && (
                 <Link
                   target="_blank"
-                  href={blockExplorer.blockUrl(deployment.blockNumber)}
+                  href={blockExplorer.blockUrl(deploymentData.blockNumber)}
                   className="text-xs text-muted-foreground"
                 >
                   View on {blockExplorer.explorer}
