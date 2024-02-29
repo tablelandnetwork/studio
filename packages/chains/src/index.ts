@@ -18,8 +18,10 @@ import {
   sepolia,
 } from "viem/chains";
 
-const INFURA_KEY = process.env.INFURA_KEY ?? "";
-const QUICK_NODE_KEY = process.env.QUICK_NODE_KEY ?? "";
+export interface ApiKeys {
+  infura?: string;
+  quickNode?: string;
+}
 
 function supportedChains(isLocalDev = false) {
   const res: Chain[] = [
@@ -42,9 +44,12 @@ function supportedChains(isLocalDev = false) {
   return res;
 }
 
-function configuredChains(isLocalDev = false) {
+function configuredChains(isLocalDev = false, apiKeys?: ApiKeys) {
+  const infuraKey = apiKeys?.infura ?? "";
+  const quickNodeKey = apiKeys?.quickNode ?? "";
+
   return configureChains(supportedChains(isLocalDev), [
-    infuraProvider({ apiKey: INFURA_KEY }),
+    infuraProvider({ apiKey: infuraKey }),
     jsonRpcProvider({
       rpc: (chain) => {
         let slug = "breakit";
@@ -52,7 +57,7 @@ function configuredChains(isLocalDev = false) {
           slug = "nova-mainnet";
         }
         return {
-          http: `https://neat-dark-dust.${slug}.quiknode.pro/${QUICK_NODE_KEY}/`,
+          http: `https://neat-dark-dust.${slug}.quiknode.pro/${quickNodeKey}/`,
         };
       },
     }),

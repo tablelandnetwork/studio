@@ -19,6 +19,8 @@ export function appRouter(
   createInviteLink: (seal: string) => string,
   dataSealPass: string,
   isLocalDev: boolean,
+  infuraKey: string,
+  quickNodeKey: string,
 ) {
   const mailApi = initMailApi(mailApiKey);
   const sendInvite = createSendInvite(
@@ -36,7 +38,10 @@ export function appRouter(
     invites: invitesRouter(store, sendInvite, dataSealPass),
     environments: environmentsRouter(store),
     deployments: deploymentsRouter(store),
-    providers: providersRouter(isLocalDev),
+    providers: providersRouter(isLocalDev, {
+      infura: infuraKey,
+      quickNode: quickNodeKey,
+    }),
   });
 }
 
