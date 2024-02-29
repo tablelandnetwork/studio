@@ -21,7 +21,7 @@ helpers.overrideDefaults("localhost", { baseUrl: TEST_VALIDATOR_URL });
 const lt = new LocalTableland({
   validator: path.resolve(_dirname, "validator"),
   registryPort: TEST_REGISTRY_PORT,
-  silent: true,
+  silent: false,
 });
 
 before(async function () {

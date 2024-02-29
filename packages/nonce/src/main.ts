@@ -32,7 +32,6 @@ export class NonceManager extends ethers.Signer {
   readonly memStore = redis;
 
   _lock: string | undefined;
-  _initialPromise: Promise<number> | null;
 
   constructor(signer: ethers.Signer) {
     super();
@@ -40,7 +39,6 @@ export class NonceManager extends ethers.Signer {
       throw new Error("NonceManager requires a provider at instantiation");
     }
 
-    this._initialPromise = null;
     this.signer = signer;
     this.provider = signer.provider;
   }
@@ -57,21 +55,16 @@ export class NonceManager extends ethers.Signer {
     blockTag?: ethers.providers.BlockTag,
   ): Promise<number> {
     if (blockTag === "pending") {
-      if (!this._initialPromise) {
-        this._initialPromise = this.signer.getTransactionCount("pending");
-      }
-
       await this._acquireLock();
+
+      const currentCount = await this.signer.getTransactionCount("pending");
       // this returns null if the key doesn't exist
       const deltaCount = await this.memStore.get(
         `delta:${await this.getAddress()}`,
       );
       await this._releaseLock();
 
-      // TODO: this `_initialPromise` may no longer serve any purpose. It's
-      //     here because that is how ethers implements NonceManager.
-      const initial = await this._initialPromise;
-      return initial + (typeof deltaCount === "number" ? deltaCount : 0);
+      return currentCount + (typeof deltaCount === "number" ? deltaCount : 0);
     }
 
     return await this.signer.getTransactionCount(blockTag);
@@ -80,13 +73,8 @@ export class NonceManager extends ethers.Signer {
   async setTransactionCount(
     transactionCount: ethers.BigNumberish | Promise<ethers.BigNumberish>,
   ): Promise<void> {
-    this._initialPromise = Promise.resolve(transactionCount).then((nonce) => {
-      return ethers.BigNumber.from(nonce).toNumber();
-    });
-
-    // aquire the lock that protects all nonce managers using the same redis db
     await this._acquireLock();
-    await this.memStore.set(`delta:${await this.getAddress()}`, 0);
+    await this._resetDelta();
     await this._releaseLock();
   }
 
@@ -124,6 +112,14 @@ export class NonceManager extends ethers.Signer {
     }
 
     const tx = await this.signer.sendTransaction(transaction);
+
+    this.provider
+      .getTransactionReceipt(tx.hash)
+      .then(async () => {
+        await this._resetDelta();
+      })
+      .catch((err) => console.log("Error reseting delta:", err));
+
     return tx;
   }
 
@@ -145,12 +141,6 @@ export class NonceManager extends ethers.Signer {
   }
 
   async _acquireLock() {
-    // make sure we don't try to aquire multiple times
-    if (this._lock) {
-      throw new Error("cannot aquire a lock simultaneously in one instance");
-    }
-    this._lock = Math.random().toString();
-
     // If the lock was not acquired, we want to retry using increasing backoff
     // combined with "jitter".  For a nice overview of the reasoning here, read
     // https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter
@@ -159,20 +149,28 @@ export class NonceManager extends ethers.Signer {
     const backoffRate = 50; // ms
     const maxWait = 2000; // ms
     let trys = 0;
-    const doTry = async function () {
+    // NOTE: we need arrow functions to keep context of `this`
+    const doTry = async () => {
       trys += 1;
-      await new Promise(function (resolve, reject) {
+      await new Promise((resolve, reject) => {
         const wait = Math.random() * Math.min(maxWait, trys * backoffRate);
 
         // `setTimeout`'s function should return void so we don't swallow a
         // Promise, hence using `catch` instead of `await`ing.
-        setTimeout(function () {
+        setTimeout(() => {
           // capture resolve & reject in scope
-          (async function () {
+          (async () => {
+            // make sure we can't aquire simultaneously in this instance
+            if (this._lock) {
+              return resolve(await doTry());
+            }
+
+            this._lock = Math.random().toString();
             // returns null or "OK"
             const res = await acquire();
 
             if (res === null) {
+              this._lock = undefined;
               return resolve(await doTry());
             }
 
@@ -202,5 +200,17 @@ export class NonceManager extends ethers.Signer {
       [this._lock],
     );
     this._lock = undefined;
+  }
+
+  async _resetDelta() {
+    await this.memStore.eval(
+      `if redis.call("get",KEYS[1]) ~= ARGV[1] then
+          return redis.call("set",KEYS[1], 0)
+      else
+          return 0
+      end`,
+      [`delta:${await this.getAddress()}`],
+      [0],
+    );
   }
 }
