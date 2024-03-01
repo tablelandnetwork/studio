@@ -7,7 +7,8 @@ import Link from "next/link";
 import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
 import { openSeaLinks } from "@/lib/open-sea";
 import { blockExplorers } from "@/lib/block-explorers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const timeAgo = new TimeAgo("en-US");
 
