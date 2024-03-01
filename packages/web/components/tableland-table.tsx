@@ -98,7 +98,9 @@ export default async function TablelandTable({
             <Table2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold">{tableName}</div>
+            <div className="overflow-x-auto whitespace-nowrap text-2xl font-semibold">
+              {tableName}
+            </div>
             <Link
               className="text-xs text-muted-foreground"
               href={`https://tablescan.io/${tableName}`}
