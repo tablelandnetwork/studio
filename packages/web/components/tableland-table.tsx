@@ -5,11 +5,11 @@ import TimeAgo from "javascript-time-ago";
 import { Blocks, Coins, Hash, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
-import { openSeaLinks } from "@/lib/open-sea";
-import { blockExplorers } from "@/lib/block-explorers";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SQLLogs from "./sql-logs";
+import { blockExplorers } from "@/lib/block-explorers";
+import { openSeaLinks } from "@/lib/open-sea";
 
 const timeAgo = new TimeAgo("en-US");
 

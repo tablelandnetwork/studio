@@ -1,12 +1,12 @@
 "use client";
 
-import { Paginator } from "./paginator";
-import { Button } from "./ui/button";
-import { cn } from "@/lib/utils";
-import { SqlLog, getSqlLogs } from "@/lib/validator-queries";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Paginator } from "./paginator";
+import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
+import { type SqlLog, getSqlLogs } from "@/lib/validator-queries";
 
 export default function SQLLogs({
   chain,
@@ -21,16 +21,15 @@ export default function SQLLogs({
   const [page, setPage] = useState(0);
   const [loadedPage, setLoadedPage] = useState(-1);
   const [maxLoadedPage, setMaxLoadedPage] = useState(-1);
-  const [pageSize] = useState(20);
+  const [pageSize] = useState(10);
   useEffect(() => {
     async function loadLogs() {
       if (page <= maxLoadedPage) {
         setLoadedPage(page);
         return;
       }
-      let beforeTimestamp = !!logs.length
-        ? logs[logs.length - 1].timestamp
-        : undefined;
+      let beforeTimestamp =
+        logs.length > 0 ? logs[logs.length - 1].timestamp : undefined;
       if (beforeTimestamp && maxLoadedPage === -1) {
         beforeTimestamp = undefined;
       }
