@@ -7,7 +7,9 @@ import Link from "next/link";
 import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
 import { openSeaLinks } from "@/lib/open-sea";
 import { blockExplorers } from "@/lib/block-explorers";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import SQLLogs from "./sql-logs";
 
 const timeAgo = new TimeAgo("en-US");
 
@@ -175,7 +177,18 @@ export default async function TablelandTable({
           </Card>
         )}
       </div>
-      <DataTable columns={columns} data={data.results} />
+      <Tabs defaultValue="logs" className="py-4">
+        <TabsList>
+          <TabsTrigger value="data">Table Data</TabsTrigger>
+          <TabsTrigger value="logs">SQL Logs</TabsTrigger>
+        </TabsList>
+        <TabsContent value="data">
+          <DataTable columns={columns} data={data.results} />
+        </TabsContent>
+        <TabsContent value="logs">
+          <SQLLogs chain={chainId} tableId={tokenId} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import TimeAgo from "javascript-time-ago";
 import { useState } from "react";
-import { Paginator } from "./paginator";
+import { Paginator } from "@/components/paginator";
 import { TypographyH3 } from "@/components/typography-h3";
 import { type store } from "@/lib/store";
 import TeamAvatar from "@/components/team-avatar";
