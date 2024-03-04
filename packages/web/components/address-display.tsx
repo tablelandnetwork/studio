@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy } from "lucide-react";
+import { type HTMLProps } from "react";
 import { Button } from "./ui/button";
 import {
   Tooltip,
@@ -9,7 +10,6 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
-import { HTMLProps } from "react";
 import { cn } from "@/lib/utils";
 
 export default function AddressDisplay({
@@ -36,14 +36,14 @@ export default function AddressDisplay({
         toast({
           title: "Done!",
           description: `The ${
-            name || "address"
+            name ?? "address"
           } has been copied to your clipboard.`,
           duration: 2000,
         });
       })
       .catch(function (err) {
         const errMessage = [
-          `Could not copy the ${name || "address"} to your clipboard.`,
+          `Could not copy the ${name ?? "address"} to your clipboard.`,
           typeof err.message === "string" ? err.message : undefined,
         ]
           .filter((s) => s)
@@ -85,11 +85,11 @@ export default function AddressDisplay({
                 onClick={handleCopy}
               >
                 <Copy className="h-4 w-4 stroke-slate-300" />
-                <span className="sr-only">Copy {name || "address"}</span>
+                <span className="sr-only">Copy {name ?? "address"}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Click to copy {name || "address"}</p>
+              <p>Click to copy {name ?? "address"}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

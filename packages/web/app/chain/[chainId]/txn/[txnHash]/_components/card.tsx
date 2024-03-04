@@ -1,5 +1,5 @@
+import React, { type ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils";
-import React, { ComponentPropsWithoutRef } from "react";
 
 export function Card({
   children,

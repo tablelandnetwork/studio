@@ -45,7 +45,7 @@ export default function SQLLogs({
       setLoading(false);
       setError(err.message);
     });
-  }, [page, pageSize, maxLoadedPage]);
+  }, [page, pageSize, maxLoadedPage, chain, logs, tableId]);
 
   function refresh() {
     setMaxLoadedPage(-1);

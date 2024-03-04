@@ -1,10 +1,7 @@
-import AddressDisplay from "@/components/address-display";
-import { chainsMap } from "@/lib/chains-map";
-import { cn } from "@/lib/utils";
-import { getSqlLog } from "@/lib/validator-queries";
 import TimeAgo from "javascript-time-ago";
-import { AlertCircle, ExternalLink } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -12,9 +9,12 @@ import {
   CardSubContent,
   CardTitle,
 } from "./_components/card";
-import { blockExplorers } from "@/lib/block-explorers";
 import ExplorerButton from "./_components/explorer-button";
-import Link from "next/link";
+import AddressDisplay from "@/components/address-display";
+import { chainsMap } from "@/lib/chains-map";
+import { cn } from "@/lib/utils";
+import { getSqlLog } from "@/lib/validator-queries";
+import { blockExplorers } from "@/lib/block-explorers";
 import {
   Tooltip,
   TooltipContent,
