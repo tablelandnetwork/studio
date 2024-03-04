@@ -142,7 +142,7 @@ function getAliases(tablesFile: string) {
 
 function startTablelandApi(tablesFile: string, provider: Provider) {
   if (typeof process.env.STORE_PRIVATE_KEY !== "string") {
-    throw new Error("you must provide api private key");
+    throw new Error("you must provide store private key");
   }
 
   // should be hardhat account #1
@@ -171,6 +171,8 @@ async function startStudioApi({ store }: { store: Store }) {
     (seal: string) => `${TEST_API_BASE_URL}/invite?seal=${seal}`,
     process.env.DATA_SEAL_PASS!,
     true,
+    "",
+    "",
   );
 
   // Create a local server to receive data from
