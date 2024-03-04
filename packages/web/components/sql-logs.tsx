@@ -74,6 +74,7 @@ export default function SQLLogs({
             log.error ? "bg-red-200 hover:bg-red-300" : "hover:bg-accent",
           )}
           href={`/chain/${chain}/txn/${log.txHash}`}
+          target="_blank"
         >
           {log.error && <AlertCircle className="shrink-0" />}
           <div className="shrink-0 text-sm text-muted-foreground">
