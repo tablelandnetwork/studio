@@ -73,7 +73,7 @@ export default function SQLLogs({
             "flex items-center gap-4 rounded-sm border border-gray-200 p-2 transition-all",
             log.error ? "bg-red-200 hover:bg-red-300" : "hover:bg-accent",
           )}
-          href={``}
+          href={`/chain/${chain}/txn/${log.txHash}`}
         >
           {log.error && <AlertCircle className="shrink-0" />}
           <div className="shrink-0 text-sm text-muted-foreground">

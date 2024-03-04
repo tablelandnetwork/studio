@@ -116,6 +116,40 @@ export async function getSqlLogs(
   return res.json() as unknown as SqlLog[];
 }
 
+export async function getSqlLog(chainId: number, txnHash: string) {
+  const query = `
+  SELECT
+    e.block_number as blockNumber,
+    e.event_index as eventIndex,
+    tx_hash as txHash,
+    event_type as eventType,
+    json_extract(event_json,'$.Caller') as caller,
+    json_extract(event_json,'$.Statement') as statement,
+    error,
+    timestamp
+  FROM
+    system_evm_events e join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash AND tr.chain_id = e.chain_id
+  WHERE
+    txHash = '${txnHash}' AND
+    e.chain_id = ${chainId}
+  LIMIT 1
+  `;
+
+  const uri = encodeURI(`${baseUrlForChain(chainId)}/query?statement=${query}`);
+  const res = await fetch(uri);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  const array = (await res.json()) as unknown as SqlLog[];
+  if (array.length === 0) {
+    throw new Error("Log not found");
+  }
+  return array[0];
+}
+
 function baseUrlForChain(chainId: number | "mainnets" | "testnets") {
   if (chainId === "mainnets") {
     return helpers.getBaseUrl(1);
