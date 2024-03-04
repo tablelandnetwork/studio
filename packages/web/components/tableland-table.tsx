@@ -177,7 +177,7 @@ export default async function TablelandTable({
           </Card>
         )}
       </div>
-      <Tabs defaultValue="logs" className="py-4">
+      <Tabs defaultValue="data" className="py-4">
         <TabsList>
           <TabsTrigger value="data">Table Data</TabsTrigger>
           <TabsTrigger value="logs">SQL Logs</TabsTrigger>
