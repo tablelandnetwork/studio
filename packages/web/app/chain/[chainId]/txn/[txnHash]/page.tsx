@@ -41,7 +41,7 @@ export default async function TxnPage({
   const explorer = blockExplorers.get(chainNumber);
 
   return (
-    <div className="container flex flex-col gap-10 pt-10">
+    <div className="container flex flex-col gap-10 py-10">
       <div className="flex items-center gap-2">
         {log.error && (
           <TooltipProvider>
@@ -58,7 +58,10 @@ export default async function TxnPage({
           name="txn hash"
           numCharacters={8}
           copy
-          className={cn("text-3xl font-bold", log.error && "text-red-500")}
+          className={cn(
+            "text-3xl font-bold text-foreground",
+            log.error && "text-red-500",
+          )}
         />
         {explorer && (
           <ExplorerButton
@@ -75,7 +78,7 @@ export default async function TxnPage({
               <AddressDisplay
                 address={log.caller}
                 copy
-                className="self-center text-3xl font-medium text-black"
+                className="self-center text-3xl font-medium text-foreground"
               />
             </CardMainContent>
           </CardContent>
