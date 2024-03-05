@@ -67,6 +67,7 @@ export async function getPopularTables(
 
 export interface SqlLog {
   blockNumber: number;
+  txIndex: number;
   caller: string;
   error: string | null;
   eventIndex: number;
@@ -86,6 +87,7 @@ export async function getSqlLogs(
   const query = `
   SELECT
     e.block_number as blockNumber,
+    e.tx_index as txIndex,
     e.event_index as eventIndex,
     tx_hash as txHash,
     event_type as eventType,
@@ -116,10 +118,15 @@ export async function getSqlLogs(
   return res.json() as unknown as SqlLog[];
 }
 
-export async function getSqlLog(chainId: number, txnHash: string) {
+export async function getSqlLog(
+  chainId: number,
+  txnHash: string,
+  eventIndex: number,
+) {
   const query = `
   SELECT
     e.block_number as blockNumber,
+    e.tx_index as txIndex,
     e.event_index as eventIndex,
     tx_hash as txHash,
     event_type as eventType,
@@ -131,6 +138,7 @@ export async function getSqlLog(chainId: number, txnHash: string) {
     system_evm_events e join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash AND tr.chain_id = e.chain_id
   WHERE
     txHash = '${txnHash}' AND
+    eventIndex = ${eventIndex} AND
     e.chain_id = ${chainId}
   LIMIT 1
   `;

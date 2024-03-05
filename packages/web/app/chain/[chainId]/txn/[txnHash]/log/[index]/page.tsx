@@ -27,10 +27,10 @@ const timeAgo = new TimeAgo("en-US");
 export default async function TxnPage({
   params,
 }: {
-  params: { chainId: string; txnHash: string };
+  params: { chainId: string; txnHash: string; index: number };
 }) {
   const chainNumber = parseInt(params.chainId, 10);
-  const log = await getSqlLog(chainNumber, params.txnHash);
+  const log = await getSqlLog(chainNumber, params.txnHash, params.index);
 
   const chain = chainsMap.get(chainNumber);
 
@@ -53,16 +53,22 @@ export default async function TxnPage({
             </Tooltip>
           </TooltipProvider>
         )}
-        <AddressDisplay
-          address={log.txHash}
-          name="txn hash"
-          numCharacters={8}
-          copy
-          className={cn(
-            "text-3xl font-bold text-foreground",
-            log.error && "text-red-500",
-          )}
-        />
+        <div className="flex flex-col">
+          <AddressDisplay
+            address={log.txHash}
+            name="txn hash"
+            numCharacters={8}
+            copy
+            className={cn(
+              "text-3xl font-bold text-foreground",
+              log.error && "text-red-500",
+            )}
+          />
+          <div className="text-base text-muted-foreground">
+            Log index:{" "}
+            <span className="font-bold text-foreground">{log.eventIndex}</span>
+          </div>
+        </div>
         {explorer && (
           <ExplorerButton
             explorerName={explorer.explorer}
@@ -121,9 +127,9 @@ export default async function TxnPage({
           </CardContent>
         </Card>
         <Card>
-          <CardTitle>Event Index</CardTitle>
+          <CardTitle>Txn Index</CardTitle>
           <CardContent>
-            <CardMainContent>{log.eventIndex}</CardMainContent>
+            <CardMainContent>{log.txIndex}</CardMainContent>
           </CardContent>
         </Card>
         <Card>
