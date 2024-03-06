@@ -83,7 +83,7 @@ export default async function TxnPage({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         <MetricCard>
           <MetricCardHeader>
-            <MetricCardTitle className="uppercase">Sent by</MetricCardTitle>
+            <MetricCardTitle>Sent by</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>
             <AddressDisplay
@@ -95,7 +95,7 @@ export default async function TxnPage({
         </MetricCard>
         <MetricCard>
           <MetricCardHeader>
-            <MetricCardTitle className="uppercase">Timestamp</MetricCardTitle>
+            <MetricCardTitle>Timestamp</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>
             {timeAgo.format(log.timestamp * 1000)}
@@ -106,7 +106,7 @@ export default async function TxnPage({
         </MetricCard>
         <MetricCard>
           <MetricCardHeader>
-            <MetricCardTitle className="uppercase">Status</MetricCardTitle>
+            <MetricCardTitle>Status</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>
             {log.error ? "Error" : "Success"}
@@ -114,16 +114,14 @@ export default async function TxnPage({
         </MetricCard>
         <MetricCard>
           <MetricCardHeader>
-            <MetricCardTitle className="uppercase">Chain Id</MetricCardTitle>
+            <MetricCardTitle>Chain Id</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>{chainNumber}</MetricCardContent>
           <MetricCardFooter>{chain.name}</MetricCardFooter>
         </MetricCard>
         <MetricCard>
           <MetricCardHeader>
-            <MetricCardTitle className="uppercase">
-              Block Number
-            </MetricCardTitle>
+            <MetricCardTitle>Block Number</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>{log.blockNumber}</MetricCardContent>
           {explorer && (
@@ -136,17 +134,15 @@ export default async function TxnPage({
         </MetricCard>
         <MetricCard>
           <MetricCardHeader>
-            <MetricCardTitle className="uppercase">Txn Index</MetricCardTitle>
+            <MetricCardTitle>Txn Index</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>{log.txIndex}</MetricCardContent>
         </MetricCard>
-        <MetricCard className="rounded-sm shadow-sm">
+        <MetricCard>
           <MetricCardHeader>
-            <MetricCardTitle className="text-sm uppercase text-muted-foreground">
-              Event Type
-            </MetricCardTitle>
+            <MetricCardTitle>Event Type</MetricCardTitle>
           </MetricCardHeader>
-          <MetricCardContent className="text-center text-3xl font-semibold tracking-tight">
+          <MetricCardContent>
             {log.eventType === "ContractCreateTable"
               ? "Create Table"
               : "Run SQL"}
