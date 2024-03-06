@@ -10,7 +10,7 @@ import {
   MetricCardHeader,
   MetricCardTitle,
 } from "@/components/metric-card";
-import AddressDisplay from "@/components/address-display";
+import HashDisplay from "@/components/hash-display";
 import { chainsMap } from "@/lib/chains-map";
 import { cn } from "@/lib/utils";
 import { getSqlLog } from "@/lib/validator-queries";
@@ -58,8 +58,8 @@ export default async function TxnPage({
           </TooltipProvider>
         )}
         <div className="flex flex-col">
-          <AddressDisplay
-            address={log.txHash}
+          <HashDisplay
+            hash={log.txHash}
             name="txn hash"
             numCharacters={8}
             copy
@@ -86,8 +86,8 @@ export default async function TxnPage({
             <MetricCardTitle>Sent by</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>
-            <AddressDisplay
-              address={log.caller}
+            <HashDisplay
+              hash={log.caller}
               copy
               className="text-3xl text-foreground"
             />

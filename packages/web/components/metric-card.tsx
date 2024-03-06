@@ -71,7 +71,9 @@ const MetricCardContent = React.forwardRef<
       {tooltipText ? (
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>{children}</TooltipTrigger>
+            <TooltipTrigger className="tracking-tight">
+              {children}
+            </TooltipTrigger>
             <TooltipContent>{tooltipText}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
