@@ -58,7 +58,7 @@ export default function AddressDisplay({
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -81,7 +81,7 @@ export default function AddressDisplay({
             <TooltipTrigger asChild>
               <Button
                 variant={"ghost"}
-                className="h-auto p-1"
+                className="ml-1 h-auto p-1"
                 onClick={handleCopy}
               >
                 <Copy className="h-4 w-4 stroke-slate-300" />

@@ -3,12 +3,12 @@ import { AlertCircle } from "lucide-react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  Card,
-  CardContent,
-  CardMainContent,
-  CardSubContent,
-  CardTitle,
-} from "./_components/card";
+  MetricCard,
+  MetricCardContent,
+  MetricCardFooter,
+  MetricCardHeader,
+  MetricCardTitle,
+} from "@/components/metric-card";
 import ExplorerButton from "./_components/explorer-button";
 import AddressDisplay from "@/components/address-display";
 import { chainsMap } from "@/lib/chains-map";
@@ -81,71 +81,77 @@ export default async function TxnPage({
         )}
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <Card>
-          <CardTitle>Sent by</CardTitle>
-          <CardContent>
-            <CardMainContent>
-              <AddressDisplay
-                address={log.caller}
-                copy
-                className="self-center text-3xl font-medium text-foreground"
-              />
-            </CardMainContent>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardTitle>Timestamp</CardTitle>
-          <CardContent>
-            <CardMainContent>
-              {timeAgo.format(log.timestamp * 1000)}
-            </CardMainContent>
-            <CardSubContent>
-              {new Date(log.timestamp * 1000).toLocaleString()}
-            </CardSubContent>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardTitle>Status</CardTitle>
-          <CardContent>
-            <CardMainContent>{log.error ? "Error" : "Success"}</CardMainContent>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardTitle>Chain ID</CardTitle>
-          <CardContent>
-            <CardMainContent>{chainNumber}</CardMainContent>
-            <CardSubContent>{chain.name}</CardSubContent>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardTitle>Block Number</CardTitle>
-          <CardContent>
-            <CardMainContent>{log.blockNumber}</CardMainContent>
-            {explorer && (
-              <CardSubContent>
-                <Link href={explorer.blockUrl(log.blockNumber)}>
-                  View on {explorer.explorer}
-                </Link>
-              </CardSubContent>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardTitle>Txn Index</CardTitle>
-          <CardContent>
-            <CardMainContent>{log.txIndex}</CardMainContent>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardTitle>Event Type</CardTitle>
-          <CardContent>
-            <CardMainContent>
-              {log.eventType === "ContractCreateTable"
-                ? "Create Table"
-                : "Run SQL"}
-            </CardMainContent>
-          </CardContent>
-        </Card>
+        <MetricCard>
+          <MetricCardHeader>
+            <MetricCardTitle className="uppercase">Sent by</MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent>
+            <AddressDisplay
+              address={log.caller}
+              copy
+              className="text-3xl text-foreground"
+            />
+          </MetricCardContent>
+        </MetricCard>
+        <MetricCard>
+          <MetricCardHeader>
+            <MetricCardTitle className="uppercase">Timestamp</MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent>
+            {timeAgo.format(log.timestamp * 1000)}
+          </MetricCardContent>
+          <MetricCardFooter>
+            {new Date(log.timestamp * 1000).toLocaleString()}
+          </MetricCardFooter>
+        </MetricCard>
+        <MetricCard>
+          <MetricCardHeader>
+            <MetricCardTitle className="uppercase">Status</MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent>
+            {log.error ? "Error" : "Success"}
+          </MetricCardContent>
+        </MetricCard>
+        <MetricCard>
+          <MetricCardHeader>
+            <MetricCardTitle className="uppercase">Chain Id</MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent>{chainNumber}</MetricCardContent>
+          <MetricCardFooter>{chain.name}</MetricCardFooter>
+        </MetricCard>
+        <MetricCard>
+          <MetricCardHeader>
+            <MetricCardTitle className="uppercase">
+              Block Number
+            </MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent>{log.blockNumber}</MetricCardContent>
+          {explorer && (
+            <MetricCardFooter>
+              <Link href={explorer.blockUrl(log.blockNumber)}>
+                View on {explorer.explorer}
+              </Link>
+            </MetricCardFooter>
+          )}
+        </MetricCard>
+        <MetricCard>
+          <MetricCardHeader>
+            <MetricCardTitle className="uppercase">Txn Index</MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent>{log.txIndex}</MetricCardContent>
+        </MetricCard>
+        <MetricCard className="rounded-sm shadow-sm">
+          <MetricCardHeader>
+            <MetricCardTitle className="text-sm uppercase text-muted-foreground">
+              Event Type
+            </MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent className="text-center text-3xl font-semibold tracking-tight">
+            {log.eventType === "ContractCreateTable"
+              ? "Create Table"
+              : "Run SQL"}
+          </MetricCardContent>
+        </MetricCard>
       </div>
       <div>
         <label className="text-sm uppercase text-muted-foreground">
