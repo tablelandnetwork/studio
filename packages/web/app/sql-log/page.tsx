@@ -25,12 +25,16 @@ import {
 const timeAgo = new TimeAgo("en-US");
 
 export default async function TxnPage({
-  params,
+  searchParams,
 }: {
-  params: { chainId: string; txnHash: string; index: number };
+  searchParams: { chainId: string; txnHash: string; index: number };
 }) {
-  const chainNumber = parseInt(params.chainId, 10);
-  const log = await getSqlLog(chainNumber, params.txnHash, params.index);
+  const chainNumber = parseInt(searchParams.chainId, 10);
+  const log = await getSqlLog(
+    chainNumber,
+    searchParams.txnHash,
+    searchParams.index,
+  );
 
   const chain = chainsMap.get(chainNumber);
 
@@ -72,7 +76,7 @@ export default async function TxnPage({
         {explorer && (
           <ExplorerButton
             explorerName={explorer.explorer}
-            txnUrl={explorer.txUrl(params.txnHash)}
+            txnUrl={explorer.txUrl(searchParams.txnHash)}
           />
         )}
       </div>
