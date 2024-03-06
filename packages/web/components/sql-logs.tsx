@@ -68,7 +68,7 @@ export default function SQLLogs({
       {error && <div className="text-red-500">{error}</div>}
       {logs.slice(offset, offset + pageSize).map((log) => (
         <Link
-          key={log.txHash}
+          key={`${log.txHash}-${log.eventIndex}`}
           className={cn(
             "flex items-center gap-4 rounded-sm border border-gray-200 p-2 transition-all",
             log.error ? "bg-red-200 hover:bg-red-300" : "hover:bg-accent",
