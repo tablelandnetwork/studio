@@ -43,7 +43,7 @@ export async function getPopularTables(
   const d = new Date();
   const dayAgo = Math.round(d.getTime() / 1000) - 24 * 60 * 60;
 
-  let query = `select tr.chain_id, tr.table_id, prefix, r.controller, max(timestamp) as max_timestamp, count(*) as count from system_evm_events e join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash inner join registry r on r.chain_id = tr.chain_id and r.id = tr.table_id where event_type = 'ContractRunSQL' and error is null and timestamp > ${dayAgo} `;
+  let query = `select tr.chain_id, tr.table_id, prefix, r.controller, max(timestamp) as max_timestamp, count(*) as count from system_evm_events e inner join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash inner join registry r on r.chain_id = tr.chain_id and r.id = tr.table_id where event_type = 'ContractRunSQL' and error is null and timestamp > ${dayAgo} `;
   if (typeof chain === "number") {
     query += `and tr.chain_id = ${chain} `;
   }
@@ -63,6 +63,99 @@ export async function getPopularTables(
   }
 
   return res.json() as unknown as PopularTable[];
+}
+
+export interface SqlLog {
+  blockNumber: number;
+  txIndex: number;
+  caller: string;
+  error: string | null;
+  eventIndex: number;
+  eventType: "ContractRunSQL" | "ContractCreateTable";
+  statement: string;
+  timestamp: number;
+  txHash: string;
+}
+
+export async function getSqlLogs(
+  chain: number,
+  tableId: string,
+  limit: number,
+  beforeTimestamp?: number,
+) {
+  // TODO: Just filtering on timestamp is probably going to miss some logs. Need to investigate.
+  const query = `
+  SELECT
+    e.block_number as blockNumber,
+    e.tx_index as txIndex,
+    e.event_index as eventIndex,
+    tx_hash as txHash,
+    event_type as eventType,
+    json_extract(event_json,'$.Caller') as caller,
+    json_extract(event_json,'$.Statement') as statement,
+    error,
+    timestamp
+  FROM
+    system_evm_events e join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash AND tr.chain_id = e.chain_id
+  WHERE
+    ${beforeTimestamp ? `timestamp < ${beforeTimestamp} AND` : ""}
+    json_extract(event_json,'$.TableId') = ${tableId} AND
+    e.chain_id = ${chain} AND
+    (eventType = 'ContractCreateTable' OR eventType = 'ContractRunSQL')
+  ORDER BY
+    blockNumber DESC, eventIndex DESC
+  LIMIT ${limit}
+  `;
+
+  const uri = encodeURI(`${baseUrlForChain(chain)}/query?statement=${query}`);
+  const res = await fetch(uri);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  return res.json() as unknown as SqlLog[];
+}
+
+export async function getSqlLog(
+  chainId: number,
+  txnHash: string,
+  eventIndex: number,
+) {
+  const query = `
+  SELECT
+    e.block_number as blockNumber,
+    e.tx_index as txIndex,
+    e.event_index as eventIndex,
+    tx_hash as txHash,
+    event_type as eventType,
+    json_extract(event_json,'$.Caller') as caller,
+    json_extract(event_json,'$.Statement') as statement,
+    error,
+    timestamp
+  FROM
+    system_evm_events e join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash AND tr.chain_id = e.chain_id
+  WHERE
+    txHash = '${txnHash}' AND
+    eventIndex = ${eventIndex} AND
+    e.chain_id = ${chainId}
+  LIMIT 1
+  `;
+
+  const uri = encodeURI(`${baseUrlForChain(chainId)}/query?statement=${query}`);
+  const res = await fetch(uri);
+
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error("Failed to fetch data");
+  }
+
+  const array = (await res.json()) as unknown as SqlLog[];
+  if (array.length === 0) {
+    throw new Error("Log not found");
+  }
+  return array[0];
 }
 
 function baseUrlForChain(chainId: number | "mainnets" | "testnets") {

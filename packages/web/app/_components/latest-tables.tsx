@@ -4,7 +4,7 @@ import Link from "next/link";
 import TimeAgo from "javascript-time-ago";
 import { useEffect, useState } from "react";
 import { chainsMap } from "../../lib/chains-map";
-import { Paginator } from "./paginator";
+import { Paginator } from "@/components/paginator";
 import { TypographyH3 } from "@/components/typography-h3";
 import ChainSelector from "@/components/chain-selector";
 import { Label } from "@/components/ui/label";
@@ -85,6 +85,7 @@ export function LatestTables({ initialData }: { initialData: Table[] }) {
         pageSize={pageSize}
         page={page}
         setPage={setPage}
+        disabled={loading}
       />
     </>
   );

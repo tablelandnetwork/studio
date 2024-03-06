@@ -56,8 +56,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4">
-        <h2 className="text-xl font-medium">Table Data</h2>
+      <div className="flex items-center">
         {!!data.length && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -87,7 +86,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenu>
         )}
       </div>
-      <div className="rounded-md border">
+      <div className="mt-4 rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
