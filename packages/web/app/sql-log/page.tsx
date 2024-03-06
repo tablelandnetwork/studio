@@ -2,6 +2,7 @@ import TimeAgo from "javascript-time-ago";
 import { AlertCircle } from "lucide-react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import ExplorerButton from "./_components/explorer-button";
 import {
   MetricCard,
   MetricCardContent,
@@ -9,7 +10,6 @@ import {
   MetricCardHeader,
   MetricCardTitle,
 } from "@/components/metric-card";
-import ExplorerButton from "./_components/explorer-button";
 import AddressDisplay from "@/components/address-display";
 import { chainsMap } from "@/lib/chains-map";
 import { cn } from "@/lib/utils";
