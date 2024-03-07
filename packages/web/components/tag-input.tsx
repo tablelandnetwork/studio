@@ -66,7 +66,7 @@ const TagInput = forwardRef<HTMLDivElement, Props>(
       <div
         id={id}
         ref={ref}
-        className="flex w-full max-w-full flex-wrap space-x-1 overflow-scroll rounded-md border pl-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+        className="flex w-full max-w-full flex-wrap space-x-1 rounded-md border pl-1 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
       >
         {tags.map((tag, i) => (
           <div
