@@ -1,10 +1,10 @@
-import { configuredChains } from "@tableland/studio-chains";
+import { type ApiKeys, configuredChains } from "@tableland/studio-chains";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 
-export function providersRouter(isLocalDev = false) {
-  const providersMap = configuredChains(isLocalDev).chains.reduce(
+export function providersRouter(isLocalDev = false, apiKeys?: ApiKeys) {
+  const providersMap = configuredChains(isLocalDev, apiKeys).chains.reduce(
     (acc, chain) => {
       let url: string;
       switch (chain.id) {

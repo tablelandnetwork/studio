@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy } from "lucide-react";
+import { type HTMLProps } from "react";
 import { Button } from "./ui/button";
 import {
   Tooltip,
@@ -9,15 +10,20 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
-export default function AddressDisplay({
-  address,
+export default function HashDisplay({
+  hash,
   numCharacters = 5,
   copy = false,
-}: {
-  address: string;
+  hashDesc = "address",
+  className,
+  ...rest
+}: HTMLProps<HTMLSpanElement> & {
+  hash: string;
   numCharacters?: number;
   copy?: boolean;
+  hashDesc?: string;
 }) {
   const { toast } = useToast();
 
@@ -26,17 +32,17 @@ export default function AddressDisplay({
     //    needed here, but some kind lock of the UI when async ops are happening
     //    could make the ui feel more responsive.
     navigator.clipboard
-      .writeText(address)
+      .writeText(hash)
       .then(function () {
         toast({
           title: "Done!",
-          description: "The address has been copied to your clipboard.",
+          description: `The ${hashDesc} has been copied to your clipboard.`,
           duration: 2000,
         });
       })
       .catch(function (err) {
         const errMessage = [
-          "Could not copy the address to your clipboard.",
+          `Could not copy the ${hashDesc} to your clipboard.`,
           typeof err.message === "string" ? err.message : undefined,
         ]
           .filter((s) => s)
@@ -51,25 +57,38 @@ export default function AddressDisplay({
   };
 
   return (
-    <div className="flex items-center gap-1">
-      <p className="text-sm text-muted-foreground">
-        {address.slice(0, numCharacters)}...{address.slice(-numCharacters)}
-      </p>
+    <div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              className={cn("text-sm text-muted-foreground", className)}
+              {...rest}
+            >
+              {hash.slice(0, numCharacters)}...
+              {hash.slice(-numCharacters)}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{hash}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       {copy && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant={"ghost"}
-                className="h-auto p-1"
+                className="ml-1 h-auto p-1"
                 onClick={handleCopy}
               >
                 <Copy className="h-4 w-4 stroke-slate-300" />
-                <span className="sr-only">Copy address</span>
+                <span className="sr-only">Copy {hashDesc}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Click to copy address</p>
+              <p>Click to copy {hashDesc}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

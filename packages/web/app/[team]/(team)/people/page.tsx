@@ -5,7 +5,7 @@ import Info from "./_components/info";
 import InviteActions from "./_components/invite-actions";
 import NewInvite from "./_components/new-invite";
 import UserActions from "./_components/user-actions";
-import AddressDisplay from "@/components/address-display";
+import HashDisplay from "@/components/hash-display";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/server";
@@ -79,8 +79,8 @@ export default async function People({ params }: { params: { team: string } }) {
                   {person.personalTeam.name}
                   {person.personalTeam.id === auth?.personalTeam.id && " (You)"}
                 </p>
-                <AddressDisplay
-                  address={person.address}
+                <HashDisplay
+                  hash={person.address}
                   copy={true}
                   numCharacters={7}
                 />
