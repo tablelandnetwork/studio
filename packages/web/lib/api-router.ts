@@ -11,6 +11,6 @@ export const apiRouter = appRouter(
   (seal) => `${baseUrl}/invite?seal=${seal}`,
   process.env.DATA_SEAL_PASS!,
   process.env.NODE_ENV === "development",
-  process.env.INFURA_KEY ?? "",
-  process.env.QUICK_NODE_KEY ?? "",
+  process.env.API_ROUTER_INFURA_KEY ?? "",
+  process.env.API_ROUTER_QUICK_NODE_KEY ?? "",
 );
