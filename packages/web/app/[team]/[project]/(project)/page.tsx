@@ -51,7 +51,7 @@ export default async function Project({
         <h2 className="text-lg font-semibold tracking-tight">
           Project description
         </h2>
-        <p className="ml-4 max-w-lg text-muted-foreground">
+        <p className="ml-4 max-w-lg whitespace-pre-wrap leading-tight text-muted-foreground">
           {project.description}
         </p>
       </div>
