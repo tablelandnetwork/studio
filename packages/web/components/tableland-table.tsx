@@ -5,11 +5,19 @@ import TimeAgo from "javascript-time-ago";
 import { Blocks, Coins, Hash, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import {
+  MetricCard,
+  MetricCardContent,
+  MetricCardFooter,
+  MetricCardHeader,
+  MetricCardTitle,
+} from "./metric-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SQLLogs from "./sql-logs";
+import HashDisplay from "./hash-display";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
+import { chainsMap } from "@/lib/chains-map";
 
 const timeAgo = new TimeAgo("en-US");
 
@@ -49,7 +57,7 @@ export default async function TablelandTable({
   tableData,
   deploymentData,
 }: Props) {
-  const chainInfo = helpers.getChainInfo(chainId);
+  const chain = chainsMap.get(chainId);
   const blockExplorer = blockExplorers.get(chainId);
   const openSeaLink = openSeaLinks.get(chainId);
 
@@ -80,101 +88,86 @@ export default async function TablelandTable({
         </Select> */}
       </div>
       <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Deployed to</CardTitle>
+        <MetricCard>
+          <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
             <Rocket className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold">{chainInfo.chainName}</div>
-            <p className="text-xs text-muted-foreground">
-              {timeAgo.format(createdAt)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tableland Table
-            </CardTitle>
+            <MetricCardTitle>Deployed to</MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent>{chain?.name}</MetricCardContent>
+          <MetricCardFooter>{timeAgo.format(createdAt)}</MetricCardFooter>
+        </MetricCard>
+        <MetricCard>
+          <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
             <Table2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold">{tableName}</div>
-            <Link
-              className="text-xs text-muted-foreground"
-              href={`https://tablescan.io/${tableName}`}
-            >
+            <MetricCardTitle>Tableland Table</MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent tooltipText={tableName}>
+            {tableName}
+          </MetricCardContent>
+          <MetricCardFooter>
+            <Link href={`https://tablescan.io/${tableName}`}>
               View on Tablescan
             </Link>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Token ID</CardTitle>
+          </MetricCardFooter>
+        </MetricCard>
+        <MetricCard>
+          <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
             <Coins className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold">{tokenId}</div>
-            {openSeaLink && (
-              <Link
-                target="_blank"
-                href={openSeaLink.tokenUrl(tokenId)}
-                className="text-xs text-muted-foreground"
-              >
+            <MetricCardTitle>Token ID</MetricCardTitle>
+          </MetricCardHeader>
+          <MetricCardContent>{tokenId}</MetricCardContent>
+          {openSeaLink && (
+            <MetricCardFooter>
+              <Link target="_blank" href={openSeaLink.tokenUrl(tokenId)}>
                 View on OpenSea
               </Link>
-            )}
-          </CardContent>
-        </Card>
+            </MetricCardFooter>
+          )}
+        </MetricCard>
         {deploymentData?.txnHash && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Transaction Hash
-              </CardTitle>
+          <MetricCard>
+            <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
               <Hash className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">
-                {deploymentData.txnHash.slice(0, 5)}...
-                {deploymentData.txnHash.slice(-5)}
-              </div>
-              {blockExplorer && (
+              <MetricCardTitle>Transaction Hash</MetricCardTitle>
+            </MetricCardHeader>
+            <MetricCardContent>
+              <HashDisplay
+                hash={deploymentData.txnHash}
+                copy
+                className="text-3xl text-foreground"
+                hashDesc="txn hash"
+              />
+            </MetricCardContent>
+            {blockExplorer && (
+              <MetricCardFooter>
                 <Link
                   target="_blank"
                   href={blockExplorer.txUrl(deploymentData.txnHash)}
-                  className="text-xs text-muted-foreground"
                 >
                   View on {blockExplorer.explorer}
                 </Link>
-              )}
-            </CardContent>
-          </Card>
+              </MetricCardFooter>
+            )}
+          </MetricCard>
         )}
         {deploymentData?.blockNumber && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Block Number
-              </CardTitle>
+          <MetricCard>
+            <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
               <Blocks className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">
-                {deploymentData.blockNumber}
-              </div>
-              {blockExplorer && (
+              <MetricCardTitle>Block Number</MetricCardTitle>
+            </MetricCardHeader>
+            <MetricCardContent>{deploymentData.blockNumber}</MetricCardContent>
+            {blockExplorer && (
+              <MetricCardFooter>
                 <Link
                   target="_blank"
                   href={blockExplorer.blockUrl(deploymentData.blockNumber)}
-                  className="text-xs text-muted-foreground"
                 >
                   View on {blockExplorer.explorer}
                 </Link>
-              )}
-            </CardContent>
-          </Card>
+              </MetricCardFooter>
+            )}
+          </MetricCard>
         )}
       </div>
       <Tabs defaultValue="data" className="py-4">

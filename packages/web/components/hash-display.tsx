@@ -12,17 +12,18 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 
-export default function AddressDisplay({
-  address,
+export default function HashDisplay({
+  hash,
   numCharacters = 5,
   copy = false,
-  name,
+  hashDesc = "address",
   className,
   ...rest
 }: HTMLProps<HTMLSpanElement> & {
-  address: string;
+  hash: string;
   numCharacters?: number;
   copy?: boolean;
+  hashDesc?: string;
 }) {
   const { toast } = useToast();
 
@@ -31,19 +32,17 @@ export default function AddressDisplay({
     //    needed here, but some kind lock of the UI when async ops are happening
     //    could make the ui feel more responsive.
     navigator.clipboard
-      .writeText(address)
+      .writeText(hash)
       .then(function () {
         toast({
           title: "Done!",
-          description: `The ${
-            name ?? "address"
-          } has been copied to your clipboard.`,
+          description: `The ${hashDesc} has been copied to your clipboard.`,
           duration: 2000,
         });
       })
       .catch(function (err) {
         const errMessage = [
-          `Could not copy the ${name ?? "address"} to your clipboard.`,
+          `Could not copy the ${hashDesc} to your clipboard.`,
           typeof err.message === "string" ? err.message : undefined,
         ]
           .filter((s) => s)
@@ -66,12 +65,12 @@ export default function AddressDisplay({
               className={cn("text-sm text-muted-foreground", className)}
               {...rest}
             >
-              {address.slice(0, numCharacters)}...
-              {address.slice(-numCharacters)}
+              {hash.slice(0, numCharacters)}...
+              {hash.slice(-numCharacters)}
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{address}</p>
+            <p>{hash}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -85,11 +84,11 @@ export default function AddressDisplay({
                 onClick={handleCopy}
               >
                 <Copy className="h-4 w-4 stroke-slate-300" />
-                <span className="sr-only">Copy {name ?? "address"}</span>
+                <span className="sr-only">Copy {hashDesc}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Click to copy {name ?? "address"}</p>
+              <p>Click to copy {hashDesc}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

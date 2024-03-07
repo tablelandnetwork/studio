@@ -6,7 +6,7 @@ import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAccount, useConnect } from "wagmi";
-import AddressDisplay from "./address-display";
+import HashDisplay from "./hash-display";
 import RegistrationDialog from "./registration-dialog";
 import SignInButton from "./sign-in-button";
 import { Button } from "./ui/button";
@@ -127,7 +127,7 @@ export default function Profile({
       {isConnected && (
         <>
           {/* Wallet content goes here */}
-          {address && !hideAddress && <AddressDisplay address={address} copy />}
+          {address && !hideAddress && <HashDisplay hash={address} copy />}
           {auth ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
