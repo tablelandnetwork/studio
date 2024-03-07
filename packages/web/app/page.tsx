@@ -172,7 +172,7 @@ export default async function Page() {
                           </div>
                         </div>
                       </div>
-                      <div className="line-clamp-5 text-sm text-muted-foreground">
+                      <div className="line-clamp-5 whitespace-pre-wrap text-sm leading-tight text-muted-foreground">
                         {item.project.description}
                       </div>
                     </div>
