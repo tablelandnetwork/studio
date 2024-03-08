@@ -60,7 +60,7 @@ export default async function TxnPage({
         <div className="flex flex-col">
           <HashDisplay
             hash={log.txHash}
-            name="txn hash"
+            hashDesc="txn hash"
             numCharacters={8}
             copy
             className={cn(
@@ -81,18 +81,20 @@ export default async function TxnPage({
         )}
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <MetricCard>
-          <MetricCardHeader>
-            <MetricCardTitle>Sent by</MetricCardTitle>
-          </MetricCardHeader>
-          <MetricCardContent>
-            <HashDisplay
-              hash={log.caller}
-              copy
-              className="text-3xl text-foreground"
-            />
-          </MetricCardContent>
-        </MetricCard>
+        {log.caller && (
+          <MetricCard>
+            <MetricCardHeader>
+              <MetricCardTitle>Sent by</MetricCardTitle>
+            </MetricCardHeader>
+            <MetricCardContent>
+              <HashDisplay
+                hash={log.caller}
+                copy
+                className="text-3xl text-foreground"
+              />
+            </MetricCardContent>
+          </MetricCard>
+        )}
         <MetricCard>
           <MetricCardHeader>
             <MetricCardTitle>Timestamp</MetricCardTitle>

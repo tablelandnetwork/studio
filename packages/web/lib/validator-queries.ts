@@ -68,7 +68,7 @@ export async function getPopularTables(
 export interface SqlLog {
   blockNumber: number;
   txIndex: number;
-  caller: string;
+  caller: string | null;
   error: string | null;
   eventIndex: number;
   eventType: "ContractRunSQL" | "ContractCreateTable";
