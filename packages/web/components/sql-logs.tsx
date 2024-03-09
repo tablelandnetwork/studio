@@ -66,23 +66,28 @@ export default function SQLLogs({
         Refresh
       </Button>
       {error && <div className="text-red-500">{error}</div>}
-      {logs.slice(offset, offset + pageSize).map((log) => (
-        <Link
-          key={`${log.txHash}-${log.eventIndex}`}
-          className={cn(
-            "flex items-center gap-4 rounded-sm border border-gray-200 p-2 transition-all",
-            log.error ? "bg-red-200 hover:bg-red-300" : "hover:bg-accent",
-          )}
-          href={`/sql-log?chainId=${chain}&txnHash=${log.txHash}&index=${log.eventIndex}`}
-          target="_blank"
-        >
-          {log.error && <AlertCircle className="shrink-0" />}
-          <div className="shrink-0 text-sm text-muted-foreground">
-            {new Date(log.timestamp * 1000).toLocaleString()}
+      <div className="w-full">
+        {logs.slice(offset, offset + pageSize).map((log) => (
+          <div className="mb-4" key={`${log.txHash}-${log.eventIndex}`}>
+            <Link
+              className={cn(
+                "flex items-center rounded-sm border border-gray-200 p-2 transition-all",
+                log.error ? "bg-red-200 hover:bg-red-300" : "hover:bg-accent",
+              )}
+              href={`/sql-log?chainId=${chain}&txnHash=${log.txHash}&index=${log.eventIndex}`}
+              target="_blank"
+            >
+              {log.error && <AlertCircle className="shrink-0" />}
+              <div className="px-2 text-sm text-muted-foreground">
+                {new Date(log.timestamp * 1000).toLocaleString()}
+              </div>
+              <div className="break-all font-mono text-sm">
+                <div>{log.statement}</div>
+              </div>
+            </Link>
           </div>
-          <div className="font-mono text-sm">{log.statement}</div>
-        </Link>
-      ))}
+        ))}
+      </div>
       <Paginator
         numItems={logs.length}
         page={page}
