@@ -13,13 +13,14 @@ export default function NavNewTable({
     project: string;
   }>();
 
-  const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
-  const project = api.projects.projectBySlug.useQuery(
-    { teamId: team.data!.id, slug: projectSlug },
-    { enabled: !!team.data },
+  const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
+  const teamId = team?.id;
+  const { data: project } = api.projects.projectBySlug.useQuery(
+    { teamId, slug: projectSlug },
+    { enabled: !!teamId },
   );
 
-  if (!team.data || !project.data) {
+  if (!team || !project) {
     return null;
   }
 
@@ -28,10 +29,10 @@ export default function NavNewTable({
       <Crumb
         title={crumbTitle}
         items={[
-          { label: team.data.name, href: `/${team.data.slug}` },
+          { label: team.name, href: `/${team.slug}` },
           {
-            label: project.data.name,
-            href: `/${team.data.slug}/${project.data.slug}`,
+            label: project.name,
+            href: `/${team.slug}/${project.slug}`,
           },
         ]}
       />

@@ -18,29 +18,31 @@ export default function NavNewTable({
   }>();
 
   // TODO: Create a single endpoint for this.
-  const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
-  const project = api.projects.projectBySlug.useQuery(
-    { teamId: team.data!.id, slug: projectSlug },
-    { enabled: !!team.data },
+  const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
+  const teamId = team?.id;
+  const { data: project } = api.projects.projectBySlug.useQuery(
+    { teamId, slug: projectSlug },
+    { enabled: !!teamId },
   );
-  const table = api.tables.tableByProjectIdAndSlug.useQuery(
-    { projectId: project.data!.id, slug: tableSlug },
-    { enabled: !!project.data },
+  const projectId = project?.id;
+  const { data: table } = api.tables.tableByProjectIdAndSlug.useQuery(
+    { projectId: projectId!, slug: tableSlug },
+    { enabled: !!projectId },
   );
 
-  if (!team.data || !project.data || !table.data) {
+  if (!team || !project || !table) {
     return null;
   }
 
   return (
     <div className={className}>
       <Crumb
-        title={table.data.name}
+        title={table.name}
         items={[
-          { label: team.data.name, href: `/${team.data.slug}` },
+          { label: team.name, href: `/${team.slug}` },
           {
-            label: project.data.name,
-            href: `/${team.data.slug}/${project.data.slug}`,
+            label: project.name,
+            href: `/${team.slug}/${project.slug}`,
           },
         ]}
       />
