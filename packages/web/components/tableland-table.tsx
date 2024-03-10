@@ -19,6 +19,7 @@ import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
 import { objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
+import TablelandTableMenu from "./tableland-table-menu";
 
 interface Props {
   displayName: string;
@@ -74,6 +75,7 @@ export default async function TablelandTable({
     <div className="flex-1 space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-medium">{displayName}</h1>
+        <TablelandTableMenu />
         {/* <Select>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Staging" />
