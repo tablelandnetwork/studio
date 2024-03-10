@@ -89,9 +89,10 @@ const formSchema = z.object({
 });
 
 interface Props {
-  team: schema.Team;
-  project: schema.Project;
-  envs: schema.Environment[];
+  team?: schema.Team;
+  project?: schema.Project;
+  envs?: schema.Environment[];
+  showSelectors?: boolean;
 }
 
 export default function NewTable({ project, team, envs }: Props) {
@@ -99,13 +100,20 @@ export default function NewTable({ project, team, envs }: Props) {
   const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const router = useRouter();
 
+  const teams = api.teams.userTeams.useQuery();
+  const projects = api.projects.teamProjects.useQuery(
+    { teamId: "asdf" },
+    { enabled: false },
+  );
+
   const nameAvailableQuery = api.tables.nameAvailable.useQuery(
-    { projectId: project.id, name: tableName },
-    { enabled: !!tableName },
+    { projectId: project!.id, name: tableName },
+    { enabled: !!tableName && !!project },
   );
 
   const newTable = api.tables.newTable.useMutation({
     onSuccess: () => {
+      if (!team || !project) return;
       router.refresh();
       router.replace(`/${team.slug}/${project.slug}`);
     },
@@ -120,7 +128,7 @@ export default function NewTable({ project, team, envs }: Props) {
       name: "",
       description: "",
       columns: [],
-      deployments: envs.map((env) => ({ env: env.name, chain: "no-deploy" })),
+      deployments: envs?.map((env) => ({ env: env.name, chain: "no-deploy" })),
     },
   });
 
@@ -174,6 +182,9 @@ export default function NewTable({ project, team, envs }: Props) {
         return schemaColumn;
       },
     );
+
+    if (!project) return;
+
     newTable.mutate({
       projectId: project.id,
       name: values.name,
