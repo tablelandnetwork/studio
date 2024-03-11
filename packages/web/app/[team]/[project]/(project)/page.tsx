@@ -1,14 +1,6 @@
 import { helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import {
-  Construction,
-  FileSearch,
-  Import,
-  PencilRuler,
-  Plus,
-  Rocket,
-  Table2,
-} from "lucide-react";
+import { Import, PencilRuler, Plus, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import { api } from "@/trpc/server";
@@ -75,7 +67,33 @@ export default async function Project({
             </div>
           )}
         </div>
-        {tables.length ? (
+        {!tables.length && (
+          <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4 py-16">
+            <div className="flex items-center space-x-4">
+              <PencilRuler className="flex-shrink-0" />
+              <h1 className="text-2xl font-medium">
+                This Project does not have any tables yet.
+              </h1>
+            </div>
+            {authorized && (
+              <div className="flex items-center space-x-4">
+                <Table2 className="flex-shrink-0" />
+                <p className="text-muted-foreground">
+                  Get started by creating or importing a Table using the buttons
+                  above. Remember here in your Blueprint, Tables are simply
+                  Table <span className="italic">definitions</span> &mdash; To
+                  actually deploy them on Tableland, vist the Project&apos;s{" "}
+                  <Link href={`${project.slug}/deployments`}>
+                    Deployments tab
+                  </Link>
+                  .
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!!tables.length && (
           <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {tables.map((table) => {
               // const columnCount = 0;
@@ -131,45 +149,6 @@ export default async function Project({
                 </Link>
               );
             })}
-          </div>
-        ) : (
-          <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4 py-16">
-            <div className="flex items-center space-x-4">
-              <PencilRuler className="flex-shrink-0" />
-              <h1 className="text-2xl font-medium">
-                This is your Project Blueprint.
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Table2 className="flex-shrink-0" />
-              <p className="text-muted-foreground">
-                Here, you&apos;ll create your Project&apos;s Table definitions.
-                Get started by creating or importing a Table using the buttons
-                above. Remember here in your Blueprint, Tables are simply Table{" "}
-                <span className="italic">definitions</span> &mdash; To actually
-                create them on Tableland, vist the Project&apos;s{" "}
-                <Link href={`${project.slug}/deployments`}>
-                  Deployments tab
-                </Link>
-                .
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Construction className="flex-shrink-0" />
-              <p className="text-muted-foreground">
-                We&apos;re working on expanding Blueprints to include more that
-                just Table definitions. Stay tuned!
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <FileSearch className="flex-shrink-0" />
-              <p className="text-muted-foreground">
-                Additionally, we&apos;re working to make Blueprints discoverable
-                and useable by other Teams, so be sure to give your Tables good
-                names and descriptions so others can understand and learn from
-                what you&apos;ve built.
-              </p>
-            </div>
           </div>
         )}
       </div>
