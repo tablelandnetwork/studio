@@ -79,12 +79,12 @@ export const blockExplorers = new Map<
     },
   ],
   [
-    420,
+    11155420,
     {
-      explorer: "Blockscout",
+      explorer: "Etherscan",
       blockUrl: (block) =>
-        `https://optimism-goerli.blockscout.com/block/${block}`,
-      txUrl: (hash) => `https://optimism-goerli.blockscout.com/tx/${hash}`,
+        `https://sepolia-optimism.etherscan.io/block/${block}`,
+      txUrl: (hash) => `https://sepolia-optimism.etherscan.io/tx/${hash}`,
     },
   ],
   [
