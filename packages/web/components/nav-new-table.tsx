@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import Crumb from "./crumb";
 import { api } from "@/trpc/react";
+import { cn } from "@/lib/utils";
 
 export default function NavNewTable({
   crumbTitle,
@@ -21,7 +22,11 @@ export default function NavNewTable({
   );
 
   if (!team || !project) {
-    return null;
+    return (
+      <div className={cn("flex flex-col", className)}>
+        <div className="mb-1 h-6 w-32 animate-pulse rounded bg-gray-200"></div>
+      </div>
+    );
   }
 
   return (
