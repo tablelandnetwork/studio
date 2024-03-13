@@ -38,7 +38,14 @@ export default function NavTeam({
   const team = api.teams.teamBySlug.useQuery({ slug: teamSlug });
 
   if (!team.data) {
-    return null;
+    return (
+      <div className={cn("flex flex-col", className)} {...props}>
+        <div className="mb-2 h-7 w-32 animate-pulse rounded bg-gray-200"></div>
+        <nav className="flex items-center space-x-4 lg:space-x-6">
+          <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
+        </nav>
+      </div>
+    );
   }
 
   return (
