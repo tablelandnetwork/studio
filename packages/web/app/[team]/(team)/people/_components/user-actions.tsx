@@ -75,11 +75,11 @@ export default function UserActions({
       <DropdownMenuTrigger className={cn(className)} {...props} asChild>
         <Button
           variant="ghost"
-          disabled={toggleAdmin.isLoading || removeUser.isLoading}
+          disabled={toggleAdmin.isPending || removeUser.isPending}
         >
           <MoreHorizontal
             className={cn(
-              (toggleAdmin.isLoading || removeUser.isLoading) &&
+              (toggleAdmin.isPending || removeUser.isPending) &&
                 "animate-pulse",
             )}
           />

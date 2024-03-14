@@ -1,9 +1,9 @@
 import { type Store } from "@tableland/studio-store";
 import { z } from "zod";
-import { publicProcedure, router, tableProcedure } from "../trpc";
+import { publicProcedure, createTRPCRouter, tableProcedure } from "../trpc";
 
 export function deploymentsRouter(store: Store) {
-  return router({
+  return createTRPCRouter({
     recordDeployment: tableProcedure(store)
       .input(
         z.object({

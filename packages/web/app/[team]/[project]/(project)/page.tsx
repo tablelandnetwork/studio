@@ -19,22 +19,22 @@ export default async function Project({
 }: {
   params: { team: string; project: string };
 }) {
-  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
-  const project = await cache(api.projects.projectBySlug.query)({
+  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const project = await cache(api.projects.projectBySlug)({
     teamId: team.id,
     slug: params.project,
   });
-  const tables = await cache(api.tables.projectTables.query)({
+  const tables = await cache(api.tables.projectTables)({
     projectId: project.id,
   });
-  const deployments = await cache(api.deployments.projectDeployments.query)({
+  const deployments = await cache(api.deployments.projectDeployments)({
     projectId: project.id,
   });
   const deploymentsMap = deployments.reduce((acc, deployment) => {
     acc.set(deployment.tableId, deployment);
     return acc;
   }, new Map<string, schema.Deployment>());
-  const authorized = await cache(api.teams.isAuthorized.query)({
+  const authorized = await cache(api.teams.isAuthorized)({
     teamId: team.id,
   });
 

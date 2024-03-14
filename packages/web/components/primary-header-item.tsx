@@ -1,7 +1,7 @@
 "use client";
 
 import { type RouterOutputs } from "@tableland/studio-api";
-import { useParams } from "next/navigation";
+import { skipToken } from "@tanstack/react-query";
 import TeamSwitcher from "./team-switcher";
 import { api } from "@/trpc/react";
 
@@ -13,9 +13,8 @@ export default function PrimaryHeaderItem({
   const { team: teamSlug } = useParams<{ team?: string }>();
 
   const team = api.teams.teamBySlug.useQuery(
-    { slug: teamSlug! },
+    teamSlug ? { slug: teamSlug } : skipToken,
     {
-      enabled: !!teamSlug,
       initialData: teams.find((team) => team.slug === teamSlug),
     },
   );

@@ -51,9 +51,9 @@ export default function InviteHandler({
       <Button
         variant={"outline"}
         onClick={() => ignoreInvite.mutate({ seal })}
-        disabled={ignoreInvite.isLoading || acceptInvite.isLoading}
+        disabled={ignoreInvite.isPending || acceptInvite.isPending}
       >
-        {ignoreInvite.isLoading && (
+        {ignoreInvite.isPending && (
           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
         )}
         Ignore
@@ -62,9 +62,9 @@ export default function InviteHandler({
       {auth && (
         <Button
           onClick={() => acceptInvite.mutate({ seal })}
-          disabled={acceptInvite.isLoading || ignoreInvite.isLoading}
+          disabled={acceptInvite.isPending || ignoreInvite.isPending}
         >
-          {acceptInvite.isLoading && (
+          {acceptInvite.isPending && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           )}
           Accept

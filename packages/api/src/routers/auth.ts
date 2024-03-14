@@ -2,11 +2,11 @@ import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { generateNonce, SiweMessage } from "siwe";
 import { z } from "zod";
-import { protectedProcedure, publicProcedure, router } from "../trpc";
+import { protectedProcedure, publicProcedure, createTRPCRouter } from "../trpc";
 import { internalError } from "../utils/internalError";
 
 export function authRouter(store: Store) {
-  return router({
+  return createTRPCRouter({
     authenticated: publicProcedure.input(z.void()).query(({ ctx }) => {
       // we want to check for null, undefined, and ""
       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -14,7 +14,7 @@ export function authRouter(store: Store) {
     }),
     nonce: publicProcedure.input(z.void()).mutation(async ({ ctx }) => {
       ctx.session.nonce = generateNonce();
-      await ctx.session.persist(ctx.responseCookies);
+      await ctx.session.save();
       return ctx.session.nonce;
     }),
     login: publicProcedure
@@ -36,14 +36,14 @@ export function authRouter(store: Store) {
           if (info) {
             ctx.session.auth = info;
           }
-          await ctx.session.persist(ctx.responseCookies);
+          await ctx.session.save();
 
           return ctx.session.auth;
         } catch (e: any) {
           ctx.session.auth = undefined;
           ctx.session.nonce = undefined;
 
-          await ctx.session.persist(ctx.responseCookies);
+          await ctx.session.save();
 
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
@@ -73,14 +73,14 @@ export function authRouter(store: Store) {
             input.email,
           );
           ctx.session.auth = auth;
-          await ctx.session.persist(ctx.responseCookies);
+          await ctx.session.save();
           return ctx.session.auth;
         } catch (err) {
           throw internalError("Error registering user", err);
         }
       }),
-    logout: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
-      await ctx.session.clear(ctx.responseCookies);
+    logout: protectedProcedure.input(z.void()).mutation(({ ctx }) => {
+      ctx.session.destroy();
     }),
   });
 }

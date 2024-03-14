@@ -59,11 +59,11 @@ export default function InviteActions({
       <DropdownMenuTrigger className={cn(className)} {...props} asChild>
         <Button
           variant="ghost"
-          disabled={resendInvite.isLoading || deleteInvite.isLoading}
+          disabled={resendInvite.isPending || deleteInvite.isPending}
         >
           <MoreHorizontal
             className={cn(
-              (resendInvite.isLoading || deleteInvite.isLoading) &&
+              (resendInvite.isPending || deleteInvite.isPending) &&
                 "animate-pulse",
             )}
           />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { skipToken } from "@tanstack/react-query";
 import Crumb from "./crumb";
 import { api } from "@/trpc/react";
 
@@ -19,15 +20,11 @@ export default function NavNewTable({
 
   // TODO: Create a single endpoint for this.
   const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
-  const teamId = team?.id;
   const { data: project } = api.projects.projectBySlug.useQuery(
-    { teamId, slug: projectSlug },
-    { enabled: !!teamId },
+    team ? { teamId: team.id, slug: projectSlug } : skipToken,
   );
-  const projectId = project?.id;
   const { data: table } = api.tables.tableByProjectIdAndSlug.useQuery(
-    { projectId: projectId!, slug: tableSlug },
-    { enabled: !!projectId },
+    project ? { projectId: project.id, slug: tableSlug } : skipToken,
   );
 
   if (!team || !project || !table) {

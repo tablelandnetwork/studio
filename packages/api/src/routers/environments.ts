@@ -1,9 +1,9 @@
 import { type Store } from "@tableland/studio-store";
 import { z } from "zod";
-import { projectProcedure, publicProcedure, router } from "../trpc";
+import { projectProcedure, publicProcedure, createTRPCRouter } from "../trpc";
 
 export function environmentsRouter(store: Store) {
-  return router({
+  return createTRPCRouter({
     projectEnvironments: publicProcedure
       .input(z.object({ projectId: z.string().trim() }))
       .query(async ({ input }) => {

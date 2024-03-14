@@ -1,7 +1,7 @@
 import { type ApiKeys, configuredChains } from "@tableland/studio-chains";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, createTRPCRouter } from "../trpc";
 
 export function providersRouter(isLocalDev = false, apiKeys?: ApiKeys) {
   const providersMap = configuredChains(isLocalDev, apiKeys).chains.reduce(
@@ -23,7 +23,7 @@ export function providersRouter(isLocalDev = false, apiKeys?: ApiKeys) {
     new Map<number, string>(),
   );
 
-  return router({
+  return createTRPCRouter({
     providerForChain: protectedProcedure
       .input(z.object({ chainId: z.number() }))
       .query(async ({ input }) => {

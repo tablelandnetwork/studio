@@ -7,12 +7,12 @@ export default async function NewProject({
 }: {
   params: { team: string; project: string };
 }) {
-  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
-  const project = await cache(api.projects.projectBySlug.query)({
+  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const project = await cache(api.projects.projectBySlug)({
     teamId: team.id,
     slug: params.project,
   });
-  const envs = await cache(api.environments.projectEnvironments.query)({
+  const envs = await cache(api.environments.projectEnvironments)({
     projectId: project.id,
   });
 

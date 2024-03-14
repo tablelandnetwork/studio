@@ -1,10 +1,9 @@
-import { Session } from "@tableland/studio-api";
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import NewTeamForm from "./_components/new-team-form";
+import { getSession } from "@/lib/session";
 
 export default async function NewProject() {
-  const session = await Session.fromCookies(cookies());
+  const session = await getSession();
   if (!session.auth) {
     notFound();
   }

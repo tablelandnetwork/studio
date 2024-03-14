@@ -18,11 +18,11 @@ export default async function Projects({
   params: { team: string };
 }) {
   // TODO: Make some high level API call to return a summary of all projects.
-  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
-  const projects = await cache(api.projects.teamProjects.query)({
+  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const projects = await cache(api.projects.teamProjects)({
     teamId: team.id,
   });
-  const authorized = await cache(api.teams.isAuthorized.query)({
+  const authorized = await cache(api.teams.isAuthorized)({
     teamId: team.id,
   });
   const authenticated = await api.auth.authenticated.query();
@@ -30,13 +30,13 @@ export default async function Projects({
   const tables = await Promise.all(
     projects.map(
       async (project) =>
-        await cache(api.tables.projectTables.query)({ projectId: project.id }),
+        await cache(api.tables.projectTables)({ projectId: project.id }),
     ),
   );
   const deployments = await Promise.all(
     projects.map(
       async (project) =>
-        await cache(api.deployments.projectDeployments.query)({
+        await cache(api.deployments.projectDeployments)({
           projectId: project.id,
         }),
     ),
