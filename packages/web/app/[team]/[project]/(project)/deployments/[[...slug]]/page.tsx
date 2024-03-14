@@ -17,21 +17,21 @@ export default async function Deployments({
     notFound();
   }
 
-  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
-  const authorized = await cache(api.teams.isAuthorized.query)({
+  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const authorized = await cache(api.teams.isAuthorized)({
     teamId: team.id,
   });
-  const project = await cache(api.projects.projectBySlug.query)({
+  const project = await cache(api.projects.projectBySlug)({
     teamId: team.id,
     slug: params.project,
   });
-  const environments = await cache(api.environments.projectEnvironments.query)({
+  const environments = await cache(api.environments.projectEnvironments)({
     projectId: project.id,
   });
-  const tables = await cache(api.tables.projectTables.query)({
+  const tables = await cache(api.tables.projectTables)({
     projectId: project.id,
   });
-  const deployments = await cache(api.deployments.projectDeployments.query)({
+  const deployments = await cache(api.deployments.projectDeployments)({
     projectId: project.id,
   });
   const deploymentsMap = deployments.reduce((acc, deployment) => {

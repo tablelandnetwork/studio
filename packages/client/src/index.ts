@@ -1,7 +1,7 @@
 import { type helpers } from "@tableland/sdk";
 import { type AppRouter } from "@tableland/studio-api";
 import {
-  createTRPCProxyClient,
+  createTRPCClient,
   httpBatchLink,
   type HTTPHeaders,
   type Operation,
@@ -21,16 +21,16 @@ interface ClientConfig {
   url?: string;
 }
 
-type ProxyClient = ReturnType<typeof createTRPCProxyClient<AppRouter>>;
+type ProxyClient = ReturnType<typeof createTRPCClient<AppRouter>>;
 
 const api = function (config: ClientConfig = {}): ProxyClient {
   const apiUrl = typeof config.url === "string" ? getUrl(config.url) : getUrl();
 
-  return createTRPCProxyClient<AppRouter>({
-    transformer: superjson,
+  return createTRPCClient<AppRouter>({
     links: [
       httpBatchLink({
         url: apiUrl,
+        transformer: superjson,
         fetch: async function (url, options) {
           const res = await fetch(url, options);
 

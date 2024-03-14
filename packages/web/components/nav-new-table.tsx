@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { skipToken } from "@tanstack/react-query";
 import Crumb from "./crumb";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
@@ -15,10 +16,8 @@ export default function NavNewTable({
   }>();
 
   const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
-  const teamId = team?.id;
   const { data: project } = api.projects.projectBySlug.useQuery(
-    { teamId, slug: projectSlug },
-    { enabled: !!teamId },
+    team ? { teamId: team.id, slug: projectSlug } : skipToken,
   );
 
   if (!team || !project) {

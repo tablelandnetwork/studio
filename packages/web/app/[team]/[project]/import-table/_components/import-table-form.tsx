@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { skipToken } from "@tanstack/react-query";
 import ChainSelector from "@/components/chain-selector";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
@@ -67,13 +68,12 @@ export default function ImportTableForm({ project, team, envs }: Props) {
   const { handleSubmit, control, register, setValue, setError } = form;
 
   const nameAvailableQuery = api.tables.nameAvailable.useQuery(
-    {
-      projectId: project.id,
-      name: tableName,
-    },
-    {
-      enabled: !!tableName,
-    },
+    tableName
+      ? {
+          projectId: project.id,
+          name: tableName,
+        }
+      : skipToken,
   );
 
   const importTable = api.tables.importTable.useMutation({
@@ -236,9 +236,9 @@ export default function ImportTableForm({ project, team, envs }: Props) {
         <FormRootMessage />
         <Button
           type="submit"
-          disabled={importTable.isLoading || !nameAvailable}
+          disabled={importTable.isPending || !nameAvailable}
         >
-          {importTable.isLoading && (
+          {importTable.isPending && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           )}
           Import

@@ -5,6 +5,13 @@ const nextConfig = {
     // your project has ESLint errors.  Ensure `npm run lint` is passing.
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    serverComponentsExternalPackages: [
+      "@react-email/components",
+      "@react-email/render",
+      "@react-email/tailwind",
+    ],
+  },
 };
 
 module.exports = nextConfig;

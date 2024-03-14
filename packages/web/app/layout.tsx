@@ -1,7 +1,7 @@
-import { type RouterOutputs, Session } from "@tableland/studio-api";
+import { type RouterOutputs } from "@tableland/studio-api";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import Link from "next/link";
 import Script from "next/script";
 import { cache } from "react";
@@ -18,6 +18,7 @@ import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 import { TimeAgoProvider } from "@/components/time-ago-provider";
+import { getSession } from "@/lib/session";
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
@@ -49,11 +50,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await Session.fromCookies(cookies());
+  const session = await getSession();
   let teams: RouterOutputs["teams"]["userTeams"] = [];
   if (session.auth) {
     try {
-      teams = await cache(api.teams.userTeams.query)({
+      teams = await cache(api.teams.userTeams)({
         userTeamId: session.auth.user.teamId,
       });
     } catch {
