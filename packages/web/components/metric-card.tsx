@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { Copy } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,7 +16,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, handleCopy } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 const MetricCard = React.forwardRef<
   HTMLDivElement,
@@ -57,29 +61,46 @@ MetricCardDescription.displayName = "MetricCardDescription";
 
 const MetricCardContent = React.forwardRef<
   HTMLDivElement,
-  { tooltipText?: string } & React.HTMLAttributes<HTMLDivElement>
->(({ tooltipText, className, children, ...props }, ref) => {
+  { tooltipText?: string; copy?: string } & React.HTMLAttributes<HTMLDivElement>
+>(({ tooltipText, className, children, copy, ...props }, ref) => {
+  const { toast } = useToast();
+
   return (
     <CardContent
       ref={ref}
       className={cn(
-        "m-auto hyphens-auto text-center text-3xl font-semibold tracking-tight",
+        "m-auto text-center text-3xl font-semibold tracking-tight",
         className,
       )}
       {...props}
     >
-      {tooltipText ? (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger className="tracking-tight">
-              {children}
-            </TooltipTrigger>
-            <TooltipContent>{tooltipText}</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ) : (
-        children
-      )}
+      <div className="flex w-full tracking-tight">
+        {!!tooltipText && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger className="max-w-full cursor-default">
+                <div className="truncate">{children}</div>
+              </TooltipTrigger>
+              <TooltipContent>{tooltipText}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        {!!copy && !!tooltipText && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger
+                className="cursor-point -mt-4 h-auto w-0"
+                onClick={() => handleCopy(tooltipText, toast)}
+              >
+                <Copy className="h-4 w-4 stroke-slate-300" />
+                <span className="sr-only">{tooltipText}</span>
+              </TooltipTrigger>
+              <TooltipContent>click to copy table name</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        {!tooltipText && children}
+      </div>
     </CardContent>
   );
 });

@@ -101,7 +101,7 @@ export default async function TablelandTable({
             <Table2 className="h-4 w-4 text-muted-foreground" />
             <MetricCardTitle>Tableland Table</MetricCardTitle>
           </MetricCardHeader>
-          <MetricCardContent tooltipText={tableName}>
+          <MetricCardContent tooltipText={tableName} copy="true">
             {tableName}
           </MetricCardContent>
           <MetricCardFooter>
