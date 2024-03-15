@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { Copy } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,7 +16,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, handleCopy } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 const MetricCard = React.forwardRef<
   HTMLDivElement,
@@ -27,12 +31,46 @@ const MetricCard = React.forwardRef<
 ));
 MetricCard.displayName = "MetricCard";
 
-const MetricCardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <CardHeader ref={ref} className={cn(className)} {...props} />
-));
+type HeaderMainProps = React.HTMLAttributes<HTMLDivElement>;
+interface HeaderCopyProps {
+  copyValue: string;
+  valueDesc: string;
+  tooltipText: string;
+}
+interface HeaderNoCopyProps {
+  copyValue?: undefined;
+  valueDesc?: never;
+  tooltipText?: never;
+}
+type HeaderProps = HeaderMainProps & (HeaderCopyProps | HeaderNoCopyProps);
+
+const MetricCardHeader = React.forwardRef<HTMLDivElement, HeaderProps>(
+  (
+    { className, children, copyValue, valueDesc, tooltipText, ...props },
+    ref,
+  ) => {
+    const { toast } = useToast();
+    return (
+      <CardHeader ref={ref} className={cn(className)} {...props}>
+        {children}
+        {copyValue && tooltipText && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger
+                className="cursor-point ml-auto"
+                onClick={() => handleCopy(copyValue, valueDesc, toast)}
+              >
+                <Copy className="h-4 w-4 stroke-slate-300" />
+                <span className="sr-only">{"hi"}</span>
+              </TooltipTrigger>
+              <TooltipContent>{tooltipText}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </CardHeader>
+    );
+  },
+);
 MetricCardHeader.displayName = "MetricCardHeader";
 
 const MetricCardTitle = React.forwardRef<
@@ -63,23 +101,25 @@ const MetricCardContent = React.forwardRef<
     <CardContent
       ref={ref}
       className={cn(
-        "m-auto hyphens-auto text-center text-3xl font-semibold tracking-tight",
+        "m-auto text-center text-3xl font-semibold tracking-tight",
         className,
       )}
       {...props}
     >
-      {tooltipText ? (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger className="tracking-tight">
-              {children}
-            </TooltipTrigger>
-            <TooltipContent>{tooltipText}</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ) : (
-        children
-      )}
+      <div className="flex w-full max-w-full">
+        {tooltipText ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger className="max-w-full cursor-default">
+                <div className="truncate tracking-tight">{children}</div>
+              </TooltipTrigger>
+              <TooltipContent>{tooltipText}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <div className="truncate tracking-tight">{children}</div>
+        )}
+      </div>
     </CardContent>
   );
 });
