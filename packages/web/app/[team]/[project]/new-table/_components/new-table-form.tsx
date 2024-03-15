@@ -8,15 +8,16 @@ import {
   type Schema,
   type schema,
 } from "@tableland/studio-store";
-import { HelpCircle, Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
+import { skipToken } from "@tanstack/react-query";
+import Columns from "./columns";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -26,30 +27,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
+import TeamSwitcher from "@/components/team-switcher";
+import ProjectSwitcher from "@/components/project-switcher";
+import { ensureError } from "@/lib/ensure-error";
+import TableColumns from "@/components/table-columns";
 
 const formSchema = z.object({
   name: z
@@ -93,22 +76,35 @@ interface Props {
   project?: schema.Project;
   envs?: schema.Environment[];
   showSelectors?: boolean;
+  schema?: Schema;
 }
 
-export default function NewTable({ project, team, envs }: Props) {
+export default function NewTableForm({ project, team, envs, schema }: Props) {
+  const [selectedTeam, setSelectedTeam] = useState<schema.Team | undefined>(
+    team,
+  );
+  const [selectedProject, setSelectedProject] = useState<
+    schema.Project | undefined
+  >(undefined);
   const [tableName, setTableName] = useState("");
   const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const router = useRouter();
 
-  const teams = api.teams.userTeams.useQuery();
-  const projects = api.projects.teamProjects.useQuery(
-    { teamId: "asdf" },
-    { enabled: false },
+  useEffect(() => {
+    setSelectedProject(undefined);
+  }, [selectedTeam]);
+
+  console.log("selectedTeam", selectedTeam);
+
+  const { data: teams } = api.teams.userTeams.useQuery();
+  const { data: projects } = api.projects.teamProjects.useQuery(
+    selectedTeam ? { teamId: selectedTeam.id } : skipToken,
   );
 
   const nameAvailableQuery = api.tables.nameAvailable.useQuery(
-    { projectId: project!.id, name: tableName },
-    { enabled: !!tableName && !!project },
+    project && !!tableName
+      ? { projectId: project.id, name: tableName }
+      : skipToken,
   );
 
   const newTable = api.tables.newTable.useMutation({
@@ -117,8 +113,9 @@ export default function NewTable({ project, team, envs }: Props) {
       router.refresh();
       router.replace(`/${team.slug}/${project.slug}`);
     },
-    onError: (err) => {
-      setError("root", { message: err.message });
+    onError: (err: any) => {
+      const error = ensureError(err);
+      setError("root", { message: error.message });
     },
   });
 
@@ -194,268 +191,93 @@ export default function NewTable({ project, team, envs }: Props) {
   }
 
   return (
-    <Form {...form}>
-      <form
-        // TODO: `handleSubmit` creates a floating promise, as a result the linter is complaining
-        //    we should figure out if this is ok or not and either change this or the lint config
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onSubmit={handleSubmit(onSubmit)}
-        className="mx-auto max-w-2xl space-y-8"
-      >
-        <FormField
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <InputWithCheck
-                  placeholder="Table name"
-                  updateQuery={setTableName}
-                  queryStatus={nameAvailableQuery}
-                  onResult={setNameAvailable}
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Table name must be unique within your Project.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Table description" {...field} />
-              </FormControl>
-              <FormDescription>
-                Provide a description of your new Table so others can understand
-                the role it plays in your Project Blueprint.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="space-y-2">
-          <FormLabel>Columns</FormLabel>
-          {columnFields.length ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="flex items-center gap-2">
-                    Type
-                    <HoverCard>
-                      <HoverCardTrigger>
-                        <HelpCircle className="h-5 w-5 text-gray-200 hover:text-gray-400" />
-                      </HoverCardTrigger>
-                      <HoverCardContent className="w-80">
-                        <Table>
-                          <TableCaption className="text-xs font-normal text-muted-foreground">
-                            Explanation of supported column types.
-                          </TableCaption>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Type</TableHead>
-                              <TableHead>Description</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell className="font-medium">Int</TableCell>
-                              <TableCell className="font-normal">
-                                Signed integer values, stored in 0, 1, 2, 3, 4,
-                                6, or 8 bytes depending on the magnitude of the
-                                value.
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Integer
-                              </TableCell>
-                              <TableCell className="font-normal">
-                                Same as Int, except it may also be used to
-                                represent an auto-incrementing primary key
-                                field.
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Text
-                              </TableCell>
-                              <TableCell className="font-normal">
-                                Text string, stored using the database encoding
-                                (UTF-8).
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Blob
-                              </TableCell>
-                              <TableCell className="font-normal">
-                                A blob of data, stored exactly as it was input.
-                                Useful for byte slices etc.
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </HoverCardContent>
-                    </HoverCard>
-                  </TableHead>
-                  <TableHead>Not Null</TableHead>
-                  <TableHead>Primary Key</TableHead>
-                  <TableHead>Unique</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {columnFields.map((column, index) => (
-                  <TableRow key={column.id}>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`columns.${index}.name`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                key={column.id}
-                                id={index.toString()}
-                                placeholder="column_name"
-                                {...register(`columns.${index}.name`)}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`columns.${index}.type`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select
-                              key={column.id}
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger
-                                  className="w-auto gap-x-2"
-                                  key={column.id}
-                                  // {...register(`columns.${index}.type`)} // TODO: Not sure how to register this select.
-                                >
-                                  <SelectValue placeholder="Select column type" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="int">Int</SelectItem>
-                                <SelectItem value="integer">Integer</SelectItem>
-                                <SelectItem value="text">Text</SelectItem>
-                                <SelectItem value="blob">Blob</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`columns.${index}.notNull`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Checkbox
-                                key={column.id}
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                {...register(`columns.${index}.notNull`)}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`columns.${index}.primaryKey`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Checkbox
-                                key={column.id}
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`columns.${index}.unique`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Checkbox
-                                key={column.id}
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          removeColumn(index);
-                        }}
-                      >
-                        <X />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-center text-[0.8rem] text-muted-foreground">
-              No columns to display, go ahead and add one.
-            </p>
-          )}
-          <Button
-            className="my-4"
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addColumn}
-          >
-            <Plus className="mr-2" />
-            Add Column
-          </Button>
-        </div>
-        {/* <div className="space-y-2">
+    <>
+      <Form {...form}>
+        <form
+          // TODO: `handleSubmit` creates a floating promise, as a result the linter is complaining
+          //    we should figure out if this is ok or not and either change this or the lint config
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onSubmit={handleSubmit(onSubmit)}
+          className="mx-auto max-w-2xl space-y-8"
+        >
+          <TeamSwitcher
+            teams={teams}
+            selectedTeam={selectedTeam}
+            onTeamSelected={setSelectedTeam}
+          />
+          <ProjectSwitcher
+            variant="select"
+            team={selectedTeam}
+            projects={projects}
+            selectedProject={selectedProject}
+            onProjectSelected={setSelectedProject}
+          />
+          <FormField
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <InputWithCheck
+                    placeholder="Table name"
+                    updateQuery={setTableName}
+                    queryStatus={nameAvailableQuery}
+                    onResult={setNameAvailable}
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Table name must be unique within your Project.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Table description" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Provide a description of your new Table so others can
+                  understand the role it plays in your Project Blueprint.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="space-y-2">
+            <FormLabel>Columns</FormLabel>
+            {schema ? <TableColumns columns={schema.columns} /> : null}
+            {columnFields.length ? (
+              <Columns
+                columns={columnFields}
+                control={control}
+                register={register}
+                removeColumn={removeColumn}
+              />
+            ) : (
+              <p className="text-center text-[0.8rem] text-muted-foreground">
+                No columns to display, go ahead and add one.
+              </p>
+            )}
+            <Button
+              className="my-4"
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addColumn}
+            >
+              <Plus className="mr-2" />
+              Add Column
+            </Button>
+          </div>
+          {/* <div className="space-y-2">
           <FormLabel>Deployments</FormLabel>
           <FormDescription>
             You can optionally deploy your new table to one or more of your
@@ -523,14 +345,15 @@ export default function NewTable({ project, team, envs }: Props) {
             );
           })}
         </div> */}
-        <FormRootMessage />
-        <Button type="submit" disabled={newTable.isLoading || !nameAvailable}>
-          {newTable.isLoading && (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          )}
-          Submit
-        </Button>
-      </form>
-    </Form>
+          <FormRootMessage />
+          <Button type="submit" disabled={newTable.isPending || !nameAvailable}>
+            {newTable.isPending && (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            )}
+            Submit
+          </Button>
+        </form>
+      </Form>
+    </>
   );
 }

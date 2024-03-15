@@ -1,18 +1,9 @@
 import { helpers } from "@tableland/sdk";
-import { hasConstraint } from "@tableland/studio-store";
 import TimeAgo from "javascript-time-ago";
-import { Check, Rocket } from "lucide-react";
+import { Rocket } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import { api } from "@/trpc/server";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Card,
   CardContent,
@@ -20,6 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import TableColumns from "@/components/table-columns";
+import TableConstraints from "@/components/table-constraints";
 
 const timeAgo = new TimeAgo("en-US");
 
@@ -57,42 +50,7 @@ export default async function TableDetails({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            {table.schema.columns.length > 0 && (
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-center">Not Null</TableHead>
-                  <TableHead className="text-center">Primary Key</TableHead>
-                  <TableHead className="text-center">Unique</TableHead>
-                </TableRow>
-              </TableHeader>
-            )}
-            <TableBody>
-              {table.schema.columns.map((column, index) => {
-                return (
-                  <TableRow key={column.name}>
-                    <TableCell>
-                      <p>{column.name}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p>{column.type}</p>
-                    </TableCell>
-                    <TableCell align="center">
-                      {hasConstraint(column, "not null") && <Check />}
-                    </TableCell>
-                    <TableCell align="center">
-                      {hasConstraint(column, "primary key") && <Check />}
-                    </TableCell>
-                    <TableCell align="center">
-                      {hasConstraint(column, "unique") && <Check />}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          <TableColumns columns={table.schema.columns} />
         </CardContent>
       </Card>
       <Card>
@@ -106,17 +64,7 @@ export default async function TableDetails({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableBody>
-              {table.schema.tableConstraints?.map((constraint, index) => {
-                return (
-                  <TableRow key={constraint}>
-                    <TableCell>{constraint}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          <TableConstraints tableConstraints={table.schema.tableConstraints} />
         </CardContent>
       </Card>
       <Card>
