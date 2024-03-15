@@ -1,14 +1,7 @@
-import {
-  Folders,
-  Gem,
-  Plus,
-  Rocket,
-  Table2,
-  UserCircle,
-  Users,
-} from "lucide-react";
+import { AlertCircle, Folders, Plus, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,6 +25,7 @@ export default async function Projects({
   const authorized = await cache(api.teams.isAuthorized.query)({
     teamId: team.id,
   });
+  const authenticated = await api.auth.authenticated.query();
 
   const tables = await Promise.all(
     projects.map(
@@ -50,6 +44,19 @@ export default async function Projects({
 
   return (
     <main className="container flex flex-1 flex-col p-4">
+      {!authorized && authenticated && (
+        <Alert className="mb-4 flex flex-1 items-center">
+          <span className="mr-2">
+            <AlertCircle />
+          </span>
+          <AlertDescription>
+            You don&apos;t currently have access to work in this team. If you
+            think this is a mistake contact the owner and ask them to invite you
+            to the team.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {authorized && (
         <Link href={`/${team.slug}/new-project`} className="ml-auto">
           <Button variant="ghost">
@@ -58,54 +65,19 @@ export default async function Projects({
           </Button>
         </Link>
       )}
-      {!projects.length ? (
+
+      {!projects.length && (
         <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4 py-16">
           <div className="flex items-center space-x-4">
-            <Gem className="flex-shrink-0" />
+            <Folders className="flex-shrink-0" />
             <h1 className="text-2xl font-medium">
-              {team.personal
-                ? "Welcome to Tableland Studio!"
-                : `Team ${team.name} has been created!`}
+              Team <b>{team.name}</b> doesn&apos;t have any projects yet.
             </h1>
           </div>
-          <div className="flex items-center space-x-4">
-            <Users className="flex-shrink-0" />
-            {team.personal ? (
-              <p className="text-muted-foreground">
-                In Studio, Teams are the top level container for your work. You
-                can create new Teams and switch Teams using the Team switcher in
-                the upper left corner of the screen. Once you create new Team,
-                you can invite others to collaborate.
-              </p>
-            ) : (
-              <p className="text-muted-foreground">
-                You can invite others to collaborate in the People tab above.
-              </p>
-            )}
-          </div>
-          {!!team.personal && (
-            <div className="flex items-center space-x-4">
-              <UserCircle className="flex-shrink-0" />
-              <p className="text-muted-foreground">
-                We&apos;ve created a default Team &mdash;{" "}
-                <span className="font-semibold text-foreground">
-                  {team.slug}
-                </span>{" "}
-                &mdash; for you. {team.personal ? "This" : "It"} is your
-                personal Team for your own projects &mdash; You can&apos;t
-                invite collaborators {team.personal ? "here" : "there"}.
-              </p>
-            </div>
-          )}
-          <div className="flex items-center space-x-4">
-            <Folders className="flex-shrink-0" />
-            <p className="text-muted-foreground">
-              Within a Team, work is organized into Projects. To get started,
-              create a Project using the New Project button above.
-            </p>
-          </div>
         </div>
-      ) : (
+      )}
+
+      {!!projects.length && (
         <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {projects.map((project, i) => {
             const tableCount = tables[i].length;
