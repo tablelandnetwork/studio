@@ -18,6 +18,7 @@ import HashDisplay from "./hash-display";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
+import { objectToTableData } from "@/lib/utils";
 
 const timeAgo = new TimeAgo("en-US");
 
@@ -63,6 +64,7 @@ export default async function TablelandTable({
 
   const tbl = new Database({ baseUrl: helpers.getBaseUrl(chainId) });
   const data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
+  const formattedData = objectToTableData(data.results);
   const columns: Array<ColumnDef<unknown>> = data.results.length
     ? Object.keys(data.results[0] as object).map((col) => ({
         accessorKey: col,
@@ -176,7 +178,7 @@ export default async function TablelandTable({
           <TabsTrigger value="logs">SQL Logs</TabsTrigger>
         </TabsList>
         <TabsContent value="data">
-          <DataTable columns={columns} data={data.results} />
+          <DataTable columns={columns} data={formattedData} />
         </TabsContent>
         <TabsContent value="logs">
           <SQLLogs chain={chainId} tableId={tokenId} />

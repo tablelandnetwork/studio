@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { /* useFieldArray, */ useForm } from "react-hook-form";
 import * as z from "zod";
 import { api } from "@/trpc/react";
@@ -31,6 +31,7 @@ const formSchema = z.object({
 export default function NewProjectForm({ team }: { team: schema.Team }) {
   const [projectName, setProjectName] = useState("");
   const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const nameAvailableQuery = api.projects.nameAvailable.useQuery(
@@ -45,8 +46,13 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
     },
     onError: (err) => {
       setError("root", { message: err.message });
+      setIsLoading(false);
     },
   });
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,6 +73,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
   // );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
     newProject.mutate({
       teamId: team.id,
       name: values.name,
@@ -187,10 +194,8 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
           </Button>
         </div> */}
         <FormRootMessage />
-        <Button type="submit" disabled={newProject.isLoading || !nameAvailable}>
-          {newProject.isLoading && (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          )}
+        <Button type="submit" disabled={isLoading || !nameAvailable}>
+          {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
           Submit
         </Button>
       </form>
