@@ -36,7 +36,7 @@ export function objectToTableData<TData>(data: any[]) {
   });
 }
 
-export const handleCopy = function (text: string, toast: Toast) {
+export const handleCopy = function (text: string, desc: string, toast: Toast) {
   // TODO: clickboard write text is probably really fast, so it might not be
   //    needed here, but some kind lock of the UI when async ops are happening
   //    could make the ui feel more responsive.
@@ -45,13 +45,13 @@ export const handleCopy = function (text: string, toast: Toast) {
     .then(function () {
       toast({
         title: "Done!",
-        description: `${text} has been copied to your clipboard.`,
+        description: `${desc} has been copied to your clipboard.`,
         duration: 2000,
       });
     })
     .catch(function (err) {
       const errMessage = [
-        `Could not copy ${text} to your clipboard.`,
+        `Could not copy ${desc} ${text} to your clipboard.`,
         typeof err.message === "string" ? err.message : undefined,
       ]
         .filter((s) => s)

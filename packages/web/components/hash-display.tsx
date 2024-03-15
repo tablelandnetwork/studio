@@ -52,7 +52,7 @@ export default function HashDisplay({
               <Button
                 variant={"ghost"}
                 className="ml-1 h-auto p-1"
-                onClick={() => handleCopy(hash, toast)}
+                onClick={() => handleCopy(hash, hashDesc, toast)}
               >
                 <Copy className="h-4 w-4 stroke-slate-300" />
                 <span className="sr-only">Copy {hashDesc}</span>
