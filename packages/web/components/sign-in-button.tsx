@@ -19,7 +19,17 @@ export default function SignInButton({
   const { signMessageAsync } = useSignMessage();
 
   const nonce = api.auth.nonce.useMutation({
+    onMutate: () => {
+      console.log("On mutate fetching nonce");
+    },
+    onSettled(data, error, variables, context) {
+      console.log("Nonce settled", data, error, variables, context);
+    },
+    onSuccess(data, variables, context) {
+      console.log("Nonce success", data, variables, context);
+    },
     onError: (error) => {
+      console.log("Error fetching nonce", error);
       onError({ error: new Error(error.message) });
     },
   });
@@ -36,6 +46,7 @@ export default function SignInButton({
   // to ensure deep linking works for WalletConnect
   // users on iOS when signing the SIWE message
   useEffect(() => {
+    console.log("Fetching nonce");
     nonce.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
