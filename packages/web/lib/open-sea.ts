@@ -12,10 +12,10 @@ export const openSeaLinks = new Map<
     },
   ],
   [
-    421613,
+    421614,
     {
       tokenUrl: (tokenId) =>
-        `https://testnets.opensea.io/assets/arbitrum-goerli/0x033f69e8d119205089ab15d340f5b797732f646b/${tokenId}`,
+        `https://testnets.opensea.io/assets/arbitrum-sepolia/0x223A74B8323914afDC3ff1e5005564dC17231d6e/${tokenId}`,
     },
   ],
   [
@@ -39,13 +39,14 @@ export const openSeaLinks = new Map<
         `https://opensea.io/assets/optimism/0xfad44bf5b843de943a09d4f3e84949a11d3aa3e6/${tokenId}`,
     },
   ],
-  [
-    420,
-    {
-      tokenUrl: (tokenId) =>
-        `https://testnets.opensea.io/assets/optimism-goerli/0xc72e8a7be04f2469f8c2db3f1bdf69a7d516abba/${tokenId}`,
-    },
-  ],
+  // TODO: Uncomment once OpenSea add Optimism Sepolia support
+  // [
+  //   11155420,
+  //   {
+  //     tokenUrl: (tokenId) =>
+  //       `https://testnets.opensea.io/assets/optimism-sepolia/0x68A2f4423ad3bf5139Db563CF3bC80aA09ed7079/${tokenId}`,
+  //   },
+  // ],
   [
     137,
     {

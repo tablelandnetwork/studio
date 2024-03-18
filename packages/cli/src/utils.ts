@@ -98,26 +98,30 @@ export const wait = async (timeout: number): Promise<void> =>
 // TODO: this is quite general and should probably be moved to a utils package
 export function getLink(chain: sdkHelpers.ChainName, hash: string): string {
   /* c8 ignore start */
-  if (chain.includes("ethereum")) {
-    if (chain.includes("goerli")) {
-      return `https://goerli.etherscan.io/tx/${hash}`;
-    }
+  if (chain === "mainnet" || chain === "homestead") {
     return `https://etherscan.io/tx/${hash}`;
+  } else if (chain === "sepolia") {
+    return `https://sepolia.etherscan.io/tx/${hash}`;
   } else if (chain.includes("polygon")) {
     if (chain.includes("mumbai")) {
       return `https://mumbai.polygonscan.com/tx/${hash}`;
     }
     return `https://polygonscan.com/tx/${hash}`;
   } else if (chain.includes("optimism")) {
-    if (chain.includes("goerli")) {
-      return `https://blockscout.com/optimism/goerli/tx/${hash}`;
+    if (chain.includes("sepolia")) {
+      return `https://sepolia-optimism.etherscan.io/tx/${hash}`;
     }
     return `https://optimistic.etherscan.io/tx/${hash}`;
   } else if (chain.includes("arbitrum")) {
-    if (chain.includes("goerli")) {
-      return `https://goerli-rollup-explorer.arbitrum.io/tx/${hash}`;
+    if (chain.includes("sepolia")) {
+      return `https://sepolia.arbiscan.io/tx/${hash}`;
     }
     return `https://arbiscan.io/tx/${hash}`;
+  } else if (chain.includes("filecoin")) {
+    if (chain.includes("calibration")) {
+      return `https://calibration.filfox.info/tx/${hash}`;
+    }
+    return `https://filfox.info/tx/${hash}`;
   }
   return "";
   /* c8 ignore stop */

@@ -99,7 +99,12 @@ export default async function TablelandTable({
           <MetricCardFooter>{timeAgo.format(createdAt)}</MetricCardFooter>
         </MetricCard>
         <MetricCard>
-          <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
+          <MetricCardHeader
+            className="flex flex-row items-center gap-2 space-y-0"
+            copyValue={tableName}
+            valueDesc="Table name"
+            tooltipText="Click to copy table name"
+          >
             <Table2 className="h-4 w-4 text-muted-foreground" />
             <MetricCardTitle>Tableland Table</MetricCardTitle>
           </MetricCardHeader>
@@ -128,16 +133,19 @@ export default async function TablelandTable({
         </MetricCard>
         {deploymentData?.txnHash && (
           <MetricCard>
-            <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
+            <MetricCardHeader
+              className="flex flex-row items-center gap-2 space-y-0"
+              copyValue={deploymentData.txnHash}
+              valueDesc="Txn hash"
+              tooltipText="Click to copy txn hash"
+            >
               <Hash className="h-4 w-4 text-muted-foreground" />
               <MetricCardTitle>Transaction Hash</MetricCardTitle>
             </MetricCardHeader>
             <MetricCardContent>
               <HashDisplay
                 hash={deploymentData.txnHash}
-                copy
                 className="text-3xl text-foreground"
-                hashDesc="txn hash"
               />
             </MetricCardContent>
             {blockExplorer && (

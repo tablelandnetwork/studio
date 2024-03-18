@@ -1,6 +1,6 @@
 {
   "name": "@tableland/studio-chains",
-  "version": "0.0.0-pre.0",
+  "version": "0.0.0-pre.1",
   "description": "Supported chain definitions for Tableland Studio",
   "repository": "https://github.com/tablelandnetwork/studio/chains",
   "publishConfig": {
