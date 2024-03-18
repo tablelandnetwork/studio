@@ -1,4 +1,3 @@
-import TimeAgo from "javascript-time-ago";
 import {
   Cake,
   Hourglass,
@@ -14,9 +13,8 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { TimeSince } from "@/components/time";
 import { cn } from "@/lib/utils";
-
-const timeAgo = new TimeAgo("en-US");
 
 type Props = LucideProps & {
   user?: schema.Team;
@@ -44,7 +42,7 @@ export default function Info({
           <div>
             <p className="text-xs text-muted-foreground">Founded team</p>
             <p className="text-sm">
-              {timeAgo.format(new Date(membership.joinedAt))}
+              <TimeSince time={membership.joinedAt} />
             </p>
           </div>
         </div>
@@ -76,7 +74,7 @@ export default function Info({
             <div>
               <p className="text-xs text-muted-foreground">Joined</p>
               <p className="text-sm">
-                {timeAgo.format(new Date(membership.joinedAt))}
+                <TimeSince time={membership.joinedAt} />
               </p>
             </div>
           </div>
@@ -89,7 +87,7 @@ export default function Info({
           <div>
             <p className="text-xs text-muted-foreground">Joined</p>
             <p className="text-sm">
-              {timeAgo.format(new Date(membership.joinedAt))}
+              <TimeSince time={membership.joinedAt} />
             </p>
           </div>
         </div>
@@ -112,7 +110,7 @@ export default function Info({
             <div>
               <p className="text-xs text-muted-foreground">Invited</p>
               <p className="text-sm">
-                {timeAgo.format(new Date(invite.createdAt))}
+                <TimeSince time={invite.createdAt} />
               </p>
             </div>
           </div>

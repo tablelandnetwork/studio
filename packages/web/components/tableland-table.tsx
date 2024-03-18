@@ -1,7 +1,6 @@
 import { Database, type Schema, helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
-import TimeAgo from "javascript-time-ago";
 import { Blocks, Coins, Hash, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
@@ -19,8 +18,7 @@ import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
 import { objectToTableData } from "@/lib/utils";
-
-const timeAgo = new TimeAgo("en-US");
+import { TimeSince } from "@/components/time";
 
 interface Props {
   displayName: string;
@@ -96,7 +94,9 @@ export default async function TablelandTable({
             <MetricCardTitle>Deployed to</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>{chain?.name}</MetricCardContent>
-          <MetricCardFooter>{timeAgo.format(createdAt)}</MetricCardFooter>
+          <MetricCardFooter>
+            <TimeSince time={createdAt} />
+          </MetricCardFooter>
         </MetricCard>
         <MetricCard>
           <MetricCardHeader

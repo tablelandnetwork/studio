@@ -1,6 +1,4 @@
 import { type RouterOutputs, Session } from "@tableland/studio-api";
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import { cookies, headers } from "next/headers";
@@ -20,8 +18,6 @@ import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 import { TimeAgoProvider } from "@/components/time-ago-provider";
-
-TimeAgo.addDefaultLocale(en);
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
