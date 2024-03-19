@@ -15,11 +15,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SQLLogs from "./sql-logs";
 import HashDisplay from "./hash-display";
+import TablelandTableMenu from "./tableland-table-menu";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
 import { objectToTableData } from "@/lib/utils";
-import TablelandTableMenu from "./tableland-table-menu";
 
 const timeAgo = new TimeAgo("en-US");
 
