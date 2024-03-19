@@ -278,7 +278,7 @@ function DeployStep({
   return (
     <div
       className={cn(
-        "flex-auto items-center overflow-auto",
+        "no-scrollbar flex-auto items-center overflow-auto",
         state === "pending" && "opacity-40",
       )}
     >
