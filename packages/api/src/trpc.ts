@@ -98,10 +98,13 @@ export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.session.auth) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+  // infers the `session.auth` as non-nullable
+  type AuthedSession = typeof ctx.session & {
+    auth: NonNullable<typeof ctx.session.auth>;
+  };
   return await next({
     ctx: {
-      // infers the `session.auth` as non-nullable
-      session: { ...ctx.session, auth: ctx.session.auth },
+      session: ctx.session as AuthedSession,
     },
   });
 });
@@ -125,7 +128,12 @@ export const teamProcedure = (store: Store) =>
       }
       input.teamId = teamId;
       return await next({
-        ctx: { ...ctx, teamAuthorization: membership, teamId },
+        ctx: {
+          ...ctx,
+          session: ctx.session,
+          teamAuthorization: membership,
+          teamId,
+        },
       });
     });
 
@@ -162,7 +170,7 @@ export const projectProcedure = (store: Store) =>
         });
       }
       return await next({
-        ctx: { ...ctx, teamAuthorization: membership },
+        ctx: { ...ctx, session: ctx.session, teamAuthorization: membership },
       });
     });
 
@@ -188,6 +196,6 @@ export const tableProcedure = (store: Store) =>
         });
       }
       return await next({
-        ctx: { ...ctx, teamAuthorization: membership },
+        ctx: { ...ctx, session: ctx.session, teamAuthorization: membership },
       });
     });
