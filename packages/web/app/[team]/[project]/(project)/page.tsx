@@ -1,9 +1,10 @@
+import { Import, PencilRuler, Plus, Rocket, Table2 } from "lucide-react";
 import { helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import { Import, PencilRuler, Plus, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import { api } from "@/trpc/server";
+import HashDisplay from "@/components/hash-display";
 import {
   Card,
   CardContent,
@@ -45,6 +46,17 @@ export default async function Project({
         </h2>
         <p className="ml-4 max-w-lg whitespace-pre-wrap leading-tight text-muted-foreground">
           {project.description}
+        </p>
+      </div>
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold tracking-tight">Project ID</h2>
+        <p className="ml-4 max-w-lg whitespace-pre-wrap leading-tight text-muted-foreground">
+          <HashDisplay
+            hash={project.id}
+            numCharacters={60}
+            copy={true}
+            hashDesc="project id"
+          />
         </p>
       </div>
       <div className="flex flex-1 flex-col space-y-1">
