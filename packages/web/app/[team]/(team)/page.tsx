@@ -25,7 +25,7 @@ export default async function Projects({
   const authorized = await cache(api.teams.isAuthorized)({
     teamId: team.id,
   });
-  const authenticated = await api.auth.authenticated.query();
+  const authenticated = await api.auth.authenticated();
 
   const tables = await Promise.all(
     projects.map(
