@@ -3,7 +3,7 @@
 import { Ellipsis } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import NewTableSheet from "./new-table-sheet";
+import NewTableForm, { type NewTableFormProps } from "./new-table-form";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +11,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function TablelandTableMenu() {
-  const [newTableOpen, setNewTableOpen] = useState(false);
-
+export default function TablelandTableMenu(
+  props: Omit<NewTableFormProps, "open" | "onOpenChange">,
+) {
+  const [newTableFormOpen, setNewTableFormOpen] = useState(false);
   return (
     <>
-      <NewTableSheet open={newTableOpen} onOpenChange={setNewTableOpen} />
+      <NewTableForm
+        {...props}
+        open={newTableFormOpen}
+        onOpenChange={setNewTableFormOpen}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -24,10 +29,10 @@ export default function TablelandTableMenu() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onSelect={() => console.log("asdf")}>
+          <DropdownMenuItem onSelect={() => {}}>
             Import into Studio project
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setNewTableOpen(true)}>
+          <DropdownMenuItem onSelect={() => setNewTableFormOpen(true)}>
             Use table schema
           </DropdownMenuItem>
         </DropdownMenuContent>
