@@ -32,7 +32,7 @@ export const createTRPCContext = async (opts: {
     ">>> tRPC Request from",
     source,
     "by",
-    session?.auth?.user.address,
+    session?.auth?.user.address ?? "unauthenticated user",
   );
 
   return {

@@ -1,8 +1,9 @@
-import { Import, PencilRuler, Plus, Rocket, Table2 } from "lucide-react";
 import { helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
+import { Import, PencilRuler, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
+import NewTable from "./_components/new-table";
 import { api } from "@/trpc/server";
 import HashDisplay from "@/components/hash-display";
 import {
@@ -51,7 +52,7 @@ export default async function Project({
         </div>
         <div className="space-y-1">
           <h2 className="text-lg font-semibold tracking-tight">Project ID</h2>
-          <span className="block min-w-72 whitespace-pre-wrap leading-tight text-muted-foreground">
+          <span className="min-w-72 block whitespace-pre-wrap leading-tight text-muted-foreground">
             <HashDisplay
               hash={project.id}
               numCharacters={60}
@@ -66,12 +67,7 @@ export default async function Project({
           <h2 className="text-lg font-semibold tracking-tight">Tables</h2>
           {authorized && (
             <div className="ml-auto">
-              <Link href={`/${team.slug}/${project.slug}/new-table`}>
-                <Button variant="ghost" className="mr-2">
-                  <Plus className="mr-2" />
-                  New Table
-                </Button>
-              </Link>
+              <NewTable teamPreset={team} projectPreset={project} />
               <Link href={`/${team.slug}/${project.slug}/import-table`}>
                 <Button variant="ghost" className="">
                   <Import className="mr-2" />
