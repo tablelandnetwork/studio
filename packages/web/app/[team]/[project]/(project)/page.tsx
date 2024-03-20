@@ -39,25 +39,27 @@ export default async function Project({
   });
 
   return (
-    <main className="container flex flex-1 flex-col space-y-6 p-4">
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">
-          Project description
-        </h2>
-        <p className="ml-4 max-w-lg whitespace-pre-wrap leading-tight text-muted-foreground">
-          {project.description}
-        </p>
-      </div>
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">Project ID</h2>
-        <p className="ml-4 max-w-lg whitespace-pre-wrap leading-tight text-muted-foreground">
-          <HashDisplay
-            hash={project.id}
-            numCharacters={60}
-            copy={true}
-            hashDesc="project id"
-          />
-        </p>
+    <main className="container flex flex-col space-y-6 p-4">
+      <div className="flex flex-col p-4 md:flex-row">
+        <div className="min-w-1/2 space-y-1 p-4">
+          <h2 className="text-lg font-semibold tracking-tight">
+            Project description
+          </h2>
+          <p className="ml-4 whitespace-pre-wrap leading-tight text-muted-foreground">
+            {project.description}
+          </p>
+        </div>
+        <div className="space-y-1 p-4">
+          <h2 className="text-lg font-semibold tracking-tight">Project ID</h2>
+          <span className="ml-4 block min-w-72 whitespace-pre-wrap leading-tight text-muted-foreground">
+            <HashDisplay
+              hash={project.id}
+              numCharacters={60}
+              copy={true}
+              hashDesc="project id"
+            />
+          </span>
+        </div>
       </div>
       <div className="flex flex-1 flex-col space-y-1">
         <div className="flex items-center">

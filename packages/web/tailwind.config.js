@@ -15,6 +15,16 @@ module.exports = {
         "2xl": "1400px",
       },
     },
+    minWidth: ({ theme }) => ({
+      ...theme("spacing"),
+      full: "100%",
+      "1/4": "25%",
+      "1/2": "50%",
+      "3/4": "75%",
+      min: "min-content",
+      max: "max-content",
+      fit: "fit-content",
+    }),
     extend: {
       fontFamily: {
         sans: ["var(--font-source-sans-3)"],
