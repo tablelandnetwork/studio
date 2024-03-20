@@ -40,18 +40,18 @@ export default async function Project({
 
   return (
     <main className="container flex flex-col space-y-6 p-4">
-      <div className="flex flex-col p-4 md:flex-row">
-        <div className="min-w-1/2 space-y-1 p-4">
+      <div className="flex flex-col md:flex-row">
+        <div className="min-w-1/2 space-y-1 pr-8">
           <h2 className="text-lg font-semibold tracking-tight">
             Project description
           </h2>
-          <p className="ml-4 whitespace-pre-wrap leading-tight text-muted-foreground">
+          <p className="whitespace-pre-wrap leading-tight text-muted-foreground">
             {project.description}
           </p>
         </div>
-        <div className="space-y-1 p-4">
+        <div className="space-y-1">
           <h2 className="text-lg font-semibold tracking-tight">Project ID</h2>
-          <span className="ml-4 block min-w-72 whitespace-pre-wrap leading-tight text-muted-foreground">
+          <span className="block min-w-72 whitespace-pre-wrap leading-tight text-muted-foreground">
             <HashDisplay
               hash={project.id}
               numCharacters={60}
