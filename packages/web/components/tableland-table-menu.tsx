@@ -1,6 +1,7 @@
 "use client";
 
 import { Ellipsis } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import NewTableForm, { type NewTableFormProps } from "./new-table-form";
@@ -12,15 +13,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function TablelandTableMenu(
-  props: Omit<NewTableFormProps, "open" | "onOpenChange">,
+  props: Omit<NewTableFormProps, "open" | "onOpenChange" | "onSuccess">,
 ) {
   const [newTableFormOpen, setNewTableFormOpen] = useState(false);
+  const router = useRouter();
+
   return (
     <>
       <NewTableForm
         {...props}
         open={newTableFormOpen}
         onOpenChange={setNewTableFormOpen}
+        onSuccess={(team, project, table) => {
+          router.push(`/${team.slug}/${project.slug}/${table.slug}`);
+        }}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

@@ -41,6 +41,7 @@ export default function ProjectSwitcher({
   projects,
   onProjectSelected,
   onNewProjectSelected,
+  disabled,
 }: ProjectSwitcherProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -56,7 +57,7 @@ export default function ProjectSwitcher({
           <div>Select a project...</div>
         ))}
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild disabled={disabled}>
           <Button
             variant={variant === "navigation" ? "ghost" : "outline"}
             size={variant === "navigation" ? "sm" : "default"}

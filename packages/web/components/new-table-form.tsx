@@ -7,7 +7,6 @@ import {
   type schema,
 } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
@@ -16,6 +15,7 @@ import Columns from "./columns";
 import { FormRootMessage } from "./form-root";
 import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
+import TableConstraints from "./table-constraints";
 import {
   Form,
   FormControl,
@@ -81,6 +81,11 @@ export interface NewTableFormProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
+  onSuccess: (
+    team: schema.Team,
+    project: schema.Project,
+    table: schema.Table,
+  ) => void;
 }
 
 export default function NewTableForm({
@@ -91,6 +96,7 @@ export default function NewTableForm({
   open,
   onOpenChange,
   trigger,
+  onSuccess,
 }: NewTableFormProps) {
   const [openSheet, setOpenSheet] = useState(open ?? false);
   const [team, setTeam] = useState<schema.Team | undefined>(teamPreset);
@@ -99,12 +105,20 @@ export default function NewTableForm({
   );
   const [tableName, setTableName] = useState("");
   const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
-  const router = useRouter();
 
   const { data: teams } = api.teams.userTeams.useQuery();
   const { data: projects } = api.projects.teamProjects.useQuery(
     team ? { teamId: team.id } : skipToken,
   );
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      columns: [],
+    },
+  });
 
   useEffect(() => {
     if (!openSheet) {
@@ -113,7 +127,7 @@ export default function NewTableForm({
       form.reset();
     }
     onOpenChange?.(openSheet);
-  }, [openSheet, teamPreset, projectPreset, onOpenChange]);
+  }, [openSheet, teamPreset, projectPreset, onOpenChange, form]);
 
   useEffect(() => {
     setOpenSheet(open ?? false);
@@ -126,24 +140,14 @@ export default function NewTableForm({
   );
 
   const newTable = api.tables.newTable.useMutation({
-    onSuccess: () => {
+    onSuccess: (table) => {
       if (!team || !project) return;
-      router.refresh();
-      router.replace(`/${team.slug}/${project.slug}`);
+      onSuccess(team, project, table);
       setOpenSheet(false);
     },
     onError: (err: any) => {
       const error = ensureError(err);
       setError("root", { message: error.message });
-    },
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      columns: [],
     },
   });
 
@@ -236,7 +240,7 @@ export default function NewTableForm({
                 account and remove your data from our servers.
               </SheetDescription> */}
             </SheetHeader>
-            {(showSelectors ?? !team ?? !project) && (
+            {(showSelectors ?? !teamPreset ?? !projectPreset) && (
               <>
                 <div className="space-y-2">
                   <FormLabel>Team</FormLabel>
@@ -254,6 +258,7 @@ export default function NewTableForm({
                     projects={projects}
                     selectedProject={project}
                     onProjectSelected={setProject}
+                    disabled={!team}
                   />
                 </div>
               </>
@@ -266,6 +271,7 @@ export default function NewTableForm({
                   <FormLabel>Name</FormLabel>
                   <FormControl>
                     <InputWithCheck
+                      disabled={!project}
                       placeholder="Table name"
                       updateQuery={setTableName}
                       queryStatus={nameAvailableQuery}
@@ -301,15 +307,24 @@ export default function NewTableForm({
               <FormLabel>Columns</FormLabel>
               {schemaPreset ? (
                 <TableColumns columns={schemaPreset.columns} />
-              ) : null}
-              <Columns
-                columns={columnFields}
-                control={control}
-                register={register}
-                addColumn={addColumn}
-                removeColumn={removeColumn}
-              />
+              ) : (
+                <Columns
+                  columns={columnFields}
+                  control={control}
+                  register={register}
+                  addColumn={addColumn}
+                  removeColumn={removeColumn}
+                />
+              )}
             </div>
+            {schemaPreset?.tableConstraints && (
+              <div className="space-y-2">
+                <FormLabel>Table constraints</FormLabel>
+                <TableConstraints
+                  tableConstraints={schemaPreset?.tableConstraints}
+                />
+              </div>
+            )}
             <FormRootMessage />
             <Button
               type="submit"
