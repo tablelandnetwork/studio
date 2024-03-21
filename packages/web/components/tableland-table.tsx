@@ -1,4 +1,4 @@
-import { Database, type Schema, helpers } from "@tableland/sdk";
+import { Database, Validator, type Schema, helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
 import TimeAgo from "javascript-time-ago";
@@ -63,7 +63,10 @@ export default async function TablelandTable({
   const blockExplorer = blockExplorers.get(chainId);
   const openSeaLink = openSeaLinks.get(chainId);
 
-  const tbl = new Database({ baseUrl: helpers.getBaseUrl(chainId) });
+  const baseUrl = helpers.getBaseUrl(chainId);
+  const tbl = new Database({ baseUrl });
+  const validator = new Validator({ baseUrl });
+
   const data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   const formattedData = objectToTableData(data.results);
   const columns: Array<ColumnDef<unknown>> = data.results.length
@@ -72,12 +75,13 @@ export default async function TablelandTable({
         header: col,
       }))
     : [];
+  const table = await validator.getTableById({ chainId, tableId: tokenId });
 
   return (
     <div className="flex-1 space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-medium">{displayName}</h1>
-        <TablelandTableMenu />
+        <TablelandTableMenu schemaPreset={table.schema} />
         {/* <Select>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Staging" />
