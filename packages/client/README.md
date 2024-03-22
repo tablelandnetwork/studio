@@ -1,6 +1,12 @@
-## Overview
+# `@tableland/studio-client`
 
-This is an http client setup to connect to the tRPC server that exists in the `api` package of this repo.
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftablelandnetwork%2Fstudio%2Fmain%2Fpackages%2Fclient%2Fpackage.json&query=%24.version&label=Version)](./package.json)
+
+> HTTP client for the Studio API.
+
+## Background
+
+This is an HTTP client set up to connect to the tRPC server that exists in the `api` package of this repo.
 
 ## Install
 
@@ -13,10 +19,12 @@ npm install @tableland/studio-client
 ## Usage
 
 This package is fairly small and it only exports two functions:
+
 - `api`: a function that takes a config Object and returns an api Object that maps one-to-one to the tRPC endpoints.
-- `studioAliases`: a function that takes an environment id and apiUrl, and returns a Tableland SDK aliases Object that can be used to setup a Database instance for a given Project Environment.  If you're not familiar with the SDK's concept of aliases, more info on them can be found in the [docs](https://docs.tableland.xyz/sdk/database/aliases).  They make using Tableland a D1 compatible ORM seamless.
+- `studioAliases`: a function that takes an environment id and apiUrl, and returns a Tableland SDK aliases Object that can be used to setup a Database instance for a given Project Environment. If you're not familiar with the SDK's concept of aliases, more info on them can be found in the [docs](https://docs.tableland.xyz/sdk/database/aliases). They make using Tableland a D1 compatible ORM seamless.
 
 Example usage of `api`:
+
 ```
 import { api } from "@tableland/studio-client";
 
@@ -34,6 +42,7 @@ const projects = await studioRpc.projects.teamProjects.query({ teamId: "123abc" 
 ```
 
 Example usage of `studioAliases`:
+
 ```
 import { studioAliases } from "@tableland/studio-client";
 
@@ -55,6 +64,18 @@ const results = db.prepare("select * from students;").all();
 console.log(results);
 ```
 
+## Development
+
+See the `web` package for how the client is used in the context of Studio.
+
+## Contributing
+
+PRs accepted. Studio is still under initial development, so if you are interested in helping out, feel free to connect on Discord:
+[https://tableland.xyz/discord](https://tableland.xyz/discord)
+
+Small note: If editing the README, please conform to the
+[standard-readme](https://github.com/RichardLitt/standard-readme) specification.
+
 ## License
 
-MIT AND Apache-2.0, © 2021-2023 Tableland Network Contributors
+MIT AND Apache-2.0, © 2021-2024 Tableland Network Contributors
