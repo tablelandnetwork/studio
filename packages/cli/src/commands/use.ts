@@ -1,3 +1,4 @@
+import yargs from "yargs";
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
@@ -7,10 +8,14 @@ import {
   helpers,
 } from "../utils.js";
 
+type Yargs = typeof yargs;
+
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "use [context] [id]";
 export const desc =
   "use the given context id for all    ensuing commands. context can be one of (api, chain, team, project, or  provider). ";
+
+export const builder = function (args: Yargs) {};
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,

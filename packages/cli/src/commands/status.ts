@@ -1,9 +1,14 @@
+import yargs from "yargs";
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import { logger, FileStore, helpers } from "../utils.js";
 
+type Yargs = typeof yargs;
+
 export const command = "status";
 export const desc = "show the status of the current session";
+
+export const builder = function (args: Yargs) {};
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,

@@ -1,3 +1,4 @@
+import yargs from "yargs";
 import { createInterface } from "readline";
 import type { Arguments } from "yargs";
 import { Wallet, type Signer } from "ethers";
@@ -15,9 +16,13 @@ import {
   normalizePrivateKey,
 } from "../utils.js";
 
+type Yargs = typeof yargs;
+
 export const command = "query";
 export const desc =
   "open a shell to run sql statements  against your selected project";
+
+export const builder = function (args: Yargs) {};
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,

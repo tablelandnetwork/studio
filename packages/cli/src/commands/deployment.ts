@@ -1,10 +1,10 @@
-import type { Arguments } from "yargs";
 // Yargs doesn't seem to export the type of `yargs`.  This causes a conflict
 // between linting and building. Lint complains that yargs is only imported
 // for it's type, and build complains that you cannot use namespace as a type.
 // Solving this by disabling lint here.
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import yargs from "yargs";
+import type { Arguments } from "yargs";
 import chalk from "chalk";
 import { helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
