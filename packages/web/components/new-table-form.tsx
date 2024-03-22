@@ -17,6 +17,13 @@ import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
 import TableConstraints from "./table-constraints";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -31,13 +38,6 @@ import TeamSwitcher from "@/components/team-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { ensureError } from "@/lib/ensure-error";
 import TableColumns from "@/components/table-columns";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 const formSchema = z.object({
   name: z
@@ -106,9 +106,11 @@ export default function NewTableForm({
   const [tableName, setTableName] = useState("");
   const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
 
-  const { data: teams } = api.teams.userTeams.useQuery();
+  const { data: teams } = api.teams.userTeams.useQuery(
+    !teamPreset ? undefined : skipToken,
+  );
   const { data: projects } = api.projects.teamProjects.useQuery(
-    team ? { teamId: team.id } : skipToken,
+    !projectPreset && team ? { teamId: team.id } : skipToken,
   );
 
   const form = useForm<z.infer<typeof formSchema>>({

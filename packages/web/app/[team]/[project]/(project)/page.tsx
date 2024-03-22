@@ -1,9 +1,10 @@
 import { helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import { Import, PencilRuler, Rocket, Table2 } from "lucide-react";
+import { PencilRuler, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import NewTable from "./_components/new-table";
+import ImportTable from "./_components/import-table";
 import { api } from "@/trpc/server";
 import HashDisplay from "@/components/hash-display";
 import {
@@ -13,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default async function Project({
   params,
@@ -25,6 +25,10 @@ export default async function Project({
     teamId: team.id,
     slug: params.project,
   });
+  const envs = await cache(api.environments.projectEnvironments)({
+    projectId: project.id,
+  });
+
   const tables = await cache(api.tables.projectTables)({
     projectId: project.id,
   });
@@ -68,12 +72,13 @@ export default async function Project({
           {authorized && (
             <div className="ml-auto">
               <NewTable teamPreset={team} projectPreset={project} />
-              <Link href={`/${team.slug}/${project.slug}/import-table`}>
-                <Button variant="ghost" className="">
-                  <Import className="mr-2" />
-                  Import Table
-                </Button>
-              </Link>
+              {envs.length && (
+                <ImportTable
+                  teamPreset={team}
+                  projectPreset={project}
+                  envPreset={envs[0]}
+                />
+              )}
             </div>
           )}
         </div>

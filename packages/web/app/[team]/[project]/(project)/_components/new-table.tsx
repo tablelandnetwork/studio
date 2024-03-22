@@ -20,7 +20,7 @@ export default function NewTable(
           New Table
         </Button>
       }
-      onSuccess={(team, project) => {
+      onSuccess={() => {
         router.refresh();
       }}
       {...props}

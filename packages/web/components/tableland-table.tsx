@@ -79,7 +79,11 @@ export default async function TablelandTable({
     <div className="flex-1 space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-medium">{displayName}</h1>
-        <TablelandTableMenu schemaPreset={table.schema} />
+        <TablelandTableMenu
+          schemaPreset={table.schema}
+          chainIdPreset={chainId}
+          tableIdPreset={tokenId}
+        />
         {/* <Select>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Staging" />
