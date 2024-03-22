@@ -1,6 +1,14 @@
-## Overview
+# `@tableland/studio-cli`
 
-A Tableland Studio command line tool.  The full up to date docs can be found here: https://docs.tableland.xyz/studio/cli
+[![License: MIT AND Apache-2.0](https://img.shields.io/badge/License-MIT%20AND%20Apache--2.0-blue.svg)](./LICENSE)
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftablelandnetwork%2Fstudio%2Fmain%2Fpackages%2Fcli%2Fpackage.json&query=%24.version&label=Version)](./package.json)
+[![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg)](https://github.com/RichardLitt/standard-readme)
+
+> A Tableland Studio command line tool.
+
+## Background
+
+The Studio command line lets you interact with your Studio teams, projects, and tables. The full, up-to-date docs can be found: [here](https://docs.tableland.xyz/studio/cli).
 
 ## Install
 
@@ -12,9 +20,10 @@ npm install -g @tableland/studio-cli
 
 ## Usage
 
-First you will need a studio account, which you can create for free here: https://studio.tableland.xyz/
+First, you will need a Studio account, which you can create for free here: [https://studio.tableland.xyz](https://studio.tableland.xyz)
 
 Once you have an account read the output of the help command:
+
 ```shell
 $ npx studio --help
 studio <command>
@@ -57,16 +66,19 @@ Options:
 ```
 
 Your first step is probably going to be either running the `init` command (`npx studio init`), or to login (`npx studio login --privateKey <include the private key you used to create your studio account>`).
-Note that the `init` command will ask you some questions, and potentially store your private key in the `.tablelandrc.json` [config file](https://docs.tableland.xyz/studio/cli#config).  If you pass your private key to the `login` command we won't store your private key anywhere.
+Note that the `init` command will ask you some questions, and potentially store your private key in the `.tablelandrc.json` [config file](https://docs.tableland.xyz/studio/cli#config). If you pass your private key to the `login` command we won't store your private key anywhere.
 If you plan to submit blockchain transactions via the cli you will probably want to store your private key in the config file, if you don't plan to send transactions you only need your private key to login, and there's no need to store it in the config file.
 
-At this point you are ready to use all the cli commands. Refer to the [docs](https://docs.tableland.xyz/studio/cli) for the most recent usage recommendations.  If you have any problems you can open an issue here, or chat with us in [Discord](https://discord.gg/kjgrnPhs).
+At this point you are ready to use all the cli commands. Refer to the [docs](https://docs.tableland.xyz/studio/cli) for the most recent usage recommendations. If you have any problems you can open an issue here, or chat with us in [Discord](https://discord.gg/kjgrnPhs).
 
 ## Contributing
 
-Studio is still under initial development, if you are interested in helping out feel free to connect on discord
-https://discord.gg/kjgrnPhs
+PRs accepted. Studio is still under initial development, so if you are interested in helping out, feel free to connect on Discord:
+[https://tableland.xyz/discord](https://tableland.xyz/discord)
+
+Small note: If editing the README, please conform to the
+[standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 
 ## License
 
-MIT AND Apache-2.0, © 2021-2022 Tableland Network Contributors
+MIT AND Apache-2.0, © 2021-2024 Tableland Network Contributors
