@@ -1,6 +1,7 @@
 import { type SelectProps } from "@radix-ui/react-select";
 import { supportedChains } from "@tableland/studio-chains";
 import { type Chain } from "viem/chains";
+import { forwardRef } from "react";
 import {
   Select,
   SelectContent,
@@ -41,58 +42,60 @@ type Props = Omit<SelectProps, "onValueChange"> & {
   showAll?: boolean;
 };
 
-export default function ChainSelector({
-  onValueChange = () => {},
-  showAll = false,
-  ...rest
-}: Props) {
-  function handleOnValueChange(val: string) {
-    if (val === "mainnets" || val === "testnets") {
-      onValueChange(val);
-    } else {
-      const num = parseInt(val, 10);
-      if (isNaN(num)) return;
-      onValueChange(num);
+const ChainSelector = forwardRef<React.ElementRef<typeof SelectTrigger>, Props>(
+  ({ onValueChange = () => {}, showAll = false, ...rest }: Props, ref) => {
+    function handleOnValueChange(val: string) {
+      if (val === "mainnets" || val === "testnets") {
+        onValueChange(val);
+      } else {
+        const num = parseInt(val, 10);
+        if (isNaN(num)) return;
+        onValueChange(num);
+      }
     }
-  }
 
-  return (
-    <Select
-      {...rest}
-      onValueChange={handleOnValueChange}
-      defaultValue={showAll ? "testnets" : undefined}
-    >
-      <SelectTrigger className="w-fit gap-x-2">
-        <SelectValue placeholder="Select chain" />
-      </SelectTrigger>
-      <SelectContent>
-        <ScrollArea className="h-[20rem]">
-          {showAll && (
-            <>
-              <SelectItem key="mainnets" value="mainnets">
-                All mainnets
-              </SelectItem>
-              <SelectItem key="testnets" value="testnets">
-                All testnets
-              </SelectItem>
-            </>
-          )}
-          {groupedChains.map((group) => {
-            return group[1].length ? (
-              <div key={group[0]}>
-                <p className="px-2 pt-2 text-xs text-muted-foreground">
-                  {group[0]}
-                </p>
-                {group[1].map((chain) => (
-                  <SelectItem key={chain.name} value={`${chain.id}`}>
-                    {chain.name} ({chain.id})
-                  </SelectItem>
-                ))}
-              </div>
-            ) : null;
-          })}
-        </ScrollArea>
-      </SelectContent>
-    </Select>
-  );
-}
+    return (
+      <Select
+        {...rest}
+        onValueChange={handleOnValueChange}
+        defaultValue={showAll ? "testnets" : undefined}
+      >
+        <SelectTrigger className="w-fit gap-x-2" ref={ref}>
+          <SelectValue placeholder="Select chain" />
+        </SelectTrigger>
+        <SelectContent>
+          <ScrollArea className="h-[20rem]">
+            {showAll && (
+              <>
+                <SelectItem key="mainnets" value="mainnets">
+                  All mainnets
+                </SelectItem>
+                <SelectItem key="testnets" value="testnets">
+                  All testnets
+                </SelectItem>
+              </>
+            )}
+            {groupedChains.map((group) => {
+              return group[1].length ? (
+                <div key={group[0]}>
+                  <p className="px-2 pt-2 text-xs text-muted-foreground">
+                    {group[0]}
+                  </p>
+                  {group[1].map((chain) => (
+                    <SelectItem key={chain.name} value={`${chain.id}`}>
+                      {chain.name} ({chain.id})
+                    </SelectItem>
+                  ))}
+                </div>
+              ) : null;
+            })}
+          </ScrollArea>
+        </SelectContent>
+      </Select>
+    );
+  },
+);
+
+ChainSelector.displayName = "ChainSelector";
+
+export default ChainSelector;

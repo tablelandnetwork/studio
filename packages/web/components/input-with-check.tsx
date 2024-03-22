@@ -20,7 +20,7 @@ export type Props = InputProps & {
   errorMessage?: string;
 };
 
-const InputWithCheck = forwardRef<HTMLDivElement, Props>(
+const InputWithCheck = forwardRef<HTMLInputElement, Props>(
   (
     {
       updateQuery,
@@ -86,7 +86,7 @@ const InputWithCheck = forwardRef<HTMLDivElement, Props>(
 
     return (
       <div className="flex items-center space-x-2">
-        <Input {...props} onChange={handleInputChange} />
+        <Input {...props} onChange={handleInputChange} ref={ref} />
         {statusComponent()}
       </div>
     );
