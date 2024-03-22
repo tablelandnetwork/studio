@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import NewTableForm, { type NewTableFormProps } from "./new-table-form";
+import ImportTableForm, { type ImportTableFormProps } from "./import-table-form";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,9 +14,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function TablelandTableMenu(
-  props: Omit<NewTableFormProps, "open" | "onOpenChange" | "onSuccess">,
+  props: Omit<NewTableFormProps, "open" | "onOpenChange" | "onSuccess"> &
+    Omit<ImportTableFormProps, "open" | "onOpenChange" | "onSuccess">,
 ) {
   const [newTableFormOpen, setNewTableFormOpen] = useState(false);
+  const [importTableFormOpen, setImportTableFormOpen] = useState(false);
   const router = useRouter();
 
   return (
@@ -28,6 +31,16 @@ export default function TablelandTableMenu(
           router.push(`/${team.slug}/${project.slug}/${table.slug}`);
         }}
       />
+      <ImportTableForm
+        {...props}
+        open={importTableFormOpen}
+        onOpenChange={setImportTableFormOpen}
+        onSuccess={(team, project, table, env) => {
+          router.push(
+            `/${team.slug}/${project.slug}/deployments/${env.slug}/${table.slug}`,
+          );
+        }}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -35,7 +48,7 @@ export default function TablelandTableMenu(
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onSelect={() => {}}>
+          <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
             Import into Studio project
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setNewTableFormOpen(true)}>
