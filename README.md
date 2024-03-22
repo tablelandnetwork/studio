@@ -2,7 +2,6 @@
 
 [![Review](https://github.com/tablelandnetwork/studio/actions/workflows/review.yml/badge.svg)](https://github.com/tablelandnetwork/studio/actions/workflows/review.yml)
 [![Test](https://github.com/tablelandnetwork/studio/actions/workflows/test.yml/badge.svg)](https://github.com/tablelandnetwork/studio/actions/workflows/test.yml)
-[![License: MIT AND Apache-2.0](https://img.shields.io/badge/License-MIT%20AND%20Apache--2.0-blue.svg)](./LICENSE)
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg)](https://github.com/RichardLitt/standard-readme)
 
 > Build projects on Tableland with the Studio web app and accompanying CLI tool.
