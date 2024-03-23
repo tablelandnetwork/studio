@@ -56,7 +56,7 @@ export default async function Project({
         </div>
         <div className="space-y-1">
           <h2 className="text-lg font-semibold tracking-tight">Project ID</h2>
-          <span className="min-w-72 block whitespace-pre-wrap leading-tight text-muted-foreground">
+          <span className="block min-w-72 whitespace-pre-wrap leading-tight text-muted-foreground">
             <HashDisplay
               hash={project.id}
               numCharacters={60}

@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import NewTableForm, { type NewTableFormProps } from "./new-table-form";
-import ImportTableForm, { type ImportTableFormProps } from "./import-table-form";
+import ImportTableForm, {
+  type ImportTableFormProps,
+} from "./import-table-form";
 import {
   DropdownMenu,
   DropdownMenuContent,
