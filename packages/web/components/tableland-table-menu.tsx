@@ -51,10 +51,10 @@ export default function TablelandTableMenu(
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
-            Import into Studio project
+            Import table into Studio project
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setNewTableFormOpen(true)}>
-            Use table schema
+            Use table schema in Studio project
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
