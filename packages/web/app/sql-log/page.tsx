@@ -155,7 +155,7 @@ export default async function TxnPage({
         <label className="text-sm uppercase text-muted-foreground">
           Statement:
         </label>
-        <pre className="whitespace-break-spaces rounded-sm border border-gray-300 bg-gray-100 p-4">
+        <pre className="whitespace-break-spaces rounded-sm border p-4">
           {log.statement}
         </pre>
       </div>
@@ -164,7 +164,7 @@ export default async function TxnPage({
           <label className="text-sm uppercase text-muted-foreground">
             Error:
           </label>
-          <pre className="whitespace-break-spaces rounded-sm border border-gray-300 bg-gray-100 p-4">
+          <pre className="whitespace-break-spaces rounded-sm border p-4">
             {log.error}
           </pre>
         </div>

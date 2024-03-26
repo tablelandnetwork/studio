@@ -71,7 +71,7 @@ export default function SQLLogs({
           <div className="mb-4" key={`${log.txHash}-${log.eventIndex}`}>
             <Link
               className={cn(
-                "flex items-center rounded-sm border border-gray-200 p-2 transition-all",
+                "flex items-center rounded-sm border p-2 transition-all",
                 log.error ? "bg-red-200 hover:bg-red-300" : "hover:bg-accent",
               )}
               href={`/sql-log?chainId=${chain}&txnHash=${log.txHash}&index=${log.eventIndex}`}
