@@ -1,6 +1,12 @@
-import { createTRPCContext as createContext } from "@tableland/studio-api";
+import {
+  SessionData,
+  createTRPCContext as createContext,
+  sessionOptions,
+} from "@tableland/studio-api";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { apiRouter } from "@/lib/api-router";
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
 
 // TODO: Understand why this should be set to edge and figure out why the crypto module is not available in edge. Might need to upgrade nextjs.
 // export const runtime = "edge";
@@ -30,8 +36,13 @@ const handler = async (req: Request) => {
     router: apiRouter,
     req,
     createContext: async () => {
+      const session = await getIronSession<SessionData>(
+        cookies(),
+        sessionOptions,
+      );
       const context = await createContext({
         headers: req.headers,
+        session,
       });
       return context;
     },
