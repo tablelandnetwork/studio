@@ -2,8 +2,7 @@
 
 import { type Auth } from "@tableland/studio-api";
 import { useAtom } from "jotai";
-import { LogOut, Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAccount, useConnect } from "wagmi";
@@ -21,13 +20,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuGroup,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -59,8 +51,6 @@ export default function Profile({
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-
-  const { theme, setTheme } = useTheme();
 
   // Fetch user when:
   useEffect(() => {
@@ -164,34 +154,6 @@ export default function Profile({
                     </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <Sun className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                      <Moon className="absolute mr-2 h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                      Theme
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent>
-                        <DropdownMenuRadioGroup
-                          value={theme}
-                          onValueChange={setTheme}
-                        >
-                          <DropdownMenuRadioItem value="light">
-                            Light
-                          </DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="dark">
-                            Dark
-                          </DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="system">
-                            System
-                          </DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => logout.mutate()}>
                   <LogOut className="mr-2 h-4 w-4" />
