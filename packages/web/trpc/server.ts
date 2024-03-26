@@ -1,7 +1,13 @@
 import { cookies, headers } from "next/headers";
 import { cache } from "react";
-import { createCaller, createTRPCContext } from "@tableland/studio-api";
+import {
+  SessionData,
+  createCaller,
+  createTRPCContext,
+  sessionOptions,
+} from "@tableland/studio-api";
 import { apiRouter } from "@/lib/api-router";
+import { getIronSession } from "iron-session";
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -11,8 +17,11 @@ const createContext = cache(async () => {
   const heads = new Headers(headers());
   heads.set("x-trpc-source", "rsc");
 
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+
   return await createTRPCContext({
     headers: heads,
+    session,
   });
 });
 

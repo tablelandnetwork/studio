@@ -9,8 +9,10 @@ import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
 import {
+  SessionData,
   appRouter,
   createTRPCContext as createContext,
+  sessionOptions,
 } from "@tableland/studio-api";
 import { init } from "@tableland/studio-store";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
@@ -23,6 +25,7 @@ import {
   TEST_TIMEOUT_FACTOR,
   TEST_VALIDATOR_URL,
 } from "./utils";
+import { getIronSession } from "iron-session";
 
 type Provider = ReturnType<typeof getDefaultProvider>;
 type Store = ReturnType<typeof init>;
@@ -199,6 +202,12 @@ async function startStudioApi({ store }: { store: Store }) {
         });
       };
 
+      const session = await getIronSession<SessionData>(
+        req,
+        res,
+        sessionOptions,
+      );
+
       const response = await fetchRequestHandler({
         endpoint: "/api/trpc",
         router: apiRouter,
@@ -206,6 +215,7 @@ async function startStudioApi({ store }: { store: Store }) {
         createContext: async () => {
           const context = await createContext({
             headers: req.headers,
+            session,
           });
           return context;
         },
