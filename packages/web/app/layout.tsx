@@ -9,6 +9,7 @@ import Script from "next/script";
 import { cache } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import Footer from "./_components/footer";
+import { ThemeSwitcher } from "./_components/theme-switcher";
 import { api } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
 import WagmiProvider from "@/components/wagmi-provider";
@@ -94,6 +95,7 @@ export default async function RootLayout({
                     <div className="ml-auto flex items-center space-x-4">
                       <NavPrimary />
                       <Profile />
+                      <ThemeSwitcher />
                     </div>
                   </header>
                   <div className="flex flex-1 flex-col">{children}</div>
