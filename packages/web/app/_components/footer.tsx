@@ -4,7 +4,7 @@ import logo from "@/public/white.svg";
 
 export default function Footer() {
   return (
-    <footer className="text-neonblue bg-black py-10 font-light text-white">
+    <footer className="text-neonblue bg-foreground py-10 font-light text-white dark:border-t dark:bg-background">
       <nav className="container mx-auto flex flex-col items-center px-6 md:px-9 lg:px-16 xl:px-20">
         <div className="grid w-full grid-cols-1 gap-y-10 lg:grid-cols-3">
           <div className="mt-1">

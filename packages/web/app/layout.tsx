@@ -20,6 +20,7 @@ import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 import { TimeAgoProvider } from "@/components/time-ago-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 
 TimeAgo.addDefaultLocale(en);
 
@@ -76,23 +77,30 @@ export default async function RootLayout({
           >
             <body className="flex min-h-screen flex-col">
               <Hotjar></Hotjar>
-              <TRPCReactProvider headers={headers()}>
-                <header className="flex items-center justify-between px-4 py-3">
-                  <div className="flex flex-row items-center gap-x-2">
-                    <Link href="/">
-                      <MesaSvg />
-                    </Link>
-                    <PrimaryHeaderItem teams={teams} />
-                  </div>
-                  <div className="ml-auto flex items-center space-x-4">
-                    <NavPrimary />
-                    <Profile />
-                  </div>
-                </header>
-                <div className="flex flex-1 flex-col">{children}</div>
-                <Footer />
-                <Toaster />
-              </TRPCReactProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <TRPCReactProvider headers={headers()}>
+                  <header className="flex items-center justify-between px-4 py-3">
+                    <div className="flex flex-row items-center gap-x-2">
+                      <Link href="/">
+                        <MesaSvg />
+                      </Link>
+                      <PrimaryHeaderItem teams={teams} />
+                    </div>
+                    <div className="ml-auto flex items-center space-x-4">
+                      <NavPrimary />
+                      <Profile />
+                    </div>
+                  </header>
+                  <div className="flex flex-1 flex-col">{children}</div>
+                  <Footer />
+                  <Toaster />
+                </TRPCReactProvider>
+              </ThemeProvider>
               <Script
                 id="maze"
                 strategy="beforeInteractive"
