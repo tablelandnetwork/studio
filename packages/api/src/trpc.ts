@@ -2,8 +2,8 @@ import { type Store } from "@tableland/studio-store";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod";
-import { IronSession } from "iron-session";
-import { type SessionData, sessionOptions } from "./session-data";
+import { type IronSession } from "iron-session";
+import { type SessionData } from "./session-data";
 
 /**
  * 1. CONTEXT

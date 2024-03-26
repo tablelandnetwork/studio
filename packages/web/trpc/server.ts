@@ -1,13 +1,13 @@
 import { cookies, headers } from "next/headers";
 import { cache } from "react";
 import {
-  SessionData,
+  type SessionData,
   createCaller,
   createTRPCContext,
   sessionOptions,
 } from "@tableland/studio-api";
-import { apiRouter } from "@/lib/api-router";
 import { getIronSession } from "iron-session";
+import { apiRouter } from "@/lib/api-router";
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when

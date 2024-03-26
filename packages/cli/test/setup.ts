@@ -9,7 +9,7 @@ import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
 import {
-  SessionData,
+  type SessionData,
   appRouter,
   createTRPCContext as createContext,
   sessionOptions,
@@ -18,6 +18,7 @@ import { init } from "@tableland/studio-store";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Wallet, getDefaultProvider } from "ethers";
 import { after, before } from "mocha";
+import { getIronSession } from "iron-session";
 import {
   TEST_API_BASE_URL,
   TEST_API_PORT,
@@ -25,7 +26,6 @@ import {
   TEST_TIMEOUT_FACTOR,
   TEST_VALIDATOR_URL,
 } from "./utils";
-import { getIronSession } from "iron-session";
 
 type Provider = ReturnType<typeof getDefaultProvider>;
 type Store = ReturnType<typeof init>;
