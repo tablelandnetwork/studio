@@ -8,13 +8,14 @@ import { createHash } from "crypto";
 import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
-import { appRouter, createTRPCContext } from "@tableland/studio-api";
+import {
+  appRouter,
+  createTRPCContext as createContext,
+} from "@tableland/studio-api";
 import { init } from "@tableland/studio-store";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Wallet, getDefaultProvider } from "ethers";
 import { after, before } from "mocha";
-import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import { RequestCookiesAdapter } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import {
   TEST_API_BASE_URL,
   TEST_API_PORT,
@@ -183,10 +184,8 @@ async function startStudioApi({ store }: { store: Store }) {
     // TODO: My current solution to running the api with two adapters is to map
     //       a Node.js request and response to and from a Fetch request and response
     try {
-      const headers = new Headers(req.headers);
-
       req.url = `${TEST_API_BASE_URL}${req.url as string}`;
-      req.headers = headers;
+      req.headers = new Headers(req.headers);
       req.text = async function () {
         return await new Promise(function (resolve, reject) {
           const body: any[] = [];
@@ -200,19 +199,16 @@ async function startStudioApi({ store }: { store: Store }) {
         });
       };
 
-      const cookies = RequestCookiesAdapter.seal(
-        new RequestCookies(req.headers),
-      );
-
       const response = await fetchRequestHandler({
         endpoint: "/api/trpc",
         router: apiRouter,
         req,
-        createContext: async () =>
-          await createTRPCContext({
-            cookies,
+        createContext: async () => {
+          const context = await createContext({
             headers: req.headers,
-          }),
+          });
+          return context;
+        },
       });
 
       const responseHeaders = Object.fromEntries(response.headers.entries());
