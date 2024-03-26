@@ -2,8 +2,8 @@ import { type Store } from "@tableland/studio-store";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod";
-import { type ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { getIronSession } from "iron-session";
+import { cookies } from "next/headers";
 import { type SessionData, sessionOptions } from "./session-data";
 
 /**
@@ -18,15 +18,11 @@ import { type SessionData, sessionOptions } from "./session-data";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: {
-  headers: Headers;
-  cookies: ReadonlyRequestCookies;
-}) => {
-  const session = await getIronSession<SessionData>(
-    opts.cookies,
-    sessionOptions,
-  );
-  const source = opts.headers.get("x-trpc-source") ?? "unknown";
+
+export const createTRPCContext = async ({ headers }: { headers: Headers }) => {
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+
+  const source = headers.get("x-trpc-source") ?? "unknown";
 
   console.log(
     ">>> tRPC Request from",
