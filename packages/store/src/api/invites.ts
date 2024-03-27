@@ -61,12 +61,12 @@ export function invites(
         .get();
       if (!invite) return undefined;
       const { sealed, ...rest } = invite;
-      const { email } = await unsealData(sealed, {
+      const { email } = await unsealData<{ email: string }>(sealed, {
         password: dataSealPass,
       });
       return {
         ...rest,
-        email: email as string,
+        email,
       };
     },
 
@@ -118,12 +118,12 @@ export function invites(
       const invites = await Promise.all(
         invitesSealed.map(
           async ({ inviter, invite: { sealed, ...rest }, claimedBy }) => {
-            const { email } = await unsealData(sealed, {
+            const { email } = await unsealData<{ email: string }>(sealed, {
               password: dataSealPass,
             });
             return {
               inviter,
-              invite: { ...rest, email: email as string },
+              invite: { ...rest, email },
               claimedBy,
             };
           },
