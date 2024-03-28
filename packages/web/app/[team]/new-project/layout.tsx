@@ -1,4 +1,5 @@
 import NavNewProject from "@/components/nav-new-project";
+import SubNavHeader from "@/components/sub-nav-header";
 
 export default async function NewProjectLayout({
   children,
@@ -7,9 +8,9 @@ export default async function NewProjectLayout({
 }) {
   return (
     <div>
-      <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
+      <SubNavHeader>
         <NavNewProject />
-      </header>
+      </SubNavHeader>
       {children}
     </div>
   );

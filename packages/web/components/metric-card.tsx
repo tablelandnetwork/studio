@@ -25,7 +25,7 @@ const MetricCard = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <Card
     ref={ref}
-    className={cn("rounded-sm shadow-sm", className)}
+    className={cn("rounded-md shadow-sm", className)}
     {...props}
   />
 ));

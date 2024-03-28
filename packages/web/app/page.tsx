@@ -126,7 +126,7 @@ export default async function Page() {
               <Link
                 key={team.id}
                 href={`/${team.slug}`}
-                className="flex grow basis-1 flex-col items-start gap-2 rounded-lg border p-4 text-left text-sm transition-all hover:bg-accent"
+                className="flex grow basis-1 flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
               >
                 <div className="flex w-full flex-col gap-4">
                   <div className="flex items-center gap-2">
@@ -161,7 +161,7 @@ export default async function Page() {
                   <Link
                     key={item.project.id}
                     href={`/${item.team.slug}/${item.project.slug}`}
-                    className="flex grow basis-1 flex-col items-start gap-2 rounded-lg border p-4 text-left text-sm transition-all hover:bg-accent"
+                    className="flex grow basis-1 flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
                   >
                     <div className="flex w-full flex-col gap-4">
                       <div className="flex items-center gap-2">

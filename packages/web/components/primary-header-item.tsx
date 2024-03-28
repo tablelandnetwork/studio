@@ -22,9 +22,7 @@ export default function PrimaryHeaderItem({
 
   if (!teams.length || !team.data) {
     return (
-      <h1 className="text-2xl font-normal uppercase text-fuchsia-800">
-        Studio
-      </h1>
+      <h1 className="text-2xl font-normal uppercase text-[#6358dc]">Studio</h1>
     );
   }
 
