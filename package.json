@@ -18,7 +18,8 @@
     "prettier": "lerna run prettier",
     "prettier:fix": "lerna run prettier:fix",
     "format": "npm run prettier:fix && npm run lint:fix",
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "clean": "lerna run clean"
   },
   "devDependencies": {
     "@tableland/local": "^2.4.1",
