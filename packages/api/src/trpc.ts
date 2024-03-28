@@ -1,10 +1,66 @@
+import {
+  type IncomingHttpHeaders,
+  type IncomingMessage,
+  type ServerResponse,
+} from "http";
+import { type CookieSerializeOptions } from "cookie";
 import { type Store } from "@tableland/studio-store";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod";
-import { type IronSession } from "iron-session";
-import { type SessionData } from "./session-data";
+import { getIronSession } from "iron-session";
+import { type SessionData, sessionOptions } from "./session-data";
 
+// TODO: the types and interfaces below are from iron-session, but they aren't exported.
+//      maybe we can open a PR to export them, or maybe there's a better way to get them?
+
+/**
+ * {@link https://wicg.github.io/cookie-store/#dictdef-cookielistitem CookieListItem}
+ * as specified by W3C.
+ */
+interface CookieListItem
+  extends Pick<
+    CookieSerializeOptions,
+    "domain" | "path" | "sameSite" | "secure"
+  > {
+  /** A string with the name of a cookie. */
+  name: string;
+  /** A string containing the value of the cookie. */
+  value: string;
+  /** A number of milliseconds or Date interface containing the expires of the cookie. */
+  expires?: CookieSerializeOptions["expires"] | number;
+}
+/**
+ * Superset of {@link CookieListItem} extending it with
+ * the `httpOnly`, `maxAge` and `priority` properties.
+ */
+type ResponseCookie = CookieListItem &
+  Pick<CookieSerializeOptions, "httpOnly" | "maxAge" | "priority">;
+/**
+ * The high-level type definition of the .get() and .set() methods
+ * of { cookies() } from "next/headers"
+ */
+interface CookieStore {
+  get: (name: string) =>
+    | {
+        name: string;
+        value: string;
+      }
+    | undefined;
+  set: {
+    (name: string, value: string, cookie?: Partial<ResponseCookie>): void;
+    (options: ResponseCookie): void;
+  };
+}
+
+// To get the session we want to allow callers to provided cookies or a
+// req+res set. This allows flexibility in TRPC adapter usage.
+export interface GetSessionArgs {
+  headers?: Headers | IncomingHttpHeaders;
+  cookies?: CookieStore;
+  req?: IncomingMessage | Request;
+  res?: Response | ServerResponse;
+}
 /**
  * 1. CONTEXT
  *
@@ -18,14 +74,52 @@ import { type SessionData } from "./session-data";
  * @see https://trpc.io/docs/server/context
  */
 
-export const createTRPCContext = async ({
-  headers,
-  session,
-}: {
-  headers: Headers;
-  session: IronSession<SessionData>;
-}) => {
-  const source = headers.get("x-trpc-source") ?? "unknown";
+export const createTRPCContext = async (args: GetSessionArgs) => {
+  const session = await getSession(args);
+
+  logTrpcSource(args.headers, session);
+
+  return { session };
+};
+
+// Determine if caller has given cookies or req+res set, then return session.
+export const getSession = async function ({
+  cookies,
+  req,
+  res,
+}: GetSessionArgs) {
+  if (typeof cookies !== "undefined") {
+    return await getIronSession<SessionData>(cookies, sessionOptions);
+  }
+
+  if (typeof req !== "undefined" && typeof res !== "undefined") {
+    return await getIronSession<SessionData>(req, res, sessionOptions);
+  }
+
+  throw new Error(
+    "cannot get session from context must supply cookies or req and res",
+  );
+};
+
+// get a header from either of the accepted header types
+const getSourceHeader = function (headers: unknown) {
+  if (typeof headers === "undefined" || headers === null) return "";
+  if (headers instanceof Headers) return headers.get("x-trpc-source");
+
+  if (hasTrpcSource(headers)) {
+    return headers["x-trpc-source"];
+  }
+
+  return "";
+};
+
+const logTrpcSource = function (
+  headers: IncomingHttpHeaders | Headers | undefined,
+  session: SessionData,
+) {
+  if (typeof headers === "undefined") return;
+
+  const source = getSourceHeader(headers);
 
   console.log(
     ">>> tRPC Request from",
@@ -33,11 +127,16 @@ export const createTRPCContext = async ({
     "by",
     session?.auth?.user.address ?? "unauthenticated user",
   );
+};
 
-  return {
-    session,
-    // db,
-  };
+interface SourceHeader {
+  "x-trpc-source": string;
+}
+const hasTrpcSource = function (headers: unknown): headers is SourceHeader {
+  return (
+    (headers as SourceHeader)?.["x-trpc-source"] !== undefined &&
+    typeof (headers as SourceHeader)["x-trpc-source"] === "string"
+  );
 };
 
 /**

@@ -1,9 +1,9 @@
-import { type RouterOutputs } from "@tableland/studio-api";
+import { type RouterOutputs, getSession } from "@tableland/studio-api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import Link from "next/link";
 import Script from "next/script";
 import { cache } from "react";
@@ -20,7 +20,6 @@ import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 import { TimeAgoProvider } from "@/components/time-ago-provider";
-import { getSession } from "@/lib/session";
 
 TimeAgo.addDefaultLocale(en);
 
@@ -54,7 +53,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
+  const session = await getSession({ cookies: cookies(), headers: headers() });
   let teams: RouterOutputs["teams"]["userTeams"] = [];
   if (session.auth) {
     try {

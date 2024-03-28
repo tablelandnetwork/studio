@@ -52,7 +52,6 @@
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "ethers": "^5.7.1",
-    "iron-session": "^8.0.1",
     "javascript-time-ago": "^2.5.9",
     "jotai": "^2.1.1",
     "keccak": "^3.0.3",

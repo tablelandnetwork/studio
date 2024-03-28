@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@tableland/local": "^2.4.1",
+    "@types/cookie": "^0.6.0",
     "@types/cosmiconfig": "^6.0.0",
     "@types/inquirer": "^9.0.2",
     "@types/js-yaml": "^4.0.5",
@@ -49,7 +50,6 @@
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-promise": "^6.1.1",
     "husky": "^8.0.3",
-    "iron-session": "^8.0.1",
     "lerna": "^7.1.5",
     "lint-staged": "^13.2.2",
     "mocha": "^10.0.0",
