@@ -8,7 +8,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { cache } from "react";
 import { Analytics } from "@vercel/analytics/react";
-import Footer from "./_components/footer";
+import PathAwareHeader from "./_components/path-aware-header";
 import { api } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
 import WagmiProvider from "@/components/wagmi-provider";
@@ -20,7 +20,6 @@ import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 import { TimeAgoProvider } from "@/components/time-ago-provider";
-import PathAwareHeader from "./_components/path-aware-header";
 
 TimeAgo.addDefaultLocale(en);
 

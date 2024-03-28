@@ -1,5 +1,5 @@
-import SubNavHeader from "@/components/sub-nav-header";
 import NavProject from "./_components/nav-project";
+import SubNavHeader from "@/components/sub-nav-header";
 
 export default async function ProjectLayout({
   children,
