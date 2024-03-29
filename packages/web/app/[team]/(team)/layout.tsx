@@ -1,4 +1,5 @@
 import NavTeam from "@/components/nav-team";
+import SubNavHeader from "@/components/sub-nav-header";
 
 export default async function LayoutTeam({
   children,
@@ -7,11 +8,9 @@ export default async function LayoutTeam({
 }) {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
-        <div className="flex">
-          <NavTeam />
-        </div>
-      </header>
+      <SubNavHeader>
+        <NavTeam />
+      </SubNavHeader>
       {children}
     </div>
   );

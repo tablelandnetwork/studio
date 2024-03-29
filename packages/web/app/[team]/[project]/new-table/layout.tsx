@@ -1,4 +1,5 @@
 import NavNewTable from "@/components/nav-new-table";
+import SubNavHeader from "@/components/sub-nav-header";
 
 export default async function NewTableLayout({
   children,
@@ -7,9 +8,9 @@ export default async function NewTableLayout({
 }) {
   return (
     <div>
-      <header className="sticky top-0 flex flex-col space-y-4 border-b bg-white px-4 py-3">
+      <SubNavHeader>
         <NavNewTable crumbTitle="New Table" />
-      </header>
+      </SubNavHeader>
       {children}
     </div>
   );

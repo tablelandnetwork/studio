@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import NewTeamForm from "./_components/new-team-form";
 
-export default async function NewProject() {
+export default async function NewTeam() {
   const session = await Session.fromCookies(cookies());
   if (!session.auth) {
     notFound();

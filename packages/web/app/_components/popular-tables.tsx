@@ -71,7 +71,7 @@ export function PopularTables({
           <Link
             key={`${table.chain_id}-${table.table_id}`}
             href={`/table/${table.prefix}_${table.chain_id}_${table.table_id}`}
-            className="flex flex-col items-start gap-2 rounded-lg border p-4 text-left text-sm transition-all hover:bg-accent"
+            className="flex flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
           >
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center gap-4">

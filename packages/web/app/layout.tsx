@@ -8,7 +8,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { cache } from "react";
 import { Analytics } from "@vercel/analytics/react";
-import Footer from "./_components/footer";
+import PathAwareHeader from "./_components/path-aware-header";
 import { api } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
 import WagmiProvider from "@/components/wagmi-provider";
@@ -77,7 +77,7 @@ export default async function RootLayout({
             <body className="flex min-h-screen flex-col">
               <Hotjar></Hotjar>
               <TRPCReactProvider headers={headers()}>
-                <header className="flex items-center justify-between px-4 py-3">
+                <PathAwareHeader className="flex items-center justify-between bg-[#202132] px-4 py-3">
                   <div className="flex flex-row items-center gap-x-2">
                     <Link href="/">
                       <MesaSvg />
@@ -88,9 +88,8 @@ export default async function RootLayout({
                     <NavPrimary />
                     <Profile />
                   </div>
-                </header>
+                </PathAwareHeader>
                 <div className="flex flex-1 flex-col">{children}</div>
-                <Footer />
                 <Toaster />
               </TRPCReactProvider>
               <Script
