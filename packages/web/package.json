@@ -12,6 +12,7 @@
     "dev:all": "(sleep 30 && npm run dev) & npm run dev:net",
     "build": "next build",
     "start": "next start",
+    "clean": "rm -rf .next/",
     "gen-migrate": "drizzle-kit generate:sqlite",
     "exec-migrate": "tsx scripts/migrate.ts"
   },
