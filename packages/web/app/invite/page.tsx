@@ -1,5 +1,7 @@
+import { headers, cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { getSession } from "@tableland/studio-api";
 import { api } from "@/trpc/server";
 import {
   Card,
@@ -10,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import InviteHandler from "@/components/invite-handler";
-import { getSession } from "@/lib/session";
 
 export default async function Invite({
   searchParams,
@@ -36,7 +37,7 @@ export default async function Invite({
     teamId: invite.inviterTeamId,
   });
 
-  const session = await getSession();
+  const session = await getSession({ cookies: cookies(), headers: headers() });
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-4">

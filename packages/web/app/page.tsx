@@ -7,7 +7,8 @@ import {
   Play,
 } from "lucide-react";
 import Link from "next/link";
-import { type RouterOutputs } from "@tableland/studio-api";
+import { headers, cookies } from "next/headers";
+import { type RouterOutputs, getSession } from "@tableland/studio-api";
 import { cache } from "react";
 import { LatestTables } from "./_components/latest-tables";
 import { PopularTables } from "./_components/popular-tables";
@@ -21,10 +22,9 @@ import { store } from "@/lib/store";
 import TeamAvatar from "@/components/team-avatar";
 import { getLatestTables, getPopularTables } from "@/lib/validator-queries";
 import { api } from "@/trpc/server";
-import { getSession } from "@/lib/session";
 
 export default async function Page() {
-  const session = await getSession();
+  const session = await getSession({ headers: headers(), cookies: cookies() });
 
   let teams: RouterOutputs["teams"]["userTeams"] = [];
   if (session.auth) {

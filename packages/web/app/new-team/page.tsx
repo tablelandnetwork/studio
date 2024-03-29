@@ -1,9 +1,10 @@
+import { getSession } from "@tableland/studio-api";
+import { headers, cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import NewTeamForm from "./_components/new-team-form";
-import { getSession } from "@/lib/session";
 
 export default async function NewTeam() {
-  const session = await getSession();
+  const session = await getSession({ headers: headers(), cookies: cookies() });
   if (!session.auth) {
     notFound();
   }

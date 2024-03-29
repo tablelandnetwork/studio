@@ -1,11 +1,6 @@
-import {
-  type SessionData,
-  createTRPCContext as createContext,
-  sessionOptions,
-} from "@tableland/studio-api";
+import { createTRPCContext } from "@tableland/studio-api";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
 import { apiRouter } from "@/lib/api-router";
 
 // TODO: Understand why this should be set to edge and figure out why the crypto module is not available in edge. Might need to upgrade nextjs.
@@ -36,15 +31,10 @@ const handler = async (req: Request) => {
     router: apiRouter,
     req,
     createContext: async () => {
-      const session = await getIronSession<SessionData>(
-        cookies(),
-        sessionOptions,
-      );
-      const context = await createContext({
+      return await createTRPCContext({
         headers: req.headers,
-        session,
+        cookies: cookies(),
       });
-      return context;
     },
     onError({ error, path }) {
       console.error(`>>> tRPC Error on '${path ?? "[undefined path]"}'`, error);

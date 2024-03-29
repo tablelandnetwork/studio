@@ -8,17 +8,11 @@ import { createHash } from "crypto";
 import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
-import {
-  type SessionData,
-  appRouter,
-  createTRPCContext as createContext,
-  sessionOptions,
-} from "@tableland/studio-api";
+import { appRouter, createTRPCContext } from "@tableland/studio-api";
 import { init } from "@tableland/studio-store";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Wallet, getDefaultProvider } from "ethers";
 import { after, before } from "mocha";
-import { getIronSession } from "iron-session";
 import {
   TEST_API_BASE_URL,
   TEST_API_PORT,
@@ -202,22 +196,16 @@ async function startStudioApi({ store }: { store: Store }) {
         });
       };
 
-      const session = await getIronSession<SessionData>(
-        req,
-        res,
-        sessionOptions,
-      );
-
       const response = await fetchRequestHandler({
         endpoint: "/api/trpc",
         router: apiRouter,
         req,
         createContext: async () => {
-          const context = await createContext({
+          return await createTRPCContext({
             headers: req.headers,
-            session,
+            req,
+            res,
           });
-          return context;
         },
       });
 

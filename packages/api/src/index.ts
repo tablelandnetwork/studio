@@ -8,7 +8,12 @@ import {
 } from "./session-data";
 import type { AppRouter } from "./root";
 import { appRouter } from "./root";
-import { createCallerFactory, createTRPCContext } from "./trpc";
+import {
+  type GetSessionArgs,
+  createCallerFactory,
+  createTRPCContext,
+  getSession,
+} from "./trpc";
 
 /**
  * Create a server-side caller for the tRPC API
@@ -41,12 +46,14 @@ export {
   createTRPCContext,
   appRouter,
   createCaller,
+  getSession,
   sessionOptions,
   defaultSession,
 };
 export type {
   AppRouter,
   RouterInputs,
+  GetSessionArgs,
   RouterOutputs,
   Auth,
   SessionData,
