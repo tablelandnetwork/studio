@@ -1,6 +1,6 @@
 "use client";
 
-import "client-only";
+import { useEffect, useState } from "react";
 import TimeAgo from "javascript-time-ago";
 
 export function TimeSince({
@@ -8,9 +8,14 @@ export function TimeSince({
 }: React.HTMLAttributes<HTMLElement> & {
   time: string | number | Date;
 }) {
-  if (!(time instanceof Date)) time = new Date(time);
-
+  const [timeStr, setTimeStr] = useState("");
   const timeAgo = new TimeAgo("en-US");
 
-  return <span>{timeAgo.format(time)}</span>;
+  useEffect(function () {
+    if (!(time instanceof Date)) time = new Date(time);
+
+    setTimeStr(timeAgo.format(time));
+  });
+
+  return <span>{timeStr}</span>;
 }
