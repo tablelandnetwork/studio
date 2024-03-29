@@ -30,6 +30,7 @@ export default function TablelandTableMenu(
         open={newTableFormOpen}
         onOpenChange={setNewTableFormOpen}
         onSuccess={(team, project, table) => {
+          router.refresh();
           router.push(`/${team.slug}/${project.slug}/${table.slug}`);
         }}
       />
@@ -38,6 +39,7 @@ export default function TablelandTableMenu(
         open={importTableFormOpen}
         onOpenChange={setImportTableFormOpen}
         onSuccess={(team, project, table, env) => {
+          router.refresh();
           router.push(
             `/${team.slug}/${project.slug}/deployments/${env.slug}/${table.slug}`,
           );

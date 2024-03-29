@@ -240,6 +240,7 @@ export default function ImportTableForm({
                           }
                         }}
                         value={value ? `${value}` : ""}
+                        disabled={!!chainIdPreset}
                         {...rest}
                       />
                     </FormControl>
@@ -270,7 +271,11 @@ export default function ImportTableForm({
                 <FormItem>
                   <FormLabel>Table ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="eg. 345" {...field} />
+                    <Input
+                      placeholder="eg. 345"
+                      disabled={!!tableIdPreset}
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     The ID of the existing Tableland table.
