@@ -1,4 +1,3 @@
-import TimeAgo from "javascript-time-ago";
 import { AlertCircle } from "lucide-react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -11,6 +10,7 @@ import {
   MetricCardTitle,
 } from "@/components/metric-card";
 import HashDisplay from "@/components/hash-display";
+import { TimeSince } from "@/components/time";
 import { chainsMap } from "@/lib/chains-map";
 import { cn } from "@/lib/utils";
 import { getSqlLog } from "@/lib/validator-queries";
@@ -21,8 +21,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const timeAgo = new TimeAgo("en-US");
 
 export default async function TxnPage({
   searchParams,
@@ -100,7 +98,7 @@ export default async function TxnPage({
             <MetricCardTitle>Timestamp</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>
-            {timeAgo.format(log.timestamp * 1000)}
+            <TimeSince time={log.timestamp * 1000} />
           </MetricCardContent>
           <MetricCardFooter>
             {new Date(log.timestamp * 1000).toLocaleString()}

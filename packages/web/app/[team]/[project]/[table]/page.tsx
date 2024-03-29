@@ -1,10 +1,10 @@
 import { helpers } from "@tableland/sdk";
 import { hasConstraint } from "@tableland/studio-store";
-import TimeAgo from "javascript-time-ago";
 import { Check, Rocket } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import { api } from "@/trpc/server";
+import { TimeSince } from "@/components/time";
 import {
   Table,
   TableBody,
@@ -20,8 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-const timeAgo = new TimeAgo("en-US");
 
 export default async function TableDetails({
   params,
@@ -125,9 +123,14 @@ export default async function TableDetails({
         <CardHeader>
           <CardTitle>Deployments</CardTitle>
           <CardDescription>
-            {deploymentInfos.length
-              ? `Table ${table.name} has been deployed to the following networks:`
-              : `Table ${table.name} has not been deployed yet.`}
+            {deploymentInfos.length ? (
+              `Table ${table.name} has been deployed to the following networks:`
+            ) : (
+              <Link href={`/${team.slug}/${project.slug}/deployments`}>
+                Table <b className="font-bold">{table.name}</b> has not been
+                deployed yet.
+              </Link>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -147,9 +150,7 @@ export default async function TableDetails({
                       }
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {timeAgo.format(
-                        new Date(deploymentInfo.deployment.createdAt),
-                      )}
+                      <TimeSince time={deploymentInfo.deployment.createdAt} />
                     </p>
                   </div>
                 </div>

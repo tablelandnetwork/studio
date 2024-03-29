@@ -1,17 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import TimeAgo from "javascript-time-ago";
 import { useEffect, useState } from "react";
 import { chainsMap } from "../../lib/chains-map";
 import { Paginator } from "@/components/paginator";
 import { TypographyH3 } from "@/components/typography-h3";
 import ChainSelector from "@/components/chain-selector";
+import { TimeSince } from "@/components/time";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { type Table, getLatestTables } from "@/lib/validator-queries";
-
-const timeAgo = new TimeAgo("en-US");
 
 export function LatestTables({ initialData }: { initialData: Table[] }) {
   const [latestTables, setLatestTables] = useState<Table[]>(initialData);
@@ -73,7 +71,7 @@ export function LatestTables({ initialData }: { initialData: Table[] }) {
                   </div>
                 </div>
                 <div className="ml-auto text-sm text-muted-foreground">
-                  {timeAgo.format(new Date(table.created_at * 1000))}
+                  <TimeSince time={new Date(table.created_at * 1000)} />
                 </div>
               </div>
             </div>

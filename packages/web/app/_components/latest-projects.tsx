@@ -1,14 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import TimeAgo from "javascript-time-ago";
 import { useState } from "react";
+import { TimeSince } from "@/components/time";
 import { Paginator } from "@/components/paginator";
 import { TypographyH3 } from "@/components/typography-h3";
 import { type store } from "@/lib/store";
 import TeamAvatar from "@/components/team-avatar";
-
-const timeAgo = new TimeAgo("en-US");
 
 export type Projects = Awaited<
   ReturnType<typeof store.projects.latestProjects>
@@ -40,7 +38,7 @@ export function LatestProjects({ projects }: { projects: Projects }) {
                 </div>
                 {item.project.createdAt && (
                   <div className="ml-auto text-sm text-muted-foreground">
-                    {timeAgo.format(new Date(item.project.createdAt))}
+                    <TimeSince time={item.project.createdAt} />
                   </div>
                 )}
               </div>
