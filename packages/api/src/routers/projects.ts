@@ -1,11 +1,11 @@
 import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { publicProcedure, router, teamProcedure } from "../trpc";
+import { publicProcedure, createTRPCRouter, teamProcedure } from "../trpc";
 import { internalError } from "../utils/internalError";
 
 export function projectsRouter(store: Store) {
-  return router({
+  return createTRPCRouter({
     teamProjects: publicProcedure
       .input(z.object({ teamId: z.string().trim().nonempty() }).or(z.void()))
       .query(async ({ ctx, input }) => {

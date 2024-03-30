@@ -84,7 +84,7 @@ export default function NewInvite({ team }: { team: schema.Team }) {
                     <Input
                       placeholder="Email address"
                       className="ml-4"
-                      disabled={inviteEmails.isLoading}
+                      disabled={inviteEmails.isPending}
                       {...field}
                     />
                   </FormControl>
@@ -95,10 +95,10 @@ export default function NewInvite({ team }: { team: schema.Team }) {
             <Button
               type="submit"
               size="sm"
-              disabled={inviteEmails.isLoading}
+              disabled={inviteEmails.isPending}
               className="ml-auto"
             >
-              {inviteEmails.isLoading && (
+              {inviteEmails.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               )}
               Submit
@@ -106,7 +106,7 @@ export default function NewInvite({ team }: { team: schema.Team }) {
             <Button
               size="sm"
               variant="ghost"
-              disabled={inviteEmails.isLoading}
+              disabled={inviteEmails.isPending}
               onClick={onCancel}
               className="ml-2"
             >

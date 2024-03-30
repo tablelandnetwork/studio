@@ -2,7 +2,7 @@ import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
 import { type Schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { projectProcedure, publicProcedure, router } from "../trpc";
+import { projectProcedure, publicProcedure, createTRPCRouter } from "../trpc";
 import { internalError } from "../utils/internalError";
 
 const schemaSchema: z.ZodType<Schema> = z.object({
@@ -17,7 +17,7 @@ const schemaSchema: z.ZodType<Schema> = z.object({
 });
 
 export function tablesRouter(store: Store) {
-  return router({
+  return createTRPCRouter({
     projectTables: publicProcedure
       .input(z.object({ projectId: z.string().trim() }))
       .query(async ({ input }) => {

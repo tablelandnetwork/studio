@@ -3,6 +3,7 @@
 import { type schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { skipToken } from "@tanstack/react-query";
 import Share from "./share";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
@@ -42,10 +43,8 @@ export default function NavProject({
   const pathname = usePathname();
 
   const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
-  const teamId = team?.id;
   const { data: project } = api.projects.projectBySlug.useQuery(
-    { teamId, slug: projectSlug },
-    { enabled: !!teamId },
+    team ? { teamId: team.id, slug: projectSlug } : skipToken,
   );
 
   if (!team || !project) {

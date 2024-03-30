@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { /* useFieldArray, */ useForm } from "react-hook-form";
 import * as z from "zod";
+import { skipToken } from "@tanstack/react-query";
 import { api } from "@/trpc/react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -35,8 +36,7 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
   const router = useRouter();
 
   const nameAvailableQuery = api.projects.nameAvailable.useQuery(
-    { teamId: team.id, name: projectName },
-    { enabled: !!projectName },
+    projectName ? { teamId: team.id, name: projectName } : skipToken,
   );
 
   const newProject = api.projects.newProject.useMutation({
@@ -195,7 +195,9 @@ export default function NewProjectForm({ team }: { team: schema.Team }) {
         </div> */}
         <FormRootMessage />
         <Button type="submit" disabled={isLoading || !nameAvailable}>
-          {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+          {newProject.isPending && (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          )}
           Submit
         </Button>
       </form>

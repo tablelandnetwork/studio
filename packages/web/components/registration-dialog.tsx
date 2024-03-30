@@ -1,6 +1,7 @@
 import { type Auth } from "@tableland/studio-api";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { skipToken } from "@tanstack/react-query";
 import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
 import {
@@ -32,8 +33,7 @@ export default function RegistrationDialog({
   const [email, setEmail] = useState("");
 
   const nameAvailableQuery = api.teams.nameAvailable.useQuery(
-    { name: teamName },
-    { enabled: !!teamName },
+    teamName ? { name: teamName } : skipToken,
   );
 
   const register = api.auth.register.useMutation({
@@ -97,16 +97,16 @@ export default function RegistrationDialog({
           <Button
             variant="outline"
             onClick={handleCancel}
-            disabled={register.isLoading}
+            disabled={register.isPending}
           >
             Cancel
           </Button>
           <Button
             type="submit"
             onClick={handleRegister}
-            disabled={register.isLoading || !nameAvailable}
+            disabled={register.isPending || !nameAvailable}
           >
-            {register.isLoading && (
+            {register.isPending && (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             )}
             Continue

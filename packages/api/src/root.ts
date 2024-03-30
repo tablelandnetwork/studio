@@ -1,16 +1,15 @@
 import { initMailApi } from "@tableland/studio-mail";
 import { type Store } from "@tableland/studio-store";
-import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
-import { router } from "../trpc";
-import { createSendInvite } from "../utils/sendInvite";
-import { authRouter } from "./auth";
-import { deploymentsRouter } from "./deployments";
-import { environmentsRouter } from "./environments";
-import { invitesRouter } from "./invites";
-import { projectsRouter } from "./projects";
-import { providersRouter } from "./providers";
-import { tablesRouter } from "./tables";
-import { teamsRouter } from "./teams";
+import { createTRPCRouter } from "./trpc";
+import { createSendInvite } from "./utils/sendInvite";
+import { authRouter } from "./routers/auth";
+import { deploymentsRouter } from "./routers/deployments";
+import { environmentsRouter } from "./routers/environments";
+import { invitesRouter } from "./routers/invites";
+import { projectsRouter } from "./routers/projects";
+import { providersRouter } from "./routers/providers";
+import { tablesRouter } from "./routers/tables";
+import { teamsRouter } from "./routers/teams";
 
 export function appRouter(
   store: Store,
@@ -30,7 +29,7 @@ export function appRouter(
     createInviteLink,
     mailApi,
   );
-  return router({
+  return createTRPCRouter({
     auth: authRouter(store),
     projects: projectsRouter(store),
     teams: teamsRouter(store, sendInvite),
@@ -45,17 +44,5 @@ export function appRouter(
   });
 }
 
+// export type definition of API
 export type AppRouter = ReturnType<typeof appRouter>;
-/**
- * Inference helper for inputs.
- *
- * @example type HelloInput = RouterInputs['example']['hello']
- */
-export type RouterInputs = inferRouterInputs<AppRouter>;
-
-/**
- * Inference helper for outputs.
- *
- * @example type HelloOutput = RouterOutputs['example']['hello']
- */
-export type RouterOutputs = inferRouterOutputs<AppRouter>;

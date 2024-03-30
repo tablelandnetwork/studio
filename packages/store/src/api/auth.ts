@@ -26,13 +26,13 @@ export function auth(
       return undefined;
     }
     const { sealed, ...rest } = res.user;
-    const { email } = await unsealData(sealed, {
+    const { email } = await unsealData<{ email?: string }>(sealed, {
       password: dataSealPass,
     });
     return {
       user: {
         ...rest,
-        email: email as string | undefined,
+        email,
       },
       personalTeam: res.personalTeam,
     };
