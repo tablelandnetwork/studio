@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { skipToken } from "@tanstack/react-query";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import TagInput from "@/components/tag-input";
@@ -33,8 +34,7 @@ export default function NewTeamForm() {
   const router = useRouter();
 
   const nameAvailableQuery = api.teams.nameAvailable.useQuery(
-    { name: teamName },
-    { enabled: !!teamName },
+    teamName ? { name: teamName } : skipToken,
   );
 
   const newTeam = api.teams.newTeam.useMutation({
@@ -122,8 +122,8 @@ export default function NewTeamForm() {
           )}
         />
         <FormRootMessage />
-        <Button type="submit" disabled={newTeam.isLoading || !nameAvailable}>
-          {newTeam.isLoading && (
+        <Button type="submit" disabled={newTeam.isPending || !nameAvailable}>
+          {newTeam.isPending && (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           )}
           Submit

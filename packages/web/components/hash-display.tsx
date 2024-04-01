@@ -26,6 +26,10 @@ export default function HashDisplay({
   hashDesc?: string;
 }) {
   const { toast } = useToast();
+  const slicedHash =
+    hash.length > numCharacters * 2
+      ? `${hash.slice(0, numCharacters)}...${hash.slice(-numCharacters)}`
+      : hash;
 
   return (
     <div>
@@ -36,8 +40,7 @@ export default function HashDisplay({
               className={cn("text-sm text-muted-foreground", className)}
               {...rest}
             >
-              {hash.slice(0, numCharacters)}...
-              {hash.slice(-numCharacters)}
+              {slicedHash}
             </span>
           </TooltipTrigger>
           <TooltipContent>

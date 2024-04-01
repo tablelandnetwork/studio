@@ -5,7 +5,7 @@ import { z } from "zod";
 import {
   protectedProcedure,
   publicProcedure,
-  router,
+  createTRPCRouter,
   teamProcedure,
 } from "../trpc";
 import { type SendInviteFunc } from "../utils/sendInvite";
@@ -15,7 +15,7 @@ export function invitesRouter(
   sendInvite: SendInviteFunc,
   dataSealPass: string,
 ) {
-  return router({
+  return createTRPCRouter({
     invitesForTeam: teamProcedure(store).query(async ({ ctx }) => {
       const invites = await store.invites.invitesForTeam(ctx.teamId);
       return { invites, teamAuthorization: ctx.teamAuthorization };
@@ -47,10 +47,13 @@ export function invitesRouter(
     inviteFromSeal: publicProcedure
       .input(z.object({ seal: z.string().trim() }))
       .query(async ({ input }) => {
-        const { inviteId } = await unsealData(input.seal, {
-          password: dataSealPass,
-        });
-        const invite = await store.invites.inviteById(inviteId as string);
+        const { inviteId } = await unsealData<{ inviteId: string }>(
+          input.seal,
+          {
+            password: dataSealPass,
+          },
+        );
+        const invite = await store.invites.inviteById(inviteId);
         if (!invite) {
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -62,10 +65,13 @@ export function invitesRouter(
     acceptInvite: protectedProcedure
       .input(z.object({ seal: z.string().trim() }))
       .mutation(async ({ input, ctx }) => {
-        const { inviteId } = await unsealData(input.seal, {
-          password: dataSealPass,
-        });
-        const invite = await store.invites.inviteById(inviteId as string);
+        const { inviteId } = await unsealData<{ inviteId: string }>(
+          input.seal,
+          {
+            password: dataSealPass,
+          },
+        );
+        const invite = await store.invites.inviteById(inviteId);
         if (!invite) {
           throw new TRPCError({
             code: "NOT_FOUND",
@@ -86,10 +92,13 @@ export function invitesRouter(
     ignoreInvite: publicProcedure
       .input(z.object({ seal: z.string().trim() }))
       .mutation(async ({ input }) => {
-        const { inviteId } = await unsealData(input.seal, {
-          password: dataSealPass,
-        });
-        const invite = await store.invites.inviteById(inviteId as string);
+        const { inviteId } = await unsealData<{ inviteId: string }>(
+          input.seal,
+          {
+            password: dataSealPass,
+          },
+        );
+        const invite = await store.invites.inviteById(inviteId);
         if (!invite) {
           throw new Error("Invite not found");
         }
@@ -101,7 +110,7 @@ export function invitesRouter(
             message: "Invite has already been claimed",
           });
         }
-        await store.invites.deleteInvite(inviteId as string);
+        await store.invites.deleteInvite(inviteId);
         return invite;
       }),
     deleteInvite: teamProcedure(store)

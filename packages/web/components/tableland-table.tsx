@@ -1,7 +1,6 @@
-import { Database, type Schema, helpers } from "@tableland/sdk";
+import { Database, Validator, type Schema, helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
-import TimeAgo from "javascript-time-ago";
 import { Blocks, Coins, Hash, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
@@ -15,12 +14,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SQLLogs from "./sql-logs";
 import HashDisplay from "./hash-display";
+import TablelandTableMenu from "./tableland-table-menu";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
 import { objectToTableData } from "@/lib/utils";
-
-const timeAgo = new TimeAgo("en-US");
+import { TimeSince } from "@/components/time";
 
 interface Props {
   displayName: string;
@@ -62,7 +61,10 @@ export default async function TablelandTable({
   const blockExplorer = blockExplorers.get(chainId);
   const openSeaLink = openSeaLinks.get(chainId);
 
-  const tbl = new Database({ baseUrl: helpers.getBaseUrl(chainId) });
+  const baseUrl = helpers.getBaseUrl(chainId);
+  const tbl = new Database({ baseUrl });
+  const validator = new Validator({ baseUrl });
+
   const data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   const formattedData = objectToTableData(data.results);
   const columns: Array<ColumnDef<unknown>> = data.results.length
@@ -71,11 +73,17 @@ export default async function TablelandTable({
         header: col,
       }))
     : [];
+  const table = await validator.getTableById({ chainId, tableId: tokenId });
 
   return (
     <div className="flex-1 space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-medium">{displayName}</h1>
+        <TablelandTableMenu
+          schemaPreset={table.schema}
+          chainIdPreset={chainId}
+          tableIdPreset={tokenId}
+        />
         {/* <Select>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Staging" />
@@ -96,7 +104,9 @@ export default async function TablelandTable({
             <MetricCardTitle>Deployed to</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>{chain?.name}</MetricCardContent>
-          <MetricCardFooter>{timeAgo.format(createdAt)}</MetricCardFooter>
+          <MetricCardFooter>
+            <TimeSince time={createdAt} />
+          </MetricCardFooter>
         </MetricCard>
         <MetricCard>
           <MetricCardHeader

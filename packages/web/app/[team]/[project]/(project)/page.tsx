@@ -1,9 +1,12 @@
 import { helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import { Import, PencilRuler, Plus, Rocket, Table2 } from "lucide-react";
+import { PencilRuler, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
+import NewTable from "./_components/new-table";
+import ImportTable from "./_components/import-table";
 import { api } from "@/trpc/server";
+import HashDisplay from "@/components/hash-display";
 import {
   Card,
   CardContent,
@@ -11,59 +14,71 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default async function Project({
   params,
 }: {
   params: { team: string; project: string };
 }) {
-  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
-  const project = await cache(api.projects.projectBySlug.query)({
+  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const project = await cache(api.projects.projectBySlug)({
     teamId: team.id,
     slug: params.project,
   });
-  const tables = await cache(api.tables.projectTables.query)({
+  const envs = await cache(api.environments.projectEnvironments)({
     projectId: project.id,
   });
-  const deployments = await cache(api.deployments.projectDeployments.query)({
+
+  const tables = await cache(api.tables.projectTables)({
+    projectId: project.id,
+  });
+  const deployments = await cache(api.deployments.projectDeployments)({
     projectId: project.id,
   });
   const deploymentsMap = deployments.reduce((acc, deployment) => {
     acc.set(deployment.tableId, deployment);
     return acc;
   }, new Map<string, schema.Deployment>());
-  const authorized = await cache(api.teams.isAuthorized.query)({
+  const authorized = await cache(api.teams.isAuthorized)({
     teamId: team.id,
   });
 
   return (
-    <main className="container flex flex-1 flex-col space-y-6 p-4">
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">
-          Project description
-        </h2>
-        <p className="ml-4 max-w-lg whitespace-pre-wrap leading-tight text-muted-foreground">
-          {project.description}
-        </p>
+    <main className="container flex flex-col space-y-6 p-4">
+      <div className="flex flex-col md:flex-row">
+        <div className="min-w-1/2 space-y-1 pr-8">
+          <h2 className="text-lg font-semibold tracking-tight">
+            Project description
+          </h2>
+          <p className="whitespace-pre-wrap leading-tight text-muted-foreground">
+            {project.description}
+          </p>
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold tracking-tight">Project ID</h2>
+          <span className="block min-w-72 whitespace-pre-wrap leading-tight text-muted-foreground">
+            <HashDisplay
+              hash={project.id}
+              numCharacters={60}
+              copy={true}
+              hashDesc="project id"
+            />
+          </span>
+        </div>
       </div>
       <div className="flex flex-1 flex-col space-y-1">
         <div className="flex items-center">
           <h2 className="text-lg font-semibold tracking-tight">Tables</h2>
           {authorized && (
             <div className="ml-auto">
-              <Link href={`/${team.slug}/${project.slug}/new-table`}>
-                <Button variant="ghost" className="mr-2">
-                  <Plus className="mr-2" />
-                  New Table
-                </Button>
-              </Link>
-              <Link href={`/${team.slug}/${project.slug}/import-table`}>
-                <Button variant="ghost" className="">
-                  <Import className="mr-2" />
-                  Import Table
-                </Button>
-              </Link>
+              <NewTable teamPreset={team} projectPreset={project} />
+              {envs.length && (
+                <ImportTable
+                  teamPreset={team}
+                  projectPreset={project}
+                  envPreset={envs[0]}
+                />
+              )}
             </div>
           )}
         </div>

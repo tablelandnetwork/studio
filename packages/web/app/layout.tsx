@@ -1,13 +1,12 @@
-import { type RouterOutputs, Session } from "@tableland/studio-api";
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
+import { type RouterOutputs, getSession } from "@tableland/studio-api";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
-import { cookies, headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import Link from "next/link";
 import Script from "next/script";
 import { cache } from "react";
-import Footer from "./_components/footer";
+import { Analytics } from "@vercel/analytics/react";
+import PathAwareHeader from "./_components/path-aware-header";
 import { api } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
 import WagmiProvider from "@/components/wagmi-provider";
@@ -19,8 +18,6 @@ import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
 import { TimeAgoProvider } from "@/components/time-ago-provider";
-
-TimeAgo.addDefaultLocale(en);
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
@@ -52,11 +49,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await Session.fromCookies(cookies());
+  const session = await getSession({ cookies: cookies(), headers: headers() });
   let teams: RouterOutputs["teams"]["userTeams"] = [];
   if (session.auth) {
     try {
-      teams = await cache(api.teams.userTeams.query)({
+      teams = await cache(api.teams.userTeams)({
         userTeamId: session.auth.user.teamId,
       });
     } catch {
@@ -76,7 +73,7 @@ export default async function RootLayout({
             <body className="flex min-h-screen flex-col">
               <Hotjar></Hotjar>
               <TRPCReactProvider headers={headers()}>
-                <header className="flex items-center justify-between px-4 py-3">
+                <PathAwareHeader className="flex items-center justify-between bg-[#202132] px-4 py-3">
                   <div className="flex flex-row items-center gap-x-2">
                     <Link href="/">
                       <MesaSvg />
@@ -87,9 +84,8 @@ export default async function RootLayout({
                     <NavPrimary />
                     <Profile />
                   </div>
-                </header>
+                </PathAwareHeader>
                 <div className="flex flex-1 flex-col">{children}</div>
-                <Footer />
                 <Toaster />
               </TRPCReactProvider>
               <Script
@@ -99,6 +95,7 @@ export default async function RootLayout({
                   __html: `(function (m, a, z, e) {var s, t;try {t = m.sessionStorage.getItem('maze-us');} catch (err) {} if (!t) {t = new Date().getTime();try {m.sessionStorage.setItem('maze-us', t);} catch (err) {}} s = a.createElement('script');s.src = z + '?apiKey=' + e;s.async = true;a.getElementsByTagName('head')[0].appendChild(s);m.mazeUniversalSnippetApiKey = e;})(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'ee647aa6-0377-4302-b3f0-67b50f58c48b');`,
                 }}
               ></Script>
+              <Analytics />
             </body>
           </html>
         </TimeAgoProvider>

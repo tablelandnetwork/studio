@@ -1,18 +1,61 @@
-import { createContext } from "./context";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import {
-  type AppRouter,
-  appRouter,
-  type RouterInputs,
-  type RouterOutputs,
-} from "./routers";
-import { type Auth, Session } from "./session";
+  type Auth,
+  type SessionData,
+  type SiweFields,
+  sessionOptions,
+  defaultSession,
+} from "./session-data";
+import type { AppRouter } from "./root";
+import { appRouter } from "./root";
+import {
+  type GetSessionArgs,
+  createCallerFactory,
+  createTRPCContext,
+  getSession,
+} from "./trpc";
+
+/**
+ * Create a server-side caller for the tRPC API
+ * @example
+ * const trpc = createCaller(createContext);
+ * const res = await trpc.post.all();
+ *       ^? Post[]
+ */
+function createCaller(appRouter: AppRouter) {
+  return createCallerFactory(appRouter);
+}
+
+/**
+ * Inference helpers for input types
+ * @example
+ * type PostByIdInput = RouterInputs['post']['byId']
+ *      ^? { id: number }
+ **/
+type RouterInputs = inferRouterInputs<AppRouter>;
+
+/**
+ * Inference helpers for output types
+ * @example
+ * type AllPostsOutput = RouterOutputs['post']['all']
+ *      ^? Post[]
+ **/
+type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export {
-  type AppRouter,
+  createTRPCContext,
   appRouter,
-  type Auth,
-  createContext,
-  type RouterInputs,
-  type RouterOutputs,
-  Session,
+  createCaller,
+  getSession,
+  sessionOptions,
+  defaultSession,
+};
+export type {
+  AppRouter,
+  RouterInputs,
+  GetSessionArgs,
+  RouterOutputs,
+  Auth,
+  SessionData,
+  SiweFields,
 };

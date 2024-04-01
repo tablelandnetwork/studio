@@ -1,4 +1,3 @@
-import TimeAgo from "javascript-time-ago";
 import { AlertCircle } from "lucide-react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -11,6 +10,7 @@ import {
   MetricCardTitle,
 } from "@/components/metric-card";
 import HashDisplay from "@/components/hash-display";
+import { TimeSince } from "@/components/time";
 import { chainsMap } from "@/lib/chains-map";
 import { cn } from "@/lib/utils";
 import { getSqlLog } from "@/lib/validator-queries";
@@ -21,8 +21,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const timeAgo = new TimeAgo("en-US");
 
 export default async function TxnPage({
   searchParams,
@@ -65,7 +63,7 @@ export default async function TxnPage({
             copy
             className={cn(
               "text-3xl font-bold text-foreground",
-              log.error && "text-red-500",
+              log.error && "text-destructive",
             )}
           />
           <div className="text-base text-muted-foreground">
@@ -100,7 +98,7 @@ export default async function TxnPage({
             <MetricCardTitle>Timestamp</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent>
-            {timeAgo.format(log.timestamp * 1000)}
+            <TimeSince time={log.timestamp * 1000} />
           </MetricCardContent>
           <MetricCardFooter>
             {new Date(log.timestamp * 1000).toLocaleString()}
@@ -155,7 +153,7 @@ export default async function TxnPage({
         <label className="text-sm uppercase text-muted-foreground">
           Statement:
         </label>
-        <pre className="whitespace-break-spaces rounded-sm border border-gray-300 bg-gray-100 p-4">
+        <pre className="whitespace-break-spaces rounded-md border bg-card p-4">
           {log.statement}
         </pre>
       </div>
@@ -164,7 +162,7 @@ export default async function TxnPage({
           <label className="text-sm uppercase text-muted-foreground">
             Error:
           </label>
-          <pre className="whitespace-break-spaces rounded-sm border border-gray-300 bg-gray-100 p-4">
+          <pre className="whitespace-break-spaces rounded-md border bg-card p-4">
             {log.error}
           </pre>
         </div>

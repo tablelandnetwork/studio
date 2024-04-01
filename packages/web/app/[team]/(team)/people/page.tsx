@@ -1,6 +1,7 @@
-import { cookies } from "next/headers";
 import { cache } from "react";
-import { type RouterOutputs, Session } from "@tableland/studio-api";
+import { headers, cookies } from "next/headers";
+import { type RouterOutputs } from "@tableland/studio-api";
+import { getSession } from "@tableland/studio-api";
 import Info from "./_components/info";
 import InviteActions from "./_components/invite-actions";
 import NewInvite from "./_components/new-invite";
@@ -11,10 +12,11 @@ import { cn } from "@/lib/utils";
 import { api } from "@/trpc/server";
 
 export default async function People({ params }: { params: { team: string } }) {
-  const { auth } = await Session.fromCookies(cookies());
+  const session = await getSession({ cookies: cookies(), headers: headers() });
+  const { auth } = session;
 
-  const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
-  const people = await cache(api.teams.usersForTeam.query)({
+  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const people = await cache(api.teams.usersForTeam)({
     teamId: team.id,
   });
 
@@ -25,7 +27,7 @@ export default async function People({ params }: { params: { team: string } }) {
   if (auth) {
     try {
       const { invites: invitesRes, teamAuthorization: teamAuthorizationRes } =
-        await cache(api.invites.invitesForTeam.query)({ teamId: team.id });
+        await cache(api.invites.invitesForTeam)({ teamId: team.id });
       invites = invitesRes;
       teamAuthorization = teamAuthorizationRes;
     } catch {}

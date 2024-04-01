@@ -1,7 +1,7 @@
-import { Session } from "@tableland/studio-api";
-import { cookies } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { getSession } from "@tableland/studio-api";
 import { api } from "@/trpc/server";
 import {
   Card,
@@ -21,7 +21,7 @@ export default async function Invite({
   if (typeof searchParams.seal !== "string") {
     notFound();
   }
-  const invite = await cache(api.invites.inviteFromSeal.query)({
+  const invite = await cache(api.invites.inviteFromSeal)({
     seal: searchParams.seal,
   });
   // TODO: Return not found if invite is expired
@@ -30,14 +30,14 @@ export default async function Invite({
   if (invite.claimedByTeamId || invite.claimedAt) {
     notFound();
   }
-  const targetTeam = await cache(api.teams.getTeam.query)({
+  const targetTeam = await cache(api.teams.getTeam)({
     teamId: invite.teamId,
   });
-  const inviterTeam = await cache(api.teams.getTeam.query)({
+  const inviterTeam = await cache(api.teams.getTeam)({
     teamId: invite.inviterTeamId,
   });
 
-  const session = await Session.fromCookies(cookies());
+  const session = await getSession({ cookies: cookies(), headers: headers() });
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-4">

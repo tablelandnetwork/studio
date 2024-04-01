@@ -1,14 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import TimeAgo from "javascript-time-ago";
 import { useState } from "react";
+import { TimeSince } from "@/components/time";
 import { Paginator } from "@/components/paginator";
 import { TypographyH3 } from "@/components/typography-h3";
 import { type store } from "@/lib/store";
 import TeamAvatar from "@/components/team-avatar";
-
-const timeAgo = new TimeAgo("en-US");
 
 export type Projects = Awaited<
   ReturnType<typeof store.projects.latestProjects>
@@ -28,7 +26,7 @@ export function LatestProjects({ projects }: { projects: Projects }) {
           <Link
             key={item.project.id}
             href={`/${item.team.slug}/${item.project.slug}`}
-            className="flex flex-col items-start gap-2 rounded-lg border p-4 text-left text-sm transition-all hover:bg-accent"
+            className="flex flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
           >
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center gap-2">
@@ -40,7 +38,7 @@ export function LatestProjects({ projects }: { projects: Projects }) {
                 </div>
                 {item.project.createdAt && (
                   <div className="ml-auto text-sm text-muted-foreground">
-                    {timeAgo.format(new Date(item.project.createdAt))}
+                    <TimeSince time={item.project.createdAt} />
                   </div>
                 )}
               </div>

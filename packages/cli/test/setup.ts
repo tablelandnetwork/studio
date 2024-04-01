@@ -8,7 +8,7 @@ import { createHash } from "crypto";
 import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
-import { appRouter, createContext } from "@tableland/studio-api";
+import { appRouter, createTRPCContext } from "@tableland/studio-api";
 import { init } from "@tableland/studio-store";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Wallet, getDefaultProvider } from "ethers";
@@ -198,10 +198,15 @@ async function startStudioApi({ store }: { store: Store }) {
 
       const response = await fetchRequestHandler({
         endpoint: "/api/trpc",
-        // endpoint: "",
-        req,
         router: apiRouter,
-        createContext,
+        req,
+        createContext: async () => {
+          return await createTRPCContext({
+            headers: req.headers,
+            req,
+            res,
+          });
+        },
       });
 
       const responseHeaders = Object.fromEntries(response.headers.entries());

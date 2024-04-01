@@ -4,7 +4,7 @@ import { z } from "zod";
 import {
   protectedProcedure,
   publicProcedure,
-  router,
+  createTRPCRouter,
   teamAdminProcedure,
 } from "../trpc";
 import { type SendInviteFunc } from "../utils/sendInvite";
@@ -12,7 +12,7 @@ import { internalError } from "../utils/internalError";
 import { zeroNine } from "../utils/fourHundredError";
 
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
-  return router({
+  return createTRPCRouter({
     isAuthorized: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))
       .query(async ({ ctx, input }) => {
