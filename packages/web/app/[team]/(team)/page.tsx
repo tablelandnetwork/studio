@@ -1,8 +1,8 @@
-import { AlertCircle, Folders, Plus, Rocket, Table2 } from "lucide-react";
+import { AlertCircle, Folders, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
+import NewProjectButton from "./_components/new-project-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -57,14 +57,7 @@ export default async function Projects({
         </Alert>
       )}
 
-      {authorized && (
-        <Link href={`/${team.slug}/new-project`} className="ml-auto">
-          <Button variant="ghost">
-            <Plus className="mr-2" />
-            New Project
-          </Button>
-        </Link>
-      )}
+      {authorized && <NewProjectButton team={team} />}
 
       {!projects.length && (
         <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4 py-16">
