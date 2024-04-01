@@ -15,7 +15,6 @@ export function activate(id: number, sv: number, win: any, debug = false) {
     console.log("window is undefined");
     return;
   }
-  console.log("window is defined");
   // Hotjar Tracking Code for https://studio.tableland.xyz/
   (function (h, o, t, j, a, r) {
     h.hj =

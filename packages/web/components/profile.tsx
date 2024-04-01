@@ -55,10 +55,7 @@ export default function Profile({
   // Fetch user when:
   useEffect(() => {
     const handler = () => {
-      authenticated
-        .refetch()
-        .then(() => console.log("authenticated.refetch success"))
-        .catch((err) => console.error(err));
+      authenticated.refetch().catch((err) => console.error(err));
     };
     // 1. window is focused (in case user logs out of another window)
     window.addEventListener("focus", handler);
