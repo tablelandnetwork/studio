@@ -1,4 +1,3 @@
-import yargs from "yargs";
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
 import {
@@ -8,13 +7,9 @@ import {
   FileStore,
 } from "../utils.js";
 
-type Yargs = typeof yargs;
-
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "unuse [context]";
 export const desc = "remove any existing id from the     given context";
-
-export const builder = function (args: Yargs) {};
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,

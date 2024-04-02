@@ -1,4 +1,3 @@
-import yargs from "yargs";
 import { readFileSync } from "fs";
 import type { Arguments } from "yargs";
 import { parse } from "csv-parse";
@@ -16,13 +15,9 @@ import {
   FileStore,
 } from "../utils.js";
 
-type Yargs = typeof yargs;
-
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "import-data <table> <file>";
 export const desc = "write the content of a csv into an  existing table";
-
-export const builder = function (args: Yargs) {};
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,

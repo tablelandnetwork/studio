@@ -1,4 +1,3 @@
-import yargs from "yargs";
 import { SiweMessage } from "siwe";
 import type { Arguments } from "yargs";
 import { type GlobalOptions } from "../cli.js";
@@ -10,13 +9,9 @@ import {
   toChecksumAddress,
 } from "../utils.js";
 
-type Yargs = typeof yargs;
-
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "login";
 export const desc = "create a login session via private  key";
-
-export const builder = function (args: Yargs) {};
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
