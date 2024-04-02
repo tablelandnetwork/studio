@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { skipToken } from "@tanstack/react-query";
-import { type schema } from "@tableland/studio-store";
+import { slugify, type schema } from "@tableland/studio-store";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import TagInput from "@/components/tag-input";
@@ -26,9 +26,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
+import { restrictedTeamSlugs } from "@/lib/restricted-slugs";
 
 const formSchema = z.object({
-  name: z.string().trim().nonempty(),
+  name: z
+    .string()
+    .trim()
+    .nonempty()
+    .refine((name) => !restrictedTeamSlugs.includes(slugify(name)), {
+      message: "You can't use a restricted word as a team name.",
+    }),
   emailInvites: z.array(z.string().trim().email()),
 });
 

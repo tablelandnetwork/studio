@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type schema } from "@tableland/studio-store";
+import { slugify, type schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { /* useFieldArray, */ useForm } from "react-hook-form";
@@ -26,9 +26,16 @@ import {
 import { Button } from "@/components/ui/button";
 import InputWithCheck from "@/components/input-with-check";
 import { FormRootMessage } from "@/components/form-root";
+import { restrictedProjectSlugs } from "@/lib/restricted-slugs";
 
 const formSchema = z.object({
-  name: z.string().trim().min(3),
+  name: z
+    .string()
+    .trim()
+    .min(3)
+    .refine((name) => !restrictedProjectSlugs.includes(slugify(name)), {
+      message: "You can't use a restricted word as a project name.",
+    }),
   description: z.string().trim().nonempty().max(1024),
   environments: z.array(z.object({ name: z.string().trim().min(3) })),
 });
