@@ -3,7 +3,7 @@ import { type Database } from "@tableland/sdk";
 import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
-import { slugify } from "./utils.js";
+import { slugify } from "../helpers.js";
 
 type Project = schema.Project;
 const environments = schema.environments;

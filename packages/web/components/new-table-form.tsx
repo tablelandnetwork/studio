@@ -5,7 +5,9 @@ import {
   setConstraint,
   type Schema,
   type schema,
+  slugify,
 } from "@tableland/studio-store";
+import { helpers } from "@tableland/sdk";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -38,18 +40,29 @@ import TeamSwitcher from "@/components/team-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { ensureError } from "@/lib/ensure-error";
 import TableColumns from "@/components/table-columns";
+import { restrictedTableSlugs } from "@/lib/restricted-slugs";
 
 const formSchema = z.object({
   name: z
     .string()
     .nonempty()
-    .regex(
-      /^(?!\d)[a-z0-9_]+$/,
-      "Table name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
-    )
     .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
       message: "You can't use a SQL keyword as a table name.",
-    }),
+    })
+    .refine((val) => !restrictedTableSlugs.includes(slugify(val)), {
+      message: "You can't use a restricted word as a table name.",
+    })
+    .refine(
+      async (val) => {
+        try {
+          await helpers.validateTableName(`${val}_1_1`, true);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
+      { message: "Table name invalid." },
+    ),
   description: z.string().trim().nonempty(),
   columns: z
     .array(
@@ -341,7 +354,7 @@ export default function NewTableForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      Specify at least one column for your table's schema.
+                      Specify at least one column for your table&apos;s schema.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
