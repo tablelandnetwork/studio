@@ -51,26 +51,28 @@ const formSchema = z.object({
       message: "You can't use a SQL keyword as a table name.",
     }),
   description: z.string().trim().nonempty(),
-  columns: z.array(
-    z.object({
-      id: z.string(),
-      name: z
-        .string()
-        .trim()
-        .nonempty()
-        .regex(
-          /^(?!\d)[a-z0-9_]+$/,
-          "Column name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
-        )
-        .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
-          message: "You can't use a SQL keyword as a column name.",
-        }),
-      type: z.enum(["int", "integer", "text", "blob"]),
-      notNull: z.boolean(),
-      primaryKey: z.boolean(),
-      unique: z.boolean(),
-    }),
-  ),
+  columns: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z
+          .string()
+          .trim()
+          .nonempty()
+          .regex(
+            /^(?!\d)[a-z0-9_]+$/,
+            "Column name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
+          )
+          .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
+            message: "You can't use a SQL keyword as a column name.",
+          }),
+        type: z.enum(["int", "integer", "text", "blob"]),
+        notNull: z.boolean(),
+        primaryKey: z.boolean(),
+        unique: z.boolean(),
+      }),
+    )
+    .min(1, "At least one column is required."),
 });
 
 export interface NewTableFormProps {
@@ -305,27 +307,46 @@ export default function NewTableForm({
                 </FormItem>
               )}
             />
-            <div className="space-y-2">
-              <FormLabel>Columns</FormLabel>
-              {schemaPreset ? (
-                <TableColumns columns={schemaPreset.columns} />
-              ) : (
-                <Columns
-                  columns={columnFields}
-                  control={control}
-                  register={register}
-                  addColumn={addColumn}
-                  removeColumn={removeColumn}
-                />
-              )}
-            </div>
-            {schemaPreset?.tableConstraints && (
-              <div className="space-y-2">
-                <FormLabel>Table constraints</FormLabel>
-                <TableConstraints
-                  tableConstraints={schemaPreset?.tableConstraints}
-                />
-              </div>
+
+            {schemaPreset ? (
+              <>
+                <div className="space-y-2">
+                  <FormLabel>Columns</FormLabel>
+                  <TableColumns columns={schemaPreset.columns} />
+                </div>
+                {schemaPreset.tableConstraints && (
+                  <div className="space-y-2">
+                    <FormLabel>Table constraints</FormLabel>
+                    <TableConstraints
+                      tableConstraints={schemaPreset?.tableConstraints}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <FormField
+                control={control}
+                name="columns"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Columns</FormLabel>
+                    <FormControl>
+                      <Columns
+                        columns={columnFields}
+                        control={control}
+                        register={register}
+                        addColumn={addColumn}
+                        removeColumn={removeColumn}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Specify at least one column for your table's schema.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
             <FormRootMessage />
             <Button
