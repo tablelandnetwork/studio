@@ -1,4 +1,4 @@
-import { type Store, type schema } from "@tableland/studio-store";
+import { slugify, type Store, type schema } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -10,6 +10,7 @@ import {
 import { type SendInviteFunc } from "../utils/sendInvite";
 import { internalError } from "../utils/internalError";
 import { zeroNine } from "../utils/fourHundredError";
+import { restrictedTeamSlugs } from "../restricted-slugs";
 
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
   return createTRPCRouter({
@@ -34,7 +35,17 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         );
       }),
     nameAvailable: publicProcedure
-      .input(z.object({ name: z.string().trim() }))
+      .input(
+        z.object({
+          name: z
+            .string()
+            .trim()
+            .min(3)
+            .refine((name) => !restrictedTeamSlugs.includes(slugify(name)), {
+              message: "You can't use a restricted word as a team name.",
+            }),
+        }),
+      )
       .query(async ({ input }) => {
         return await store.teams.nameAvailable(input.name);
       }),
@@ -100,7 +111,13 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
     newTeam: protectedProcedure
       .input(
         z.object({
-          name: z.string().trim(),
+          name: z
+            .string()
+            .trim()
+            .min(3)
+            .refine((name) => !restrictedTeamSlugs.includes(slugify(name)), {
+              message: "You can't use a restricted word as a team name.",
+            }),
           emailInvites: z.array(z.string().trim()),
         }),
       )

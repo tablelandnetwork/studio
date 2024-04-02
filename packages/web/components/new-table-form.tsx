@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sqliteKeywords } from "@tableland/studio-client";
+import { sqliteKeywords } from "@tableland/studio-api";
 import {
   cleanSchema,
   setConstraint,
@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 import { skipToken } from "@tanstack/react-query";
+import { restrictedTableSlugs } from "@tableland/studio-api";
 import Columns from "./columns";
 import { FormRootMessage } from "./form-root";
 import InputWithCheck from "./input-with-check";
@@ -40,7 +41,6 @@ import TeamSwitcher from "@/components/team-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { ensureError } from "@/lib/ensure-error";
 import TableColumns from "@/components/table-columns";
-import { restrictedTableSlugs } from "@/lib/restricted-slugs";
 
 const formSchema = z.object({
   name: z

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { /* useFieldArray, */ useForm } from "react-hook-form";
 import * as z from "zod";
 import { skipToken } from "@tanstack/react-query";
+import { restrictedProjectSlugs } from "@tableland/studio-api";
 import { api } from "@/trpc/react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -26,7 +27,6 @@ import {
 import { Button } from "@/components/ui/button";
 import InputWithCheck from "@/components/input-with-check";
 import { FormRootMessage } from "@/components/form-root";
-import { restrictedProjectSlugs } from "@/lib/restricted-slugs";
 
 const formSchema = z.object({
   name: z

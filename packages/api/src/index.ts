@@ -14,6 +14,13 @@ import {
   createTRPCContext,
   getSession,
 } from "./trpc";
+import {
+  allRestrictedSlugs,
+  restrictedProjectSlugs,
+  restrictedTableSlugs,
+  restrictedTeamSlugs,
+} from "./restricted-slugs";
+import { sqliteKeywords } from "./sqlite-keywords";
 
 /**
  * Create a server-side caller for the tRPC API
@@ -49,6 +56,11 @@ export {
   getSession,
   sessionOptions,
   defaultSession,
+  allRestrictedSlugs,
+  restrictedProjectSlugs,
+  restrictedTableSlugs,
+  restrictedTeamSlugs,
+  sqliteKeywords,
 };
 export type {
   AppRouter,

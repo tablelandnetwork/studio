@@ -1,14 +1,16 @@
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
-import { type Schema, type Store } from "@tableland/studio-store";
+import { slugify, type Schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { projectProcedure, publicProcedure, createTRPCRouter } from "../trpc";
 import { internalError } from "../utils/internalError";
+import { restrictedTableSlugs } from "../restricted-slugs";
+import { sqliteKeywords } from "../sqlite-keywords";
 
 const schemaSchema: z.ZodType<Schema> = z.object({
   columns: z.array(
     z.object({
-      name: z.string().trim().nonempty(),
+      name: createTableOrColumnNameSchema(),
       type: z.string().trim().nonempty(),
       constraints: z.array(z.string().trim().nonempty()).optional(),
     }),
@@ -42,7 +44,10 @@ export function tablesRouter(store: Store) {
       }),
     nameAvailable: publicProcedure
       .input(
-        z.object({ projectId: z.string().trim(), name: z.string().trim() }),
+        z.object({
+          projectId: z.string().trim(),
+          name: createTableOrColumnNameSchema(),
+        }),
       )
       .query(async ({ input }) => {
         return await store.tables.nameAvailable(input.projectId, input.name);
@@ -50,7 +55,7 @@ export function tablesRouter(store: Store) {
     newTable: projectProcedure(store)
       .input(
         z.object({
-          name: z.string().trim(),
+          name: createTableOrColumnNameSchema(),
           description: z.string().trim().nonempty(),
           schema: schemaSchema,
         }),
@@ -72,7 +77,7 @@ export function tablesRouter(store: Store) {
         z.object({
           chainId: z.number(),
           tableId: z.string().trim(),
-          name: z.string().trim(),
+          name: createTableOrColumnNameSchema(),
           environmentId: z.string().trim(),
           description: z.string().trim().nonempty(),
         }),
@@ -133,4 +138,28 @@ export function tablesRouter(store: Store) {
         }
       }),
   });
+}
+
+function createTableOrColumnNameSchema() {
+  return z
+    .string()
+    .trim()
+    .nonempty()
+    .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
+      message: "You can't use a SQL keyword as a table name.",
+    })
+    .refine((val) => !restrictedTableSlugs.includes(slugify(val)), {
+      message: "You can't use a restricted word as a table name.",
+    })
+    .refine(
+      async (val) => {
+        try {
+          await helpers.validateTableName(`${val}_1_1`, true);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
+      { message: "Table name invalid." },
+    );
 }

@@ -1,8 +1,9 @@
-import { type Store } from "@tableland/studio-store";
+import { slugify, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { publicProcedure, createTRPCRouter, teamProcedure } from "../trpc";
 import { internalError } from "../utils/internalError";
+import { restrictedProjectSlugs } from "../restricted-slugs";
 
 export function projectsRouter(store: Store) {
   return createTRPCRouter({
@@ -53,7 +54,13 @@ export function projectsRouter(store: Store) {
       .input(
         z.object({
           teamId: z.string().trim().optional(),
-          name: z.string().trim(),
+          name: z
+            .string()
+            .trim()
+            .min(3)
+            .refine((name) => !restrictedProjectSlugs.includes(slugify(name)), {
+              message: "You can't use a restricted word as a project name.",
+            }),
         }),
       )
       .query(async ({ input, ctx }) => {
@@ -71,7 +78,13 @@ export function projectsRouter(store: Store) {
     newProject: teamProcedure(store)
       .input(
         z.object({
-          name: z.string().trim(),
+          name: z
+            .string()
+            .trim()
+            .min(3)
+            .refine((name) => !restrictedProjectSlugs.includes(slugify(name)), {
+              message: "You can't use a restricted word as a project name.",
+            }),
           description: z.string().trim().nonempty(),
         }),
       )
