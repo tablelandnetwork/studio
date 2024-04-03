@@ -3,8 +3,9 @@ import { type schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import type * as z from "zod";
 import { skipToken } from "@tanstack/react-query";
+import { importTableSchema } from "@tableland/studio-validators";
 import {
   Sheet,
   SheetContent,
@@ -30,24 +31,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-
-const formSchema = z.object({
-  chainId: z.coerce.number().gt(0),
-  tableId: z.string().trim().nonempty(),
-  name: z
-    .string()
-    .nonempty()
-    .regex(
-      /^(?!\d)[a-z0-9_]+$/,
-      "Table name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
-    ),
-  description: z.string().trim().nonempty(),
-  environment: z
-    .string()
-    .optional()
-    .refine((v) => !!v, "Environment is required")
-    .transform((v) => v!),
-});
 
 export interface ImportTableFormProps {
   teamPreset?: schema.Team;
@@ -99,14 +82,14 @@ export default function ImportTableForm({
     !envPreset && project ? { projectId: project.id } : skipToken,
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof importTableSchema>>({
+    resolver: zodResolver(importTableSchema),
     defaultValues: {
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
       name: "",
       description: undefined,
-      environment: envPreset?.id ?? "",
+      environmentId: envPreset?.id ?? "",
     },
   });
 
@@ -128,7 +111,7 @@ export default function ImportTableForm({
   useEffect(() => {
     const env = envs?.[0];
     if (!env) return;
-    setValue("environment", env.id);
+    setValue("environmentId", env.id);
     setEnv(env);
   }, [envs, setValue]);
 
@@ -154,7 +137,7 @@ export default function ImportTableForm({
     setProject(undefined);
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof importTableSchema>) {
     if (!project) return;
     importTable.mutate(
       {
@@ -162,7 +145,7 @@ export default function ImportTableForm({
         chainId: values.chainId,
         tableId: values.tableId,
         name: values.name,
-        environmentId: values.environment,
+        environmentId: values.environmentId,
         description: values.description,
       },
       {
@@ -327,9 +310,13 @@ export default function ImportTableForm({
             />
             <FormField
               control={control}
-              name="environment"
+              name="environmentId"
               render={({ field }) => (
-                <Input type="hidden" {...field} {...register("environment")} />
+                <Input
+                  type="hidden"
+                  {...field}
+                  {...register("environmentId")}
+                />
                 // <FormItem>
                 //   <FormLabel>Environment</FormLabel>
                 //   <Select onValueChange={field.onChange} defaultValue={field.value}>

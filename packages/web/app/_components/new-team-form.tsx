@@ -2,10 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import type * as z from "zod";
 import { skipToken } from "@tanstack/react-query";
-import { slugify, type schema } from "@tableland/studio-store";
-import { restrictedTeamSlugs } from "@tableland/studio-api";
+import { type schema } from "@tableland/studio-store";
+import { newTeamSchema } from "@tableland/studio-validators";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
 import TagInput from "@/components/tag-input";
@@ -28,17 +28,6 @@ import {
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
 
-const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3)
-    .refine((name) => !restrictedTeamSlugs.includes(slugify(name)), {
-      message: "You can't use a restricted word as a team name.",
-    }),
-  emailInvites: z.array(z.string().trim().email()),
-});
-
 export interface NewTeamFormProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -57,8 +46,8 @@ export default function NewTeamForm({
   const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const [pendingEmail, setPendingEmail] = useState("");
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof newTeamSchema>>({
+    resolver: zodResolver(newTeamSchema),
     defaultValues: {
       name: "",
       emailInvites: [],
@@ -93,7 +82,7 @@ export default function NewTeamForm({
 
   const { setError } = form;
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof newTeamSchema>) {
     if (pendingEmail) {
       values.emailInvites = [...values.emailInvites, pendingEmail];
     }

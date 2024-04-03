@@ -9,7 +9,8 @@
     "packages/client",
     "packages/store",
     "packages/mail",
-    "packages/nonce"
+    "packages/nonce",
+    "packages/validators"
   ],
   "scripts": {
     "test": "lerna run test",

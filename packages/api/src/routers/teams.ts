@@ -1,6 +1,10 @@
-import { slugify, type Store, type schema } from "@tableland/studio-store";
+import { type Store, type schema } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+  teamNameAvailableSchema,
+  newTeamSchema,
+} from "@tableland/studio-validators";
 import {
   protectedProcedure,
   publicProcedure,
@@ -10,7 +14,6 @@ import {
 import { type SendInviteFunc } from "../utils/sendInvite";
 import { internalError } from "../utils/internalError";
 import { zeroNine } from "../utils/fourHundredError";
-import { restrictedTeamSlugs } from "../restricted-slugs";
 
 export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
   return createTRPCRouter({
@@ -35,17 +38,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         );
       }),
     nameAvailable: publicProcedure
-      .input(
-        z.object({
-          name: z
-            .string()
-            .trim()
-            .min(3)
-            .refine((name) => !restrictedTeamSlugs.includes(slugify(name)), {
-              message: "You can't use a restricted word as a team name.",
-            }),
-        }),
-      )
+      .input(teamNameAvailableSchema)
       .query(async ({ input }) => {
         return await store.teams.nameAvailable(input.name);
       }),
@@ -109,18 +102,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return await store.teams.teamsByMemberId(personalTeam);
       }),
     newTeam: protectedProcedure
-      .input(
-        z.object({
-          name: z
-            .string()
-            .trim()
-            .min(3)
-            .refine((name) => !restrictedTeamSlugs.includes(slugify(name)), {
-              message: "You can't use a restricted word as a team name.",
-            }),
-          emailInvites: z.array(z.string().trim()),
-        }),
-      )
+      .input(newTeamSchema)
       .mutation(async ({ ctx, input }) => {
         let team: schema.Team;
         let invites: schema.TeamInvite[];

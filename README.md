@@ -25,6 +25,7 @@ The `packages` directory contains the different packages used by Studio. All of 
 - `mail`: email sending interfaces. Package name: [`@tableland/studio-mail`](https://www.npmjs.com/package/@tableland/studio-mail)
 - `nonce`: Redis-based nonce manager. Package name: [`@tableland/nonce`](https://www.npmjs.com/package/@tableland/nonce)
 - `store`: an internal Studio data store. Package name: [`@tableland/studio-store`](https://www.npmjs.com/package/@tableland/studio-store)
+- `validators`: shared Zod schemas for Studio. Package name: [`@tableland/studio-validators`](https://www.npmjs.com/package/@tableland/studio-validators)
 - `web`: a web-based Studio client built with Next.js.
 
 ## Development

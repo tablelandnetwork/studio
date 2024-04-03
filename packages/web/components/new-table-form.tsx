@@ -1,19 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sqliteKeywords } from "@tableland/studio-api";
 import {
   cleanSchema,
   setConstraint,
   type Schema,
   type schema,
-  slugify,
 } from "@tableland/studio-store";
-import { helpers } from "@tableland/sdk";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
+import type * as z from "zod";
 import { skipToken } from "@tanstack/react-query";
-import { restrictedTableSlugs } from "@tableland/studio-api";
+import { newTableFormSchema } from "@tableland/studio-validators";
 import Columns from "./columns";
 import { FormRootMessage } from "./form-root";
 import InputWithCheck from "./input-with-check";
@@ -41,52 +38,6 @@ import TeamSwitcher from "@/components/team-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { ensureError } from "@/lib/ensure-error";
 import TableColumns from "@/components/table-columns";
-
-const formSchema = z.object({
-  name: z
-    .string()
-    .nonempty()
-    .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
-      message: "You can't use a SQL keyword as a table name.",
-    })
-    .refine((val) => !restrictedTableSlugs.includes(slugify(val)), {
-      message: "You can't use a restricted word as a table name.",
-    })
-    .refine(
-      async (val) => {
-        try {
-          await helpers.validateTableName(`${val}_1_1`, true);
-          return true;
-        } catch (_) {
-          return false;
-        }
-      },
-      { message: "Table name invalid." },
-    ),
-  description: z.string().trim().nonempty(),
-  columns: z
-    .array(
-      z.object({
-        id: z.string(),
-        name: z
-          .string()
-          .trim()
-          .nonempty()
-          .regex(
-            /^(?!\d)[a-z0-9_]+$/,
-            "Column name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
-          )
-          .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
-            message: "You can't use a SQL keyword as a column name.",
-          }),
-        type: z.enum(["int", "integer", "text", "blob"]),
-        notNull: z.boolean(),
-        primaryKey: z.boolean(),
-        unique: z.boolean(),
-      }),
-    )
-    .min(1, "At least one column is required."),
-});
 
 export interface NewTableFormProps {
   teamPreset?: schema.Team;
@@ -128,8 +79,8 @@ export default function NewTableForm({
     !projectPreset && team ? { teamId: team.id } : skipToken,
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof newTableFormSchema>>({
+    resolver: zodResolver(newTableFormSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -199,7 +150,7 @@ export default function NewTableForm({
     setProject(undefined);
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof newTableFormSchema>) {
     if (!project) return;
     const schema =
       schemaPreset ??

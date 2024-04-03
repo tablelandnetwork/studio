@@ -1,22 +1,14 @@
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
-import { slugify, type Schema, type Store } from "@tableland/studio-store";
+import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+  newTableApiSchema,
+  tableNameAvailableSchema,
+  importTableSchema,
+} from "@tableland/studio-validators";
 import { projectProcedure, publicProcedure, createTRPCRouter } from "../trpc";
 import { internalError } from "../utils/internalError";
-import { restrictedTableSlugs } from "../restricted-slugs";
-import { sqliteKeywords } from "../sqlite-keywords";
-
-const schemaSchema: z.ZodType<Schema> = z.object({
-  columns: z.array(
-    z.object({
-      name: createTableOrColumnNameSchema(),
-      type: z.string().trim().nonempty(),
-      constraints: z.array(z.string().trim().nonempty()).optional(),
-    }),
-  ),
-  tableConstraints: z.array(z.string().trim().nonempty()).optional(),
-});
 
 export function tablesRouter(store: Store) {
   return createTRPCRouter({
@@ -43,23 +35,12 @@ export function tablesRouter(store: Store) {
         return table;
       }),
     nameAvailable: publicProcedure
-      .input(
-        z.object({
-          projectId: z.string().trim(),
-          name: createTableOrColumnNameSchema(),
-        }),
-      )
+      .input(tableNameAvailableSchema)
       .query(async ({ input }) => {
         return await store.tables.nameAvailable(input.projectId, input.name);
       }),
     newTable: projectProcedure(store)
-      .input(
-        z.object({
-          name: createTableOrColumnNameSchema(),
-          description: z.string().trim().nonempty(),
-          schema: schemaSchema,
-        }),
-      )
+      .input(newTableApiSchema)
       .mutation(async ({ input }) => {
         try {
           return await store.tables.createTable(
@@ -73,15 +54,7 @@ export function tablesRouter(store: Store) {
         }
       }),
     importTable: projectProcedure(store)
-      .input(
-        z.object({
-          chainId: z.number(),
-          tableId: z.string().trim(),
-          name: createTableOrColumnNameSchema(),
-          environmentId: z.string().trim(),
-          description: z.string().trim().nonempty(),
-        }),
-      )
+      .input(importTableSchema)
       .mutation(async ({ input }) => {
         const validator = new Validator({
           baseUrl: helpers.getBaseUrl(input.chainId),
@@ -138,28 +111,4 @@ export function tablesRouter(store: Store) {
         }
       }),
   });
-}
-
-function createTableOrColumnNameSchema() {
-  return z
-    .string()
-    .trim()
-    .nonempty()
-    .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
-      message: "You can't use a SQL keyword as a table name.",
-    })
-    .refine((val) => !restrictedTableSlugs.includes(slugify(val)), {
-      message: "You can't use a restricted word as a table name.",
-    })
-    .refine(
-      async (val) => {
-        try {
-          await helpers.validateTableName(`${val}_1_1`, true);
-          return true;
-        } catch (_) {
-          return false;
-        }
-      },
-      { message: "Table name invalid." },
-    );
 }

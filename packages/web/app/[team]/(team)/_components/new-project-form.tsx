@@ -1,11 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { slugify, type schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { /* useFieldArray, */ useForm } from "react-hook-form";
-import * as z from "zod";
+import type * as z from "zod";
 import { skipToken } from "@tanstack/react-query";
-import { restrictedProjectSlugs } from "@tableland/studio-api";
+import { newProjectSchema } from "@tableland/studio-validators";
 import { api } from "@/trpc/react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -27,18 +27,6 @@ import {
 import { Button } from "@/components/ui/button";
 import InputWithCheck from "@/components/input-with-check";
 import { FormRootMessage } from "@/components/form-root";
-
-const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3)
-    .refine((name) => !restrictedProjectSlugs.includes(slugify(name)), {
-      message: "You can't use a restricted word as a project name.",
-    }),
-  description: z.string().trim().nonempty().max(1024),
-  environments: z.array(z.object({ name: z.string().trim().min(3) })),
-});
 
 export interface NewProjectFormProps {
   team: schema.Team;
@@ -73,12 +61,11 @@ export default function NewProjectForm({
     },
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof newProjectSchema>>({
+    resolver: zodResolver(newProjectSchema),
     defaultValues: {
       name: "",
       description: "",
-      environments: [],
     },
   });
 
@@ -96,14 +83,7 @@ export default function NewProjectForm({
 
   const { setError } = form;
 
-  // const { fields, append, remove } = useFieldArray(
-  //   {
-  //     control,
-  //     name: "environments",
-  //   },
-  // );
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof newProjectSchema>) {
     newProject.mutate({
       teamId: team.id,
       name: values.name,
@@ -179,69 +159,6 @@ export default function NewProjectForm({
                 </FormItem>
               )}
             />
-            {/* <div>
-          <FormItem>
-            <FormLabel>Environments</FormLabel>
-            <FormDescription className="pb-2">
-              Environments provide logical groupings of tables you can use
-              however you&apos;d like. Optionally add environments here now, or
-              add them later in your Project&apos;s settings.
-            </FormDescription>
-          </FormItem>
-          {fields.map((env, index) => (
-            <FormField
-              control={form.control}
-              name={`environments.${index}.name`}
-              key={env.id}
-              render={({ field }) => (
-                <FormItem className="pb-3">
-                  <FormControl key={index}>
-                    <div className="flex gap-2">
-                      <Input
-                        {...form.register(`environments.${index}.name`)}
-                        placeholder="Environment name"
-                      />
-                      <Button
-                        className="hidden"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          append(
-                            { name: "" },
-                            {
-                              shouldFocus: true,
-                            },
-                          );
-                        }}
-                      />
-                      <Button
-                        variant="ghost"
-                        type="button"
-                        className="px-0"
-                        size="sm"
-                        onClick={() => remove(index)}
-                      >
-                        <X />
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
-          <Button
-            type="button"
-            variant="outline"
-            disabled={pending}
-            onClick={(e) => {
-              e.preventDefault();
-              append({ name: "" });
-            }}
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Add Environment
-          </Button>
-        </div> */}
             <FormRootMessage />
             <Button
               type="submit"

@@ -1,9 +1,12 @@
-import { slugify, type Store } from "@tableland/studio-store";
+import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+  newProjectSchema,
+  projectNameAvailableSchema,
+} from "@tableland/studio-validators";
 import { publicProcedure, createTRPCRouter, teamProcedure } from "../trpc";
 import { internalError } from "../utils/internalError";
-import { restrictedProjectSlugs } from "../restricted-slugs";
 
 export function projectsRouter(store: Store) {
   return createTRPCRouter({
@@ -51,18 +54,7 @@ export function projectsRouter(store: Store) {
         return project;
       }),
     nameAvailable: publicProcedure
-      .input(
-        z.object({
-          teamId: z.string().trim().optional(),
-          name: z
-            .string()
-            .trim()
-            .min(3)
-            .refine((name) => !restrictedProjectSlugs.includes(slugify(name)), {
-              message: "You can't use a restricted word as a project name.",
-            }),
-        }),
-      )
+      .input(projectNameAvailableSchema)
       .query(async ({ input, ctx }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -76,18 +68,7 @@ export function projectsRouter(store: Store) {
         return await store.projects.nameAvailable(teamId, input.name);
       }),
     newProject: teamProcedure(store)
-      .input(
-        z.object({
-          name: z
-            .string()
-            .trim()
-            .min(3)
-            .refine((name) => !restrictedProjectSlugs.includes(slugify(name)), {
-              message: "You can't use a restricted word as a project name.",
-            }),
-          description: z.string().trim().nonempty(),
-        }),
-      )
+      .input(newProjectSchema)
       .mutation(async ({ input, ctx }) => {
         try {
           const project = await store.projects.createProject(
