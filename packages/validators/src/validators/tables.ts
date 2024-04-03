@@ -1,8 +1,8 @@
-import { restrictedTableSlugs } from "../restricted-slugs";
-import { sqliteKeywords } from "../sqlite-keywords";
 import { z } from "zod";
 import { helpers } from "@tableland/sdk";
 import { type Schema, slugify } from "@tableland/studio-store";
+import { sqliteKeywords } from "../sqlite-keywords";
+import { restrictedTableSlugs } from "../restricted-slugs";
 
 const tableNameSchema = z
   .string()
