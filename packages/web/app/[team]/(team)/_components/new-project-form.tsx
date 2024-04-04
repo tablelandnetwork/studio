@@ -48,6 +48,7 @@ export default function NewProjectForm({
 
   const nameAvailableQuery = api.projects.nameAvailable.useQuery(
     projectName ? { teamId: team.id, name: projectName } : skipToken,
+    { retry: false },
   );
 
   const newProject = api.projects.newProject.useMutation({

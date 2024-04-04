@@ -121,6 +121,7 @@ export default function ImportTableForm({
           name: tableName,
         }
       : skipToken,
+    { retry: false },
   );
 
   const importTable = api.tables.importTable.useMutation({

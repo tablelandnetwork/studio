@@ -67,6 +67,7 @@ export default function NewTeamForm({
 
   const nameAvailableQuery = api.teams.nameAvailable.useQuery(
     teamName ? { name: teamName } : skipToken,
+    { retry: false },
   );
 
   const newTeam = api.teams.newTeam.useMutation({
