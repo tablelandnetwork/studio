@@ -43,7 +43,6 @@ export default function NewTeamForm({
 }: NewTeamFormProps) {
   const [openSheet, setOpenSheet] = useState(open ?? false);
   const [teamName, setTeamName] = useState("");
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const [pendingEmail, setPendingEmail] = useState("");
 
   const form = useForm<z.infer<typeof newTeamSchema>>({
@@ -128,7 +127,6 @@ export default function NewTeamForm({
                       placeholder="Team name"
                       updateQuery={setTeamName}
                       queryStatus={nameAvailableQuery}
-                      onResult={setNameAvailable}
                       {...field}
                     />
                   </FormControl>
@@ -168,7 +166,7 @@ export default function NewTeamForm({
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={newTeam.isPending || !nameAvailable}
+              disabled={newTeam.isPending || !nameAvailableQuery.data}
             >
               {newTeam.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />

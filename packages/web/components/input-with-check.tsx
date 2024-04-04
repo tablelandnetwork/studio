@@ -1,23 +1,23 @@
 import { CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { type ChangeEvent, forwardRef, useEffect, useState } from "react";
+import { type RouterError } from "@tableland/studio-api";
+import { type TRPCClientErrorBase } from "@trpc/client";
 import { Input, type InputProps } from "@/components/ui/input";
-
-export type CheckStatus = "idle" | "pending" | "passed" | "failed" | "error";
 
 export interface QueryStatus {
   data: boolean | undefined;
   isError: boolean;
   isFetching: boolean;
   isSuccess: boolean;
+  error: TRPCClientErrorBase<RouterError> | null;
 }
 
 export type Props = InputProps & {
   updateQuery: (inputValue: string) => void;
   queryStatus: QueryStatus;
-  onResult?: (result: boolean | undefined) => void;
   debounceDuration?: number;
   failedMessage?: string;
-  errorMessage?: string;
+  errorFieldName?: string;
 };
 
 const InputWithCheck = forwardRef<HTMLInputElement, Props>(
@@ -25,11 +25,10 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
     {
       updateQuery,
       queryStatus,
-      onResult,
       onChange,
       debounceDuration = 500,
       failedMessage = "unavailable",
-      errorMessage = "error checking availability",
+      errorFieldName = "name",
       ...props
     }: Props,
     ref,
@@ -37,7 +36,6 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
     const [inputValue, setInputValue] = useState("");
     const [debouncing, setDebouncing] = useState(false);
     const [debouncedValue, setDebouncedValue] = useState("");
-    const [result, setResult] = useState<boolean | undefined>(undefined);
 
     useEffect(() => {
       setDebouncing(true);
@@ -52,30 +50,11 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
     }, [inputValue, debounceDuration]);
 
     useEffect(() => {
-      if (debouncing) {
-        setResult(undefined);
-      }
-    }, [debouncing]);
-
-    useEffect(() => {
       if (!debouncedValue.length) {
-        setResult(undefined);
         return;
       }
       updateQuery(debouncedValue);
     }, [debouncedValue, updateQuery]);
-
-    useEffect(() => {
-      if (queryStatus.isSuccess) {
-        setResult(queryStatus.data);
-      }
-    }, [queryStatus.data, queryStatus.isSuccess]);
-
-    useEffect(() => {
-      if (onResult) {
-        onResult(result);
-      }
-    }, [onResult, result]);
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
       setInputValue(event.target.value);
@@ -102,8 +81,14 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
         } else {
           return <p className="text-xs text-red-500">{failedMessage}</p>;
         }
-      } else if (queryStatus.isError) {
-        return <p className="text-xs text-red-500">{errorMessage}</p>;
+      } else if (queryStatus.isError && queryStatus.error) {
+        return (
+          <p className="text-xs text-destructive">
+            {queryStatus.error.data?.zodError
+              ? queryStatus.error.data.zodError.fieldErrors[errorFieldName]
+              : queryStatus.error.message}
+          </p>
+        );
       } else {
         return <CircleDashed className="text-gray-300" />;
       }

@@ -1,6 +1,7 @@
 import { createTRPCContext } from "@tableland/studio-api";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { cookies } from "next/headers";
+import { ZodError } from "zod";
 import { apiRouter } from "@/lib/api-router";
 
 // TODO: Understand why this should be set to edge and figure out why the crypto module is not available in edge. Might need to upgrade nextjs.
@@ -37,6 +38,7 @@ const handler = async (req: Request) => {
       });
     },
     onError({ error, path }) {
+      if (error.cause instanceof ZodError) return;
       console.error(`>>> tRPC Error on '${path ?? "[undefined path]"}'`, error);
     },
   });

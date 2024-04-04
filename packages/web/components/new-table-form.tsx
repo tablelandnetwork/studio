@@ -70,7 +70,6 @@ export default function NewTableForm({
     projectPreset,
   );
   const [tableName, setTableName] = useState("");
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
 
   const { data: teams } = api.teams.userTeams.useQuery(
     !teamPreset ? undefined : skipToken,
@@ -105,6 +104,7 @@ export default function NewTableForm({
     project && !!tableName
       ? { projectId: project.id, name: tableName }
       : skipToken,
+    { retry: false },
   );
 
   const newTable = api.tables.newTable.useMutation({
@@ -243,7 +243,6 @@ export default function NewTableForm({
                       placeholder="Table name"
                       updateQuery={setTableName}
                       queryStatus={nameAvailableQuery}
-                      onResult={setNameAvailable}
                       {...field}
                     />
                   </FormControl>
@@ -315,7 +314,7 @@ export default function NewTableForm({
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={newTable.isPending || !nameAvailable}
+              disabled={newTable.isPending || !nameAvailableQuery.data}
             >
               {newTable.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />

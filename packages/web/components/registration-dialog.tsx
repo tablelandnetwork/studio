@@ -28,7 +28,6 @@ export default function RegistrationDialog({
   onCancel: () => void;
 }) {
   const [teamName, setTeamName] = useState("");
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
 
@@ -75,7 +74,6 @@ export default function RegistrationDialog({
                 value={username}
                 updateQuery={setTeamName}
                 queryStatus={nameAvailableQuery}
-                onResult={setNameAvailable}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -104,7 +102,7 @@ export default function RegistrationDialog({
           <Button
             type="submit"
             onClick={handleRegister}
-            disabled={register.isPending || !nameAvailable}
+            disabled={register.isPending || !nameAvailableQuery.data}
           >
             {register.isPending && (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />

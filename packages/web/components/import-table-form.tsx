@@ -70,7 +70,6 @@ export default function ImportTableForm({
   );
   const [env, setEnv] = useState<schema.Environment | undefined>(envPreset);
   const [tableName, setTableName] = useState("");
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
 
   const { data: teams } = api.teams.userTeams.useQuery(
     !teamPreset ? undefined : skipToken,
@@ -279,7 +278,6 @@ export default function ImportTableForm({
                       placeholder="eg. users"
                       updateQuery={setTableName}
                       queryStatus={nameAvailableQuery}
-                      onResult={setNameAvailable}
                       {...field}
                     />
                   </FormControl>
@@ -345,7 +343,7 @@ export default function ImportTableForm({
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={importTable.isPending || !nameAvailable}
+              disabled={importTable.isPending || !nameAvailableQuery.data}
             >
               {importTable.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />

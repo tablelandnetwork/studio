@@ -45,7 +45,6 @@ export default function NewProjectForm({
 }: NewProjectFormProps) {
   const [openSheet, setOpenSheet] = useState(open ?? false);
   const [projectName, setProjectName] = useState("");
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
 
   const nameAvailableQuery = api.projects.nameAvailable.useQuery(
     projectName ? { teamId: team.id, name: projectName } : skipToken,
@@ -130,7 +129,6 @@ export default function NewProjectForm({
                       placeholder="Project name"
                       updateQuery={setProjectName}
                       queryStatus={nameAvailableQuery}
-                      onResult={setNameAvailable}
                       {...field}
                     />
                   </FormControl>
@@ -162,7 +160,7 @@ export default function NewProjectForm({
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={newProject.isPending || !nameAvailable}
+              disabled={newProject.isPending || !nameAvailableQuery.data}
             >
               {newProject.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
