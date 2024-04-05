@@ -86,8 +86,7 @@ export default function NewProjectForm({
   function onSubmit(values: z.infer<typeof newProjectSchema>) {
     newProject.mutate({
       teamId: team.id,
-      name: values.name,
-      description: values.description,
+      ...values,
     });
   }
 

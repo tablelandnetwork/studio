@@ -142,11 +142,7 @@ export default function ImportTableForm({
     importTable.mutate(
       {
         projectId: project.id,
-        chainId: values.chainId,
-        tableId: values.tableId,
-        name: values.name,
-        environmentId: values.environmentId,
-        description: values.description,
+        ...values,
       },
       {
         onError: (err) => {

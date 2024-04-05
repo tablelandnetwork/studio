@@ -174,9 +174,8 @@ export default function NewTableForm({
       });
     newTable.mutate({
       projectId: project.id,
-      name: values.name,
-      description: values.description,
       schema,
+      ...values,
     });
   }
 
