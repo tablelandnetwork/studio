@@ -29,6 +29,8 @@ SESSION_COOKIE_NAME=STUDIO_SESSION
 SESSION_COOKIE_PASS="secure password secure password secure password secure password secure password secure password secure password"
 DATA_SEAL_PASS="secure password secure password secure password secure password secure password secure password secure password"
 DATA_SEAL_PASS="secure password secure password secure password"
+KV_REST_API_URL="https://your-example-domain.upstash.io"
+KV_REST_API_TOKEN="your_kv_api_token"
 ```
 
 4. Run `npm run dev:all` to start a local only validator, deploy the needed contracts, create all the internal studio tables, and start the web app
