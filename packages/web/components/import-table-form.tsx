@@ -268,7 +268,7 @@ export default function ImportTableForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Table Name</FormLabel>
+                  <FormLabel>Blueprint table definition name</FormLabel>
                   <FormControl>
                     <InputWithCheck
                       disabled={!project}
@@ -279,8 +279,9 @@ export default function ImportTableForm({
                     />
                   </FormControl>
                   <FormDescription>
-                    The name of the Table to create in your Studio project. This
-                    Table&apos;s name must be unique within your Project.
+                    The name of the table definition to create in your Studio
+                    project&apos;s blueprint. This name must be unique within
+                    your project&apos;s blueprint.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -296,8 +297,9 @@ export default function ImportTableForm({
                     <Textarea placeholder="Table description" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Provide a description for the imported Table so others can
-                    understand the role it plays in your Project Blueprint.
+                    Provide a description for the imported table so others can
+                    understand the role it plays in your project&apos;s
+                    blueprint.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
