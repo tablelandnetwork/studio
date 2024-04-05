@@ -1,6 +1,6 @@
 {
   "name": "@tableland/studio-cli",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Tableland command line tools",
   "repository": "https://github.com/tablelandnetwork/studio/cli",
   "publishConfig": {
@@ -26,7 +26,8 @@
     "studio": "./dist/cli.js"
   },
   "files": [
-    "dist/**/*.js"
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
   ],
   "scripts": {
     "prepublishOnly": "npm run build",
