@@ -10,6 +10,7 @@ import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -33,12 +34,10 @@ export default function RegistrationDialog({
   showDialog,
   onOpenChange,
   onSuccess,
-  onCancel,
 }: {
   showDialog: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (auth: Auth) => void;
-  onCancel: () => void;
 }) {
   const [teamName, setTeamName] = useState("");
 
@@ -70,11 +69,6 @@ export default function RegistrationDialog({
   function onSubmit(values: z.infer<typeof registerSchema>) {
     register.mutate(values);
   }
-
-  const handleCancel = () => {
-    onCancel();
-    form.reset();
-  };
 
   const handleOnOpenChange = (open: boolean) => {
     onOpenChange(open);
@@ -114,7 +108,7 @@ export default function RegistrationDialog({
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>Team name must be unique.</FormDescription>
+                  <FormDescription>Username must be unique.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -128,20 +122,21 @@ export default function RegistrationDialog({
                   <FormControl>
                     <Input placeholder="me@me.com" {...field} />
                   </FormControl>
-                  <FormDescription>Team name must be unique.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormRootMessage />
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={handleCancel}
-                disabled={register.isPending}
-              >
-                Cancel
-              </Button>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={register.isPending}
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
               <Button
                 type="submit"
                 disabled={register.isPending || !nameAvailableQuery.data}

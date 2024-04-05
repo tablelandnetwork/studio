@@ -115,10 +115,6 @@ export default function Profile({
     }
   };
 
-  const onRegisterCancel = () => {
-    setShowRegisterDialog(false);
-  };
-
   return (
     <div className="flex flex-row gap-2">
       {isConnected && (
@@ -184,7 +180,6 @@ export default function Profile({
         showDialog={showRegisterDialog}
         onOpenChange={setShowRegisterDialog}
         onSuccess={onRegisterSuccess}
-        onCancel={onRegisterCancel}
       />
     </div>
   );
