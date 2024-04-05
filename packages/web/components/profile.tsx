@@ -90,6 +90,12 @@ export default function Profile({
     }
   }, [signInError, toast]);
 
+  useEffect(() => {
+    if (isConnected && authenticated.data) {
+      router.push(`/${authenticated.data.personalTeam.slug}`);
+    }
+  }, [isConnected, authenticated.data, router]);
+
   const onSignInSuccess = ({ auth }: { auth: Auth | undefined }) => {
     if (auth) {
       router.refresh();
