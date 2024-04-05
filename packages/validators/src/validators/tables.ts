@@ -31,8 +31,8 @@ const columnNameSchema = z
   .trim()
   .nonempty()
   .regex(
-    /^(?!\d)[a-z0-9_]+$/,
-    "Column name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
+    /^(?!\d)[A-Za-z0-9_]+$/,
+    "Column name can't start with a number and can contain any combination of letters, numbers, and underscores.",
   )
   .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
     message: "You can't use a SQL keyword as a column name.",
