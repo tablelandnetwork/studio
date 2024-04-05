@@ -8,7 +8,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import type * as z from "zod";
+import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
 import { newTableFormSchema } from "@tableland/studio-validators";
 import Columns from "./columns";

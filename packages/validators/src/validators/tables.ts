@@ -57,17 +57,21 @@ export const newTableFormSchema = z.object({
         unique: z.boolean(),
       }),
     )
-    .min(1, "At least one column is required."),
+    .min(1, "At least one column is required.")
+    .max(24, "A table can have at most 24 columns."),
 });
 
 const schemaSchema: z.ZodType<Schema> = z.object({
-  columns: z.array(
-    z.object({
-      name: columnNameSchema,
-      type: z.string().trim().nonempty(),
-      constraints: z.array(z.string().trim().nonempty()).optional(),
-    }),
-  ),
+  columns: z
+    .array(
+      z.object({
+        name: columnNameSchema,
+        type: z.string().trim().nonempty(),
+        constraints: z.array(z.string().trim().nonempty()).optional(),
+      }),
+    )
+    .min(1, "At least one column is required.")
+    .max(24, "A table can have at most 24 columns."),
   tableConstraints: z.array(z.string().trim().nonempty()).optional(),
 });
 

@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import * as z from "zod";
+import { z } from "zod";
 import { type useToast } from "@/components/ui/use-toast";
 
 type Toast = ReturnType<typeof useToast>["toast"];

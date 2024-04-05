@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import type * as z from "zod";
+import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
 import { type schema } from "@tableland/studio-store";
 import { newTeamSchema } from "@tableland/studio-validators";
