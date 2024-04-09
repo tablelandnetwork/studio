@@ -73,7 +73,7 @@ export function Sidebar({
             return isAuthorized || deployment ? (
               <Link
                 key={table.id}
-                href={`/${teamSlug}/${projectSlug}/deployments/${environment.slug}/${table.name}`}
+                href={`/${teamSlug}/${projectSlug}/deployments/${environment.slug}/${table.slug}`}
               >
                 {button}
               </Link>

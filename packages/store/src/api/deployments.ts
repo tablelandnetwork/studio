@@ -1,11 +1,14 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
 
 const deployments = schema.deployments;
 const environments = schema.environments;
 const projectTables = schema.projectTables;
+const projects = schema.projects;
 const tables = schema.tables;
+const teamProjects = schema.teamProjects;
+const teams = schema.teams;
 
 export function initDeployments(db: DrizzleD1Database<typeof schema>) {
   return {
@@ -74,6 +77,35 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
         table: r.tables,
       }));
       return mapped;
+    },
+
+    deploymentReferences: async function (chainId: number, tokenId: string) {
+      const res = await db
+        .select({
+          team: teams,
+          project: projects,
+          table: tables,
+          environment: environments,
+          deployment: deployments,
+        })
+        .from(deployments)
+        .innerJoin(
+          projectTables,
+          eq(deployments.tableId, projectTables.tableId),
+        )
+        .innerJoin(tables, eq(projectTables.tableId, tables.id))
+        .innerJoin(projects, eq(projectTables.projectId, projects.id))
+        .innerJoin(environments, eq(deployments.environmentId, environments.id))
+        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
+        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .where(
+          and(
+            eq(deployments.chainId, chainId),
+            eq(deployments.tokenId, tokenId),
+          ),
+        )
+        .all();
+      return res;
     },
   };
 }
