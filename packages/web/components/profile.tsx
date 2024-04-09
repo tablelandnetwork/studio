@@ -94,7 +94,10 @@ export default function Profile({
     if (isConnected && authenticated.data) {
       router.push(`/${authenticated.data.personalTeam.slug}`);
     }
-  }, [isConnected, authenticated.data, router]);
+    // Not incliding authenticated.data in deps because we only
+    // want to trigger this when isConnected changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, router]);
 
   const onSignInSuccess = ({ auth }: { auth: Auth | undefined }) => {
     if (auth) {
