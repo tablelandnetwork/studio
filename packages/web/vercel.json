@@ -1,4 +1,9 @@
 {
   "trailingSlash": false,
-  "github": { "silent": true }
+  "github": { "silent": true },
+  "functions": {
+    "app/**/*": {
+      "maxDuration": 60
+    }
+  }
 }
