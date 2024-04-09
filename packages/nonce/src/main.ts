@@ -202,14 +202,11 @@ export class NonceManager extends ethers.Signer {
     this._lock = undefined;
   }
 
-  // NOTE: The delta key expires in 30 seconds. This should be about right for
-  //       Nova's average of 12 seconds per block.
+  // NOTE: The delta key expires in 30 seconds. This should be fine for Nova.
   async _resetDelta() {
     await this.memStore.eval(
       `if redis.call("get",KEYS[1]) ~= ARGV[1] then
-          local ret = redis.call("set",KEYS[1], 0)
-          redis.call("expire", KEYS[1], 30)
-          return ret
+          return redis.call("setex", KEYS[1], 30, 0)
       else
           return 0
       end`,
