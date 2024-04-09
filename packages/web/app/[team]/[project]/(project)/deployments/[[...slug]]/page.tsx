@@ -51,7 +51,7 @@ export default async function Deployments({
     selectedEnvironment = environments.find(
       (environment) => environment.slug === envSlug,
     );
-    selectedTable = tables.find((table) => table.name === tableSlug);
+    selectedTable = tables.find((table) => table.slug === tableSlug);
     if (!selectedEnvironment || !selectedTable) {
       notFound();
     }

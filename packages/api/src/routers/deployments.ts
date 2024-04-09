@@ -55,5 +55,18 @@ export function deploymentsRouter(store: Store) {
           input.environmentId,
         );
       }),
+    deploymentReferences: publicProcedure
+      .input(
+        z.object({
+          chainId: z.number().int().gt(0),
+          tokenId: z.string().trim().nonempty(),
+        }),
+      )
+      .query(async ({ input }) => {
+        return await store.deployments.deploymentReferences(
+          input.chainId,
+          input.tokenId,
+        );
+      }),
   });
 }
