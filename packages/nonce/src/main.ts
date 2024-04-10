@@ -202,10 +202,11 @@ export class NonceManager extends ethers.Signer {
     this._lock = undefined;
   }
 
+  // NOTE: The delta key expires in 30 seconds. This should be fine for Nova.
   async _resetDelta() {
     await this.memStore.eval(
       `if redis.call("get",KEYS[1]) ~= ARGV[1] then
-          return redis.call("set",KEYS[1], 0)
+          return redis.call("setex", KEYS[1], 30, 0)
       else
           return 0
       end`,
