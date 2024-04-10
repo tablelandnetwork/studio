@@ -5,7 +5,7 @@
     "ecmaVersion": 12,
     "project": "../../lint.tsconfig.json"
   },
-  "ignorePatterns": ["**/dist/", "*.d.ts", "packages/web/components/ui/**/*"],
+  "ignorePatterns": ["**/dist/", "*.d.ts"],
   "globals": {
     // mocha
     "before": true,
