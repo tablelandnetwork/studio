@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
 import { importTableSchema } from "@tableland/studio-validators";
+import { Validator, helpers } from "@tableland/sdk";
 import {
   Sheet,
   SheetContent,
@@ -31,6 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
+import { tablePrefix } from "@/lib/table-prefix";
 
 export interface ImportTableFormProps {
   teamPreset?: schema.Team;
@@ -92,7 +94,10 @@ export default function ImportTableForm({
     },
   });
 
-  const { handleSubmit, control, register, setValue, setError } = form;
+  const { handleSubmit, control, register, setValue, setError, watch } = form;
+
+  const chainId = watch("chainId");
+  const tableId = watch("tableId");
 
   useEffect(() => {
     if (!openSheet) {
@@ -113,6 +118,24 @@ export default function ImportTableForm({
     setValue("environmentId", env.id);
     setEnv(env);
   }, [envs, setValue]);
+
+  useEffect(() => {
+    if (!(!!chainId && !!tableId)) {
+      setValue("name", "");
+      return;
+    }
+    const validator = new Validator({ baseUrl: helpers.getBaseUrl(chainId) });
+    validator
+      .getTableById({ chainId, tableId })
+      .then((table) => {
+        const prefix = tablePrefix(table.name);
+        setValue("name", prefix);
+        setTableName(prefix);
+      })
+      .catch((_) => {
+        setValue("name", "");
+      });
+  }, [chainId, tableId, setValue]);
 
   const nameAvailableQuery = api.tables.nameAvailable.useQuery(
     project && tableName

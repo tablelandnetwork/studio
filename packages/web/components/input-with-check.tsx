@@ -29,13 +29,18 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
       debounceDuration = 500,
       failedMessage = "unavailable",
       errorFieldName = "name",
+      value,
       ...props
     }: Props,
     ref,
   ) => {
-    const [inputValue, setInputValue] = useState("");
+    const [inputValue, setInputValue] = useState<
+      string | number | readonly string[] | undefined
+    >(value);
     const [debouncing, setDebouncing] = useState(false);
-    const [debouncedValue, setDebouncedValue] = useState("");
+    const [debouncedValue, setDebouncedValue] = useState<
+      string | number | readonly string[] | undefined
+    >();
 
     useEffect(() => {
       setDebouncing(true);
@@ -50,10 +55,9 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
     }, [inputValue, debounceDuration]);
 
     useEffect(() => {
-      if (!debouncedValue.length) {
-        return;
+      if (typeof debouncedValue === "string" && !debouncedValue.length) {
+        updateQuery(debouncedValue);
       }
-      updateQuery(debouncedValue);
     }, [debouncedValue, updateQuery]);
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -65,13 +69,18 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
 
     return (
       <div className="flex items-center space-x-2">
-        <Input {...props} onChange={handleInputChange} ref={ref} />
+        <Input
+          {...props}
+          value={value}
+          onChange={handleInputChange}
+          ref={ref}
+        />
         {statusComponent()}
       </div>
     );
 
     function statusComponent() {
-      if (debouncing || !inputValue.length) {
+      if (debouncing || !value) {
         return <CircleDashed className="text-gray-300" />;
       } else if (queryStatus.isFetching) {
         return <Loader2 className="animate-spin" />;
