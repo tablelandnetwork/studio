@@ -45,7 +45,7 @@ export default function RegistrationDialog({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
-      email: undefined,
+      email: "",
     },
   });
 
