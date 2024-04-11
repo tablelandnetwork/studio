@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import NewDefForm, { type NewTableFormProps } from "@/components/new-def-form";
 import { Button } from "@/components/ui/button";
 
-export default function NewTable(
+export default function NewDef(
   props: Required<Pick<NewTableFormProps, "teamPreset" | "projectPreset">>,
 ) {
   const router = useRouter();

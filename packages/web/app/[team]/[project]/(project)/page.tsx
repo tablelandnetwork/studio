@@ -3,7 +3,7 @@ import { type schema } from "@tableland/studio-store";
 import { PencilRuler, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
-import NewTable from "./_components/new-table";
+import NewDef from "./_components/new-def";
 import ImportTable from "./_components/import-table";
 import { api } from "@/trpc/server";
 import HashDisplay from "@/components/hash-display";
@@ -71,7 +71,7 @@ export default async function Project({
           <h2 className="text-lg font-semibold tracking-tight">Tables</h2>
           {authorized && (
             <div className="ml-auto">
-              <NewTable teamPreset={team} projectPreset={project} />
+              <NewDef teamPreset={team} projectPreset={project} />
               {envs.length && (
                 <ImportTable
                   teamPreset={team}
