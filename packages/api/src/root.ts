@@ -8,7 +8,7 @@ import { environmentsRouter } from "./routers/environments";
 import { invitesRouter } from "./routers/invites";
 import { projectsRouter } from "./routers/projects";
 import { providersRouter } from "./routers/providers";
-import { tablesRouter } from "./routers/tables";
+import { tablesRouter } from "./routers/defs";
 import { teamsRouter } from "./routers/teams";
 
 export function appRouter(
