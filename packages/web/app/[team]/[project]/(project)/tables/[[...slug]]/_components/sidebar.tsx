@@ -29,7 +29,7 @@ export function Sidebar({
   return (
     <div className={cn("space-y-5 pb-4 pl-4 pt-4", className)}>
       <div className="flex flex-col space-y-1">
-        <Link href={`/${teamSlug}/${projectSlug}/deployments`}>
+        <Link href={`/${teamSlug}/${projectSlug}/tables`}>
           <Button
             variant={selectedDef ? "ghost" : "secondary"}
             className="w-full justify-start"
@@ -71,7 +71,7 @@ export function Sidebar({
             return isAuthorized || deployment ? (
               <Link
                 key={def.id}
-                href={`/${teamSlug}/${projectSlug}/deployments/${environment.slug}/${def.slug}`}
+                href={`/${teamSlug}/${projectSlug}/tables/${environment.slug}/${def.slug}`}
               >
                 {button}
               </Link>

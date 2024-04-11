@@ -185,7 +185,7 @@ export default function ExecDeployment({
   const handleOnOpenChange = (open: boolean) => {
     setShowDialog(open);
     if (!open) {
-      router.replace(`/${team.slug}/${project.slug}/deployments`);
+      router.replace(`/${team.slug}/${project.slug}/tables`);
     }
   };
 

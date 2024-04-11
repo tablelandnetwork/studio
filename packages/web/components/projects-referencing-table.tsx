@@ -19,7 +19,7 @@ export default function ProjectsReferencingTable({
         {references.map((p) => (
           <li key={p.project.id}>
             <Link
-              href={`/${p.team.slug}/${p.project.slug}/deployments/${p.environment.slug}/${p.def.slug}`}
+              href={`/${p.team.slug}/${p.project.slug}/tables/${p.environment.slug}/${p.def.slug}`}
               className="text-foreground"
             >
               {p.team.name}/{p.project.name}

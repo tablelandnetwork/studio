@@ -99,10 +99,7 @@ export default async function Project({
                   the shape of tables that will eventually be created on
                   Tableland &mdash; To actually deploy your definitions to
                   Tableland, vist the Project&apos;s{" "}
-                  <Link href={`${project.slug}/deployments`}>
-                    Deployments tab
-                  </Link>
-                  .
+                  <Link href={`${project.slug}/tables`}>tables tab</Link>.
                 </p>
               </div>
             )}

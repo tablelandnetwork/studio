@@ -72,7 +72,7 @@ export default async function DefDetails({
             {deploymentInfos.length ? (
               `Definition ${def.name} has been deployed to the following networks:`
             ) : (
-              <Link href={`/${team.slug}/${project.slug}/deployments`}>
+              <Link href={`/${team.slug}/${project.slug}/tables`}>
                 Definition <b className="font-bold">{def.name}</b> has not been
                 deployed yet.
               </Link>
@@ -84,7 +84,7 @@ export default async function DefDetails({
             {deploymentInfos.map((deploymentInfo) => (
               <Link
                 key={deploymentInfo.environment.id}
-                href={`/${team.slug}/${project.slug}/deployments/${deploymentInfo.environment.slug}/${def.slug}`}
+                href={`/${team.slug}/${project.slug}/tables/${deploymentInfo.environment.slug}/${def.slug}`}
               >
                 <div className="flex items-center rounded-md p-3 hover:bg-slate-100">
                   <Rocket />

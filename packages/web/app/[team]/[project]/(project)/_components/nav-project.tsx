@@ -25,9 +25,9 @@ function projectLinks(
     },
     {
       label: "Tables",
-      href: `/${team.slug}/${project.slug}/deployments`,
+      href: `/${team.slug}/${project.slug}/tables`,
       isActive: (pathname) =>
-        pathname.includes(`/${team.slug}/${project.slug}/deployments`),
+        pathname.includes(`/${team.slug}/${project.slug}/tables`),
     },
   ];
 }

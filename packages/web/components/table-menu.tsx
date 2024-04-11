@@ -41,7 +41,7 @@ export default function TableMenu(
         onSuccess={(team, project, def, env) => {
           router.refresh();
           router.push(
-            `/${team.slug}/${project.slug}/deployments/${env.slug}/${def.slug}`,
+            `/${team.slug}/${project.slug}/tables/${env.slug}/${def.slug}`,
           );
         }}
       />
