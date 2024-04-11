@@ -37,7 +37,7 @@ import { api } from "@/trpc/react";
 import TeamSwitcher from "@/components/team-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { ensureError } from "@/lib/ensure-error";
-import TableColumns from "@/components/table-columns";
+import DefColumns from "@/components/def-columns";
 
 export interface NewTableFormProps {
   teamPreset?: schema.Team;
@@ -54,7 +54,7 @@ export interface NewTableFormProps {
   ) => void;
 }
 
-export default function NewTableForm({
+export default function NewDefForm({
   teamPreset,
   projectPreset,
   showSelectors,
@@ -274,7 +274,7 @@ export default function NewTableForm({
               <>
                 <div className="space-y-2">
                   <FormLabel>Columns</FormLabel>
-                  <TableColumns columns={schemaPreset.columns} />
+                  <DefColumns columns={schemaPreset.columns} />
                 </div>
                 {schemaPreset.tableConstraints && (
                   <div className="space-y-2">

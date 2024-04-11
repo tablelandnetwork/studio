@@ -4,7 +4,7 @@ import { Ellipsis } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import NewTableForm, { type NewTableFormProps } from "./new-table-form";
+import NewDefForm, { type NewTableFormProps } from "./new-def-form";
 import ImportTableForm, {
   type ImportTableFormProps,
 } from "./import-table-form";
@@ -25,7 +25,7 @@ export default function TablelandTableMenu(
 
   return (
     <>
-      <NewTableForm
+      <NewDefForm
         {...props}
         open={newTableFormOpen}
         onOpenChange={setNewTableFormOpen}

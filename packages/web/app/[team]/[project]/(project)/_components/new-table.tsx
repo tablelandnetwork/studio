@@ -2,9 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import NewTableForm, {
-  type NewTableFormProps,
-} from "@/components/new-table-form";
+import NewDefForm, { type NewTableFormProps } from "@/components/new-def-form";
 import { Button } from "@/components/ui/button";
 
 export default function NewTable(
@@ -13,7 +11,7 @@ export default function NewTable(
   const router = useRouter();
 
   return (
-    <NewTableForm
+    <NewDefForm
       trigger={
         <Button variant="ghost" className="mr-2">
           <Plus className="mr-2" />
