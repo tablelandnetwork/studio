@@ -1,5 +1,5 @@
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
-import TablelandTable from "@/components/tableland-table";
+import Table from "@/components/table";
 
 export default async function TablePage({
   params,
@@ -68,7 +68,7 @@ export default async function TablePage({
   const createdAt = new Date(createdAttr.value * 1000);
 
   return (
-    <TablelandTable
+    <Table
       displayName={params.name}
       chainId={chainId}
       createdAt={createdAt}

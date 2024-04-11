@@ -50,7 +50,7 @@ interface DeploymentData {
   txnHash: string | null;
 }
 
-export default async function TablelandTable({
+export default async function Table({
   displayName,
   tableName,
   chainId,

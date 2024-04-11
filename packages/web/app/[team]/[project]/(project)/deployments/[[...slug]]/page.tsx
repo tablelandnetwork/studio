@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import ExecDeployment from "./_components/exec-deployment";
 import { Sidebar } from "./_components/sidebar";
-import TablelandTable from "@/components/tableland-table";
+import Table from "@/components/table";
 import { api } from "@/trpc/server";
 
 export default async function Deployments({
@@ -77,7 +77,7 @@ export default async function Deployments({
           />
           {selectedEnvironment && selectedTable ? (
             deployment ? (
-              <TablelandTable
+              <Table
                 displayName={selectedTable.name}
                 tableName={deployment.tableName}
                 chainId={deployment.chainId}
