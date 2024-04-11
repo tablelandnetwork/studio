@@ -2,7 +2,7 @@ import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
 import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { importTableSchema } from "@tableland/studio-validators";
-import { projectProcedure, publicProcedure, createTRPCRouter } from "../trpc";
+import { projectProcedure, createTRPCRouter } from "../trpc";
 import { internalError } from "../utils/internalError";
 
 export function tablesRouter(store: Store) {

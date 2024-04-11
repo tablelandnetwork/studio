@@ -42,7 +42,7 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
         .toSQL();
       const { sql: projectDefSql, params: projectDefParams } = db
         .insert(projectDefs)
-        .values({ defId: defId, projectId })
+        .values({ defId, projectId })
         .toSQL();
       await tbl.batch([
         tbl.prepare(projectDefSql).bind(projectDefParams),

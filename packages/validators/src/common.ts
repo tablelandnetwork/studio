@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { restrictedTeamSlugs } from "./restricted-slugs";
 import { helpers } from "@tableland/sdk";
-import { type Schema, slugify } from "@tableland/studio-store";
+import { slugify } from "@tableland/studio-store";
+import { restrictedTeamSlugs, restrictedDefSlugs } from "./restricted-slugs";
 import { sqliteKeywords } from "./sqlite-keywords";
-import { restrictedDefSlugs } from "./restricted-slugs";
 
 export const teamNameSchema = z
   .string()

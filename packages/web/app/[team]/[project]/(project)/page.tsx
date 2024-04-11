@@ -1,6 +1,6 @@
 import { helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import { Boxes, PencilRuler, Rocket, Table2 } from "lucide-react";
+import { Boxes, PencilRuler, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import NewDef from "./_components/new-def";
