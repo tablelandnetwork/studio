@@ -1,6 +1,6 @@
 import { helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import { PencilRuler, Rocket, Table2 } from "lucide-react";
+import { Boxes, PencilRuler, Rocket, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import NewDef from "./_components/new-def";
@@ -95,10 +95,10 @@ export default async function Project({
                 <Table2 className="flex-shrink-0" />
                 <p className="text-muted-foreground">
                   Get started by creating a definition or importing a table
-                  using the buttons above. Remember here in your Blueprint,
-                  definitions simply define the shape of tables that will
-                  eventually be created on Tableland &mdash; To actually deploy
-                  your definitions to Tableland, vist the Project&apos;s{" "}
+                  using the buttons above. Remember, definitions simply define
+                  the shape of tables that will eventually be created on
+                  Tableland &mdash; To actually deploy your definitions to
+                  Tableland, vist the Project&apos;s{" "}
                   <Link href={`${project.slug}/deployments`}>
                     Deployments tab
                   </Link>
@@ -123,7 +123,7 @@ export default async function Project({
                   <Card className="">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-1">
-                        <Table2 />
+                        <Boxes />
                         {def.name}
                       </CardTitle>
                       <CardDescription className="truncate">
@@ -142,7 +142,7 @@ export default async function Project({
                   </div> */}
                       <div className="flex items-center gap-2">
                         <div className="flex flex-col items-center">
-                          <Rocket
+                          <Table2
                             className={
                               deployment ? "text-green-500" : "text-red-500"
                             }

@@ -1,4 +1,4 @@
-import { AlertCircle, Folders, Rocket, Table2 } from "lucide-react";
+import { AlertCircle, Boxes, Folders, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import NewProjectButton from "./_components/new-project-button";
@@ -86,20 +86,20 @@ export default async function Projects({
                   </CardHeader>
                   <CardContent className="flex items-center justify-center space-x-6">
                     <div className="flex items-center gap-1">
-                      <Table2 className="h-6 w-6" />
+                      <Boxes className="h-6 w-6" />
                       <div className="flex flex-col items-center">
                         <p className="text-4xl">{defCount}</p>
                         <p className="text-sm text-muted-foreground">
-                          Table{defCount !== 1 && "s"}
+                          Definition{defCount !== 1 && "s"}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Rocket className="h-6 w-6" />
+                      <Table2 className="h-6 w-6" />
                       <div className="flex flex-col items-center">
                         <p className="text-4xl">{deploymentsCount}</p>
                         <p className="text-sm text-muted-foreground">
-                          Deployment{deploymentsCount !== 1 && "s"}
+                          Table{deploymentsCount !== 1 && "s"}
                         </p>
                       </div>
                     </div>

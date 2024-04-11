@@ -99,22 +99,21 @@ export default async function Deployments({
           ) : (
             <div className="m-auto my-16 flex max-w-xl flex-1 flex-col justify-center space-y-4 p-4">
               <div className="flex items-center space-x-4">
-                <Rocket className="flex-shrink-0" />
-                <h1 className="text-2xl font-medium">Your Deployments.</h1>
+                <Table2 className="flex-shrink-0" />
+                <h1 className="text-2xl font-medium">Your tables</h1>
               </div>
               <div className="flex items-center space-x-4">
                 <Info className="flex-shrink-0" />
                 <p className="text-muted-foreground">
-                  Tables are definitions from your Project&apos;s Blueprint,
-                  created as a table on the Tableland network. To the left,
-                  you&apos;ll see a list of all your Project&apos;s deployed and
-                  undeployed tables.
+                  Tables are definitions from your Project, created as tables on
+                  the Tableland network. To the left, you&apos;ll see a list of
+                  all your Project&apos;s deployed and undeployed tables.
                 </p>
               </div>
               <div className="flex items-center space-x-4">
                 <Table2 className="flex-shrink-0" />
                 <p className="text-muted-foreground">
-                  Deployed tables are incicated by a black table icon. You can
+                  Deployed tables are incicated by a white table icon. You can
                   select any deployed table to see details about it and view the
                   table&apos;s data.
                 </p>
@@ -141,9 +140,9 @@ export default async function Deployments({
           <div className="flex items-center space-x-4">
             <HelpCircle className="flex-shrink-0" />
             <p className="text-muted-foreground">
-              Tables are definitions from your Project&apos;s Blueprint, created
-              as tables on the Tableland network. This screen will allow you to
-              view all your Project&apos;s tables, and deploy new ones.
+              Tables are definitions from your Project, created as tables on the
+              Tableland network. This screen will allow you to view all your
+              Project&apos;s tables, and deploy new ones.
             </p>
           </div>
           <div className="flex items-center space-x-4">
@@ -151,8 +150,8 @@ export default async function Deployments({
             <p className="text-muted-foreground">
               Before anything useful can be displayed here, you&apos;ll need to
               create some definitions first. Head over to the{" "}
-              <Link href={`/${team.slug}/${project.slug}`}>Blueprint</Link> tab
-              to do that.
+              <Link href={`/${team.slug}/${project.slug}`}>definitions</Link>{" "}
+              tab to do that.
             </p>
           </div>
         </div>

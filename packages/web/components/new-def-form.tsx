@@ -261,7 +261,7 @@ export default function NewDefForm({
                   </FormControl>
                   <FormDescription>
                     Provide a description of your new definition so others can
-                    understand the role it plays in your Project Blueprint.
+                    understand the role it plays in your Project.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

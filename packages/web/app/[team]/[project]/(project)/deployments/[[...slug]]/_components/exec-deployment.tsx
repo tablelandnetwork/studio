@@ -198,7 +198,7 @@ export default function ExecDeployment({
             Deploying a definition to Tableland will require you to sign and
             send a transaction, as well as pay any transaction fees. Once the
             defintion has been deployed, it will be registered with your Studio
-            Project and you&apos;ll be able to view it in the tables tab.
+            project and you&apos;ll be able to view it in the tables tab.
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2">
@@ -231,15 +231,15 @@ export default function ExecDeployment({
           state={tblReceiptState}
         />
         <DeployStep
-          pendingText="Register Deployment with Studio"
-          processingText="Registering Deployment with Studio..."
+          pendingText="Register deployment with Studio"
+          processingText="Registering deployment with Studio..."
           completeText="Deployment registered with Studio"
           state={recordDeploymentState}
         />
         <DialogDescription>
           <span className="font-semibold text-foreground">Important:</span>{" "}
           Don&apos;t close or navigate away from this dialog while the
-          Deployment is executing. If you do, or if you cancel, you&apos;ll
+          deployment is executing. If you do, or if you cancel, you&apos;ll
           likely still pay transaction fees and your table will still be created
           on Tableland, but not be registered with Studio.
         </DialogDescription>
