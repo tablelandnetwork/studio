@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import DefColumns from "@/components/def-columns";
-import TableConstraints from "@/components/table-constraints";
+import DefConstraints from "@/components/def-constraints";
 
 export default async function TableDetails({
   params,
@@ -62,7 +62,7 @@ export default async function TableDetails({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TableConstraints tableConstraints={table.schema.tableConstraints} />
+          <DefConstraints tableConstraints={table.schema.tableConstraints} />
         </CardContent>
       </Card>
       <Card>

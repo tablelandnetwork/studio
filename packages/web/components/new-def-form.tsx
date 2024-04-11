@@ -15,7 +15,7 @@ import Columns from "./columns";
 import { FormRootMessage } from "./form-root";
 import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
-import TableConstraints from "./table-constraints";
+import DefConstraints from "./def-constraints";
 import {
   Sheet,
   SheetContent,
@@ -279,7 +279,7 @@ export default function NewDefForm({
                 {schemaPreset.tableConstraints && (
                   <div className="space-y-2">
                     <FormLabel>Table constraints</FormLabel>
-                    <TableConstraints
+                    <DefConstraints
                       tableConstraints={schemaPreset?.tableConstraints}
                     />
                   </div>
