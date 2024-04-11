@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import TableColumns from "@/components/table-columns";
+import DefColumns from "@/components/def-columns";
 import TableConstraints from "@/components/table-constraints";
 
 export default async function TableDetails({
@@ -48,7 +48,7 @@ export default async function TableDetails({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TableColumns columns={table.schema.columns} />
+          <DefColumns columns={table.schema.columns} />
         </CardContent>
       </Card>
       <Card>

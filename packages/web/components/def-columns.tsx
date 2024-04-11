@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default function TableColumns({
+export default function DefColumns({
   columns,
 }: {
   columns: Schema["columns"];
