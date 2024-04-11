@@ -9,7 +9,6 @@ import chalk from "chalk";
 import { helpers as sdkHelpers, Database } from "@tableland/sdk";
 import { generateCreateTableStatement } from "@tableland/studio-store";
 import {
-  ERROR_INVALID_API_URL,
   ERROR_INVALID_STORE_PATH,
   FileStore,
   helpers,
@@ -46,7 +45,7 @@ export const builder = function (args: Yargs) {
           );
           const fileStore = new FileStore(store);
           const apiUrl = helpers.getApiUrl({
-            apiUrl: helpers.getString(argv.apiUrl, ERROR_INVALID_API_URL),
+            apiUrl: argv.apiUrl,
             store: fileStore,
           });
 

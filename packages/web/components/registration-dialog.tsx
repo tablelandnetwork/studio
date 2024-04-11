@@ -1,11 +1,16 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { type Auth } from "@tableland/studio-api";
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { skipToken } from "@tanstack/react-query";
+import { registerSchema } from "@tableland/studio-validators";
+import { type z } from "zod";
 import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -13,49 +18,65 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { FormRootMessage } from "./form-root";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { api } from "@/trpc/react";
 
 export default function RegistrationDialog({
   showDialog,
   onOpenChange,
   onSuccess,
-  onCancel,
 }: {
   showDialog: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (auth: Auth) => void;
-  onCancel: () => void;
 }) {
   const [teamName, setTeamName] = useState("");
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+    },
+  });
+
+  const { setError } = form;
 
   const nameAvailableQuery = api.teams.nameAvailable.useQuery(
     teamName ? { name: teamName } : skipToken,
+    { retry: false },
   );
 
   const register = api.auth.register.useMutation({
     onSuccess: (res) => {
       onSuccess(res);
-      setUsername("");
-      setEmail("");
+      form.reset();
+    },
+    onError: (err) => {
+      setError("root", { message: err.message });
     },
   });
 
-  const handleRegister = () => {
-    register.mutate({ username, email });
-  };
+  function onSubmit(values: z.infer<typeof registerSchema>) {
+    register.mutate(values);
+  }
 
-  const handleCancel = () => {
-    onCancel();
-    setUsername("");
-    setEmail("");
+  const handleOnOpenChange = (open: boolean) => {
+    onOpenChange(open);
+    form.reset();
   };
 
   return (
-    <Dialog open={showDialog} onOpenChange={onOpenChange}>
+    <Dialog open={showDialog} onOpenChange={handleOnOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Studio Registration</DialogTitle>
@@ -65,53 +86,69 @@ export default function RegistrationDialog({
             use it to send you important updates about Studio.
           </DialogDescription>
         </DialogHeader>
-        <div>
-          <div className="space-y-4 py-2 pb-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Username</Label>
-              <InputWithCheck
-                id="name"
-                placeholder="myusername"
-                value={username}
-                updateQuery={setTeamName}
-                queryStatus={nameAvailableQuery}
-                onResult={setNameAvailable}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="name">Email address</Label>
-              <Input
-                id="name"
-                placeholder="me@me.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          </div>
-          {register.isError && (
-            <p>Error registering: {register.error.message}</p>
-          )}
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={register.isPending}
+        <Form {...form}>
+          <form
+            // TODO: `form.handleSubmit` creates a floating promise, as a result the linter is complaining
+            //    we should figure out if this is ok or not and either change this or the lint config
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
           >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            onClick={handleRegister}
-            disabled={register.isPending || !nameAvailable}
-          >
-            {register.isPending && (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            )}
-            Continue
-          </Button>
-        </DialogFooter>
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <InputWithCheck
+                      placeholder="myusername"
+                      updateQuery={setTeamName}
+                      queryStatus={nameAvailableQuery}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>Username must be unique.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="me@me.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormRootMessage />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={register.isPending}
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                disabled={register.isPending || !nameAvailableQuery.data}
+              >
+                {register.isPending && (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                )}
+                Continue
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

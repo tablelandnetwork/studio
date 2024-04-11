@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { type Schema } from "../custom-types/index.js";
 import * as schema from "../schema/index.js";
-import { slugify } from "./utils.js";
+import { slugify } from "../helpers.js";
 
 type Table = schema.Table;
 const projectTables = schema.projectTables;

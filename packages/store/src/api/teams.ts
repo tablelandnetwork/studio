@@ -4,7 +4,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData } from "iron-session";
 import * as schema from "../schema/index.js";
-import { slugify } from "./utils.js";
+import { slugify } from "../helpers.js";
 
 type NewTeamInviteSealed = schema.NewTeamInviteSealed;
 type Team = schema.Team;

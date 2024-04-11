@@ -55,10 +55,7 @@ export default function Profile({
   // Fetch user when:
   useEffect(() => {
     const handler = () => {
-      authenticated
-        .refetch()
-        .then(() => console.log("authenticated.refetch success"))
-        .catch((err) => console.error(err));
+      authenticated.refetch().catch((err) => console.error(err));
     };
     // 1. window is focused (in case user logs out of another window)
     window.addEventListener("focus", handler);
@@ -93,6 +90,15 @@ export default function Profile({
     }
   }, [signInError, toast]);
 
+  useEffect(() => {
+    if (isConnected && authenticated.data) {
+      router.push(`/${authenticated.data.personalTeam.slug}`);
+    }
+    // Not incliding authenticated.data in deps because we only
+    // want to trigger this when isConnected changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, router]);
+
   const onSignInSuccess = ({ auth }: { auth: Auth | undefined }) => {
     if (auth) {
       router.refresh();
@@ -116,10 +122,6 @@ export default function Profile({
     if (!dontRedirect) {
       router.push(`/${auth.personalTeam.slug}`);
     }
-  };
-
-  const onRegisterCancel = () => {
-    setShowRegisterDialog(false);
   };
 
   return (
@@ -187,7 +189,6 @@ export default function Profile({
         showDialog={showRegisterDialog}
         onOpenChange={setShowRegisterDialog}
         onSuccess={onRegisterSuccess}
-        onCancel={onRegisterCancel}
       />
     </div>
   );

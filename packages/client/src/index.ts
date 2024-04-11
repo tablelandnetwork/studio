@@ -7,7 +7,6 @@ import {
   type Operation,
 } from "@trpc/client";
 import superjson from "superjson";
-import { sqliteKeywords } from "./sqlite-keywords.js";
 import { getBaseUrl, getUrl } from "./util.js";
 
 type NonEmptyArray<TItem> = [TItem, ...TItem[]];
@@ -82,12 +81,4 @@ function studioAliases({
   };
 }
 
-export {
-  api,
-  type API,
-  type ClientConfig,
-  getBaseUrl,
-  getUrl,
-  sqliteKeywords,
-  studioAliases,
-};
+export { api, type API, type ClientConfig, getBaseUrl, getUrl, studioAliases };

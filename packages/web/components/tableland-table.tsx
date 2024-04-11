@@ -1,7 +1,7 @@
 import { Database, Validator, type Schema, helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Blocks, Coins, Hash, Rocket, Table2 } from "lucide-react";
+import { Blocks, Coins, Hash, Rocket, Table2, Workflow } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
 import {
@@ -15,11 +15,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SQLLogs from "./sql-logs";
 import HashDisplay from "./hash-display";
 import TablelandTableMenu from "./tableland-table-menu";
+import { CardContent } from "./ui/card";
+import ProjectsReferencingTable from "./projects-referencing-table";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
 import { objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
+import { api } from "@/trpc/server";
 
 interface Props {
   displayName: string;
@@ -74,6 +77,9 @@ export default async function TablelandTable({
       }))
     : [];
   const table = await validator.getTableById({ chainId, tableId: tokenId });
+  const deploymentReferences = (
+    await api.deployments.deploymentReferences({ chainId, tokenId })
+  ).filter((p) => p.environment.id !== environment?.id);
 
   return (
     <div className="flex-1 space-y-4 p-4">
@@ -187,6 +193,22 @@ export default async function TablelandTable({
                 </Link>
               </MetricCardFooter>
             )}
+          </MetricCard>
+        )}
+        {deploymentReferences.length > 0 && (
+          <MetricCard>
+            <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
+              <Workflow className="h-4 w-4 text-muted-foreground" />
+              <MetricCardTitle>
+                Studio projects using this table
+              </MetricCardTitle>
+            </MetricCardHeader>
+            <CardContent>
+              <ProjectsReferencingTable
+                references={deploymentReferences}
+                className="h-[80px]"
+              />
+            </CardContent>
           </MetricCard>
         )}
       </div>

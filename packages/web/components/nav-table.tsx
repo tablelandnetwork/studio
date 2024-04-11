@@ -5,7 +5,7 @@ import { skipToken } from "@tanstack/react-query";
 import Crumb from "./crumb";
 import { api } from "@/trpc/react";
 
-export default function NavNewTable({
+export default function NavTable({
   className,
 }: React.HTMLAttributes<HTMLElement>) {
   const {

@@ -5,7 +5,7 @@ import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData, unsealData } from "iron-session";
 import type * as schema from "../schema/index.js";
 import { teamMemberships, teams, users } from "../schema/index.js";
-import { slugify } from "./utils.js";
+import { slugify } from "../helpers.js";
 
 export function auth(
   db: DrizzleD1Database<typeof schema>,

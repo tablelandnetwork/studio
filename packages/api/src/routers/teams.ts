@@ -2,6 +2,10 @@ import { type Store, type schema } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
+  teamNameAvailableSchema,
+  newTeamSchema,
+} from "@tableland/studio-validators";
+import {
   protectedProcedure,
   publicProcedure,
   createTRPCRouter,
@@ -34,7 +38,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         );
       }),
     nameAvailable: publicProcedure
-      .input(z.object({ name: z.string().trim() }))
+      .input(teamNameAvailableSchema)
       .query(async ({ input }) => {
         return await store.teams.nameAvailable(input.name);
       }),
@@ -98,12 +102,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return await store.teams.teamsByMemberId(personalTeam);
       }),
     newTeam: protectedProcedure
-      .input(
-        z.object({
-          name: z.string().trim(),
-          emailInvites: z.array(z.string().trim()),
-        }),
-      )
+      .input(newTeamSchema)
       .mutation(async ({ ctx, input }) => {
         let team: schema.Team;
         let invites: schema.TeamInvite[];
