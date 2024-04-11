@@ -1,17 +1,17 @@
 import { type Store } from "@tableland/studio-store";
 import { z } from "zod";
-import { publicProcedure, createTRPCRouter, tableProcedure } from "../trpc";
+import { publicProcedure, createTRPCRouter, defProcedure } from "../trpc";
 
 export function deploymentsRouter(store: Store) {
   return createTRPCRouter({
-    recordDeployment: tableProcedure(store)
+    recordDeployment: defProcedure(store)
       .input(
         z.object({
-          tableId: z.string().trim().uuid(),
+          defId: z.string().trim().uuid(),
           environmentId: z.string().trim().uuid(),
           tableName: z.string().trim().nonempty(),
           chainId: z.number().int().nonnegative(),
-          tokenId: z.string().trim().nonempty(),
+          tableId: z.string().trim().nonempty(),
           blockNumber: z.number().int().nonnegative().optional(),
           txnHash: z.string().trim().nonempty().optional(),
           createdAt: z.date(),
@@ -19,25 +19,25 @@ export function deploymentsRouter(store: Store) {
       )
       .mutation(async ({ input }) => {
         const res = await store.deployments.recordDeployment({
-          tableId: input.tableId,
+          defId: input.defId,
           environmentId: input.environmentId,
           tableName: input.tableName,
           chainId: input.chainId,
-          tokenId: input.tokenId,
+          tableId: input.tableId,
           blockNumber: input.blockNumber,
           txnHash: input.txnHash,
           createdAt: input.createdAt,
         });
         return res;
       }),
-    deploymentsByTableId: publicProcedure
+    deploymentsByDefId: publicProcedure
       .input(
         z.object({
-          tableId: z.string().trim().uuid(),
+          defId: z.string().trim().uuid(),
         }),
       )
       .query(async ({ input }) => {
-        return await store.deployments.deploymentsByTableId(input.tableId);
+        return await store.deployments.deploymentsByDefId(input.defId);
       }),
     projectDeployments: publicProcedure
       .input(

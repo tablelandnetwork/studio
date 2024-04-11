@@ -78,7 +78,7 @@ export const teamProjects = sqliteTable(
   },
 );
 
-export const tables = sqliteTable("tables", {
+export const defs = sqliteTable("tables", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
@@ -86,17 +86,17 @@ export const tables = sqliteTable("tables", {
   schema: schema("schema").notNull(),
 });
 
-export const projectTables = sqliteTable(
+export const projectDefs = sqliteTable(
   "project_tables",
   {
     projectId: text("project_id").notNull(),
-    tableId: text("table_id").notNull(),
+    defId: text("table_id").notNull(),
   },
-  (projectTables) => {
+  (projectDefs) => {
     return {
       projectTablesIdx: uniqueIndex("projectTablesIdx").on(
-        projectTables.projectId,
-        projectTables.tableId,
+        projectDefs.projectId,
+        projectDefs.defId,
       ),
     };
   },
@@ -123,18 +123,18 @@ export const environments = sqliteTable(
 export const deployments = sqliteTable(
   "deployments",
   {
-    tableId: text("table_id").notNull(),
+    defId: text("table_id").notNull(),
     environmentId: text("environment_id").notNull(),
     tableName: text("table_name").notNull(),
     chainId: integer("chain_id").notNull(),
-    tokenId: text("token_id").notNull(),
+    tableId: text("token_id").notNull(),
     blockNumber: integer("block_number"),
     txnHash: text("txn_hash"),
     createdAt: text("created_at").notNull(),
   },
   (deployments) => {
     return {
-      pk: primaryKey(deployments.tableId, deployments.environmentId),
+      pk: primaryKey(deployments.defId, deployments.environmentId),
     };
   },
 );
@@ -165,8 +165,8 @@ export const teamInvites = sqliteTable("team_invites", {
   claimedAt: text("claimed_at"),
 });
 
-export type Table = InferSelectModel<typeof tables>;
-export type NewTable = InferInsertModel<typeof tables>;
+export type Def = InferSelectModel<typeof defs>;
+export type NewDef = InferInsertModel<typeof defs>;
 
 export type UserSealed = InferSelectModel<typeof users>;
 export type NewUserSealed = InferInsertModel<typeof users>;

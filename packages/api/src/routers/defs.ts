@@ -1,113 +1,54 @@
-import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
 import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
-  newTableApiSchema,
-  tableNameAvailableSchema,
-  importTableSchema,
+  newDefApiSchema,
+  defNameAvailableSchema,
 } from "@tableland/studio-validators";
 import { projectProcedure, publicProcedure, createTRPCRouter } from "../trpc";
 import { internalError } from "../utils/internalError";
 
-export function tablesRouter(store: Store) {
+export function defsRouter(store: Store) {
   return createTRPCRouter({
-    projectTables: publicProcedure
+    projectDefs: publicProcedure
       .input(z.object({ projectId: z.string().trim() }))
       .query(async ({ input }) => {
-        return await store.tables.tablesByProjectId(input.projectId);
+        return await store.defs.defsByProjectId(input.projectId);
       }),
-    tableByProjectIdAndSlug: publicProcedure
+    defByProjectIdAndSlug: publicProcedure
       .input(
         z.object({ projectId: z.string().trim(), slug: z.string().trim() }),
       )
       .query(async ({ input }) => {
-        const table = await store.tables.tableByProjectIdAndSlug(
+        const def = await store.defs.defByProjectIdAndSlug(
           input.projectId,
           input.slug,
         );
-        if (!table) {
+        if (!def) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Table not found",
+            message: "Definition not found",
           });
         }
-        return table;
+        return def;
       }),
     nameAvailable: publicProcedure
-      .input(tableNameAvailableSchema)
+      .input(defNameAvailableSchema)
       .query(async ({ input }) => {
-        return await store.tables.nameAvailable(input.projectId, input.name);
+        return await store.defs.nameAvailable(input.projectId, input.name);
       }),
-    newTable: projectProcedure(store)
-      .input(newTableApiSchema)
+    newDef: projectProcedure(store)
+      .input(newDefApiSchema)
       .mutation(async ({ input }) => {
         try {
-          return await store.tables.createTable(
+          return await store.defs.createDef(
             input.projectId,
             input.name,
             input.description,
             input.schema,
           );
         } catch (err) {
-          throw internalError("Error saving table record.", err);
-        }
-      }),
-    importTable: projectProcedure(store)
-      .input(importTableSchema)
-      .mutation(async ({ input }) => {
-        const validator = new Validator({
-          baseUrl: helpers.getBaseUrl(input.chainId),
-        });
-
-        let tablelandTable: Table;
-        try {
-          tablelandTable = await validator.getTableById({
-            chainId: input.chainId,
-            tableId: input.tableId,
-          });
-        } catch (err) {
-          if (err instanceof ApiError && err.status === 404) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: `Table id ${input.tableId} not found on chain ${input.chainId}.`,
-            });
-          }
-          throw internalError("Error getting table by id.", err);
-        }
-
-        const createdAttr = tablelandTable.attributes?.find(
-          (attr) => attr.traitType === "created",
-        );
-        if (!createdAttr) {
-          throw new TRPCError({
-            code: "PARSE_ERROR",
-            message: "No created attribute found.",
-          });
-        }
-
-        try {
-          // TODO: Execute different table inserts in a batch txn.
-          const table = await store.tables.createTable(
-            input.projectId,
-            input.name,
-            input.description,
-            tablelandTable.schema,
-          );
-          const deployment = await store.deployments.recordDeployment({
-            tableId: table.id,
-            environmentId: input.environmentId,
-            tableName: tablelandTable.name,
-            chainId: input.chainId,
-            tokenId: input.tableId,
-            createdAt: new Date(createdAttr.value * 1000),
-          });
-          return { table, deployment };
-        } catch (err) {
-          throw internalError(
-            "Error saving table and deployment records.",
-            err,
-          );
+          throw internalError("Error saving def record.", err);
         }
       }),
   });

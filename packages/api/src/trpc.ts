@@ -272,15 +272,15 @@ export const projectProcedure = (store: Store) =>
       });
     });
 
-export const tableProcedure = (store: Store) =>
+export const defProcedure = (store: Store) =>
   protectedProcedure
-    .input(z.object({ tableId: z.string().trim().uuid() }))
+    .input(z.object({ defId: z.string().trim().uuid() }))
     .use(async ({ ctx, input, next }) => {
-      const team = await store.tables.tableTeam(input.tableId);
+      const team = await store.defs.defTeam(input.defId);
       if (!team) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "no team for table id found",
+          message: "no team for def id found",
         });
       }
       const membership = await store.teams.isAuthorizedForTeam(

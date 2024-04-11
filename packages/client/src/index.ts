@@ -64,7 +64,7 @@ function studioAliases({
 
     _map = {};
     res.forEach(function (dep) {
-      _map[dep.table.name] = dep.deployment.tableName;
+      _map[dep.def.name] = dep.deployment.tableName;
     });
   };
 
