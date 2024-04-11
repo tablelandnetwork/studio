@@ -1,6 +1,10 @@
 import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+  newProjectSchema,
+  projectNameAvailableSchema,
+} from "@tableland/studio-validators";
 import { publicProcedure, createTRPCRouter, teamProcedure } from "../trpc";
 import { internalError } from "../utils/internalError";
 
@@ -50,12 +54,7 @@ export function projectsRouter(store: Store) {
         return project;
       }),
     nameAvailable: publicProcedure
-      .input(
-        z.object({
-          teamId: z.string().trim().optional(),
-          name: z.string().trim(),
-        }),
-      )
+      .input(projectNameAvailableSchema)
       .query(async ({ input, ctx }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -69,12 +68,7 @@ export function projectsRouter(store: Store) {
         return await store.projects.nameAvailable(teamId, input.name);
       }),
     newProject: teamProcedure(store)
-      .input(
-        z.object({
-          name: z.string().trim(),
-          description: z.string().trim().nonempty(),
-        }),
-      )
+      .input(newProjectSchema)
       .mutation(async ({ input, ctx }) => {
         try {
           const project = await store.projects.createProject(

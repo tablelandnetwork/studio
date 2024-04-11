@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sqliteKeywords } from "@tableland/studio-client";
 import {
   cleanSchema,
   setConstraint,
@@ -9,8 +8,9 @@ import {
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
+import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
+import { newTableFormSchema } from "@tableland/studio-validators";
 import Columns from "./columns";
 import { FormRootMessage } from "./form-root";
 import InputWithCheck from "./input-with-check";
@@ -38,40 +38,6 @@ import TeamSwitcher from "@/components/team-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { ensureError } from "@/lib/ensure-error";
 import TableColumns from "@/components/table-columns";
-
-const formSchema = z.object({
-  name: z
-    .string()
-    .nonempty()
-    .regex(
-      /^(?!\d)[a-z0-9_]+$/,
-      "Table name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
-    )
-    .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
-      message: "You can't use a SQL keyword as a table name.",
-    }),
-  description: z.string().trim().nonempty(),
-  columns: z.array(
-    z.object({
-      id: z.string(),
-      name: z
-        .string()
-        .trim()
-        .nonempty()
-        .regex(
-          /^(?!\d)[a-z0-9_]+$/,
-          "Column name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
-        )
-        .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
-          message: "You can't use a SQL keyword as a column name.",
-        }),
-      type: z.enum(["int", "integer", "text", "blob"]),
-      notNull: z.boolean(),
-      primaryKey: z.boolean(),
-      unique: z.boolean(),
-    }),
-  ),
-});
 
 export interface NewTableFormProps {
   teamPreset?: schema.Team;
@@ -104,7 +70,6 @@ export default function NewTableForm({
     projectPreset,
   );
   const [tableName, setTableName] = useState("");
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
 
   const { data: teams } = api.teams.userTeams.useQuery(
     !teamPreset ? undefined : skipToken,
@@ -113,8 +78,8 @@ export default function NewTableForm({
     !projectPreset && team ? { teamId: team.id } : skipToken,
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof newTableFormSchema>>({
+    resolver: zodResolver(newTableFormSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -139,6 +104,7 @@ export default function NewTableForm({
     project && !!tableName
       ? { projectId: project.id, name: tableName }
       : skipToken,
+    { retry: false },
   );
 
   const newTable = api.tables.newTable.useMutation({
@@ -184,7 +150,7 @@ export default function NewTableForm({
     setProject(undefined);
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof newTableFormSchema>) {
     if (!project) return;
     const schema =
       schemaPreset ??
@@ -208,9 +174,8 @@ export default function NewTableForm({
       });
     newTable.mutate({
       projectId: project.id,
-      name: values.name,
-      description: values.description,
       schema,
+      ...values,
     });
   }
 
@@ -277,7 +242,6 @@ export default function NewTableForm({
                       placeholder="Table name"
                       updateQuery={setTableName}
                       queryStatus={nameAvailableQuery}
-                      onResult={setNameAvailable}
                       {...field}
                     />
                   </FormControl>
@@ -305,32 +269,51 @@ export default function NewTableForm({
                 </FormItem>
               )}
             />
-            <div className="space-y-2">
-              <FormLabel>Columns</FormLabel>
-              {schemaPreset ? (
-                <TableColumns columns={schemaPreset.columns} />
-              ) : (
-                <Columns
-                  columns={columnFields}
-                  control={control}
-                  register={register}
-                  addColumn={addColumn}
-                  removeColumn={removeColumn}
-                />
-              )}
-            </div>
-            {schemaPreset?.tableConstraints && (
-              <div className="space-y-2">
-                <FormLabel>Table constraints</FormLabel>
-                <TableConstraints
-                  tableConstraints={schemaPreset?.tableConstraints}
-                />
-              </div>
+
+            {schemaPreset ? (
+              <>
+                <div className="space-y-2">
+                  <FormLabel>Columns</FormLabel>
+                  <TableColumns columns={schemaPreset.columns} />
+                </div>
+                {schemaPreset.tableConstraints && (
+                  <div className="space-y-2">
+                    <FormLabel>Table constraints</FormLabel>
+                    <TableConstraints
+                      tableConstraints={schemaPreset?.tableConstraints}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <FormField
+                control={control}
+                name="columns"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Columns</FormLabel>
+                    <FormControl>
+                      <Columns
+                        columns={columnFields}
+                        control={control}
+                        register={register}
+                        addColumn={addColumn}
+                        removeColumn={removeColumn}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Specify at least one column for your table&apos;s schema.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={newTable.isPending || !nameAvailable}
+              disabled={newTable.isPending || !nameAvailableQuery.data}
             >
               {newTable.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />

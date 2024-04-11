@@ -1,20 +1,14 @@
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
-import { type Schema, type Store } from "@tableland/studio-store";
+import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+  newTableApiSchema,
+  tableNameAvailableSchema,
+  importTableSchema,
+} from "@tableland/studio-validators";
 import { projectProcedure, publicProcedure, createTRPCRouter } from "../trpc";
 import { internalError } from "../utils/internalError";
-
-const schemaSchema: z.ZodType<Schema> = z.object({
-  columns: z.array(
-    z.object({
-      name: z.string().trim().nonempty(),
-      type: z.string().trim().nonempty(),
-      constraints: z.array(z.string().trim().nonempty()).optional(),
-    }),
-  ),
-  tableConstraints: z.array(z.string().trim().nonempty()).optional(),
-});
 
 export function tablesRouter(store: Store) {
   return createTRPCRouter({
@@ -41,20 +35,12 @@ export function tablesRouter(store: Store) {
         return table;
       }),
     nameAvailable: publicProcedure
-      .input(
-        z.object({ projectId: z.string().trim(), name: z.string().trim() }),
-      )
+      .input(tableNameAvailableSchema)
       .query(async ({ input }) => {
         return await store.tables.nameAvailable(input.projectId, input.name);
       }),
     newTable: projectProcedure(store)
-      .input(
-        z.object({
-          name: z.string().trim(),
-          description: z.string().trim().nonempty(),
-          schema: schemaSchema,
-        }),
-      )
+      .input(newTableApiSchema)
       .mutation(async ({ input }) => {
         try {
           return await store.tables.createTable(
@@ -68,15 +54,7 @@ export function tablesRouter(store: Store) {
         }
       }),
     importTable: projectProcedure(store)
-      .input(
-        z.object({
-          chainId: z.number(),
-          tableId: z.string().trim(),
-          name: z.string().trim(),
-          environmentId: z.string().trim(),
-          description: z.string().trim().nonempty(),
-        }),
-      )
+      .input(importTableSchema)
       .mutation(async ({ input }) => {
         const validator = new Validator({
           baseUrl: helpers.getBaseUrl(input.chainId),

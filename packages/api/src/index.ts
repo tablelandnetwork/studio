@@ -1,4 +1,8 @@
-import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import type {
+  inferRouterInputs,
+  inferRouterOutputs,
+  inferRouterError,
+} from "@trpc/server";
 import {
   type Auth,
   type SessionData,
@@ -42,6 +46,8 @@ type RouterInputs = inferRouterInputs<AppRouter>;
  **/
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
+type RouterError = inferRouterError<AppRouter>;
+
 export {
   createTRPCContext,
   appRouter,
@@ -55,6 +61,7 @@ export type {
   RouterInputs,
   GetSessionArgs,
   RouterOutputs,
+  RouterError,
   Auth,
   SessionData,
   SiweFields,

@@ -2,6 +2,7 @@ import { type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { generateNonce, SiweMessage } from "siwe";
 import { z } from "zod";
+import { registerSchema } from "@tableland/studio-validators";
 import { protectedProcedure, publicProcedure, createTRPCRouter } from "../trpc";
 import { internalError } from "../utils/internalError";
 
@@ -53,12 +54,7 @@ export function authRouter(store: Store) {
         }
       }),
     register: publicProcedure
-      .input(
-        z.object({
-          username: z.string().trim(),
-          email: z.string().trim().optional(),
-        }),
-      )
+      .input(registerSchema)
       .mutation(async ({ input, ctx }) => {
         if (!ctx.session.siweFields) {
           throw new TRPCError({

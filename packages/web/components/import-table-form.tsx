@@ -3,8 +3,10 @@ import { type schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
+import { importTableSchema } from "@tableland/studio-validators";
+import { Validator, helpers } from "@tableland/sdk";
 import {
   Sheet,
   SheetContent,
@@ -30,24 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-
-const formSchema = z.object({
-  chainId: z.coerce.number().gt(0),
-  tableId: z.string().trim().nonempty(),
-  name: z
-    .string()
-    .nonempty()
-    .regex(
-      /^(?!\d)[a-z0-9_]+$/,
-      "Table name can't start with a number and can contain any combination of lowercase letters, numbers, and underscores.",
-    ),
-  description: z.string().trim().nonempty(),
-  environment: z
-    .string()
-    .optional()
-    .refine((v) => !!v, "Environment is required")
-    .transform((v) => v!),
-});
+import { tablePrefix } from "@/lib/table-prefix";
 
 export interface ImportTableFormProps {
   teamPreset?: schema.Team;
@@ -87,7 +72,6 @@ export default function ImportTableForm({
   );
   const [env, setEnv] = useState<schema.Environment | undefined>(envPreset);
   const [tableName, setTableName] = useState("");
-  const [nameAvailable, setNameAvailable] = useState<boolean | undefined>();
 
   const { data: teams } = api.teams.userTeams.useQuery(
     !teamPreset ? undefined : skipToken,
@@ -99,18 +83,21 @@ export default function ImportTableForm({
     !envPreset && project ? { projectId: project.id } : skipToken,
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof importTableSchema>>({
+    resolver: zodResolver(importTableSchema),
     defaultValues: {
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
       name: "",
       description: undefined,
-      environment: envPreset?.id ?? "",
+      environmentId: envPreset?.id ?? "",
     },
   });
 
-  const { handleSubmit, control, register, setValue, setError } = form;
+  const { handleSubmit, control, register, setValue, setError, watch } = form;
+
+  const chainId = watch("chainId");
+  const tableId = watch("tableId");
 
   useEffect(() => {
     if (!openSheet) {
@@ -128,9 +115,27 @@ export default function ImportTableForm({
   useEffect(() => {
     const env = envs?.[0];
     if (!env) return;
-    setValue("environment", env.id);
+    setValue("environmentId", env.id);
     setEnv(env);
   }, [envs, setValue]);
+
+  useEffect(() => {
+    if (!(!!chainId && !!tableId)) {
+      setValue("name", "");
+      return;
+    }
+    const validator = new Validator({ baseUrl: helpers.getBaseUrl(chainId) });
+    validator
+      .getTableById({ chainId, tableId })
+      .then((table) => {
+        const prefix = tablePrefix(table.name);
+        setValue("name", prefix);
+        setTableName(prefix);
+      })
+      .catch((_) => {
+        setValue("name", "");
+      });
+  }, [chainId, tableId, setValue]);
 
   const nameAvailableQuery = api.tables.nameAvailable.useQuery(
     project && tableName
@@ -139,6 +144,7 @@ export default function ImportTableForm({
           name: tableName,
         }
       : skipToken,
+    { retry: false },
   );
 
   const importTable = api.tables.importTable.useMutation({
@@ -154,16 +160,12 @@ export default function ImportTableForm({
     setProject(undefined);
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof importTableSchema>) {
     if (!project) return;
     importTable.mutate(
       {
         projectId: project.id,
-        chainId: values.chainId,
-        tableId: values.tableId,
-        name: values.name,
-        environmentId: values.environment,
-        description: values.description,
+        ...values,
       },
       {
         onError: (err) => {
@@ -289,20 +291,20 @@ export default function ImportTableForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Table Name</FormLabel>
+                  <FormLabel>Blueprint table definition name</FormLabel>
                   <FormControl>
                     <InputWithCheck
                       disabled={!project}
                       placeholder="eg. users"
                       updateQuery={setTableName}
                       queryStatus={nameAvailableQuery}
-                      onResult={setNameAvailable}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    The name of the Table to create in your Studio project. This
-                    Table&apos;s name must be unique within your Project.
+                    The name of the table definition to create in your Studio
+                    project&apos;s blueprint. This name must be unique within
+                    your project&apos;s blueprint.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -318,8 +320,9 @@ export default function ImportTableForm({
                     <Textarea placeholder="Table description" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Provide a description for the imported Table so others can
-                    understand the role it plays in your Project Blueprint.
+                    Provide a description for the imported table so others can
+                    understand the role it plays in your project&apos;s
+                    blueprint.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -327,9 +330,13 @@ export default function ImportTableForm({
             />
             <FormField
               control={control}
-              name="environment"
+              name="environmentId"
               render={({ field }) => (
-                <Input type="hidden" {...field} {...register("environment")} />
+                <Input
+                  type="hidden"
+                  {...field}
+                  {...register("environmentId")}
+                />
                 // <FormItem>
                 //   <FormLabel>Environment</FormLabel>
                 //   <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -358,7 +365,7 @@ export default function ImportTableForm({
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={importTable.isPending || !nameAvailable}
+              disabled={importTable.isPending || !nameAvailableQuery.data}
             >
               {importTable.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
