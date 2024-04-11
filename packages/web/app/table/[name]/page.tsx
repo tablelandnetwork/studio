@@ -1,4 +1,9 @@
-import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
+import {
+  ApiError,
+  type Table as TblTable,
+  Validator,
+  helpers,
+} from "@tableland/sdk";
 import Table from "@/components/table";
 
 export default async function TablePage({
@@ -31,7 +36,7 @@ export default async function TablePage({
     baseUrl: helpers.getBaseUrl(chainId),
   });
 
-  let tablelandTable: Table;
+  let tablelandTable: TblTable;
   try {
     tablelandTable = await validator.getTableById({
       chainId,
