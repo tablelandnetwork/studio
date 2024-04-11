@@ -14,7 +14,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SQLLogs from "./sql-logs";
 import HashDisplay from "./hash-display";
-import TablelandTableMenu from "./tableland-table-menu";
+import TableMenu from "./table-menu";
 import { CardContent } from "./ui/card";
 import ProjectsReferencingTable from "./projects-referencing-table";
 import { blockExplorers } from "@/lib/block-explorers";
@@ -85,7 +85,7 @@ export default async function TablelandTable({
     <div className="flex-1 space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-medium">{displayName}</h1>
-        <TablelandTableMenu
+        <TableMenu
           schemaPreset={table.schema}
           chainIdPreset={chainId}
           tableIdPreset={tokenId}

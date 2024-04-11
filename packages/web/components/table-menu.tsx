@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function TablelandTableMenu(
+export default function TableMenu(
   props: Omit<NewTableFormProps, "open" | "onOpenChange" | "onSuccess"> &
     Omit<ImportTableFormProps, "open" | "onOpenChange" | "onSuccess">,
 ) {
