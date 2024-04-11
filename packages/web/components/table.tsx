@@ -3,7 +3,7 @@ import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Blocks, Coins, Hash, Rocket, Table2, Workflow } from "lucide-react";
 import Link from "next/link";
-import { DataTable } from "../app/[team]/[project]/(project)/deployments/[[...slug]]/_components/data-table";
+import { DataTable } from "./data-table";
 import {
   MetricCard,
   MetricCardContent,
@@ -28,15 +28,15 @@ interface Props {
   displayName: string;
   tableName: string;
   chainId: number;
-  tokenId: string;
+  tableId: string;
   createdAt: Date;
   schema: Schema;
   environment?: schema.Environment;
-  tableData?: TableData;
+  defData?: DefData;
   deploymentData?: DeploymentData;
 }
 
-interface TableData {
+interface DefData {
   id: string;
   name: string;
   slug: string;
@@ -54,10 +54,10 @@ export default async function Table({
   displayName,
   tableName,
   chainId,
-  tokenId,
+  tableId,
   createdAt,
   environment,
-  tableData,
+  defData,
   deploymentData,
 }: Props) {
   const chain = chainsMap.get(chainId);
@@ -76,9 +76,9 @@ export default async function Table({
         header: col,
       }))
     : [];
-  const table = await validator.getTableById({ chainId, tableId: tokenId });
+  const table = await validator.getTableById({ chainId, tableId });
   const deploymentReferences = (
-    await api.deployments.deploymentReferences({ chainId, tokenId })
+    await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);
 
   return (
@@ -88,7 +88,7 @@ export default async function Table({
         <TableMenu
           schemaPreset={table.schema}
           chainIdPreset={chainId}
-          tableIdPreset={tokenId}
+          tableIdPreset={tableId}
         />
         {/* <Select>
           <SelectTrigger className="w-[180px]">
@@ -138,10 +138,10 @@ export default async function Table({
             <Coins className="h-4 w-4 text-muted-foreground" />
             <MetricCardTitle>Token ID</MetricCardTitle>
           </MetricCardHeader>
-          <MetricCardContent>{tokenId}</MetricCardContent>
+          <MetricCardContent>{tableId}</MetricCardContent>
           {openSeaLink && (
             <MetricCardFooter>
-              <Link target="_blank" href={openSeaLink.tokenUrl(tokenId)}>
+              <Link target="_blank" href={openSeaLink.tokenUrl(tableId)}>
                 View on OpenSea
               </Link>
             </MetricCardFooter>
@@ -221,7 +221,7 @@ export default async function Table({
           <DataTable columns={columns} data={formattedData} />
         </TabsContent>
         <TabsContent value="logs">
-          <SQLLogs chain={chainId} tableId={tokenId} />
+          <SQLLogs chain={chainId} tableId={tableId} />
         </TabsContent>
       </Tabs>
     </div>

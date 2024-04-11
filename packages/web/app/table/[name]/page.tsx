@@ -79,7 +79,7 @@ export default async function TablePage({
       createdAt={createdAt}
       schema={tablelandTable.schema}
       tableName={params.name}
-      tokenId={tokenId}
+      tableId={tokenId}
     />
   );
 }

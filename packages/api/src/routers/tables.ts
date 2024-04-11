@@ -44,8 +44,8 @@ export function tablesRouter(store: Store) {
           // TODO: Execute different table inserts in a batch txn.
           const def = await store.defs.createDef(
             input.projectId,
-            input.name,
-            input.description,
+            input.defName,
+            input.defDescription,
             tablelandTable.schema,
           );
           const deployment = await store.deployments.recordDeployment({

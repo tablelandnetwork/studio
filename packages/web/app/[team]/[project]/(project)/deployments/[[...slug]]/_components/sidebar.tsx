@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   environments: schema.Environment[];
   selectedEnvironment?: schema.Environment;
-  tables: schema.Table[];
-  selectedTable?: schema.Table;
+  defs: schema.Def[];
+  selectedDef?: schema.Def;
   deploymentsMap: Map<string, Map<string, schema.Deployment>>;
   teamSlug: string;
   projectSlug: string;
@@ -19,8 +19,8 @@ export function Sidebar({
   className,
   environments,
   selectedEnvironment,
-  tables,
-  selectedTable,
+  defs,
+  selectedDef,
   deploymentsMap,
   teamSlug,
   projectSlug,
@@ -31,7 +31,7 @@ export function Sidebar({
       <div className="flex flex-col space-y-1">
         <Link href={`/${teamSlug}/${projectSlug}/deployments`}>
           <Button
-            variant={selectedTable ? "ghost" : "secondary"}
+            variant={selectedDef ? "ghost" : "secondary"}
             className="w-full justify-start"
           >
             Overview
@@ -45,16 +45,14 @@ export function Sidebar({
             Tables
             {/* {environment.name} */}
           </h2>
-          {tables.map((table) => {
-            const deployment = deploymentsMap
-              .get(environment.id)
-              ?.get(table.id);
+          {defs.map((def) => {
+            const deployment = deploymentsMap.get(environment.id)?.get(def.id);
             const button = (
               <Button
-                key={table.id}
+                key={def.id}
                 variant={
                   environment.id === selectedEnvironment?.id &&
-                  table.id === selectedTable?.id
+                  def.id === selectedDef?.id
                     ? "secondary"
                     : "ghost"
                 }
@@ -67,13 +65,13 @@ export function Sidebar({
                     !deployment && "text-red-400 opacity-40",
                   )}
                 />
-                <span>{table.name}</span>
+                <span>{def.name}</span>
               </Button>
             );
             return isAuthorized || deployment ? (
               <Link
-                key={table.id}
-                href={`/${teamSlug}/${projectSlug}/deployments/${environment.slug}/${table.slug}`}
+                key={def.id}
+                href={`/${teamSlug}/${projectSlug}/deployments/${environment.slug}/${def.slug}`}
               >
                 {button}
               </Link>

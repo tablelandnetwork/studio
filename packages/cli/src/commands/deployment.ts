@@ -119,19 +119,19 @@ export const builder = function (args: Yargs) {
           );
 
           // lookup table data from project and name
-          const table = await api.tables.tableByProjectIdAndSlug.query({
+          const def = await api.defs.defByProjectIdAndSlug.query({
             projectId,
             slug: name,
           });
 
-          if (!(table?.name && table?.schema)) {
+          if (!(def?.name && def?.schema)) {
             throw new Error("could not get table to deploy within project");
           }
 
           // TODO: setup a "ping" endpoint in the api so we can be sure the api is responding before
           //       the deployment is created
 
-          const stmt = generateCreateTableStatement(table.name, table.schema);
+          const stmt = generateCreateTableStatement(def.name, def.schema);
 
           const cost = await helpers.estimateCost({
             signer: wallet,
@@ -175,8 +175,8 @@ Do you want to continue (y/n)? `,
             environmentId,
             tableName: txn?.name,
             chainId: txn?.chainId,
-            tableId: table.id,
-            tokenId: txn?.tableId,
+            defId: def.id,
+            tableId: txn?.tableId,
             createdAt: new Date(),
             blockNumber: txn?.blockNumber,
             txnHash: txn?.transactionHash,

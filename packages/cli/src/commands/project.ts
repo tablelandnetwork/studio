@@ -64,10 +64,10 @@ export const builder = function (args: Yargs) {
           const projectsWithTables = [];
 
           for (const proj of projects) {
-            const tables = await api.tables.projectTables.query({
+            const defs = await api.defs.projectDefs.query({
               projectId: proj.id,
             });
-            projectsWithTables.push({ tables, ...proj });
+            projectsWithTables.push({ tables: defs, ...proj });
           }
 
           logger.log(JSON.stringify(projectsWithTables, null, 4));

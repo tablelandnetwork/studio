@@ -29,7 +29,7 @@ export default async function Project({
     projectId: project.id,
   });
 
-  const tables = await cache(api.tables.projectTables)({
+  const defs = await cache(api.defs.projectDefs)({
     projectId: project.id,
   });
   const deployments = await cache(api.deployments.projectDeployments)({
@@ -68,7 +68,7 @@ export default async function Project({
       </div>
       <div className="flex flex-1 flex-col space-y-1">
         <div className="flex items-center">
-          <h2 className="text-lg font-semibold tracking-tight">Tables</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Definitions</h2>
           {authorized && (
             <div className="ml-auto">
               <NewDef teamPreset={team} projectPreset={project} />
@@ -82,22 +82,23 @@ export default async function Project({
             </div>
           )}
         </div>
-        {!tables.length && (
+        {!defs.length && (
           <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4 py-16">
             <div className="flex items-center space-x-4">
               <PencilRuler className="flex-shrink-0" />
               <h1 className="text-2xl font-medium">
-                This Project does not have any tables yet.
+                This Project does not have any definitions yet.
               </h1>
             </div>
             {authorized && (
               <div className="flex items-center space-x-4">
                 <Table2 className="flex-shrink-0" />
                 <p className="text-muted-foreground">
-                  Get started by creating or importing a Table using the buttons
-                  above. Remember here in your Blueprint, Tables are simply
-                  Table <span className="italic">definitions</span> &mdash; To
-                  actually deploy them on Tableland, vist the Project&apos;s{" "}
+                  Get started by creating a definition or importing a table
+                  using the buttons above. Remember here in your Blueprint,
+                  definitions simply define the shape of tables that will
+                  eventually be created on Tableland &mdash; To actually deploy
+                  your definitions to Tableland, vist the Project&apos;s{" "}
                   <Link href={`${project.slug}/deployments`}>
                     Deployments tab
                   </Link>
@@ -108,25 +109,25 @@ export default async function Project({
           </div>
         )}
 
-        {!!tables.length && (
+        {!!defs.length && (
           <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {tables.map((table) => {
+            {defs.map((def) => {
               // const columnCount = 0;
               // const deploymentsCount = 0;
-              const deployment = deploymentsMap.get(table.id);
+              const deployment = deploymentsMap.get(def.id);
               return (
                 <Link
-                  key={table.id}
-                  href={`/${team.slug}/${project.slug}/${table.slug}`}
+                  key={def.id}
+                  href={`/${team.slug}/${project.slug}/${def.slug}`}
                 >
                   <Card className="">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-1">
                         <Table2 />
-                        {table.name}
+                        {def.name}
                       </CardTitle>
                       <CardDescription className="truncate">
-                        {table.description}
+                        {def.description}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex items-center justify-center space-x-6">

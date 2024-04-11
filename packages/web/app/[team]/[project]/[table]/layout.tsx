@@ -1,7 +1,7 @@
-import NavTable from "@/components/nav-table";
+import NavDef from "@/components/nav-def";
 import SubNavHeader from "@/components/sub-nav-header";
 
-export default async function ImportTableLayout({
+export default async function DefLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ export default async function ImportTableLayout({
   return (
     <div>
       <SubNavHeader>
-        <NavTable />
+        <NavDef />
       </SubNavHeader>
       {children}
     </div>

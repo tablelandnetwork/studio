@@ -5,17 +5,17 @@ import { skipToken } from "@tanstack/react-query";
 import Crumb from "./crumb";
 import { api } from "@/trpc/react";
 
-export default function NavTable({
+export default function NavDef({
   className,
 }: React.HTMLAttributes<HTMLElement>) {
   const {
     team: teamSlug,
     project: projectSlug,
-    table: tableSlug,
+    def: defSlug,
   } = useParams<{
     team: string;
     project: string;
-    table: string;
+    def: string;
   }>();
 
   // TODO: Create a single endpoint for this.
@@ -23,18 +23,18 @@ export default function NavTable({
   const { data: project } = api.projects.projectBySlug.useQuery(
     team ? { teamId: team.id, slug: projectSlug } : skipToken,
   );
-  const { data: table } = api.tables.tableByProjectIdAndSlug.useQuery(
-    project ? { projectId: project.id, slug: tableSlug } : skipToken,
+  const { data: def } = api.defs.defByProjectIdAndSlug.useQuery(
+    project ? { projectId: project.id, slug: defSlug } : skipToken,
   );
 
-  if (!team || !project || !table) {
+  if (!team || !project || !def) {
     return null;
   }
 
   return (
     <div className={className}>
       <Crumb
-        title={table.name}
+        title={def.name}
         items={[
           { label: team.name, href: `/${team.slug}` },
           {

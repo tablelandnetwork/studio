@@ -27,10 +27,10 @@ export default async function Projects({
   });
   const authenticated = await api.auth.authenticated();
 
-  const tables = await Promise.all(
+  const defs = await Promise.all(
     projects.map(
       async (project) =>
-        await cache(api.tables.projectTables)({ projectId: project.id }),
+        await cache(api.defs.projectDefs)({ projectId: project.id }),
     ),
   );
   const deployments = await Promise.all(
@@ -73,7 +73,7 @@ export default async function Projects({
       {!!projects.length && (
         <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {projects.map((project, i) => {
-            const tableCount = tables[i].length;
+            const defCount = defs[i].length;
             const deploymentsCount = deployments[i].length;
             return (
               <Link key={project.id} href={`/${team.slug}/${project.slug}`}>
@@ -88,9 +88,9 @@ export default async function Projects({
                     <div className="flex items-center gap-1">
                       <Table2 className="h-6 w-6" />
                       <div className="flex flex-col items-center">
-                        <p className="text-4xl">{tableCount}</p>
+                        <p className="text-4xl">{defCount}</p>
                         <p className="text-sm text-muted-foreground">
-                          Table{tableCount !== 1 && "s"}
+                          Table{defCount !== 1 && "s"}
                         </p>
                       </div>
                     </div>

@@ -39,12 +39,12 @@ export default function ExecDeployment({
   team,
   project,
   environment,
-  table,
+  def,
 }: {
   team: schema.Team;
   project: schema.Project;
   environment: schema.Environment;
-  table: schema.Table;
+  def: schema.Def;
 }) {
   const router = useRouter();
   const [showDialog, setShowDialog] = useState(false);
@@ -111,7 +111,7 @@ export default function ExecDeployment({
           autoWait: false,
         });
 
-        const stmt = generateCreateTableStatement(table.name, table.schema);
+        const stmt = generateCreateTableStatement(def.name, def.schema);
         const res = await tbl.prepare(stmt).all();
         if (res.error) {
           throw new Error(res.error);
@@ -156,11 +156,11 @@ export default function ExecDeployment({
       setRecordDeploymentState("processing");
       try {
         await recordDeployment.mutateAsync({
-          tableId: table.id,
+          defId: def.id,
           environmentId: environment.id,
           tableName: txn.name,
           chainId: txn.chainId,
-          tokenId: txn.tableId,
+          tableId: txn.tableId,
           createdAt: new Date(),
           blockNumber: txn.blockNumber,
           txnHash: txn.transactionHash,
@@ -193,12 +193,12 @@ export default function ExecDeployment({
     <Dialog open={showDialog} onOpenChange={handleOnOpenChange}>
       <DialogContent className="flex flex-auto flex-col gap-y-4 overflow-auto">
         <DialogHeader>
-          <DialogTitle>Deploy Table: {table.name}</DialogTitle>
+          <DialogTitle>Deploy definition: {def.name}</DialogTitle>
           <DialogDescription>
-            Deploying a Table to Tableland will require you to sign and send a
-            transaction, as well as pay any transaction fees. Once the Table has
-            been deployed, it will be registered with your Studio Project and
-            you&apos;ll be able to view it in the Deployments tab.
+            Deploying a definition to Tableland will require you to sign and
+            send a transaction, as well as pay any transaction fees. Once the
+            defintion has been deployed, it will be registered with your Studio
+            Project and you&apos;ll be able to view it in the tables tab.
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-2">

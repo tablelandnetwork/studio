@@ -17,9 +17,9 @@ export const handler = async (
 ): Promise<void> => {
   try {
     const store = helpers.getStringValue(argv.store, ERROR_INVALID_STORE_PATH);
-    const description = helpers.getStringValue(
+    const defDescription = helpers.getStringValue(
       argv.description,
-      "table description is required",
+      "definition description is required",
     );
     const projectId = helpers.getStringValue(
       argv.project,
@@ -44,16 +44,16 @@ export const handler = async (
       chainId,
       tableId,
       projectId,
-      name: prefix,
+      defName: prefix,
       environmentId,
-      description,
+      defDescription,
     });
 
     logger.log(
       `successfully imported ${uuTableName}
   projectId: ${projectId}
   name: ${name}
-  description: ${description}`,
+  description: ${defDescription}`,
     );
   } catch (err: any) {
     logger.error(err);
