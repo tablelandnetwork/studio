@@ -55,7 +55,7 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
     }, [inputValue, debounceDuration]);
 
     useEffect(() => {
-      if (typeof debouncedValue === "string" && !debouncedValue.length) {
+      if (typeof debouncedValue === "string" && !!debouncedValue.length) {
         updateQuery(debouncedValue);
       }
     }, [debouncedValue, updateQuery]);
