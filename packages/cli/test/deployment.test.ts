@@ -182,7 +182,7 @@ describe("commands/deployment", function () {
       lines[0],
       `You are about to use address: ${chalk.yellow(
         "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
-      )} to deploy a table on chain local-tableland`,
+      )} to deploy a definition on chain local-tableland`,
     );
     equal(lines[1].startsWith("The estimated cost is"), true);
     equal(lines[2], "Do you want to continue (y/n)? ");

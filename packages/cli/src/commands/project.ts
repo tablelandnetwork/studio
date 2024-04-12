@@ -61,16 +61,16 @@ export const builder = function (args: Yargs) {
               : undefined;
           const projects = await api.projects.teamProjects.query(query);
 
-          const projectsWithTables = [];
+          const projectsWithDefs = [];
 
           for (const proj of projects) {
             const defs = await api.defs.projectDefs.query({
               projectId: proj.id,
             });
-            projectsWithTables.push({ tables: defs, ...proj });
+            projectsWithDefs.push({ defs, ...proj });
           }
 
-          logger.log(JSON.stringify(projectsWithTables, null, 4));
+          logger.log(JSON.stringify(projectsWithDefs, null, 4));
         } catch (err: any) {
           logger.error(err);
         }
