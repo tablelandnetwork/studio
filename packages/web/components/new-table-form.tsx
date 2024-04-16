@@ -212,6 +212,7 @@ export default function NewTableForm({
                 <div className="space-y-2">
                   <FormLabel>Team</FormLabel>
                   <TeamSwitcher
+                    variant="select"
                     teams={teams}
                     selectedTeam={team}
                     onTeamSelected={handleTeamSelected}

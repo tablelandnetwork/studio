@@ -47,15 +47,14 @@ export default function ProjectSwitcher({
 
   return (
     <div className="flex items-center gap-1">
-      {variant === "navigation" &&
-        team &&
-        (selectedProject ? (
-          <Link href={`/${team.slug}/${selectedProject.slug}`}>
-            {selectedProject.name}
-          </Link>
-        ) : (
-          <div>Select a project...</div>
-        ))}
+      {variant === "navigation" && team && selectedProject && (
+        <Link
+          href={`/${team.slug}/${selectedProject.slug}`}
+          className="underline-offset-2 hover:underline"
+        >
+          {selectedProject.name}
+        </Link>
+      )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild disabled={disabled}>
           <Button
