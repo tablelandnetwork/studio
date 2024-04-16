@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import TableColumns from "@/components/table-columns";
 import TableConstraints from "@/components/table-constraints";
-import { TypographyH1 } from "@/components/typography-h1";
 
 export default async function TableDetails({
   params,
