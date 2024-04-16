@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import TableColumns from "@/components/table-columns";
 import TableConstraints from "@/components/table-constraints";
+import { TypographyH1 } from "@/components/typography-h1";
 
 export default async function TableDetails({
   params,
@@ -34,9 +35,10 @@ export default async function TableDetails({
 
   return (
     <main className="container max-w-2xl space-y-5 p-4">
+      <h1 className="text-3xl font-medium">{table.name}</h1>
       <Card>
         <CardHeader>
-          <CardTitle>About {table.name}</CardTitle>
+          <CardTitle>Description</CardTitle>
           <CardDescription>{table.description}</CardDescription>
         </CardHeader>
       </Card>

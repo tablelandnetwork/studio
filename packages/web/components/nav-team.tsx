@@ -3,7 +3,6 @@
 import { type schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import Crumb from "./crumb";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +49,6 @@ export default function NavTeam({
 
   return (
     <div>
-      <Crumb title={team.data.name} className="mb-2" />
       <nav
         className={cn("flex items-center space-x-4 lg:space-x-6", className)}
         {...props}
