@@ -16,14 +16,17 @@ import {
 } from "../utils.js";
 
 // note: abnormal spacing is needed to ensure help message is formatted correctly
-export const command = "import-data <table> <file>";
+export const command = "import-data <definition> <file>";
 export const desc = "write the content of a csv into an  existing table";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
 ): Promise<void> => {
   try {
-    const table = helpers.getStringValue(argv.table, "table name is required");
+    const definition = helpers.getStringValue(
+      argv.definition,
+      "definition name is required",
+    );
     const file = helpers.getStringValue(argv.file, "file path is required");
     const store = helpers.getStringValue(argv.store, ERROR_INVALID_STORE_PATH);
 
@@ -39,14 +42,14 @@ export const handler = async (
     const environmentId = await helpers.getEnvironmentId(api, projectId);
 
     const aliases = studioAliases({ environmentId, apiUrl });
-    const uuTableName = helpers.getStringValue(
-      (await aliases.read())[table],
-      "could not find table in project",
+    const tableName = helpers.getStringValue(
+      (await aliases.read())[definition],
+      "could not find definition in project",
     );
 
-    // need to reverse lookup uuTableName from table and projectId so
+    // need to reverse lookup tableName from definition and projectId so
     // that the wallet can be connected to the right provider
-    const chain = helpers.getChainIdFromTableName(uuTableName);
+    const chain = helpers.getChainIdFromTableName(tableName);
     const privateKey = normalizePrivateKey(argv.privateKey);
     const signer = await helpers.getWalletWithProvider({
       privateKey,
@@ -68,13 +71,13 @@ export const handler = async (
     // need to capture row length now since `batchRows` will mutate the
     // rows Array to reduce memory overhead
     const rowCount = Number(rows.length);
-    const statements = csvHelp.batchRows(rows, headers, table);
+    const statements = csvHelp.batchRows(rows, headers, definition);
 
     const doImport = await confirmImport({
       statements,
       rowCount,
       wallet: signer,
-      table: uuTableName,
+      tableName,
     });
 
     if (!doImport) return logger.log("aborting");
@@ -87,7 +90,7 @@ export const handler = async (
     logger.log(
       `successfully inserted ${rowCount} row${
         rowCount === 1 ? "" : "s"
-      } into ${table}
+      } into ${definition}
   transaction receipt: ${chalk.gray.bold(
     JSON.stringify(result.meta?.txn, null, 4),
   )}
@@ -127,20 +130,20 @@ const parseCsvFile = async function (file: string): Promise<string[][]> {
 async function confirmImport(info: {
   statements: string[];
   rowCount: number;
-  table: unknown;
+  tableName: unknown;
   wallet: Wallet;
 }): Promise<boolean> {
-  if (typeof info.table !== "string") {
+  if (typeof info.tableName !== "string") {
     throw new Error("table name is required");
   }
 
   const statementLength = info.statements.join("").length;
   const statementCount = info.statements.length;
-  const tableId = helpers.getTableIdFromTableName(info.table);
+  const tableId = helpers.getTableIdFromTableName(info.tableName);
 
   const cost = await helpers.estimateCost({
     signer: info.wallet,
-    chainId: helpers.getChainIdFromTableName(info.table),
+    chainId: helpers.getChainIdFromTableName(info.tableName),
     method: "mutate(address,(uint256,string)[])",
     args: [info.wallet.address, info.statements.map((s) => [tableId, s])],
   });
@@ -150,7 +153,7 @@ async function confirmImport(info: {
       info.wallet.address,
     )} to insert ${chalk.yellow(info.rowCount)} row${
       info.rowCount === 1 ? "" : "s"
-    } into table ${chalk.yellow(info.table)}
+    } into table ${chalk.yellow(info.tableName)}
 This can be done with a total of ${chalk.yellow(statementCount)} statment${
       statementCount === 1 ? "" : "s"
     }

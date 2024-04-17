@@ -18,15 +18,15 @@ function projectLinks(
 }> {
   return [
     {
-      label: "Blueprint",
+      label: "Definitions",
       href: `/${team.slug}/${project.slug}`,
       isActive: (pathname) => pathname === `/${team.slug}/${project.slug}`,
     },
     {
-      label: "Deployments",
-      href: `/${team.slug}/${project.slug}/deployments`,
+      label: "Tables",
+      href: `/${team.slug}/${project.slug}/tables`,
       isActive: (pathname) =>
-        pathname.includes(`/${team.slug}/${project.slug}/deployments`),
+        pathname.includes(`/${team.slug}/${project.slug}/tables`),
     },
   ];
 }

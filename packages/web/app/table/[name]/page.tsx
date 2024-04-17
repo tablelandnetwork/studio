@@ -1,5 +1,10 @@
-import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
-import TablelandTable from "@/components/tableland-table";
+import {
+  ApiError,
+  type Table as TblTable,
+  Validator,
+  helpers,
+} from "@tableland/sdk";
+import Table from "@/components/table";
 
 export default async function TablePage({
   params,
@@ -31,7 +36,7 @@ export default async function TablePage({
     baseUrl: helpers.getBaseUrl(chainId),
   });
 
-  let tablelandTable: Table;
+  let tablelandTable: TblTable;
   try {
     tablelandTable = await validator.getTableById({
       chainId,
@@ -68,13 +73,13 @@ export default async function TablePage({
   const createdAt = new Date(createdAttr.value * 1000);
 
   return (
-    <TablelandTable
+    <Table
       displayName={params.name}
       chainId={chainId}
       createdAt={createdAt}
       schema={tablelandTable.schema}
       tableName={params.name}
-      tokenId={tokenId}
+      tableId={tokenId}
     />
   );
 }

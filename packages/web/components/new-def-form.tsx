@@ -10,12 +10,12 @@ import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
-import { newTableFormSchema } from "@tableland/studio-validators";
+import { newDefFormSchema } from "@tableland/studio-validators";
 import Columns from "./columns";
 import { FormRootMessage } from "./form-root";
 import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
-import TableConstraints from "./table-constraints";
+import DefConstraints from "./def-constraints";
 import {
   Sheet,
   SheetContent,
@@ -37,9 +37,9 @@ import { api } from "@/trpc/react";
 import TeamSwitcher from "@/components/team-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { ensureError } from "@/lib/ensure-error";
-import TableColumns from "@/components/table-columns";
+import DefColumns from "@/components/def-columns";
 
-export interface NewTableFormProps {
+export interface NewDefFormProps {
   teamPreset?: schema.Team;
   projectPreset?: schema.Project;
   showSelectors?: boolean;
@@ -50,11 +50,11 @@ export interface NewTableFormProps {
   onSuccess: (
     team: schema.Team,
     project: schema.Project,
-    table: schema.Table,
+    def: schema.Def,
   ) => void;
 }
 
-export default function NewTableForm({
+export default function NewDefForm({
   teamPreset,
   projectPreset,
   showSelectors,
@@ -63,13 +63,13 @@ export default function NewTableForm({
   onOpenChange,
   trigger,
   onSuccess,
-}: NewTableFormProps) {
+}: NewDefFormProps) {
   const [openSheet, setOpenSheet] = useState(open ?? false);
   const [team, setTeam] = useState<schema.Team | undefined>(teamPreset);
   const [project, setProject] = useState<schema.Project | undefined>(
     projectPreset,
   );
-  const [tableName, setTableName] = useState("");
+  const [defName, setDefName] = useState("");
 
   const { data: teams } = api.teams.userTeams.useQuery(
     !teamPreset ? undefined : skipToken,
@@ -78,8 +78,8 @@ export default function NewTableForm({
     !projectPreset && team ? { teamId: team.id } : skipToken,
   );
 
-  const form = useForm<z.infer<typeof newTableFormSchema>>({
-    resolver: zodResolver(newTableFormSchema),
+  const form = useForm<z.infer<typeof newDefFormSchema>>({
+    resolver: zodResolver(newDefFormSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -100,17 +100,15 @@ export default function NewTableForm({
     setOpenSheet(open ?? false);
   }, [open]);
 
-  const nameAvailableQuery = api.tables.nameAvailable.useQuery(
-    project && !!tableName
-      ? { projectId: project.id, name: tableName }
-      : skipToken,
+  const nameAvailableQuery = api.defs.nameAvailable.useQuery(
+    project && !!defName ? { projectId: project.id, name: defName } : skipToken,
     { retry: false },
   );
 
-  const newTable = api.tables.newTable.useMutation({
-    onSuccess: (table) => {
+  const newDef = api.defs.newDef.useMutation({
+    onSuccess: (def) => {
       if (!team || !project) return;
-      onSuccess(team, project, table);
+      onSuccess(team, project, def);
       setOpenSheet(false);
     },
     onError: (err: any) => {
@@ -150,7 +148,7 @@ export default function NewTableForm({
     setProject(undefined);
   };
 
-  function onSubmit(values: z.infer<typeof newTableFormSchema>) {
+  function onSubmit(values: z.infer<typeof newDefFormSchema>) {
     if (!project) return;
     const schema =
       schemaPreset ??
@@ -172,7 +170,7 @@ export default function NewTableForm({
           return schemaColumn;
         }),
       });
-    newTable.mutate({
+    newDef.mutate({
       projectId: project.id,
       schema,
       ...values,
@@ -184,12 +182,12 @@ export default function NewTableForm({
       {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
       <SheetContent
         className="overflow-scroll sm:max-w-xl"
-        closeDisabled={newTable.isPending}
+        closeDisabled={newDef.isPending}
         onPointerDownOutside={
-          newTable.isPending ? (e) => e.preventDefault() : undefined
+          newDef.isPending ? (e) => e.preventDefault() : undefined
         }
         onEscapeKeyDown={
-          newTable.isPending ? (e) => e.preventDefault() : undefined
+          newDef.isPending ? (e) => e.preventDefault() : undefined
         }
       >
         <Form {...form}>
@@ -201,7 +199,7 @@ export default function NewTableForm({
             className="mx-auto max-w-2xl space-y-8"
           >
             <SheetHeader>
-              <SheetTitle>New Table</SheetTitle>
+              <SheetTitle>New definition</SheetTitle>
               {/* <SheetDescription>
                 This action cannot be undone. This will permanently delete your
                 account and remove your data from our servers.
@@ -240,14 +238,14 @@ export default function NewTableForm({
                   <FormControl>
                     <InputWithCheck
                       disabled={!project}
-                      placeholder="Table name"
-                      updateQuery={setTableName}
+                      placeholder="Definition name"
+                      updateQuery={setDefName}
                       queryStatus={nameAvailableQuery}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Table name must be unique within your Project.
+                    Definition name must be unique within your Project.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -260,11 +258,11 @@ export default function NewTableForm({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Table description" {...field} />
+                    <Textarea placeholder="Definition description" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Provide a description of your new Table so others can
-                    understand the role it plays in your Project Blueprint.
+                    Provide a description of your new definition so others can
+                    understand the role it plays in your Project.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -275,12 +273,12 @@ export default function NewTableForm({
               <>
                 <div className="space-y-2">
                   <FormLabel>Columns</FormLabel>
-                  <TableColumns columns={schemaPreset.columns} />
+                  <DefColumns columns={schemaPreset.columns} />
                 </div>
                 {schemaPreset.tableConstraints && (
                   <div className="space-y-2">
-                    <FormLabel>Table constraints</FormLabel>
-                    <TableConstraints
+                    <FormLabel>Constraints</FormLabel>
+                    <DefConstraints
                       tableConstraints={schemaPreset?.tableConstraints}
                     />
                   </div>
@@ -304,7 +302,7 @@ export default function NewTableForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      Specify at least one column for your table&apos;s schema.
+                      Specify at least one column for your definition.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -314,9 +312,9 @@ export default function NewTableForm({
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={newTable.isPending || !nameAvailableQuery.data}
+              disabled={newDef.isPending || !nameAvailableQuery.data}
             >
-              {newTable.isPending && (
+              {newDef.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               )}
               Submit

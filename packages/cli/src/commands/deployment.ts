@@ -71,7 +71,7 @@ export const builder = function (args: Yargs) {
     )
     .command(
       "create <name>",
-      "deploy the given table name. A projectId value is required, but the default is used if no command flag is set",
+      "deploy the given definition name. A projectId value is required, but the default is used if no command flag is set",
       function (args) {
         return args.positional("project", {
           type: "string",
@@ -107,7 +107,7 @@ export const builder = function (args: Yargs) {
           });
 
           if (typeof name !== "string" || name.trim() === "") {
-            throw new Error("must provide table name");
+            throw new Error("must provide definition name");
           }
           if (typeof projectId !== "string" || projectId.trim() === "") {
             throw new Error("must provide project for deployment");
@@ -118,20 +118,22 @@ export const builder = function (args: Yargs) {
             projectId,
           );
 
-          // lookup table data from project and name
-          const table = await api.tables.tableByProjectIdAndSlug.query({
+          // lookup definition data from project and name
+          const def = await api.defs.defByProjectIdAndSlug.query({
             projectId,
             slug: name,
           });
 
-          if (!(table?.name && table?.schema)) {
-            throw new Error("could not get table to deploy within project");
+          if (!(def?.name && def?.schema)) {
+            throw new Error(
+              "could not get definition to deploy within project",
+            );
           }
 
           // TODO: setup a "ping" endpoint in the api so we can be sure the api is responding before
           //       the deployment is created
 
-          const stmt = generateCreateTableStatement(table.name, table.schema);
+          const stmt = generateCreateTableStatement(def.name, def.schema);
 
           const cost = await helpers.estimateCost({
             signer: wallet,
@@ -140,11 +142,11 @@ export const builder = function (args: Yargs) {
             args: [wallet.address, stmt],
           });
 
-          // confirm they want to deploy their table
+          // confirm they want to deploy their definition
           const confirm = await helpers.ask([
             `You are about to use address: ${chalk.yellow(
               wallet.address,
-            )} to deploy a table on chain ${chain as number}
+            )} to deploy a definition on chain ${chain as number}
 The estimated cost is ${cost}
 Do you want to continue (y/n)? `,
           ]);
@@ -175,14 +177,14 @@ Do you want to continue (y/n)? `,
             environmentId,
             tableName: txn?.name,
             chainId: txn?.chainId,
-            tableId: table.id,
-            tokenId: txn?.tableId,
+            defId: def.id,
+            tableId: txn?.tableId,
             createdAt: new Date(),
             blockNumber: txn?.blockNumber,
             txnHash: txn?.transactionHash,
           });
 
-          logger.log("table deployed");
+          logger.log("definition deployed");
           logger.log(JSON.stringify(result, null, 4));
         } catch (err: any) {
           logger.error(err);

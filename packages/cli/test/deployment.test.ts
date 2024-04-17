@@ -132,14 +132,14 @@ describe("commands/deployment", function () {
     const value = JSON.parse(res);
 
     // assert id format
-    equal(isUUID(value.tableId), true);
+    equal(isUUID(value.defId), true);
     equal(isUUID(value.environmentId), true);
     equal(value.chainId, 31337);
     equal(value.tableName.split("_")[0], tableName);
-    const tokenIdNumber = parseInt(value.tokenId, 10);
-    equal(isNaN(tokenIdNumber), false);
+    const tableIdNumber = parseInt(value.tableId, 10);
+    equal(isNaN(tableIdNumber), false);
     // There's ten studio tables, so this must be greater than 10
-    equal(tokenIdNumber > 10, true);
+    equal(tableIdNumber > 10, true);
     equal(isNaN(value.blockNumber), false);
     equal(typeof value.blockNumber, "number");
   });
@@ -182,7 +182,7 @@ describe("commands/deployment", function () {
       lines[0],
       `You are about to use address: ${chalk.yellow(
         "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
-      )} to deploy a table on chain local-tableland`,
+      )} to deploy a definition on chain local-tableland`,
     );
     equal(lines[1].startsWith("The estimated cost is"), true);
     equal(lines[2], "Do you want to continue (y/n)? ");
@@ -200,15 +200,15 @@ describe("commands/deployment", function () {
     equal(data.length, 1);
     const deployment = data[0];
 
-    equal(isUUID(deployment.tableId), true);
+    equal(isUUID(deployment.defId), true);
     equal(isUUID(deployment.environmentId), true);
     equal(deployment.environmentId, environmentId);
     equal(deployment.tableName.split("_")[0], tableName);
     equal(deployment.chainId, 31337);
-    const tokenIdNumber = parseInt(deployment.tokenId, 10);
-    equal(isNaN(tokenIdNumber), false);
+    const tableIdNumber = parseInt(deployment.tableId, 10);
+    equal(isNaN(tableIdNumber), false);
     // There's ten studio tables, so this must be greater than 10
-    equal(tokenIdNumber > 10, true);
+    equal(tableIdNumber > 10, true);
     equal(isNaN(deployment.blockNumber), false);
     equal(typeof deployment.blockNumber, "number");
   });
