@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   teamNameAvailableSchema,
   newTeamSchema,
+  updateTeamSchema,
 } from "@tableland/studio-validators";
 import {
   protectedProcedure,
@@ -149,6 +150,15 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         }
 
         return team;
+      }),
+    updateTeam: teamAdminProcedure(store)
+      .input(updateTeamSchema)
+      .mutation(async ({ input: { name }, ctx }) => {
+        try {
+          await store.teams.updateTeam(ctx.teamId, name);
+        } catch (err) {
+          throw internalError("Error updating team", err);
+        }
       }),
     usersForTeam: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))

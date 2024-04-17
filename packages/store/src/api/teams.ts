@@ -88,6 +88,15 @@ export function initTeams(
       return { team, invites };
     },
 
+    updateTeam: async function (teamId: string, name: string) {
+      const slug = slugify(name);
+      await db
+        .update(teams)
+        .set({ name, slug })
+        .where(eq(teams.id, teamId))
+        .run();
+    },
+
     teamBySlug: async function (slug: string) {
       const team = await db
         .select()
