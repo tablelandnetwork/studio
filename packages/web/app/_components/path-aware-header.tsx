@@ -13,9 +13,9 @@ export default function PathAwareHeader({
 
   const showBorder =
     path === "/" ||
-    path.startsWith("/invite") ||
-    path === "/sql-log" ||
-    path.startsWith("/table") ||
+    path.startsWith("/invite/") ||
+    path === "/sql-log/" ||
+    path.startsWith("/table/") ||
     path.split("/").length === 4; // This is a table definition page
 
   return (
