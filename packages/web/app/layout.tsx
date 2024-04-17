@@ -2,7 +2,6 @@ import { type RouterOutputs, getSession } from "@tableland/studio-api";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import { headers, cookies } from "next/headers";
-import Link from "next/link";
 import Script from "next/script";
 import { cache } from "react";
 import { Analytics } from "@vercel/analytics/react";
@@ -13,7 +12,6 @@ import { TRPCReactProvider } from "@/trpc/react";
 import WagmiProvider from "@/components/wagmi-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { NavPrimary } from "@/components/nav-primary";
-import MesaSvg from "@/components/mesa-svg";
 import Hotjar from "@/components/hotjar";
 import { JotaiProvider } from "@/components/jotai-provider";
 import "./globals.css";
@@ -74,12 +72,7 @@ export default async function RootLayout({
               <Hotjar></Hotjar>
               <TRPCReactProvider headers={headers()}>
                 <PathAwareHeader className="flex items-center justify-between bg-[#202132] px-4 py-3">
-                  <div className="flex flex-row items-center gap-x-2">
-                    <Link href="/">
-                      <MesaSvg />
-                    </Link>
-                    <PrimaryHeaderItem teams={teams} />
-                  </div>
+                  <PrimaryHeaderItem teams={teams} />
                   <div className="ml-auto flex items-center space-x-4">
                     <NavPrimary />
                     <Profile />

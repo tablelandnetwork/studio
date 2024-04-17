@@ -3,7 +3,7 @@
 import { Plus } from "lucide-react";
 import { type schema } from "@tableland/studio-store";
 import { useRouter } from "next/navigation";
-import NewProjectForm from "./new-project-form";
+import NewProjectForm from "@/components/new-project-form";
 import { Button } from "@/components/ui/button";
 
 export default function NewProjectButton({ team }: { team: schema.Team }) {
