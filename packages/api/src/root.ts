@@ -8,8 +8,9 @@ import { environmentsRouter } from "./routers/environments";
 import { invitesRouter } from "./routers/invites";
 import { projectsRouter } from "./routers/projects";
 import { providersRouter } from "./routers/providers";
-import { tablesRouter } from "./routers/tables";
+import { defsRouter } from "./routers/defs";
 import { teamsRouter } from "./routers/teams";
+import { tablesRouter } from "./routers/tables";
 
 export function appRouter(
   store: Store,
@@ -33,6 +34,7 @@ export function appRouter(
     auth: authRouter(store),
     projects: projectsRouter(store),
     teams: teamsRouter(store, sendInvite),
+    defs: defsRouter(store),
     tables: tablesRouter(store),
     invites: invitesRouter(store, sendInvite, dataSealPass),
     environments: environmentsRouter(store),

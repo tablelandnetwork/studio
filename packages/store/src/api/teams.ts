@@ -137,6 +137,8 @@ export function initTeams(
                 description: string;
                 id: string;
                 slug: string;
+                createdAt: string | null;
+                updatedAt: string | null;
               }>;
               name: string;
               id: string;

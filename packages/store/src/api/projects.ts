@@ -111,7 +111,7 @@ export function initProjects(
 
     projectsByTeamId: async function (teamId: string) {
       const res = await db
-        .select({ projects }) // TODO: Figure out why if we don't specify select key, projects key ends up as actual table name.
+        .select({ project: projects }) // TODO: Figure out why if we don't specify select key, projects key ends up as actual table name.
         .from(teamProjects)
         .innerJoin(projects, eq(teamProjects.projectId, projects.id))
         .where(
@@ -119,7 +119,7 @@ export function initProjects(
         )
         .orderBy(projects.name)
         .all();
-      const mapped = res.map((r) => r.projects);
+      const mapped = res.map((r) => r.project);
       return mapped;
     },
 

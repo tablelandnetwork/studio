@@ -11,58 +11,59 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import TableColumns from "@/components/table-columns";
-import TableConstraints from "@/components/table-constraints";
+import DefColumns from "@/components/def-columns";
+import DefConstraints from "@/components/def-constraints";
 
-export default async function TableDetails({
+export default async function DefDetails({
   params,
 }: {
-  params: { team: string; project: string; table: string };
+  params: { team: string; project: string; def: string };
 }) {
   const team = await cache(api.teams.teamBySlug)({ slug: params.team });
   const project = await cache(api.projects.projectBySlug)({
     teamId: team.id,
     slug: params.project,
   });
-  const table = await cache(api.tables.tableByProjectIdAndSlug)({
+  const def = await cache(api.defs.defByProjectIdAndSlug)({
     projectId: project.id,
-    slug: params.table,
+    slug: params.def,
   });
-  const deploymentInfos = await cache(api.deployments.deploymentsByTableId)({
-    tableId: table.id,
+  const deploymentInfos = await cache(api.deployments.deploymentsByDefId)({
+    defId: def.id,
   });
 
   return (
     <main className="container max-w-2xl space-y-5 p-4">
+      <h1 className="text-3xl font-medium">{def.name}</h1>
       <Card>
         <CardHeader>
-          <CardTitle>About {table.name}</CardTitle>
-          <CardDescription>{table.description}</CardDescription>
+          <CardTitle>Description</CardTitle>
+          <CardDescription>{def.description}</CardDescription>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader>
           <CardTitle>Columns</CardTitle>
           <CardDescription>
-            Table {table.name} has the following columns:
+            Definition {def.name} has the following columns:
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TableColumns columns={table.schema.columns} />
+          <DefColumns columns={def.schema.columns} />
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Table Constraints</CardTitle>
+          <CardTitle>Definition constraints</CardTitle>
           <CardDescription>
-            {table.schema.tableConstraints
-              ? `Table ${table.name} includes the following table-wide constraints
+            {def.schema.tableConstraints
+              ? `Definition ${def.name} includes the following table-wide constraints
             that apply to one or more columns:`
-              : `Table ${table.name} doesn't have any table constraints.`}
+              : `Definition ${def.name} doesn't have any table-wide constraints.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TableConstraints tableConstraints={table.schema.tableConstraints} />
+          <DefConstraints tableConstraints={def.schema.tableConstraints} />
         </CardContent>
       </Card>
       <Card>
@@ -70,10 +71,10 @@ export default async function TableDetails({
           <CardTitle>Deployments</CardTitle>
           <CardDescription>
             {deploymentInfos.length ? (
-              `Table ${table.name} has been deployed to the following networks:`
+              `Definition ${def.name} has been deployed to the following networks:`
             ) : (
-              <Link href={`/${team.slug}/${project.slug}/deployments`}>
-                Table <b className="font-bold">{table.name}</b> has not been
+              <Link href={`/${team.slug}/${project.slug}/tables`}>
+                Definition <b className="font-bold">{def.name}</b> has not been
                 deployed yet.
               </Link>
             )}
@@ -84,7 +85,7 @@ export default async function TableDetails({
             {deploymentInfos.map((deploymentInfo) => (
               <Link
                 key={deploymentInfo.environment.id}
-                href={`/${team.slug}/${project.slug}/deployments/${deploymentInfo.environment.slug}/${table.slug}`}
+                href={`/${team.slug}/${project.slug}/tables/${deploymentInfo.environment.slug}/${def.slug}`}
               >
                 <div className="flex items-center rounded-md p-3 hover:bg-slate-100">
                   <Rocket />

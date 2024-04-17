@@ -47,7 +47,7 @@ export interface ImportTableFormProps {
   onSuccess: (
     team: schema.Team,
     project: schema.Project,
-    table: schema.Table,
+    def: schema.Def,
     environment: schema.Environment,
     deployment: schema.Deployment,
   ) => void;
@@ -71,7 +71,7 @@ export default function ImportTableForm({
     projectPreset,
   );
   const [env, setEnv] = useState<schema.Environment | undefined>(envPreset);
-  const [tableName, setTableName] = useState("");
+  const [defName, setDefName] = useState("");
 
   const { data: teams } = api.teams.userTeams.useQuery(
     !teamPreset ? undefined : skipToken,
@@ -88,8 +88,8 @@ export default function ImportTableForm({
     defaultValues: {
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
-      name: "",
-      description: undefined,
+      defName: "",
+      defDescription: undefined,
       environmentId: envPreset?.id ?? "",
     },
   });
@@ -121,7 +121,7 @@ export default function ImportTableForm({
 
   useEffect(() => {
     if (!(!!chainId && !!tableId)) {
-      setValue("name", "");
+      setValue("defName", "");
       return;
     }
     const validator = new Validator({ baseUrl: helpers.getBaseUrl(chainId) });
@@ -129,28 +129,28 @@ export default function ImportTableForm({
       .getTableById({ chainId, tableId })
       .then((table) => {
         const prefix = tablePrefix(table.name);
-        setValue("name", prefix);
-        setTableName(prefix);
+        setValue("defName", prefix);
+        setDefName(prefix);
       })
       .catch((_) => {
-        setValue("name", "");
+        setValue("defName", "");
       });
   }, [chainId, tableId, setValue]);
 
-  const nameAvailableQuery = api.tables.nameAvailable.useQuery(
-    project && tableName
+  const nameAvailableQuery = api.defs.nameAvailable.useQuery(
+    project && defName
       ? {
           projectId: project.id,
-          name: tableName,
+          name: defName,
         }
       : skipToken,
     { retry: false },
   );
 
   const importTable = api.tables.importTable.useMutation({
-    onSuccess: ({ table, deployment }) => {
+    onSuccess: ({ def, deployment }) => {
       if (!team || !project || !env) return;
-      onSuccess(team, project, table, env, deployment);
+      onSuccess(team, project, def, env, deployment);
       setOpenSheet(false);
     },
   });
@@ -208,6 +208,7 @@ export default function ImportTableForm({
                 <div className="space-y-2">
                   <FormLabel>Team</FormLabel>
                   <TeamSwitcher
+                    variant="select"
                     teams={teams}
                     selectedTeam={team}
                     onTeamSelected={handleTeamSelected}
@@ -288,23 +289,22 @@ export default function ImportTableForm({
             />
             <FormField
               control={control}
-              name="name"
+              name="defName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Blueprint table definition name</FormLabel>
+                  <FormLabel>Definition name</FormLabel>
                   <FormControl>
                     <InputWithCheck
                       disabled={!project}
                       placeholder="eg. users"
-                      updateQuery={setTableName}
+                      updateQuery={setDefName}
                       queryStatus={nameAvailableQuery}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    The name of the table definition to create in your Studio
-                    project&apos;s blueprint. This name must be unique within
-                    your project&apos;s blueprint.
+                    The name of the definition to create in your Studio project.
+                    This name must be unique within your project.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -312,17 +312,16 @@ export default function ImportTableForm({
             />
             <FormField
               control={control}
-              name="description"
+              name="defDescription"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Table description" {...field} />
+                    <Textarea placeholder="Definition description" {...field} />
                   </FormControl>
                   <FormDescription>
                     Provide a description for the imported table so others can
-                    understand the role it plays in your project&apos;s
-                    blueprint.
+                    understand the role it plays in your project.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

@@ -1,7 +1,7 @@
 import { type Schema } from "@tableland/studio-store";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
-export default function TableConstraints({
+export default function DefConstraints({
   tableConstraints,
 }: {
   tableConstraints: Schema["tableConstraints"];

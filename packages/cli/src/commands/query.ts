@@ -155,7 +155,9 @@ class QueryShell {
       const queryObject = await this.queryValidator(this.statement);
 
       if (queryObject.type === "create") {
-        throw new Error("you cannot create studio project tables with the cli");
+        throw new Error(
+          "you cannot create studio project table definitions with the cli",
+        );
       }
 
       if (queryObject.type !== "read" && !this.privateKey) {

@@ -7,7 +7,6 @@ import { skipToken } from "@tanstack/react-query";
 import Share from "./share";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
-import Crumb from "@/components/crumb";
 
 function projectLinks(
   team: schema.Team,
@@ -19,15 +18,15 @@ function projectLinks(
 }> {
   return [
     {
-      label: "Blueprint",
+      label: "Definitions",
       href: `/${team.slug}/${project.slug}`,
       isActive: (pathname) => pathname === `/${team.slug}/${project.slug}`,
     },
     {
-      label: "Deployments",
-      href: `/${team.slug}/${project.slug}/deployments`,
+      label: "Tables",
+      href: `/${team.slug}/${project.slug}/tables`,
       isActive: (pathname) =>
-        pathname.includes(`/${team.slug}/${project.slug}/deployments`),
+        pathname.includes(`/${team.slug}/${project.slug}/tables`),
     },
   ];
 }
@@ -61,11 +60,6 @@ export default function NavProject({
   return (
     <div className="flex flex-1">
       <div className="flex flex-col">
-        <Crumb
-          title={project.name}
-          items={[{ label: team.name, href: `/${team.slug}` }]}
-          className="mb-2"
-        />
         <nav
           className={cn("flex items-center space-x-4 lg:space-x-6", className)}
           {...props}

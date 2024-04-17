@@ -4,30 +4,30 @@ import * as schema from "../schema/index.js";
 
 const deployments = schema.deployments;
 const environments = schema.environments;
-const projectTables = schema.projectTables;
+const projectDefs = schema.projectDefs;
 const projects = schema.projects;
-const tables = schema.tables;
+const defs = schema.defs;
 const teamProjects = schema.teamProjects;
 const teams = schema.teams;
 
 export function initDeployments(db: DrizzleD1Database<typeof schema>) {
   return {
     recordDeployment: async function ({
-      tableId,
+      defId,
       environmentId,
       chainId,
       tableName,
-      tokenId,
+      tableId,
       blockNumber,
       txnHash,
       createdAt,
     }: Omit<schema.NewDeployment, "createdAt"> & { createdAt: Date }) {
       const deployment: schema.Deployment = {
-        tableId,
+        defId,
         environmentId,
         chainId,
         tableName,
-        tokenId,
+        tableId,
         blockNumber: blockNumber ?? null,
         txnHash: txnHash ?? null,
         createdAt: createdAt.toISOString(),
@@ -36,12 +36,12 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
       return deployment;
     },
 
-    deploymentsByTableId: async function (tableId: string) {
+    deploymentsByDefId: async function (defId: string) {
       const res = await db
         .select()
         .from(deployments)
         .innerJoin(environments, eq(deployments.environmentId, environments.id))
-        .where(eq(deployments.tableId, tableId))
+        .where(eq(deployments.defId, defId))
         .orderBy(environments.name)
         .all();
       const mapped = res.map((r) => ({
@@ -57,8 +57,8 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
       const res = await db
         .select({ deployments })
         .from(deployments)
-        .leftJoin(projectTables, eq(deployments.tableId, projectTables.tableId))
-        .where(eq(projectTables.projectId, projectId))
+        .leftJoin(projectDefs, eq(deployments.defId, projectDefs.defId))
+        .where(eq(projectDefs.projectId, projectId))
         .all();
 
       const mapped = res.map((r) => r.deployments);
@@ -67,41 +67,34 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
 
     deploymentsByEnvironmentId: async function (environmentId: string) {
       const res = await db
-        .select()
+        .select({ deployment: deployments, def: defs })
         .from(deployments)
-        .innerJoin(tables, eq(deployments.tableId, tables.id))
+        .innerJoin(defs, eq(deployments.defId, defs.id))
         .where(eq(deployments.environmentId, environmentId))
         .all();
-      const mapped = res.map((r) => ({
-        deployment: r.deployments,
-        table: r.tables,
-      }));
-      return mapped;
+      return res;
     },
 
-    deploymentReferences: async function (chainId: number, tokenId: string) {
+    deploymentReferences: async function (chainId: number, tableId: string) {
       const res = await db
         .select({
           team: teams,
           project: projects,
-          table: tables,
+          def: defs,
           environment: environments,
           deployment: deployments,
         })
         .from(deployments)
-        .innerJoin(
-          projectTables,
-          eq(deployments.tableId, projectTables.tableId),
-        )
-        .innerJoin(tables, eq(projectTables.tableId, tables.id))
-        .innerJoin(projects, eq(projectTables.projectId, projects.id))
+        .innerJoin(projectDefs, eq(deployments.defId, projectDefs.defId))
+        .innerJoin(defs, eq(projectDefs.defId, defs.id))
+        .innerJoin(projects, eq(projectDefs.projectId, projects.id))
         .innerJoin(environments, eq(deployments.environmentId, environments.id))
         .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
         .innerJoin(teams, eq(teamProjects.teamId, teams.id))
         .where(
           and(
             eq(deployments.chainId, chainId),
-            eq(deployments.tokenId, tokenId),
+            eq(deployments.tableId, tableId),
           ),
         )
         .all();

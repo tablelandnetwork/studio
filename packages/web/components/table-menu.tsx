@@ -4,7 +4,7 @@ import { Ellipsis } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import NewTableForm, { type NewTableFormProps } from "./new-table-form";
+import NewDefForm, { type NewDefFormProps } from "./new-def-form";
 import ImportTableForm, {
   type ImportTableFormProps,
 } from "./import-table-form";
@@ -15,33 +15,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function TablelandTableMenu(
-  props: Omit<NewTableFormProps, "open" | "onOpenChange" | "onSuccess"> &
+export default function TableMenu(
+  props: Omit<NewDefFormProps, "open" | "onOpenChange" | "onSuccess"> &
     Omit<ImportTableFormProps, "open" | "onOpenChange" | "onSuccess">,
 ) {
-  const [newTableFormOpen, setNewTableFormOpen] = useState(false);
+  const [newDefFormOpen, setNewDefFormOpen] = useState(false);
   const [importTableFormOpen, setImportTableFormOpen] = useState(false);
   const router = useRouter();
 
   return (
     <>
-      <NewTableForm
+      <NewDefForm
         {...props}
-        open={newTableFormOpen}
-        onOpenChange={setNewTableFormOpen}
-        onSuccess={(team, project, table) => {
+        open={newDefFormOpen}
+        onOpenChange={setNewDefFormOpen}
+        onSuccess={(team, project, def) => {
           router.refresh();
-          router.push(`/${team.slug}/${project.slug}/${table.slug}`);
+          router.push(`/${team.slug}/${project.slug}/${def.slug}`);
         }}
       />
       <ImportTableForm
         {...props}
         open={importTableFormOpen}
         onOpenChange={setImportTableFormOpen}
-        onSuccess={(team, project, table, env) => {
+        onSuccess={(team, project, def, env) => {
           router.refresh();
           router.push(
-            `/${team.slug}/${project.slug}/deployments/${env.slug}/${table.slug}`,
+            `/${team.slug}/${project.slug}/tables/${env.slug}/${def.slug}`,
           );
         }}
       />
@@ -55,7 +55,7 @@ export default function TablelandTableMenu(
           <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
             Import table into Studio project
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setNewTableFormOpen(true)}>
+          <DropdownMenuItem onSelect={() => setNewDefFormOpen(true)}>
             Use table schema in Studio project
           </DropdownMenuItem>
         </DropdownMenuContent>
