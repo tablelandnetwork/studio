@@ -3,6 +3,7 @@
 import { type schema } from "@tableland/studio-store";
 import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -24,6 +25,7 @@ type PopoverTriggerProps = React.ComponentPropsWithoutRef<
 >;
 
 interface TeamSwitcherProps extends PopoverTriggerProps {
+  variant?: "navigation" | "select";
   selectedTeam?: schema.Team;
   teams?: schema.Team[];
   onTeamSelected?: (team: schema.Team) => void;
@@ -32,10 +34,12 @@ interface TeamSwitcherProps extends PopoverTriggerProps {
 
 export default function TeamSwitcher({
   className,
+  variant = "navigation",
   selectedTeam,
   teams,
   onTeamSelected,
   onNewTeamSelected,
+  disabled,
 }: TeamSwitcherProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -59,17 +63,30 @@ export default function TeamSwitcher({
 
   return (
     <div className="flex items-center gap-1">
+      {variant === "navigation" && selectedTeam && (
+        <Link
+          href={`/${selectedTeam.slug}`}
+          className="underline-offset-2 hover:underline"
+        >
+          {selectedTeam.name}
+        </Link>
+      )}
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild disabled={disabled}>
           <Button
-            variant="outline"
+            variant={variant === "navigation" ? "ghost" : "outline"}
+            size={variant === "navigation" ? "sm" : "default"}
             role="combobox"
             aria-expanded={open}
             aria-label="Select a team"
-            className={cn("justify-between", className)}
+            className={cn(
+              "justify-between",
+              variant === "navigation" && "px-0",
+              className,
+            )}
           >
-            {selectedTeam?.name ?? "Select a team..."}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            {variant === "select" && (selectedTeam?.name ?? "Select a team...")}
+            <ChevronsUpDown className="m-1 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">

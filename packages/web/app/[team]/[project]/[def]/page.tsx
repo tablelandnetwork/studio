@@ -34,9 +34,10 @@ export default async function DefDetails({
 
   return (
     <main className="container max-w-2xl space-y-5 p-4">
+      <h1 className="text-3xl font-medium">{def.name}</h1>
       <Card>
         <CardHeader>
-          <CardTitle>About {def.name}</CardTitle>
+          <CardTitle>Description</CardTitle>
           <CardDescription>{def.description}</CardDescription>
         </CardHeader>
       </Card>

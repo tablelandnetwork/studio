@@ -210,6 +210,7 @@ export default function NewDefForm({
                 <div className="space-y-2">
                   <FormLabel>Team</FormLabel>
                   <TeamSwitcher
+                    variant="select"
                     teams={teams}
                     selectedTeam={team}
                     onTeamSelected={handleTeamSelected}
