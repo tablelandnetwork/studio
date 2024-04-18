@@ -160,6 +160,23 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
           throw internalError("Error updating team", err);
         }
       }),
+    deleteTeam: teamAdminProcedure(store).mutation(async ({ ctx }) => {
+      try {
+        const team = await store.teams.teamById(ctx.teamId);
+        if (!team) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Team not found" });
+        }
+        if (!!team.personal) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Personal teams cannot be deleted",
+          });
+        }
+        await store.teams.deleteTeam(ctx.teamId);
+      } catch (err) {
+        throw internalError("Error deleting team", err);
+      }
+    }),
     usersForTeam: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))
       .query(async ({ input, ctx }) => {

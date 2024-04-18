@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { type Database } from "@tableland/sdk";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData } from "iron-session";
 import * as schema from "../schema/index.js";
@@ -95,6 +95,50 @@ export function initTeams(
         .set({ name, slug })
         .where(eq(teams.id, teamId))
         .run();
+    },
+
+    deleteTeam: async function (teamId: string) {
+      const { sql: teamsSql, params: teamsParams } = db
+        .delete(teams)
+        .where(eq(teams.id, teamId))
+        .toSQL();
+
+      const teamProjectIds = (
+        await db
+          .select({ projectId: teamProjects.projectId })
+          .from(teamProjects)
+          .where(eq(teamProjects.teamId, teamId))
+          .all()
+      ).map((r) => r.projectId);
+      const { sql: projectsSql, params: projectsParams } = db
+        .delete(projects)
+        .where(inArray(projects.id, teamProjectIds))
+        .toSQL();
+
+      const { sql: teamProjectsSql, params: teamProjectsParams } = db
+        .delete(teamProjects)
+        .where(eq(teamProjects.teamId, teamId))
+        .toSQL();
+
+      const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
+        .delete(teamMemberships)
+        .where(eq(teamMemberships.teamId, teamId))
+        .toSQL();
+
+      const { sql: teamInvitesSql, params: teamInvitesParams } = db
+        .delete(teamInvites)
+        .where(eq(teamInvites.teamId, teamId))
+        .toSQL();
+
+      const batch = [
+        tbl.prepare(teamsSql).bind(teamsParams),
+        tbl.prepare(projectsSql).bind(projectsParams),
+        tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
+        tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
+        tbl.prepare(teamInvitesSql).bind(teamInvitesParams),
+      ];
+
+      await tbl.batch(batch);
     },
 
     teamBySlug: async function (slug: string) {

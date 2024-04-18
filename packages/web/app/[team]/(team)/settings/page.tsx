@@ -1,12 +1,18 @@
-// import { cache } from "react";
-// import { api } from "@/trpc/server";
+import { cache } from "react";
+import DeleteButton from "./_components/delete-button";
+import { api } from "@/trpc/server";
 
 export default async function TeamSettings({
   params,
 }: {
   params: { team: string };
 }) {
-  // const team = await cache(api.teams.teamBySlug.query)({ slug: params.team });
+  const teamx = await cache(api.teams.teamBySlug)({ slug: params.team });
 
-  return <div>Team settings</div>;
+  return (
+    <div>
+      Team settings
+      <DeleteButton team={teamx} />
+    </div>
+  );
 }
