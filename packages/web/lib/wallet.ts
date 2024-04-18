@@ -11,6 +11,10 @@ export const provider = getDefaultProvider(process.env.PROVIDER_URL);
 const baseSigner = wallet.connect(provider);
 
 export const signer =
-  typeof process.env.KV_LOCAL_DEV === "string"
+  typeof process.env.KV_REST_API_URL !== "string" ||
+  typeof process.env.KV_REST_API_TOKEN !== "string"
     ? new EthersNonceManager(baseSigner)
-    : new TablelandNonceManager(baseSigner);
+    : new TablelandNonceManager(baseSigner, {
+        redisUrl: process.env.KV_REST_API_URL,
+        redisToken: process.env.KV_REST_API_TOKEN,
+      });

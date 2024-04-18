@@ -21,22 +21,24 @@ export class NonceManager extends ethers.Signer {
 
   _lock: string | undefined;
 
-  constructor(signer: ethers.Signer) {
+  constructor(
+    signer: ethers.Signer,
+    opts: { redisUrl: string; redisToken: string },
+  ) {
     super();
     if (typeof signer.provider === "undefined") {
       throw new Error("NonceManager requires a provider at instantiation");
     }
-
-    if (
-      typeof process.env.KV_REST_API_URL !== "string" ||
-      typeof process.env.KV_REST_API_TOKEN !== "string"
-    ) {
-      throw new Error("Vercel KV api env variables are not available");
+    if (typeof opts.redisUrl !== "string") {
+      throw new Error("NonceManager requires a redis url at instantiation");
+    }
+    if (typeof opts.redisToken !== "string") {
+      throw new Error("NonceManager requires a redis token at instantiation");
     }
 
     this.memStore = new Redis({
-      url: process.env.KV_REST_API_URL,
-      token: process.env.KV_REST_API_TOKEN,
+      url: opts.redisUrl,
+      token: opts.redisToken,
     });
     this.signer = signer;
     this.provider = signer.provider;
