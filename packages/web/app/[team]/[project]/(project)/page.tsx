@@ -36,7 +36,7 @@ export default async function Project({
     projectId: project.id,
   });
   const deploymentsMap = deployments.reduce((acc, deployment) => {
-    acc.set(deployment.tableId, deployment);
+    acc.set(deployment.defId, deployment);
     return acc;
   }, new Map<string, schema.Deployment>());
   const authorized = await cache(api.teams.isAuthorized)({
