@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { type schema } from "@tableland/studio-store";
 import { useState } from "react";
-import NewTeamSheet from "./new-team-sheet";
+import NewTeamForm from "./new-team-form";
 import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
 import MesaSvg from "@/components/mesa-svg";
@@ -76,7 +76,7 @@ export default function PrimaryHeaderItem({
         onNewTeamSelected={onNewTeamSelected}
         key="team-switcher"
       />,
-      <NewTeamSheet
+      <NewTeamForm
         onSuccess={onNewTeamSuccess}
         open={openNewTeamSheet}
         onOpenChange={setOpenNewTeamSheet}
