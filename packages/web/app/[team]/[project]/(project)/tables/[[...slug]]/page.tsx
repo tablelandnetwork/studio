@@ -38,7 +38,7 @@ export default async function Deployments({
     if (!acc.has(deployment.environmentId)) {
       acc.set(deployment.environmentId, new Map<string, schema.Deployment>());
     }
-    acc.get(deployment.environmentId)?.set(deployment.tableId, deployment);
+    acc.get(deployment.environmentId)?.set(deployment.defId, deployment);
     return acc;
   }, new Map<string, Map<string, schema.Deployment>>());
 
