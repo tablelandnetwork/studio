@@ -3,9 +3,9 @@
 import { type schema } from "@tableland/studio-store";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { skipToken } from "@tanstack/react-query";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
-import { skipToken } from "@tanstack/react-query";
 
 function teamLinks(team: schema.Team, includeSettings: boolean) {
   const links: Array<{

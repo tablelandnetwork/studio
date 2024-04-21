@@ -1,6 +1,9 @@
 import { AlertCircle, Boxes, Folders, Table2 } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
+import { type schema } from "@tableland/studio-store";
+import { notFound } from "next/navigation";
+import { TRPCError } from "@trpc/server";
 import NewProjectButton from "./_components/new-project-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {

@@ -1,11 +1,14 @@
 "use client";
 
-import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
 import { updateTeamSchema } from "@tableland/studio-validators";
-import { set, useForm } from "react-hook-form";
-import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { type z } from "zod";
+import { useState } from "react";
+import { skipToken } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,12 +19,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { DOMAttributes, useState } from "react";
 import InputWithCheck from "@/components/input-with-check";
-import { skipToken } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { api } from "@/trpc/react";
 
 export default function EditTeam({
   team,
@@ -61,6 +60,11 @@ export default function EditTeam({
 
   return (
     <Form {...form}>
+      {
+        // TODO: `form.handleSubmit` creates a floating promise, as a result the linter is complaining
+        //    we should figure out if this is ok or not and either change this or the lint config
+      }
+      {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}

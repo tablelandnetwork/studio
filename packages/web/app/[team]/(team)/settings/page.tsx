@@ -1,7 +1,9 @@
 import { cache } from "react";
+import { notFound } from "next/navigation";
+import { OctagonAlert } from "lucide-react";
 import DeleteButton from "./_components/delete-button";
-import { api } from "@/trpc/server";
 import EditTeam from "./_components/edit-team";
+import { api } from "@/trpc/server";
 import {
   Card,
   CardContent,
@@ -9,10 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { notFound } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { OctagonAlert, StopCircle } from "lucide-react";
 
 export default async function TeamSettings({
   params,

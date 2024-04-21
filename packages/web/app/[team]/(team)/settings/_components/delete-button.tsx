@@ -1,8 +1,9 @@
 "use client";
 
-import { Button, ButtonProps } from "@/components/ui/button";
-import { api } from "@/trpc/react";
-import { schema } from "@tableland/studio-store";
+import { type schema } from "@tableland/studio-store";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { useSetAtom } from "jotai";
 import {
   Dialog,
   DialogClose,
@@ -13,9 +14,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
-import { useSetAtom } from "jotai";
+import { api } from "@/trpc/react";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { authAtom } from "@/store/auth";
 
 export default function DeleteButton({
@@ -61,10 +61,10 @@ export default function DeleteButton({
           <DialogTitle>Are you absolutely sure?</DialogTitle>
           <DialogDescription>
             This action cannot be undone. All data related to this team will be
-            deleted from Studio's database. This includes all projects, table
-            definitions, and table metadata. Any tables that were created on
-            Tableland by this team will continue to exist, but Studio will not
-            be aware of them.
+            deleted from Studio&apos;s database. This includes all projects,
+            table definitions, and table metadata. Any tables that were created
+            on Tableland by this team will continue to exist, but Studio will
+            not be aware of them.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

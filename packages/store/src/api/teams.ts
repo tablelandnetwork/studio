@@ -133,7 +133,7 @@ export function initTeams(
         .where(eq(teamProjects.teamId, teamId))
         .toSQL();
 
-      let batch = [
+      const batch = [
         tbl.prepare(teamsSql).bind(teamsParams),
         tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
         tbl.prepare(usersSql).bind(usersParams),
