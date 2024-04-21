@@ -115,6 +115,12 @@ export function initTeams(
         .where(eq(teamMemberships.teamId, teamId))
         .toSQL();
 
+      // users
+      const { sql: usersSql, params: usersParams } = db
+        .delete(users)
+        .where(eq(users.teamId, teamId))
+        .toSQL();
+
       // teamInvites
       const { sql: teamInvitesSql, params: teamInvitesParams } = db
         .delete(teamInvites)
@@ -130,6 +136,7 @@ export function initTeams(
       let batch = [
         tbl.prepare(teamsSql).bind(teamsParams),
         tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
+        tbl.prepare(usersSql).bind(usersParams),
         tbl.prepare(teamInvitesSql).bind(teamInvitesParams),
         tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
       ];

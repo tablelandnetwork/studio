@@ -15,17 +15,25 @@ import {
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useSetAtom } from "jotai";
+import { authAtom } from "@/store/auth";
 
 export default function DeleteButton({
   team,
   ...props
 }: Omit<ButtonProps, "onClick"> & { team: schema.Team }) {
   const router = useRouter();
+  const logout = api.auth.logout.useMutation();
+  const setAuth = useSetAtom(authAtom);
 
   const deleteTeam = api.teams.deleteTeam.useMutation({
-    onSuccess: () => {
-      router.refresh();
+    onSuccess: async () => {
       router.replace("/");
+      if (team.personal) {
+        await logout.mutateAsync();
+        setAuth(undefined);
+      }
+      router.refresh();
     },
   });
 

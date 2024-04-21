@@ -89,9 +89,7 @@ export default function EditTeam({
             variant="outline"
             type="reset"
             onClick={onReset}
-            disabled={
-              form.getValues("name") === team.name || updateTeam.isPending
-            }
+            disabled={!form.formState.isDirty || updateTeam.isPending}
           >
             Reset
           </Button>
