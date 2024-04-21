@@ -15,6 +15,10 @@ const teamMemberships = schema.teamMemberships;
 const teamProjects = schema.teamProjects;
 const teams = schema.teams;
 const users = schema.users;
+const projectDefs = schema.projectDefs;
+const defs = schema.defs;
+const environments = schema.environments;
+const deployments = schema.deployments;
 
 export function initTeams(
   db: DrizzleD1Database<typeof schema>,
@@ -95,14 +99,42 @@ export function initTeams(
         .set({ name, slug })
         .where(eq(teams.id, teamId))
         .run();
+      return await db.select().from(teams).where(eq(teams.id, teamId)).get();
     },
 
     deleteTeam: async function (teamId: string) {
+      // teams
       const { sql: teamsSql, params: teamsParams } = db
         .delete(teams)
         .where(eq(teams.id, teamId))
         .toSQL();
 
+      // teamMemberships
+      const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
+        .delete(teamMemberships)
+        .where(eq(teamMemberships.teamId, teamId))
+        .toSQL();
+
+      // teamInvites
+      const { sql: teamInvitesSql, params: teamInvitesParams } = db
+        .delete(teamInvites)
+        .where(eq(teamInvites.teamId, teamId))
+        .toSQL();
+
+      // teamProjects
+      const { sql: teamProjectsSql, params: teamProjectsParams } = db
+        .delete(teamProjects)
+        .where(eq(teamProjects.teamId, teamId))
+        .toSQL();
+
+      let batch = [
+        tbl.prepare(teamsSql).bind(teamsParams),
+        tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
+        tbl.prepare(teamInvitesSql).bind(teamInvitesParams),
+        tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
+      ];
+
+      // Get an array of project IDs for the team
       const teamProjectIds = (
         await db
           .select({ projectId: teamProjects.projectId })
@@ -110,33 +142,58 @@ export function initTeams(
           .where(eq(teamProjects.teamId, teamId))
           .all()
       ).map((r) => r.projectId);
-      const { sql: projectsSql, params: projectsParams } = db
-        .delete(projects)
-        .where(inArray(projects.id, teamProjectIds))
-        .toSQL();
 
-      const { sql: teamProjectsSql, params: teamProjectsParams } = db
-        .delete(teamProjects)
-        .where(eq(teamProjects.teamId, teamId))
-        .toSQL();
+      // If the team has projects, delete them and all realated data
+      if (teamProjectIds.length) {
+        // projects
+        const { sql: projectsSql, params: projectsParams } = db
+          .delete(projects)
+          .where(inArray(projects.id, teamProjectIds))
+          .toSQL();
 
-      const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
-        .delete(teamMemberships)
-        .where(eq(teamMemberships.teamId, teamId))
-        .toSQL();
+        // environments
+        const { sql: environmentsSql, params: environmentsParams } = db
+          .delete(environments)
+          .where(inArray(environments.projectId, teamProjectIds))
+          .toSQL();
 
-      const { sql: teamInvitesSql, params: teamInvitesParams } = db
-        .delete(teamInvites)
-        .where(eq(teamInvites.teamId, teamId))
-        .toSQL();
+        // projectDefs
+        const { sql: projectDefsSql, params: projectDefsParams } = db
+          .delete(projectDefs)
+          .where(inArray(projectDefs.projectId, teamProjectIds))
+          .toSQL();
 
-      const batch = [
-        tbl.prepare(teamsSql).bind(teamsParams),
-        tbl.prepare(projectsSql).bind(projectsParams),
-        tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
-        tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
-        tbl.prepare(teamInvitesSql).bind(teamInvitesParams),
-      ];
+        batch.push(tbl.prepare(projectsSql).bind(projectsParams));
+        batch.push(tbl.prepare(environmentsSql).bind(environmentsParams));
+        batch.push(tbl.prepare(projectDefsSql).bind(projectDefsParams));
+
+        // Get an array of def IDs for all projects in the team
+        const defIds = (
+          await db
+            .select({ defId: projectDefs.defId })
+            .from(projectDefs)
+            .where(inArray(projectDefs.projectId, teamProjectIds))
+            .all()
+        ).map((r) => r.defId);
+
+        // If the team's projects have defs, delete them and all related data
+        if (defIds.length) {
+          // defs
+          const { sql: defsSql, params: defsParams } = db
+            .delete(defs)
+            .where(inArray(defs.id, defIds))
+            .toSQL();
+
+          // deployments
+          const { sql: deploymentsSql, params: deploymentsParams } = db
+            .delete(deployments)
+            .where(inArray(deployments.defId, defIds))
+            .toSQL();
+
+          batch.push(tbl.prepare(defsSql).bind(defsParams));
+          batch.push(tbl.prepare(deploymentsSql).bind(deploymentsParams));
+        }
+      }
 
       await tbl.batch(batch);
     },

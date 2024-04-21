@@ -155,7 +155,14 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
       .input(updateTeamSchema)
       .mutation(async ({ input: { name }, ctx }) => {
         try {
-          await store.teams.updateTeam(ctx.teamId, name);
+          const team = await store.teams.updateTeam(ctx.teamId, name);
+          if (!team) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Team not found",
+            });
+          }
+          return team;
         } catch (err) {
           throw internalError("Error updating team", err);
         }
