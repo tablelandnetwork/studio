@@ -14,17 +14,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
 
 export default async function Project({
   params,
 }: {
   params: { team: string; project: string };
 }) {
-  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
-  const project = await cache(api.projects.projectBySlug)({
-    teamId: team.id,
-    slug: params.project,
-  });
+  const team = await teamBySlug(params.team);
+  const project = await projectBySlug(params.project, team.id);
   const envs = await cache(api.environments.projectEnvironments)({
     projectId: project.id,
   });
