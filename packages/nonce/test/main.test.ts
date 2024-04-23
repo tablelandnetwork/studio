@@ -71,11 +71,24 @@ describe("NonceManager", function () {
     const wallet1 = new Wallet(account2);
     const wallet2 = new Wallet(account2);
 
+    if (
+      typeof process.env.KV_REST_API_URL !== "string" ||
+      typeof process.env.KV_REST_API_TOKEN !== "string"
+    ) {
+      throw new Error("Vercel KV api env variables are not available");
+    }
+
     const db1 = new Database({
-      signer: new NonceManager(wallet1.connect(provider1)),
+      signer: new NonceManager(wallet1.connect(provider1), {
+        redisUrl: process.env.KV_REST_API_URL,
+        redisToken: process.env.KV_REST_API_TOKEN,
+      }),
     });
     const db2 = new Database({
-      signer: new NonceManager(wallet2.connect(provider2)),
+      signer: new NonceManager(wallet2.connect(provider2), {
+        redisUrl: process.env.KV_REST_API_URL,
+        redisToken: process.env.KV_REST_API_TOKEN,
+      }),
     });
 
     const results = await Promise.all([

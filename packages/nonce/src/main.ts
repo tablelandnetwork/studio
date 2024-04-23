@@ -8,18 +8,6 @@ dotenv.config();
 // TODO: Keep a per-NonceManager pool of sent but unmined transactions for
 //    rebroadcasting, in case we overrun the transaction pool
 
-if (
-  typeof process.env.KV_REST_API_URL !== "string" ||
-  typeof process.env.KV_REST_API_TOKEN !== "string"
-) {
-  throw new Error("Vercel KV api env variables are not available");
-}
-
-const redis = new Redis({
-  url: process.env.KV_REST_API_URL,
-  token: process.env.KV_REST_API_TOKEN,
-});
-
 // The logic we need to implement here should follow the ethers.js
 // implementation logic, but the delta from on chain nonce
 
@@ -29,16 +17,29 @@ export class NonceManager extends ethers.Signer {
 
   // This redis instance is a singleton in the scope of all NonceManager
   // instances in this process, i.e. each process gets a single redis client.
-  readonly memStore = redis;
+  readonly memStore: Redis;
 
   _lock: string | undefined;
 
-  constructor(signer: ethers.Signer) {
+  constructor(
+    signer: ethers.Signer,
+    opts: { redisUrl: string; redisToken: string },
+  ) {
     super();
     if (typeof signer.provider === "undefined") {
       throw new Error("NonceManager requires a provider at instantiation");
     }
+    if (typeof opts.redisUrl !== "string") {
+      throw new Error("NonceManager requires a redis url at instantiation");
+    }
+    if (typeof opts.redisToken !== "string") {
+      throw new Error("NonceManager requires a redis token at instantiation");
+    }
 
+    this.memStore = new Redis({
+      url: opts.redisUrl,
+      token: opts.redisToken,
+    });
     this.signer = signer;
     this.provider = signer.provider;
   }
