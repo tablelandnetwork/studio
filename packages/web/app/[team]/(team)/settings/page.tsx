@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { teamBySlug } from "@/lib/api-helpers";
 
 export default async function TeamSettings({
   params,
 }: {
   params: { team: string };
 }) {
-  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const team = await teamBySlug(params.team);
   const authorization = await cache(api.teams.isAuthorized)({
     teamId: team.id,
   });
