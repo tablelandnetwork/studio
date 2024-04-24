@@ -10,12 +10,13 @@ import HashDisplay from "@/components/hash-display";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/server";
+import { teamBySlug } from "@/lib/api-helpers";
 
 export default async function People({ params }: { params: { team: string } }) {
   const session = await getSession({ cookies: cookies(), headers: headers() });
   const { auth } = session;
 
-  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const team = await teamBySlug(params.team);
   const people = await cache(api.teams.usersForTeam)({
     teamId: team.id,
   });

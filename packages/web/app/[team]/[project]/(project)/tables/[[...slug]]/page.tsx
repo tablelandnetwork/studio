@@ -7,6 +7,7 @@ import ExecDeployment from "./_components/exec-deployment";
 import { Sidebar } from "./_components/sidebar";
 import Table from "@/components/table";
 import { api } from "@/trpc/server";
+import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
 
 export default async function Deployments({
   params,
@@ -17,14 +18,11 @@ export default async function Deployments({
     notFound();
   }
 
-  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const team = await teamBySlug(params.team);
   const authorized = await cache(api.teams.isAuthorized)({
     teamId: team.id,
   });
-  const project = await cache(api.projects.projectBySlug)({
-    teamId: team.id,
-    slug: params.project,
-  });
+  const project = await projectBySlug(params.project, team.id);
   const environments = await cache(api.environments.projectEnvironments)({
     projectId: project.id,
   });

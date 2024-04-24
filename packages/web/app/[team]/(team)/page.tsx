@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { api } from "@/trpc/server";
+import { teamBySlug } from "@/lib/api-helpers";
 
 export default async function Projects({
   params,
@@ -18,7 +19,7 @@ export default async function Projects({
   params: { team: string };
 }) {
   // TODO: Make some high level API call to return a summary of all projects.
-  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
+  const team = await teamBySlug(params.team);
   const projects = await cache(api.projects.teamProjects)({
     teamId: team.id,
   });
