@@ -58,6 +58,7 @@ describe("commands/project", function () {
       TEST_TEAM_ID,
       ...defaultArgs,
     ])
+    // @ts-expect-error TODO check if the yargs type align
       .command(mod)
       .parse();
 
@@ -81,6 +82,7 @@ describe("commands/project", function () {
   test("can list projects", async function () {
     const consoleLog = spy(logger, "log");
     await yargs(["project", "ls", TEST_TEAM_ID, ...defaultArgs])
+    // @ts-expect-error TODO check if the yargs type align
       .command(mod)
       .parse();
 

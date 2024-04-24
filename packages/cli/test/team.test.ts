@@ -66,6 +66,7 @@ describe("commands/team", function () {
   test("can list authenticated user's teams", async function () {
     const consoleLog = spy(logger, "log");
     await yargs(["team", "ls", ...defaultArgs])
+    // @ts-expect-error TODO check if the yargs type align
       .command(mod)
       .parse();
 
@@ -95,6 +96,7 @@ describe("commands/team", function () {
     const consoleLog = spy(logger, "log");
     const userAddress = "0xBcd4042DE499D14e55001CcbB24a551F3b954096";
     await yargs(["team", "ls", userAddress, ...defaultArgs])
+    // @ts-expect-error TODO check if the yargs type align
       .command(mod)
       .parse();
 
@@ -124,6 +126,7 @@ describe("commands/team", function () {
     const consoleLog = spy(logger, "log");
     const teamName = "mynewteam";
     await yargs(["team", "create", teamName, ...defaultArgs])
+    // @ts-expect-error TODO check if the yargs type align
       .command(mod)
       .parse();
 
@@ -145,7 +148,6 @@ describe("commands/team", function () {
   test("can invite a user to a team", async function () {
     const consoleLog = spy(logger, "log");
     const mutateStub = stub().returns({ message: "spy success" });
-    // @ts-expect-error Don't need to mock all the types test will fail if anything doesn't work
     stub(helpers, "getApi").callsFake(function (
       fileStore?: FileStore,
       apiUrl?: string,
@@ -167,6 +169,7 @@ describe("commands/team", function () {
       TEST_TEAM_ID,
       ...defaultArgs,
     ])
+    // @ts-expect-error TODO check if the yargs type align
       .command(mod)
       .parse();
 

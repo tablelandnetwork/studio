@@ -32,7 +32,7 @@ export const builder = function (args: Yargs) {
   return args
     .command(
       "ls [teamId]",
-      "list the projects for the given team id, or if no id is given, for currenlty logged in user's personal team",
+      "list the projects for the given team id, or if no id is given, for currently logged in user's personal team",
       function (args) {
         return args.positional("teamId", {
           type: "string",
