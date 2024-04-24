@@ -72,7 +72,7 @@ describe("commands/deployment", function () {
 
     setTimeout(() => {
       // We are testing that the public provider url is used, we don't want to
-      // actually create a deployment on maticmum.
+      // actually create a deployment on polygon.
       stdin.send("n\n").end();
       stdin.restore();
     }, 7000);
@@ -88,7 +88,7 @@ describe("commands/deployment", function () {
       "--privateKey",
       accounts[10].privateKey.slice(2),
       "--chain",
-      "maticmum",
+      "polygon",
       "--apiUrl",
       TEST_API_BASE_URL,
     ])

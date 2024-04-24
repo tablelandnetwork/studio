@@ -2,11 +2,11 @@ import readline from "node:readline/promises";
 import { readFileSync, writeFileSync } from "node:fs";
 import {
   type Signer,
-  BigNumber,
+  Provider,
+  JsonRpcProvider,
   Wallet,
   getDefaultProvider,
-  providers,
-  utils as ethersUtils,
+  formatUnits,
 } from "ethers";
 import { z } from "zod";
 import createKeccakHash from "keccak";
@@ -296,13 +296,13 @@ export const helpers = {
     );
 
     // using `any` to enable indexing unknown method name by string
-    const estGas = contract.contract.estimateGas as any;
-    const gas = await estGas[params.method].apply(
-      estGas[params.method],
+    const estGas = (contract.contract as any)[params.method].estimateGas;
+    const gas = await estGas.apply(
+      estGas,
       params.args,
     );
 
-    if (!(gas instanceof BigNumber)) {
+    if (!(gas instanceof BigInt)) {
       throw new Error("could not get gas estimation");
     }
 
@@ -315,8 +315,9 @@ export const helpers = {
     // }
 
     if (feeData?.gasPrice) {
-      const costGwei = feeData?.gasPrice.mul(gas);
-      return `${ethersUtils.formatUnits(costGwei, 18)} ${getCurrencySymbol(
+      // TODO: why isn't the `instanceof` taking care of the need to cast here?
+      const costGwei = feeData?.gasPrice * (gas as bigint);
+      return `${formatUnits(costGwei, 18)} ${getCurrencySymbol(
         params.chainId,
       )}`;
     }
@@ -503,16 +504,16 @@ export const helpers = {
     const wallet = new Wallet(privateKey);
 
     // We want to aquire a provider using the params given by the caller.
-    let provider: providers.BaseProvider | undefined;
+    let provider: Provider | undefined;
     // first we check if a providerUrl was given.
     if (typeof providerUrl === "string" && providerUrl.trim() !== "") {
-      provider = new providers.JsonRpcProvider(providerUrl, network.name);
+      provider = new JsonRpcProvider(providerUrl, network.name);
     }
 
     // Second we will check if the "local-tableland" chain is being used,
     // because the default provider won't work with this chain.
     if (provider == null && network.chainName === "local-tableland") {
-      provider = new providers.JsonRpcProvider("http://127.0.0.1:8545");
+      provider = new JsonRpcProvider("http://127.0.0.1:8545");
     }
 
     // Here we try to use the studio public provider
@@ -526,7 +527,7 @@ export const helpers = {
         const chainId = helpers.getChainId(network.chainName);
         const providerUrl = await helpers.getStudioProvider(chainId, api);
 
-        provider = new providers.JsonRpcProvider(providerUrl, network.name);
+        provider = new JsonRpcProvider(providerUrl, network.name);
       } catch (err) {
         // TODO: not a big fan of swallowing this error, but seems ok here since
         //    we need to try to use the ethers default provider
@@ -551,7 +552,7 @@ export const helpers = {
       throw new Error("unable to create ETH API provider");
     }
 
-    let providerChainId: number | undefined;
+    let providerChainId: bigint | undefined;
     try {
       const providerNetwork = await provider.getNetwork();
       providerChainId = providerNetwork.chainId;
@@ -559,7 +560,7 @@ export const helpers = {
       throw new Error("cannot determine provider chain ID");
     }
 
-    if (providerChainId !== network.chainId) {
+    if (providerChainId.toString() !== network.chainId.toString()) {
       throw new Error("provider / chain mismatch.");
     }
 
