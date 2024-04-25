@@ -66,7 +66,7 @@ export default async function TeamSettings({
             <p className="text-sm font-medium">
               {team.personal
                 ? `You can delete your personal team, ${team.name}, if you choose. This effectively deletes your Studio account:`
-                : "You can delete the {team.name} team if you choose:"}
+                : `You can delete the ${team.name} team if you choose:`}
             </p>
             <DeleteButton team={team} disabled={!isAdmin} />
           </div>
