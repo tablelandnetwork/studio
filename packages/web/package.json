@@ -17,8 +17,6 @@
     "exec-migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
-    "@ethersproject/experimental": "^5.7.0",
-    "@ethersproject/providers": "^5.7.2",
     "@hookform/resolvers": "^3.3.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -37,12 +35,12 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@tableland/nonce": "^0.0.2",
-    "@tableland/sdk": "^6.0.0",
-    "@tableland/studio-api": "^0.0.0-pre.2",
-    "@tableland/studio-chains": "^0.0.0-pre.1",
-    "@tableland/studio-client": "^0.0.0-pre.2",
-    "@tableland/studio-store": "^0.0.0-pre.1",
-    "@tableland/studio-validators": "^0.0.0-pre.1",
+    "@tableland/sdk": "^7.0.0-pre.0",
+    "@tableland/studio-api": "^0.0.0-pre.4",
+    "@tableland/studio-chains": "^0.0.0-pre.2",
+    "@tableland/studio-client": "^0.0.0-pre.3",
+    "@tableland/studio-store": "^0.0.0-pre.3",
+    "@tableland/studio-validators": "^0.0.0-pre.2",
     "@tanstack/react-query": "^5.28.0",
     "@tanstack/react-table": "^8.10.1",
     "@trpc/client": "^11.0.0-next-beta.318",
@@ -53,7 +51,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
-    "ethers": "^5.7.1",
+    "ethers": "^6.12.0",
     "javascript-time-ago": "^2.5.9",
     "jotai": "^2.1.1",
     "keccak": "^3.0.3",
@@ -63,11 +61,11 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.46.2",
     "react-share": "^4.4.1",
-    "siwe": "^2.1.4",
+    "siwe": "^2.3.2",
     "superjson": "^2.2.1",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
-    "viem": "^1.16.5",
-    "wagmi": "^1.4.3"
+    "viem": "^1.21.4",
+    "wagmi": "^1.4.13"
   }
 }

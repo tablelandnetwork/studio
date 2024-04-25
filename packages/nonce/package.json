@@ -23,6 +23,6 @@
   "license": "MIT AND Apache-2.0",
   "dependencies": {
     "@upstash/redis": "^1.28.3",
-    "ethers": "^6.11.1"
+    "ethers": "^6.12.0"
   }
 }
