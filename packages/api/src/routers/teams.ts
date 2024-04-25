@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   teamNameAvailableSchema,
   newTeamSchema,
+  updateTeamSchema,
 } from "@tableland/studio-validators";
 import {
   protectedProcedure,
@@ -150,6 +151,29 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
 
         return team;
       }),
+    updateTeam: teamAdminProcedure(store)
+      .input(updateTeamSchema)
+      .mutation(async ({ input: { name }, ctx }) => {
+        try {
+          const team = await store.teams.updateTeam(ctx.teamId, name);
+          if (!team) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Team not found",
+            });
+          }
+          return team;
+        } catch (err) {
+          throw internalError("Error updating team", err);
+        }
+      }),
+    deleteTeam: teamAdminProcedure(store).mutation(async ({ ctx }) => {
+      try {
+        await store.teams.deleteTeam(ctx.teamId);
+      } catch (err) {
+        throw internalError("Error deleting team", err);
+      }
+    }),
     usersForTeam: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))
       .query(async ({ input, ctx }) => {
