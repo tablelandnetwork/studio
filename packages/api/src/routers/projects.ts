@@ -1,4 +1,4 @@
-import { schema, type Store } from "@tableland/studio-store";
+import { type schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -10,7 +10,6 @@ import {
   publicProcedure,
   createTRPCRouter,
   teamProcedure,
-  teamAdminProcedure,
   projectAdminProcedure,
 } from "../trpc";
 import { internalError } from "../utils/internalError";

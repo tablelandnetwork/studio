@@ -24,9 +24,11 @@ import { api } from "@/trpc/react";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function EditProject({
+  team,
   project,
   disabled = false,
 }: {
+  team: schema.Team;
   project: schema.Project;
   disabled?: boolean;
 }) {
@@ -45,14 +47,20 @@ export default function EditProject({
     { retry: false },
   );
   const updateProject = api.projects.updateProject.useMutation({
-    onSuccess: (team) => {
+    onSuccess: (project) => {
       router.refresh();
       router.replace(`/${team.slug}/${project.slug}/settings`);
     },
   });
 
   const onSubmit = (values: z.infer<typeof updateProjectSchema>) => {
-    updateProject.mutate({ projectId: project.id, ...values });
+    updateProject.mutate({
+      projectId: project.id,
+      name: form.formState.dirtyFields.name ? values.name : undefined,
+      description: form.formState.dirtyFields.description
+        ? values.description
+        : undefined,
+    });
   };
 
   const onReset = () => {
@@ -122,7 +130,10 @@ export default function EditProject({
           <Button
             type="submit"
             disabled={
-              disabled || !nameAvailable.data || updateProject.isPending
+              disabled ||
+              !form.formState.isDirty ||
+              (form.formState.dirtyFields.name && !nameAvailable.data) ||
+              updateProject.isPending
             }
           >
             {updateProject.isPending && (

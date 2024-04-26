@@ -99,7 +99,12 @@ export default function EditTeam({
           </Button>
           <Button
             type="submit"
-            disabled={disabled || !nameAvailable.data || updateTeam.isPending}
+            disabled={
+              disabled ||
+              !form.formState.isDirty ||
+              (form.formState.dirtyFields.name && !nameAvailable.data) ||
+              updateTeam.isPending
+            }
           >
             {updateTeam.isPending && (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
