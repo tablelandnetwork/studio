@@ -3,7 +3,6 @@
 import { type schema } from "@tableland/studio-store";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { useSetAtom } from "jotai";
 import {
   Dialog,
   DialogClose,
@@ -16,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { api } from "@/trpc/react";
 import { Button, type ButtonProps } from "@/components/ui/button";
-import { authAtom } from "@/store/auth";
 
 export default function DeleteButton({
   team,
@@ -27,8 +25,6 @@ export default function DeleteButton({
   project: schema.Project;
 }) {
   const router = useRouter();
-  const logout = api.auth.logout.useMutation();
-  const setAuth = useSetAtom(authAtom);
 
   const deleteProject = api.projects.deleteProject.useMutation({
     onSuccess: async () => {

@@ -102,7 +102,7 @@ export default function EditTeam({
             disabled={
               disabled ||
               !form.formState.isDirty ||
-              (form.formState.dirtyFields.name && !nameAvailable.data) ||
+              (!!form.formState.dirtyFields.name && !nameAvailable.data) ||
               updateTeam.isPending
             }
           >

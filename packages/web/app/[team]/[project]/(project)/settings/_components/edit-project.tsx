@@ -132,7 +132,7 @@ export default function EditProject({
             disabled={
               disabled ||
               !form.formState.isDirty ||
-              (form.formState.dirtyFields.name && !nameAvailable.data) ||
+              (!!form.formState.dirtyFields.name && !nameAvailable.data) ||
               updateProject.isPending
             }
           >
