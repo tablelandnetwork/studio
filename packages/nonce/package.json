@@ -24,5 +24,8 @@
   "dependencies": {
     "@upstash/redis": "^1.28.3",
     "ethers": "^6.12.0"
+  },
+  "devDependencies": {
+    "@tableland/sdk": "^7.0.0-pre.0"
   }
 }

@@ -10,7 +10,6 @@ import {
   type TypedDataField,
 } from "ethers";
 import { Redis } from "@upstash/redis";
-import { getDeferrable, type Deferrable } from "./utils";
 
 dotenv.config();
 
@@ -21,9 +20,8 @@ dotenv.config();
 // The logic we need to implement here should follow the ethers.js
 // implementation logic, but the delta from on chain nonce
 
-export class NonceManager extends AbstractSigner {
+export class NonceManager extends AbstractSigner<Provider> {
   readonly signer: Signer;
-  readonly provider: Provider;
 
   // This redis instance is a singleton in the scope of all NonceManager
   // instances in this process, i.e. each process gets a single redis client.
@@ -32,7 +30,6 @@ export class NonceManager extends AbstractSigner {
   _lock: string | undefined;
 
   constructor(signer: Signer, opts: { redisUrl: string; redisToken: string }) {
-    super();
     if (signer.provider == null) {
       throw new Error("NonceManager requires a provider at instantiation");
     }
@@ -43,15 +40,15 @@ export class NonceManager extends AbstractSigner {
       throw new Error("NonceManager requires a redis token at instantiation");
     }
 
+    super(signer.provider);
     this.memStore = new Redis({
       url: opts.redisUrl,
       token: opts.redisToken,
     });
     this.signer = signer;
-    this.provider = signer.provider;
   }
 
-  connect(provider: Provider): Signer {
+  connect(provider: Provider): NonceManager {
     throw new Error("changing providers in not supported");
   }
 
@@ -59,35 +56,30 @@ export class NonceManager extends AbstractSigner {
     return await this.signer.getAddress();
   }
 
-  async getTransactionCount(blockTag?: BlockTag): Promise<number> {
+  async getNonce(blockTag?: BlockTag): Promise<number> {
     if (blockTag === "pending") {
       await this._acquireLock();
-
-      const currentCount = await this.provider.getTransactionCount("pending");
-      // this returns null if the key doesn't exist
-      const deltaCount = await this.memStore.get(
-        `delta:${await this.getAddress()}`,
+      const address = await this.signer.getAddress();
+      const currentCount = await this.provider.getTransactionCount(
+        address,
+        "pending",
       );
+      // this returns null if the key doesn't exist
+      const deltaCount = await this.memStore.get(`delta:${address}`);
       await this._releaseLock();
-
       return currentCount + (typeof deltaCount === "number" ? deltaCount : 0);
     }
 
-    return await this.provider.getTransactionCount(
-      this.signer.getAddress(),
-      blockTag,
-    );
+    return await super.getNonce(blockTag);
   }
 
-  async setTransactionCount(
-    transactionCount: bigint | Promise<bigint>,
-  ): Promise<void> {
+  async reset(): Promise<void> {
     await this._acquireLock();
     await this._resetDelta();
     await this._releaseLock();
   }
 
-  async incrementTransactionCount(count?: number): Promise<number> {
+  async increment(count?: number): Promise<number> {
     return await this.memStore.incrby(
       `delta:${await this.getAddress()}`,
       count == null ? 1 : count,
@@ -98,30 +90,31 @@ export class NonceManager extends AbstractSigner {
     return await this.signer.signMessage(message);
   }
 
-  async signTransaction(
-    transaction: Deferrable<TransactionRequest>,
-  ): Promise<string> {
-    const tx = getDeferrable(transaction);
-    return await this.signer.signTransaction(tx);
+  async signTransaction(transaction: TransactionRequest): Promise<string> {
+    return await this.signer.signTransaction(transaction);
   }
 
   async sendTransaction(
-    transaction: Deferrable<TransactionRequest>,
+    transaction: TransactionRequest,
   ): Promise<TransactionResponse> {
-    if (transaction.nonce instanceof Promise) {
-      transaction.nonce = await transaction.nonce;
-    }
-
     if (transaction.nonce == null) {
       transaction = { ...transaction };
-      transaction.nonce = await this.getTransactionCount("pending");
-      await this.incrementTransactionCount();
+      transaction.nonce = await this.getNonce("pending");
+      await this.increment();
     } else {
-      await this.setTransactionCount(BigInt(transaction.nonce));
+      await this.reset();
       await this.memStore.incr(`delta:${await this.getAddress()}`);
     }
-    const txAwaited = getDeferrable(transaction);
-    const tx = await this.signer.sendTransaction(txAwaited);
+
+    // const noncePromise = this.getNonce("pending");
+    // await this.increment();
+
+    transaction = await this.signer.populateTransaction(transaction);
+    // transaction.nonce = await noncePromise;
+
+    // @TODO: Maybe handle interesting/recoverable errors?
+    // Like don't increment if the tx was certainly not sent
+    const tx = await this.signer.sendTransaction(transaction);
 
     this.provider
       .getTransactionReceipt(tx.hash)
