@@ -143,6 +143,16 @@ describe("commands/team", function () {
     equal(team.slug, teamName);
   });
 
+  // TODO: fix this test
+  // It fails to due a type issue between the mock function and the expected
+  // tRPC response:
+  // ```
+  // Argument of type '(fileStore?: FileStore | undefined, apiUrl?: string |
+  // undefined) => { invites: { inviteEmails: { mutate: SinonStub<any[], any>;
+  // }; }; }' is not assignable to parameter of type '(fileStore?: FileStore |
+  // undefined, apiUrl?: string | undefined) =>
+  // DecoratedProcedureRecord<BuiltRouter ...
+  // ```
   test("can invite a user to a team", async function () {
     const consoleLog = spy(logger, "log");
     const mutateStub = stub().returns({ message: "spy success" });

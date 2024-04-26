@@ -78,7 +78,7 @@ describe("commands/query", function () {
       "--store",
       sessionFilePath,
       "--chain",
-      "80001",
+      "80002",
       "--apiUrl",
       TEST_API_BASE_URL,
       "--providerUrl=''",
@@ -98,7 +98,7 @@ describe("commands/query", function () {
 
         equal(
           callOne.firstArg,
-          "http://localhost:2999/api/trpc/providers.providerForChain?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22chainId%22%3A80001%7D%7D%7D",
+          "http://localhost:2999/api/trpc/providers.providerForChain?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22chainId%22%3A80002%7D%7D%7D",
         );
         equal(callOne.lastArg.method, "GET");
 
@@ -131,6 +131,19 @@ describe("commands/query", function () {
     });
   });
 
+  // TODO: fix this test
+  // ```
+  // TypeError: Cannot read properties of undefined (reading 'trim')
+  // at getIdFromTableName (file:///Users/dtb/tbl/studio/packages/cli/src/utils.ts:214:27)
+  // at Object.getChainIdFromTableName (file:///Users/dtb/tbl/studio/packages/cli/src/utils.ts:392:12)
+  // at QueryShell.runQuery (file:///Users/dtb/tbl/studio/packages/cli/src/commands/query.ts:170:31)
+  // at processTicksAndRejections (node:internal/process/task_queues:95:5)
+  // at async QueryShell.handler (file:///Users/dtb/tbl/studio/packages/cli/src/commands/query.ts:150:5)
+  // ```
+  // It comes from `query.ts` L169 because the `aliasMap` is empty `{}`, so
+  // `getChainIdFromTableName` (which uses `trim`) fails on undefined table
+  // name. THe `environmentId` and `apiUrl` do exist in these tests, so idk
+  // where it's failing...perhaps the tRPC server?
   test("can run a read query", async function () {
     const consoleLog = spy(logger, "log");
     const stdin = mockStd.stdin();
