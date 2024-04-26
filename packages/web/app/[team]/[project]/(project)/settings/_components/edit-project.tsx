@@ -43,7 +43,7 @@ export default function EditProject({
   });
 
   const nameAvailable = api.projects.nameAvailable.useQuery(
-    query !== project.name ? { name: query } : skipToken,
+    query !== project.name ? { teamId: team.id, name: query } : skipToken,
     { retry: false },
   );
   const updateProject = api.projects.updateProject.useMutation({
