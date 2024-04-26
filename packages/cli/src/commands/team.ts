@@ -1,4 +1,4 @@
-import type { Arguments } from "yargs";
+import type { Arguments, ArgumentsCamelCase } from "yargs";
 // Yargs doesn't seem to export the type of `yargs`.  This causes a conflict
 // between linting and building. Lint complains that yargs is only imported
 // for it's type, and build complains that you cannot use namespace as a type.
@@ -176,6 +176,7 @@ export const builder = function (args: Yargs) {
 export const handler = async (
   argv: Arguments<CommandOptions>,
 ): Promise<void> => {
-  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const args = argv as ArgumentsCamelCase<CommandOptions>;
   // noop
 };

@@ -7,6 +7,7 @@ import { restore, spy, stub } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/team.js";
+import type { CommandOptions } from "../src/commands/team.js";
 import * as modLogin from "../src/commands/login.js";
 import * as modLogout from "../src/commands/logout.js";
 import { type FileStore, logger, wait, helpers } from "../src/utils.js";
@@ -66,8 +67,7 @@ describe("commands/team", function () {
   test("can list authenticated user's teams", async function () {
     const consoleLog = spy(logger, "log");
     await yargs(["team", "ls", ...defaultArgs])
-    // @ts-expect-error TODO check if the yargs type align
-      .command(mod)
+      .command<CommandOptions>(mod)
       .parse();
 
     const output = consoleLog.getCall(0).firstArg;
@@ -96,8 +96,7 @@ describe("commands/team", function () {
     const consoleLog = spy(logger, "log");
     const userAddress = "0xBcd4042DE499D14e55001CcbB24a551F3b954096";
     await yargs(["team", "ls", userAddress, ...defaultArgs])
-    // @ts-expect-error TODO check if the yargs type align
-      .command(mod)
+      .command<CommandOptions>(mod)
       .parse();
 
     const output = consoleLog.getCall(0).firstArg;
@@ -126,8 +125,7 @@ describe("commands/team", function () {
     const consoleLog = spy(logger, "log");
     const teamName = "mynewteam";
     await yargs(["team", "create", teamName, ...defaultArgs])
-    // @ts-expect-error TODO check if the yargs type align
-      .command(mod)
+      .command<CommandOptions>(mod)
       .parse();
 
     const output = consoleLog.getCall(0).firstArg;
@@ -169,8 +167,7 @@ describe("commands/team", function () {
       TEST_TEAM_ID,
       ...defaultArgs,
     ])
-    // @ts-expect-error TODO check if the yargs type align
-      .command(mod)
+      .command<CommandOptions>(mod)
       .parse();
 
     const out = consoleLog.getCall(0).firstArg;
