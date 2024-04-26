@@ -86,7 +86,7 @@ export class NonceManager extends AbstractSigner<Provider> {
     );
   }
 
-  async signMessage(message: string): Promise<string> {
+  async signMessage(message: string | Uint8Array): Promise<string> {
     return await this.signer.signMessage(message);
   }
 
