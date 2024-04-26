@@ -154,18 +154,19 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
     updateTeam: teamAdminProcedure(store)
       .input(updateTeamSchema)
       .mutation(async ({ input: { name }, ctx }) => {
+        let team: schema.Team | undefined;
         try {
-          const team = await store.teams.updateTeam(ctx.teamId, name);
-          if (!team) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Team not found",
-            });
-          }
-          return team;
+          team = await store.teams.updateTeam(ctx.teamId, name);
         } catch (err) {
           throw internalError("Error updating team", err);
         }
+        if (!team) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Team not found",
+          });
+        }
+        return team;
       }),
     deleteTeam: teamAdminProcedure(store).mutation(async ({ ctx }) => {
       try {

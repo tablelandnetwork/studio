@@ -1,11 +1,18 @@
-import { type Store } from "@tableland/studio-store";
+import { schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   newProjectSchema,
   projectNameAvailableSchema,
+  updateProjectSchema,
 } from "@tableland/studio-validators";
-import { publicProcedure, createTRPCRouter, teamProcedure } from "../trpc";
+import {
+  publicProcedure,
+  createTRPCRouter,
+  teamProcedure,
+  teamAdminProcedure,
+  projectAdminProcedure,
+} from "../trpc";
 import { internalError } from "../utils/internalError";
 
 export function projectsRouter(store: Store) {
@@ -84,6 +91,36 @@ export function projectsRouter(store: Store) {
           return project;
         } catch (err) {
           throw internalError("Error creating project", err);
+        }
+      }),
+    updateProject: projectAdminProcedure(store)
+      .input(updateProjectSchema)
+      .mutation(async ({ input }) => {
+        let project: schema.Project | undefined;
+        try {
+          project = await store.projects.updateProject(
+            input.projectId,
+            input.name,
+            input.description,
+          );
+        } catch (err) {
+          throw internalError("Error updating project", err);
+        }
+        if (!project) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Project not found",
+          });
+        }
+        return project;
+      }),
+    deleteProject: projectAdminProcedure(store)
+      .input(z.object({ projectId: z.string().trim() }))
+      .mutation(async ({ input }) => {
+        try {
+          await store.projects.deleteProject(input.projectId);
+        } catch (err) {
+          throw internalError("Error deleting project", err);
         }
       }),
   });

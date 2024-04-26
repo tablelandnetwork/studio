@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { type Database } from "@tableland/sdk";
-import { and, desc, eq, isNotNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
 import { slugify } from "../helpers.js";
@@ -10,6 +10,9 @@ const environments = schema.environments;
 const projects = schema.projects;
 const teamProjects = schema.teamProjects;
 const teams = schema.teams;
+const defs = schema.defs;
+const deployments = schema.deployments;
+const projectDefs = schema.projectDefs;
 
 export function initProjects(
   db: DrizzleD1Database<typeof schema>,
@@ -67,6 +70,92 @@ export function initProjects(
         updatedAt: now.toISOString(),
       };
       return project;
+    },
+
+    updateProject: async function (
+      projectId: string,
+      name?: string,
+      description?: string,
+    ) {
+      const now = new Date();
+      const slug = name ? slugify(name) : undefined;
+      await db
+        .update(projects)
+        .set({
+          name,
+          slug,
+          description,
+          updatedAt: now.toISOString(),
+        })
+        .where(eq(projects.id, projectId))
+        .execute();
+      return await db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .get();
+    },
+
+    deleteProject: async function (projectId: string) {
+      // teamProjects
+      const { sql: teamProjectsSql, params: teamProjectsParams } = db
+        .delete(teamProjects)
+        .where(eq(teamProjects.projectId, projectId))
+        .toSQL();
+
+      // projects
+      const { sql: projectsSql, params: projectsParams } = db
+        .delete(projects)
+        .where(eq(projects.id, projectId))
+        .toSQL();
+
+      // environments
+      const { sql: environmentsSql, params: environmentsParams } = db
+        .delete(environments)
+        .where(eq(environments.projectId, projectId))
+        .toSQL();
+
+      // projectDefs
+      const { sql: projectDefsSql, params: projectDefsParams } = db
+        .delete(projectDefs)
+        .where(eq(projectDefs.projectId, projectId))
+        .toSQL();
+
+      const batch = [
+        tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
+        tbl.prepare(projectsSql).bind(projectsParams),
+        tbl.prepare(environmentsSql).bind(environmentsParams),
+        tbl.prepare(projectDefsSql).bind(projectDefsParams),
+      ];
+
+      // Get an array of def IDs for all projects in the team
+      const defIds = (
+        await db
+          .select({ defId: projectDefs.defId })
+          .from(projectDefs)
+          .where(eq(projectDefs.projectId, projectId))
+          .all()
+      ).map((r) => r.defId);
+
+      // If the project has defs, delete them and all related data
+      if (defIds.length) {
+        // defs
+        const { sql: defsSql, params: defsParams } = db
+          .delete(defs)
+          .where(inArray(defs.id, defIds))
+          .toSQL();
+
+        // deployments
+        const { sql: deploymentsSql, params: deploymentsParams } = db
+          .delete(deployments)
+          .where(inArray(deployments.defId, defIds))
+          .toSQL();
+
+        batch.push(tbl.prepare(defsSql).bind(defsParams));
+        batch.push(tbl.prepare(deploymentsSql).bind(deploymentsParams));
+      }
+
+      await tbl.batch(batch);
     },
 
     firstNProjectSlugs: async function (n: number) {

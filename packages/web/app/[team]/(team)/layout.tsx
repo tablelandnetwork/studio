@@ -1,4 +1,4 @@
-import NavTeam from "@/components/nav-team";
+import NavTeam from "./_components/nav-team";
 import SubNavHeader from "@/components/sub-nav-header";
 
 export default async function LayoutTeam({
