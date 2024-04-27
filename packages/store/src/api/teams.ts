@@ -247,10 +247,7 @@ export function initTeams(
           (acc, r) => {
             if (!acc.has(r.teams.id)) {
               acc.set(r.teams.id, {
-                id: r.teams.id,
-                name: r.teams.name,
-                slug: r.teams.slug,
-                personal: r.teams.personal,
+                ...r.teams,
                 projects: [],
               });
             }
@@ -261,19 +258,8 @@ export function initTeams(
           },
           new Map<
             string,
-            {
-              projects: Array<{
-                name: string;
-                description: string;
-                id: string;
-                slug: string;
-                createdAt: string | null;
-                updatedAt: string | null;
-              }>;
-              name: string;
-              id: string;
-              slug: string;
-              personal: number;
+            schema.Team & {
+              projects: schema.Project[];
             }
           >(),
         )
