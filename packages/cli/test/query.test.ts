@@ -131,19 +131,6 @@ describe("commands/query", function () {
     });
   });
 
-  // TODO: fix this test
-  // ```
-  // TypeError: Cannot read properties of undefined (reading 'trim')
-  // at getIdFromTableName (file:///Users/dtb/tbl/studio/packages/cli/src/utils.ts:214:27)
-  // at Object.getChainIdFromTableName (file:///Users/dtb/tbl/studio/packages/cli/src/utils.ts:392:12)
-  // at QueryShell.runQuery (file:///Users/dtb/tbl/studio/packages/cli/src/commands/query.ts:170:31)
-  // at processTicksAndRejections (node:internal/process/task_queues:95:5)
-  // at async QueryShell.handler (file:///Users/dtb/tbl/studio/packages/cli/src/commands/query.ts:150:5)
-  // ```
-  // It comes from `query.ts` L169 because the `aliasMap` is empty `{}`, so
-  // `getChainIdFromTableName` (which uses `trim`) fails on undefined table
-  // name. THe `environmentId` and `apiUrl` do exist in these tests, so idk
-  // where it's failing...perhaps the tRPC server?
   test("can run a read query", async function () {
     const consoleLog = spy(logger, "log");
     const stdin = mockStd.stdin();
