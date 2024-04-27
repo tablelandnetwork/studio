@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { type Database } from "@tableland/sdk";
-import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
 import { slugify } from "../helpers.js";
@@ -19,7 +19,11 @@ export function initProjects(
   tbl: Database,
 ) {
   return {
-    nameAvailable: async function (teamId: string, name: string) {
+    nameAvailable: async function (
+      teamId: string,
+      name: string,
+      projectId?: string,
+    ) {
       const res = await db
         .select()
         .from(projects)
@@ -28,6 +32,7 @@ export function initProjects(
           and(
             eq(teamProjects.teamId, teamId),
             eq(projects.slug, slugify(name)),
+            projectId ? ne(projects.id, projectId) : undefined,
           ),
         )
         .get();

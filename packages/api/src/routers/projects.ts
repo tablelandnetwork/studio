@@ -71,7 +71,11 @@ export function projectsRouter(store: Store) {
             message: "Team ID must be provided as input or session context",
           });
         }
-        return await store.projects.nameAvailable(teamId, input.name);
+        return await store.projects.nameAvailable(
+          teamId,
+          input.name,
+          input.projectId,
+        );
       }),
     newProject: teamProcedure(store)
       .input(newProjectSchema)

@@ -52,7 +52,12 @@ export default async function ProjectSettings({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <EditProject team={team} project={project} disabled={!isAdmin} />
+          <EditProject
+            key={project.updatedAt}
+            team={team}
+            project={project}
+            disabled={!isAdmin}
+          />
         </CardContent>
       </Card>
       <Card className={cn(!isAdmin && "opacity-50")}>
