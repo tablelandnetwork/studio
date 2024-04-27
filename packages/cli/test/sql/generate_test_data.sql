@@ -12,12 +12,16 @@ insert into `teams` (
 	`id`,
 	`name`,
 	`slug`,
-	`personal`
+	`personal`,
+	`created_at`,
+	`updated_at`
 ) values (
 	'a3cd7fac-4528-4765-9ae1-304460555429',
 	'testuser',
 	'testuser',
-	1
+	1,
+	'2023-10-16T07:14:06.661Z',
+	'2023-10-16T07:14:06.661Z'
 );
 --> statement-breakpoint
 insert into `team_memberships` (
@@ -62,12 +66,16 @@ insert into `environments` (
 	`id`,
 	`project_id`,
 	`name`,
-	`slug`
+	`slug`,
+	`created_at`,
+	`updated_at`
 ) values (
 	'c862f12c-f2f8-451a-bae3-bbf633e3ae57',
 	'2f403473-de7b-41ba-8d97-12a0344aeccb',
 	'default',
-	'default'
+	'default',
+	'2023-10-16T07:14:06.661Z',
+	'2023-10-16T07:14:06.661Z'
 );
 --> statement-breakpoint
 insert into `project_tables` (
@@ -83,13 +91,17 @@ insert into `tables` (
 	`slug`,
 	`name`,
 	`description`,
-	`schema`
+	`schema`,
+	`created_at`,
+	`updated_at`
 ) values (
 	'48cbba6f-ff44-4461-a926-9ae5a1ce73f9',
 	'table1',
 	'table1',
 	'first test table',
-	'{"columns":[{"name":"id","type":"integer","constraints":["primary key"]},{"name":"info","type":"text"}]}'
+	'{"columns":[{"name":"id","type":"integer","constraints":["primary key"]},{"name":"info","type":"text"}]}',
+	'2023-10-16T07:14:06.661Z',
+	'2023-10-16T07:14:06.661Z'
 );
 --> statement-breakpoint
 insert into `project_tables` (
@@ -105,11 +117,15 @@ insert into `tables` (
 	`slug`,
 	`name`,
 	`description`,
-	`schema`
+	`schema`,
+	`created_at`,
+	`updated_at`
 ) values (
 	'48bcca5e-33ee-4461-a926-9ae5a1ce73f9',
 	'table2',
 	'table2',
 	'second test table',
-	'{"columns":[{"name":"id","type":"integer","constraints":["primary key"]},{"name":"data","type":"text"}]}'
+	'{"columns":[{"name":"id","type":"integer","constraints":["primary key"]},{"name":"data","type":"text"}]}',
+	'2023-10-16T07:14:06.661Z',
+	'2023-10-16T07:14:06.661Z'
 );
