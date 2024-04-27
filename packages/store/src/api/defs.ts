@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { type Database } from "@tableland/sdk";
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { type Schema } from "../custom-types/index.js";
 import * as schema from "../schema/index.js";
@@ -14,7 +14,11 @@ const teams = schema.teams;
 
 export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
   return {
-    nameAvailable: async function (projectId: string, name: string) {
+    nameAvailable: async function (
+      projectId: string,
+      name: string,
+      defId?: string,
+    ) {
       const res = await db
         .select()
         .from(projectDefs)
@@ -23,6 +27,7 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
           and(
             eq(projectDefs.projectId, projectId),
             eq(defs.name, slugify(name)),
+            defId ? ne(defs.id, defId) : undefined,
           ),
         )
         .get();
@@ -36,9 +41,19 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
     ) {
       const defId = randomUUID();
       const slug = slugify(name);
+      const now = new Date().toISOString();
+      const def: Def = {
+        id: defId,
+        name,
+        description,
+        schema,
+        slug,
+        createdAt: now,
+        updatedAt: now,
+      };
       const { sql: defSql, params: defParams } = db
         .insert(defs)
-        .values({ id: defId, name, description, schema, slug })
+        .values(def)
         .toSQL();
       const { sql: projectDefSql, params: projectDefParams } = db
         .insert(projectDefs)
@@ -48,7 +63,6 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
         tbl.prepare(projectDefSql).bind(projectDefParams),
         tbl.prepare(defSql).bind(defParams),
       ]);
-      const def: Def = { id: defId, name, description, schema, slug };
       return def;
     },
 

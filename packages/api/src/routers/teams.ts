@@ -41,7 +41,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
     nameAvailable: publicProcedure
       .input(teamNameAvailableSchema)
       .query(async ({ input }) => {
-        return await store.teams.nameAvailable(input.name);
+        return await store.teams.nameAvailable(input.name, input.teamId);
       }),
     getTeam: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))

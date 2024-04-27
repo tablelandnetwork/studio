@@ -39,7 +39,7 @@ export default function EditTeam({
   });
 
   const nameAvailable = api.teams.nameAvailable.useQuery(
-    query !== team.name ? { name: query } : skipToken,
+    query !== team.name ? { teamId: team.id, name: query } : skipToken,
     { retry: false },
   );
   const updateTeam = api.teams.updateTeam.useMutation({

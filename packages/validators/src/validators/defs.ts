@@ -17,6 +17,7 @@ const columnNameSchema = z
 
 export const defNameAvailableSchema = z.object({
   projectId: z.string().trim(),
+  defId: z.string().trim().nonempty().optional(),
   name: defNameSchema,
 });
 
