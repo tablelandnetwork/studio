@@ -10,4 +10,5 @@ const getTimeoutFactor = function (): number {
 export const TEST_TIMEOUT_FACTOR = getTimeoutFactor();
 
 export const TEST_REGISTRY_PORT = 8547;
+export const TEST_REGISTRY_RPC_URL = `http://127.0.0.1:${TEST_REGISTRY_PORT}`;
 export const TEST_VALIDATOR_URL = "http://localhost:8082/api/v1";
