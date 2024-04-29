@@ -106,14 +106,7 @@ export class NonceManager extends AbstractSigner<Provider> {
       await this.memStore.incr(`delta:${await this.getAddress()}`);
     }
 
-    // const noncePromise = this.getNonce("pending");
-    // await this.increment();
-
     transaction = await this.signer.populateTransaction(transaction);
-    // transaction.nonce = await noncePromise;
-
-    // @TODO: Maybe handle interesting/recoverable errors?
-    // Like don't increment if the tx was certainly not sent
     const tx = await this.signer.sendTransaction(transaction);
 
     this.provider
