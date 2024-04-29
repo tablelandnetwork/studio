@@ -1,21 +1,20 @@
 import path from "path";
 import { fileURLToPath } from "url";
-import { equal, deepStrictEqual } from "assert";
+import { equal } from "assert";
 import { getAccounts } from "@tableland/local";
 import { afterEach, before, describe, test } from "mocha";
-import { restore, spy, stub } from "sinon";
+import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
 import * as mod from "../src/commands/team.js";
 import type { CommandOptions } from "../src/commands/team.js";
 import * as modLogin from "../src/commands/login.js";
 import * as modLogout from "../src/commands/logout.js";
-import { type FileStore, logger, wait, helpers } from "../src/utils.js";
+import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_REGISTRY_PORT,
-  TEST_TEAM_ID,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
