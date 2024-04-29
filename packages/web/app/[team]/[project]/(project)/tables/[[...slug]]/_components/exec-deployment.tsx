@@ -10,7 +10,7 @@ import {
   generateCreateTableStatement,
   type schema,
 } from "@tableland/studio-store";
-import { providers } from "ethers";
+import { JsonRpcSigner, BrowserProvider } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -56,7 +56,7 @@ export default function ExecDeployment({
   const [txnState, setTxnState] = useState<
     "pending" | "processing" | "complete" | Error
   >("pending");
-  const [tblReceiptState, setTblRecieptState] = useState<
+  const [tblReceiptState, setTblReceiptState] = useState<
     "pending" | "processing" | "complete" | Error
   >("pending");
   const [recordDeploymentState, setRecordDeploymentState] = useState<
@@ -75,7 +75,7 @@ export default function ExecDeployment({
 
   const handleDeploy = async () => {
     startDeployTransition(async () => {
-      let signer: providers.JsonRpcSigner;
+      let signer: JsonRpcSigner;
       let tbl: Database;
       let txn: WaitableTransactionReceipt;
 
@@ -117,7 +117,7 @@ export default function ExecDeployment({
           throw new Error(res.error);
         }
         if (!res.success) {
-          throw new Error("Unsucessful call to exec transaction");
+          throw new Error("Unsuccessful call to exec transaction");
         }
         if (!res.meta.txn) {
           throw new Error("No transaction found in metadata");
@@ -135,7 +135,7 @@ export default function ExecDeployment({
       }
       setTxnState("complete");
 
-      setTblRecieptState("processing");
+      setTblReceiptState("processing");
       try {
         const validator = new Validator(tbl.config);
         const receipt = await validator.pollForReceiptByTransactionHash({
@@ -146,12 +146,12 @@ export default function ExecDeployment({
           throw new Error(receipt.error);
         }
       } catch (error) {
-        setTblRecieptState(
+        setTblReceiptState(
           error instanceof Error ? error : new Error(String(error)),
         );
         return;
       }
-      setTblRecieptState("complete");
+      setTblReceiptState("complete");
 
       setRecordDeploymentState("processing");
       try {
@@ -197,7 +197,7 @@ export default function ExecDeployment({
           <DialogDescription>
             Deploying a definition to Tableland will require you to sign and
             send a transaction, as well as pay any transaction fees. Once the
-            defintion has been deployed, it will be registered with your Studio
+            definition has been deployed, it will be registered with your Studio
             project and you&apos;ll be able to view it in the tables tab.
           </DialogDescription>
         </DialogHeader>
@@ -314,20 +314,24 @@ function DeployStep({
   }
 }
 
-export function walletClientToSigner(walletClient: WalletClient) {
+export function walletClientToSigner(
+  walletClient: WalletClient,
+): JsonRpcSigner {
   const { account, chain, transport } = walletClient;
   const network = {
     chainId: chain.id,
     name: chain.name,
     ensAddress: chain.contracts?.ensRegistry?.address,
   };
-  const provider = new providers.Web3Provider(transport, network);
-  const signer = provider.getSigner(account.address);
+  const provider = new BrowserProvider(transport, network);
+  const signer = new JsonRpcSigner(provider, account.address);
   return signer;
 }
 
 /** Hook to convert a viem Wallet Client to an ethers.js Signer. */
-export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
+export function useEthersSigner({ chainId }: { chainId?: number } = {}):
+  | JsonRpcSigner
+  | undefined {
   const { data: walletClient } = useWalletClient({ chainId });
   return useMemo(
     () => (walletClient ? walletClientToSigner(walletClient) : undefined),

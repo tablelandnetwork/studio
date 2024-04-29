@@ -1,4 +1,4 @@
-import type { Arguments } from "yargs";
+import type { Arguments, ArgumentsCamelCase } from "yargs";
 // Yargs doesn't seem to export the type of `yargs`.  This causes a conflict
 // between linting and building. Lint complains that yargs is only imported
 // for it's type, and build complains that you cannot use namespace as a type.
@@ -21,7 +21,7 @@ export const desc = "manage studio teams";
 export interface CommandOptions extends GlobalOptions {
   name?: string;
   address?: string;
-  personalTeamId?: string;
+  teamId?: string;
   invites?: string;
 }
 
@@ -162,12 +162,33 @@ export const builder = function (args: Yargs) {
         });
         const api = helpers.getApi(fileStore, apiUrl);
 
-        const result = await api.invites.inviteEmails.mutate({
+        // check if the email address is already invited and resend; else,
+        // invite the email address (to avoid SQLite constraint error)
+        const { invites } = await api.invites.invitesForTeam.query({
           teamId: team,
-          emails: emailInvites,
         });
+        const pendingEmails = invites
+          .filter((i) => i.invite.claimedAt == null)
+          .map((i) => i.invite.email);
+        if (pendingEmails.length > 0) {
+          for (const i of invites) {
+            await api.invites.resendInvite.mutate({
+              teamId: team,
+              inviteId: i.invite.id,
+            });
+          }
+        }
+        const newEmails = emailInvites.filter(
+          (addr: any) => !pendingEmails.includes(addr),
+        );
+        if (newEmails.length > 0) {
+          await api.invites.inviteEmails.mutate({
+            teamId: team,
+            emails: newEmails,
+          });
+        }
 
-        logger.log(JSON.stringify(result));
+        logger.log(JSON.stringify({ emails: emailInvites, teamId: team }));
       },
     );
 };
@@ -176,6 +197,7 @@ export const builder = function (args: Yargs) {
 export const handler = async (
   argv: Arguments<CommandOptions>,
 ): Promise<void> => {
-  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const args = argv as ArgumentsCamelCase<CommandOptions>;
   // noop
 };

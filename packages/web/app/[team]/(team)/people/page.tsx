@@ -144,6 +144,7 @@ export default async function People({ params }: { params: { team: string } }) {
                   invite={i.invite}
                   inviter={i.inviter}
                   user={auth.personalTeam}
+                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                   membership={teamAuthorization!}
                 />
               </div>

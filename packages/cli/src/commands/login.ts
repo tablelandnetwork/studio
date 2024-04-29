@@ -49,7 +49,7 @@ export const handler = async (
         "Sign in to Studio with your wallet address. This only requires a signature, no transaction will be sent.",
       uri: apiUrl,
       version: "1",
-      chainId: await sdkHelpers.extractChainId({signer: wallet}),
+      chainId: await sdkHelpers.extractChainId({ signer: wallet }),
       nonce: await api.auth.nonce.mutate(),
     });
     const message = rawMessage.prepareMessage();
