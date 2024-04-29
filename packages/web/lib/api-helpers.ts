@@ -15,6 +15,13 @@ export async function projectBySlug(slug: string, teamId?: string) {
   );
 }
 
+export async function defBySlug(projectId: string, slug: string) {
+  return await catch404(
+    async () =>
+      await cache(api.defs.defByProjectIdAndSlug)({ projectId, slug }),
+  );
+}
+
 async function catch404<T>(work: () => Promise<T>) {
   try {
     return await work();

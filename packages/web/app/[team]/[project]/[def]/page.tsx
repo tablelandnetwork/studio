@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import DefColumns from "@/components/def-columns";
 import DefConstraints from "@/components/def-constraints";
-import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
+import { defBySlug, projectBySlug, teamBySlug } from "@/lib/api-helpers";
 
 export default async function DefDetails({
   params,
@@ -22,10 +22,7 @@ export default async function DefDetails({
 }) {
   const team = await teamBySlug(params.team);
   const project = await projectBySlug(params.project, team.id);
-  const def = await cache(api.defs.defByProjectIdAndSlug)({
-    projectId: project.id,
-    slug: params.def,
-  });
+  const def = await defBySlug(project.id, params.def);
   const deploymentInfos = await cache(api.deployments.deploymentsByDefId)({
     defId: def.id,
   });
