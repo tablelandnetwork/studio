@@ -19,6 +19,8 @@ const sendTxn = async function (prom: Promise<any>) {
     const result = await prom;
     return { result, threw: false };
   } catch (err: any) {
+    console.log("sendTxn:");
+    console.log(err);
     return { error: err.message, threw: true };
   }
 };
