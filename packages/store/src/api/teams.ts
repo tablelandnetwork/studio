@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { type Database } from "@tableland/sdk";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, ne, inArray } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData } from "iron-session";
 import * as schema from "../schema/index.js";
@@ -26,11 +26,16 @@ export function initTeams(
   dataSealPass: string,
 ) {
   return {
-    nameAvailable: async function (name: string) {
+    nameAvailable: async function (name: string, teamId?: string) {
       const res = await db
         .select()
         .from(teams)
-        .where(eq(teams.slug, slugify(name)))
+        .where(
+          and(
+            eq(teams.slug, slugify(name)),
+            teamId ? ne(teams.id, teamId) : undefined,
+          ),
+        )
         .get();
       return !res;
     },
@@ -42,7 +47,15 @@ export function initTeams(
     ) {
       const teamId = randomUUID();
       const slug = slugify(name);
-      const team: Team = { id: teamId, personal: 0, name, slug };
+      const now = new Date().toISOString();
+      const team: Team = {
+        id: teamId,
+        personal: 0,
+        name,
+        slug,
+        createdAt: now,
+        updatedAt: now,
+      };
       const { sql: teamsSql, params: teamsParams } = db
         .insert(teams)
         .values(team)
@@ -53,7 +66,7 @@ export function initTeams(
           memberTeamId: personalTeamId,
           teamId,
           isOwner: 1,
-          joinedAt: new Date().toISOString(),
+          joinedAt: now,
         })
         .toSQL();
       const invites: TeamInvite[] = inviteEmails.map((email) => ({
@@ -61,7 +74,7 @@ export function initTeams(
         teamId,
         inviterTeamId: personalTeamId,
         email,
-        createdAt: new Date().toISOString(),
+        createdAt: now,
         claimedByTeamId: null,
         claimedAt: null,
       }));
@@ -96,7 +109,7 @@ export function initTeams(
       const slug = slugify(name);
       await db
         .update(teams)
-        .set({ name, slug })
+        .set({ name, slug, updatedAt: new Date().toISOString() })
         .where(eq(teams.id, teamId))
         .run();
       return await db.select().from(teams).where(eq(teams.id, teamId)).get();
@@ -234,10 +247,7 @@ export function initTeams(
           (acc, r) => {
             if (!acc.has(r.teams.id)) {
               acc.set(r.teams.id, {
-                id: r.teams.id,
-                name: r.teams.name,
-                slug: r.teams.slug,
-                personal: r.teams.personal,
+                ...r.teams,
                 projects: [],
               });
             }
@@ -248,19 +258,8 @@ export function initTeams(
           },
           new Map<
             string,
-            {
-              projects: Array<{
-                name: string;
-                description: string;
-                id: string;
-                slug: string;
-                createdAt: string | null;
-                updatedAt: string | null;
-              }>;
-              name: string;
-              id: string;
-              slug: string;
-              personal: number;
+            schema.Team & {
+              projects: schema.Project[];
             }
           >(),
         )

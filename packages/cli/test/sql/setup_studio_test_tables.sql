@@ -15,6 +15,8 @@ CREATE TABLE `environments` (
 	`project_id` text NOT NULL,
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
+	`created_at` text,
+	`updated_at` text,
 	UNIQUE (`project_id`,`slug`)
 );
 --> statement-breakpoint
@@ -38,7 +40,9 @@ CREATE TABLE `tables` (
 	`slug` text NOT NULL,
 	`name` text NOT NULL,
 	`description` text NOT NULL,
-	`schema` text NOT NULL
+	`schema` text NOT NULL,
+	`created_at` text,
+	`updated_at` text
 );
 --> statement-breakpoint
 CREATE TABLE `team_invites` (
@@ -70,7 +74,9 @@ CREATE TABLE `teams` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text UNIQUE NOT NULL,
 	`slug` text UNIQUE NOT NULL,
-	`personal` integer NOT NULL
+	`personal` integer NOT NULL,
+	`created_at` text,
+	`updated_at` text
 );
 --> statement-breakpoint
 CREATE TABLE `users` (

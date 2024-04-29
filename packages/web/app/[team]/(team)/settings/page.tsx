@@ -51,7 +51,7 @@ export default async function TeamSettings({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <EditTeam team={team} disabled={!isAdmin} />
+          <EditTeam key={team.updatedAt} team={team} disabled={!isAdmin} />
         </CardContent>
       </Card>
       <Card className={cn(!isAdmin && "opacity-50")}>

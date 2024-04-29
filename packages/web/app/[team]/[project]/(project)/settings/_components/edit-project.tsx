@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type schema } from "@tableland/studio-store";
-import { updateTeamSchema } from "@tableland/studio-validators";
+import { updateProjectSchema } from "@tableland/studio-validators";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { useState } from "react";
@@ -21,40 +21,52 @@ import {
 } from "@/components/ui/form";
 import InputWithCheck from "@/components/input-with-check";
 import { api } from "@/trpc/react";
+import { Textarea } from "@/components/ui/textarea";
 
-export default function EditTeam({
+export default function EditProject({
   team,
+  project,
   disabled = false,
 }: {
   team: schema.Team;
+  project: schema.Project;
   disabled?: boolean;
 }) {
   const router = useRouter();
-  const [query, setQuery] = useState(team.name);
-  const form = useForm<z.infer<typeof updateTeamSchema>>({
-    resolver: zodResolver(updateTeamSchema),
+  const [query, setQuery] = useState(project.name);
+  const form = useForm<z.infer<typeof updateProjectSchema>>({
+    resolver: zodResolver(updateProjectSchema),
     defaultValues: {
-      name: team.name,
+      name: project.name,
+      description: project.description,
     },
   });
 
-  const nameAvailable = api.teams.nameAvailable.useQuery(
-    query !== team.name ? { teamId: team.id, name: query } : skipToken,
+  const nameAvailable = api.projects.nameAvailable.useQuery(
+    query !== project.name
+      ? { teamId: team.id, projectId: project.id, name: query }
+      : skipToken,
     { retry: false },
   );
-  const updateTeam = api.teams.updateTeam.useMutation({
-    onSuccess: (team) => {
+  const updateProject = api.projects.updateProject.useMutation({
+    onSuccess: (project) => {
       router.refresh();
-      router.replace(`/${team.slug}/settings`);
+      router.replace(`/${team.slug}/${project.slug}/settings`);
     },
   });
 
-  const onSubmit = (values: z.infer<typeof updateTeamSchema>) => {
-    updateTeam.mutate({ teamId: team.id, ...values });
+  const onSubmit = (values: z.infer<typeof updateProjectSchema>) => {
+    updateProject.mutate({
+      projectId: project.id,
+      name: form.formState.dirtyFields.name ? values.name : undefined,
+      description: form.formState.dirtyFields.description
+        ? values.description
+        : undefined,
+    });
   };
 
   const onReset = () => {
-    setQuery(team.name);
+    setQuery(project.name);
     form.reset();
   };
 
@@ -74,15 +86,35 @@ export default function EditTeam({
               <FormLabel>Name</FormLabel>
               <FormControl>
                 <InputWithCheck
-                  placeholder="My Team"
+                  placeholder="My Project"
                   {...field}
                   queryStatus={nameAvailable}
                   updateQuery={setQuery}
-                  disabled={disabled || updateTeam.isPending}
+                  disabled={disabled || updateProject.isPending}
                 />
               </FormControl>
               <FormDescription>
-                The team name. It must be unique across all Studio teams.
+                The project name. It must be unique within your Studio team.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Project description"
+                  disabled={disabled || updateProject.isPending}
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                A short description of your project.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -93,7 +125,7 @@ export default function EditTeam({
             variant="outline"
             type="reset"
             onClick={onReset}
-            disabled={!form.formState.isDirty || updateTeam.isPending}
+            disabled={!form.formState.isDirty || updateProject.isPending}
           >
             Reset
           </Button>
@@ -103,10 +135,10 @@ export default function EditTeam({
               disabled ||
               !form.formState.isDirty ||
               (!!form.formState.dirtyFields.name && !nameAvailable.data) ||
-              updateTeam.isPending
+              updateProject.isPending
             }
           >
-            {updateTeam.isPending && (
+            {updateProject.isPending && (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             )}
             Submit
