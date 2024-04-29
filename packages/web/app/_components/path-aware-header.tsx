@@ -11,12 +11,14 @@ export default function PathAwareHeader({
 }: HTMLAttributes<HTMLDivElement>) {
   const path = usePathname();
 
+  const parts = path.split("/");
+
   const showBorder =
     path === "/" ||
-    path.startsWith("/invite") ||
-    path === "/sql-log" ||
-    path.startsWith("/table") ||
-    path.split("/").length === 4; // This is a table definition page
+    path.startsWith("/invite/") ||
+    path === "/sql-log/" ||
+    path.startsWith("/table/") ||
+    (parts.length === 4 && !["tables", "settings"].includes(parts[3])); // This is a table definition page
 
   return (
     <header

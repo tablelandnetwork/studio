@@ -27,6 +27,8 @@ export const teams = sqliteTable(
     name: text("name").notNull(),
     slug: text("slug").notNull(),
     personal: integer("personal").notNull(),
+    createdAt: text("created_at"),
+    updatedAt: text("updated_at"),
   },
   (teams) => ({
     nameIdx: uniqueIndex("nameIdx").on(teams.name),
@@ -84,6 +86,8 @@ export const defs = sqliteTable("tables", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   schema: schema("schema").notNull(),
+  createdAt: text("created_at"),
+  updatedAt: text("updated_at"),
 });
 
 export const projectDefs = sqliteTable(
@@ -109,6 +113,8 @@ export const environments = sqliteTable(
     projectId: text("project_id").notNull(),
     name: text("name").notNull(),
     slug: text("slug").notNull(),
+    createdAt: text("created_at"),
+    updatedAt: text("updated_at"),
   },
   (environments) => {
     return {

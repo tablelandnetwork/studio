@@ -21,11 +21,14 @@ export function initEnvironments(
       name: string;
     }) {
       const id = randomUUID();
-      const environment = {
+      const now = new Date().toISOString();
+      const environment: Environment = {
         id,
         projectId,
         name,
         slug: slugify(name),
+        createdAt: now,
+        updatedAt: now,
       };
       const { sql, params } = db
         .insert(environments)

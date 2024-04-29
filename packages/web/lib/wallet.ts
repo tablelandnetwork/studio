@@ -1,5 +1,6 @@
 import { Wallet, getDefaultProvider } from "ethers";
-import { NonceManager } from "@tableland/nonce";
+import { NonceManager as TablelandNonceManager } from "@tableland/nonce";
+import { NonceManager as EthersNonceManager } from "@ethersproject/experimental";
 
 if (!process.env.STORE_PRIVATE_KEY) {
   throw new Error("Must provide STORE_PRIVATE_KEY env var.");
@@ -8,4 +9,12 @@ if (!process.env.STORE_PRIVATE_KEY) {
 const wallet = new Wallet(process.env.STORE_PRIVATE_KEY);
 export const provider = getDefaultProvider(process.env.PROVIDER_URL);
 const baseSigner = wallet.connect(provider);
-export const signer = new NonceManager(baseSigner);
+
+export const signer =
+  typeof process.env.KV_REST_API_URL !== "string" ||
+  typeof process.env.KV_REST_API_TOKEN !== "string"
+    ? new EthersNonceManager(baseSigner)
+    : new TablelandNonceManager(baseSigner, {
+        redisUrl: process.env.KV_REST_API_URL,
+        redisToken: process.env.KV_REST_API_TOKEN,
+      });

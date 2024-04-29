@@ -13,7 +13,10 @@ const account = "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab3
 const provider = getDefaultProvider(`http://127.0.0.1:${process.env.TEST_REGISTRY_PORT}`);
 const wallet = new Wallet(account);
 const db = new Database({
-  signer: new NonceManager(wallet.connect(provider)),
+  signer: new NonceManager(wallet.connect(provider), {
+    redisUrl: process.env.KV_REST_API_URL,
+    redisToken: process.env.KV_REST_API_TOKEN,
+  }),
   registryPort: process.env.TEST_REGISTRY_PORT,
   autoWait: true,
 });

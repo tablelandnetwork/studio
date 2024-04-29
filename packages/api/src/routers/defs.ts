@@ -35,7 +35,11 @@ export function defsRouter(store: Store) {
     nameAvailable: publicProcedure
       .input(defNameAvailableSchema)
       .query(async ({ input }) => {
-        return await store.defs.nameAvailable(input.projectId, input.name);
+        return await store.defs.nameAvailable(
+          input.projectId,
+          input.name,
+          input.defId,
+        );
       }),
     newDef: projectProcedure(store)
       .input(newDefApiSchema)

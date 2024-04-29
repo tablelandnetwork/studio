@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   teamNameAvailableSchema,
   newTeamSchema,
+  updateTeamSchema,
 } from "@tableland/studio-validators";
 import {
   protectedProcedure,
@@ -40,7 +41,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
     nameAvailable: publicProcedure
       .input(teamNameAvailableSchema)
       .query(async ({ input }) => {
-        return await store.teams.nameAvailable(input.name);
+        return await store.teams.nameAvailable(input.name, input.teamId);
       }),
     getTeam: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))
@@ -150,6 +151,30 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
 
         return team;
       }),
+    updateTeam: teamAdminProcedure(store)
+      .input(updateTeamSchema)
+      .mutation(async ({ input: { name }, ctx }) => {
+        let team: schema.Team | undefined;
+        try {
+          team = await store.teams.updateTeam(ctx.teamId, name);
+        } catch (err) {
+          throw internalError("Error updating team", err);
+        }
+        if (!team) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Team not found",
+          });
+        }
+        return team;
+      }),
+    deleteTeam: teamAdminProcedure(store).mutation(async ({ ctx }) => {
+      try {
+        await store.teams.deleteTeam(ctx.teamId);
+      } catch (err) {
+        throw internalError("Error deleting team", err);
+      }
+    }),
     usersForTeam: publicProcedure
       .input(z.object({ teamId: z.string().trim() }).or(z.void()))
       .query(async ({ input, ctx }) => {

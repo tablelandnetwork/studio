@@ -272,6 +272,17 @@ export const projectProcedure = (store: Store) =>
       });
     });
 
+export const projectAdminProcedure = (store: Store) =>
+  projectProcedure(store).use(async ({ ctx, next }) => {
+    if (!ctx.teamAuthorization.isOwner) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "not authorized as project admin",
+      });
+    }
+    return await next({ ctx });
+  });
+
 export const defProcedure = (store: Store) =>
   protectedProcedure
     .input(z.object({ defId: z.string().trim().uuid() }))

@@ -11,12 +11,13 @@ import { cn } from "@/lib/utils";
 function projectLinks(
   team: schema.Team,
   project: schema.Project,
-): Array<{
-  label: string;
-  href: string;
-  isActive: (pathname: string) => boolean;
-}> {
-  return [
+  includeSettings: boolean,
+) {
+  const links: Array<{
+    label: string;
+    href: string;
+    isActive: (pathname: string) => boolean;
+  }> = [
     {
       label: "Definitions",
       href: `/${team.slug}/${project.slug}`,
@@ -29,6 +30,15 @@ function projectLinks(
         pathname.includes(`/${team.slug}/${project.slug}/tables`),
     },
   ];
+  if (includeSettings) {
+    links.push({
+      label: "Settings",
+      href: `/${team.slug}/${project.slug}/settings`,
+      isActive: (pathname: string) =>
+        pathname.startsWith(`/${team.slug}/${project.slug}/settings`),
+    });
+  }
+  return links;
 }
 
 export default function NavProject({
@@ -45,11 +55,13 @@ export default function NavProject({
   const { data: project } = api.projects.projectBySlug.useQuery(
     team ? { teamId: team.id, slug: projectSlug } : skipToken,
   );
+  const { data: authorization } = api.teams.isAuthorized.useQuery(
+    team ? { teamId: team.id } : skipToken,
+  );
 
-  if (!team || !project) {
+  if (!team || !project || !authorization === undefined) {
     return (
       <div className={cn("flex flex-col", className)}>
-        <div className="mb-2 h-7 w-32 animate-pulse rounded bg-gray-200"></div>
         <nav className="flex items-center space-x-4 lg:space-x-6">
           <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
         </nav>
@@ -58,13 +70,13 @@ export default function NavProject({
   }
 
   return (
-    <div className="flex flex-1">
+    <div className="flex flex-1 items-end">
       <div className="flex flex-col">
         <nav
           className={cn("flex items-center space-x-4 lg:space-x-6", className)}
           {...props}
         >
-          {projectLinks(team, project).map((link) => (
+          {projectLinks(team, project, !!authorization).map((link) => (
             <Link
               key={link.label}
               href={link.href}

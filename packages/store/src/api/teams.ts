@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { type Database } from "@tableland/sdk";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, ne, inArray } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData } from "iron-session";
 import * as schema from "../schema/index.js";
@@ -15,6 +15,10 @@ const teamMemberships = schema.teamMemberships;
 const teamProjects = schema.teamProjects;
 const teams = schema.teams;
 const users = schema.users;
+const projectDefs = schema.projectDefs;
+const defs = schema.defs;
+const environments = schema.environments;
+const deployments = schema.deployments;
 
 export function initTeams(
   db: DrizzleD1Database<typeof schema>,
@@ -22,11 +26,16 @@ export function initTeams(
   dataSealPass: string,
 ) {
   return {
-    nameAvailable: async function (name: string) {
+    nameAvailable: async function (name: string, teamId?: string) {
       const res = await db
         .select()
         .from(teams)
-        .where(eq(teams.slug, slugify(name)))
+        .where(
+          and(
+            eq(teams.slug, slugify(name)),
+            teamId ? ne(teams.id, teamId) : undefined,
+          ),
+        )
         .get();
       return !res;
     },
@@ -38,7 +47,15 @@ export function initTeams(
     ) {
       const teamId = randomUUID();
       const slug = slugify(name);
-      const team: Team = { id: teamId, personal: 0, name, slug };
+      const now = new Date().toISOString();
+      const team: Team = {
+        id: teamId,
+        personal: 0,
+        name,
+        slug,
+        createdAt: now,
+        updatedAt: now,
+      };
       const { sql: teamsSql, params: teamsParams } = db
         .insert(teams)
         .values(team)
@@ -49,7 +66,7 @@ export function initTeams(
           memberTeamId: personalTeamId,
           teamId,
           isOwner: 1,
-          joinedAt: new Date().toISOString(),
+          joinedAt: now,
         })
         .toSQL();
       const invites: TeamInvite[] = inviteEmails.map((email) => ({
@@ -57,7 +74,7 @@ export function initTeams(
         teamId,
         inviterTeamId: personalTeamId,
         email,
-        createdAt: new Date().toISOString(),
+        createdAt: now,
         claimedByTeamId: null,
         claimedAt: null,
       }));
@@ -86,6 +103,119 @@ export function initTeams(
       }
       await tbl.batch(batch);
       return { team, invites };
+    },
+
+    updateTeam: async function (teamId: string, name: string) {
+      const slug = slugify(name);
+      await db
+        .update(teams)
+        .set({ name, slug, updatedAt: new Date().toISOString() })
+        .where(eq(teams.id, teamId))
+        .run();
+      return await db.select().from(teams).where(eq(teams.id, teamId)).get();
+    },
+
+    deleteTeam: async function (teamId: string) {
+      // teams
+      const { sql: teamsSql, params: teamsParams } = db
+        .delete(teams)
+        .where(eq(teams.id, teamId))
+        .toSQL();
+
+      // teamMemberships
+      const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
+        .delete(teamMemberships)
+        .where(eq(teamMemberships.teamId, teamId))
+        .toSQL();
+
+      // users
+      const { sql: usersSql, params: usersParams } = db
+        .delete(users)
+        .where(eq(users.teamId, teamId))
+        .toSQL();
+
+      // teamInvites
+      const { sql: teamInvitesSql, params: teamInvitesParams } = db
+        .delete(teamInvites)
+        .where(eq(teamInvites.teamId, teamId))
+        .toSQL();
+
+      // teamProjects
+      const { sql: teamProjectsSql, params: teamProjectsParams } = db
+        .delete(teamProjects)
+        .where(eq(teamProjects.teamId, teamId))
+        .toSQL();
+
+      const batch = [
+        tbl.prepare(teamsSql).bind(teamsParams),
+        tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
+        tbl.prepare(usersSql).bind(usersParams),
+        tbl.prepare(teamInvitesSql).bind(teamInvitesParams),
+        tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
+      ];
+
+      // Get an array of project IDs for the team
+      const teamProjectIds = (
+        await db
+          .select({ projectId: teamProjects.projectId })
+          .from(teamProjects)
+          .where(eq(teamProjects.teamId, teamId))
+          .all()
+      ).map((r) => r.projectId);
+
+      // If the team has projects, delete them and all realated data
+      if (teamProjectIds.length) {
+        // projects
+        const { sql: projectsSql, params: projectsParams } = db
+          .delete(projects)
+          .where(inArray(projects.id, teamProjectIds))
+          .toSQL();
+
+        // environments
+        const { sql: environmentsSql, params: environmentsParams } = db
+          .delete(environments)
+          .where(inArray(environments.projectId, teamProjectIds))
+          .toSQL();
+
+        // projectDefs
+        const { sql: projectDefsSql, params: projectDefsParams } = db
+          .delete(projectDefs)
+          .where(inArray(projectDefs.projectId, teamProjectIds))
+          .toSQL();
+
+        batch.push(tbl.prepare(projectsSql).bind(projectsParams));
+        batch.push(tbl.prepare(environmentsSql).bind(environmentsParams));
+        batch.push(tbl.prepare(projectDefsSql).bind(projectDefsParams));
+
+        // Get an array of def IDs for all projects in the team
+        const defIds = (
+          await db
+            .select({ defId: projectDefs.defId })
+            .from(projectDefs)
+            .where(inArray(projectDefs.projectId, teamProjectIds))
+            .all()
+        ).map((r) => r.defId);
+
+        // If the team's projects have defs, delete them and all related data
+        if (defIds.length) {
+          // defs
+          const { sql: defsSql, params: defsParams } = db
+            .delete(defs)
+            .where(inArray(defs.id, defIds))
+            .toSQL();
+
+          // deployments
+          const { sql: deploymentsSql, params: deploymentsParams } = db
+            .delete(deployments)
+            .where(inArray(deployments.defId, defIds))
+            .toSQL();
+
+          batch.push(tbl.prepare(defsSql).bind(defsParams));
+          batch.push(tbl.prepare(deploymentsSql).bind(deploymentsParams));
+        }
+      }
+
+      await tbl.batch(batch);
     },
 
     teamBySlug: async function (slug: string) {
@@ -117,10 +247,7 @@ export function initTeams(
           (acc, r) => {
             if (!acc.has(r.teams.id)) {
               acc.set(r.teams.id, {
-                id: r.teams.id,
-                name: r.teams.name,
-                slug: r.teams.slug,
-                personal: r.teams.personal,
+                ...r.teams,
                 projects: [],
               });
             }
@@ -131,19 +258,8 @@ export function initTeams(
           },
           new Map<
             string,
-            {
-              projects: Array<{
-                name: string;
-                description: string;
-                id: string;
-                slug: string;
-                createdAt: string | null;
-                updatedAt: string | null;
-              }>;
-              name: string;
-              id: string;
-              slug: string;
-              personal: number;
+            schema.Team & {
+              projects: schema.Project[];
             }
           >(),
         )

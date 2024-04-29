@@ -13,17 +13,15 @@ import {
 } from "@/components/ui/card";
 import DefColumns from "@/components/def-columns";
 import DefConstraints from "@/components/def-constraints";
+import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
 
 export default async function DefDetails({
   params,
 }: {
   params: { team: string; project: string; def: string };
 }) {
-  const team = await cache(api.teams.teamBySlug)({ slug: params.team });
-  const project = await cache(api.projects.projectBySlug)({
-    teamId: team.id,
-    slug: params.project,
-  });
+  const team = await teamBySlug(params.team);
+  const project = await projectBySlug(params.project, team.id);
   const def = await cache(api.defs.defByProjectIdAndSlug)({
     projectId: project.id,
     slug: params.def,
