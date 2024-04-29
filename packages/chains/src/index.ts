@@ -2,6 +2,7 @@ import { configureChains } from "@wagmi/core";
 import { infuraProvider } from "@wagmi/core/providers/infura";
 import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc";
 import { publicProvider } from "@wagmi/core/providers/public";
+import { defineChain } from "viem";
 import {
   type Chain,
   arbitrum,
@@ -14,7 +15,6 @@ import {
   optimism,
   optimismSepolia,
   polygon,
-  polygonMumbai,
   sepolia,
 } from "viem/chains";
 
@@ -22,6 +22,35 @@ export interface ApiKeys {
   infura?: string;
   quickNode?: string;
 }
+
+// Note: copied from viem@2.9.22
+const polygonAmoy = defineChain({
+  id: 80_002,
+  name: "Polygon Amoy",
+  network: "polygon-amoy",
+  nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc-amoy.polygon.technology"],
+    },
+    public: {
+      http: ["https://rpc-amoy.polygon.technology"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "OK LINK",
+      url: "https://www.oklink.com/amoy",
+    },
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 3127388,
+    },
+  },
+  testnet: true,
+});
 
 function supportedChains(isLocalDev = false) {
   const res: Chain[] = [
@@ -34,7 +63,7 @@ function supportedChains(isLocalDev = false) {
     { ...optimism, name: "Optimism", testnet: false },
     { ...optimismSepolia, testnet: true },
     { ...polygon, testnet: false },
-    { ...polygonMumbai, testnet: true },
+    { ...polygonAmoy, testnet: true },
     { ...sepolia, testnet: true },
   ];
   if (isLocalDev) {

@@ -15,7 +15,7 @@ export const teamNameSchema = z
 export const defNameSchema = z
   .string()
   .trim()
-  .nonempty()
+  .min(1)
   .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
     message: "You can't use a SQL keyword as a definition name.",
   })

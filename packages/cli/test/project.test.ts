@@ -6,6 +6,7 @@ import { afterEach, before, describe, test } from "mocha";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import * as mod from "../src/commands/project.js";
+import type { CommandOptions } from "../src/commands/project.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
@@ -58,7 +59,7 @@ describe("commands/project", function () {
       TEST_TEAM_ID,
       ...defaultArgs,
     ])
-      .command(mod)
+      .command<CommandOptions>(mod)
       .parse();
 
     const res = consoleLog.getCall(0).firstArg;
@@ -81,7 +82,7 @@ describe("commands/project", function () {
   test("can list projects", async function () {
     const consoleLog = spy(logger, "log");
     await yargs(["project", "ls", TEST_TEAM_ID, ...defaultArgs])
-      .command(mod)
+      .command<CommandOptions>(mod)
       .parse();
 
     const projectStr = consoleLog.getCall(0).firstArg;
