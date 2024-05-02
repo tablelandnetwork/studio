@@ -40,11 +40,11 @@ export function Sidebar({
       </div>
       {environments.map((environment) => (
         <div key={environment.id} className="flex flex-col space-y-1">
-          <h2 className="text-lg font-semibold tracking-tight">
-            {/* TODO: Swap these once we unhide environments */}
-            Tables
-            {/* {environment.name} */}
-          </h2>
+          <div className="flex items-center">
+            <Table2 className="mr-2" />
+            <h2 className="text-lg font-semibold tracking-tight">Tables</h2>
+          </div>
+
           {defs.map((def) => {
             const deployment = deploymentsMap.get(environment.id)?.get(def.id);
             const button = (
@@ -59,13 +59,10 @@ export function Sidebar({
                 className="w-full justify-start"
                 disabled={!isAuthorized && !deployment}
               >
-                <Table2
-                  className={cn(
-                    "mr-2",
-                    !deployment && "text-red-400 opacity-40",
-                  )}
-                />
-                <span>{def.name}</span>
+                <span className={cn(!deployment && "mr-4")}>{def.name}</span>
+                {!deployment && (
+                  <div className="ml-auto size-2 rounded-full bg-destructive" />
+                )}
               </Button>
             );
             return isAuthorized || deployment ? (

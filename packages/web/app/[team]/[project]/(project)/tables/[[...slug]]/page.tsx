@@ -8,6 +8,8 @@ import { Sidebar } from "./_components/sidebar";
 import Table from "@/components/table";
 import { api } from "@/trpc/server";
 import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
+import DefDetails from "@/components/def-details";
+import TableWrapper from "@/components/table-wrapper";
 
 export default async function Deployments({
   params,
@@ -73,62 +75,66 @@ export default async function Deployments({
             projectSlug={params.project}
             isAuthorized={!!authorized}
           />
-          {selectedEnvironment && selectedDef ? (
-            deployment ? (
-              <Table
+          <main className="flex-1 p-4">
+            {selectedEnvironment && selectedDef ? (
+              <TableWrapper
                 displayName={selectedDef.name}
-                tableName={deployment.tableName}
-                chainId={deployment.chainId}
-                tableId={deployment.tableId}
-                createdAt={new Date(deployment.createdAt)}
-                schema={selectedDef.schema}
-                environment={selectedEnvironment}
-                defData={selectedDef}
-                deploymentData={deployment}
-              />
+                chainId={deployment?.chainId}
+                tableId={deployment?.tableId}
+              >
+                {deployment ? (
+                  <Table
+                    displayName={selectedDef.name}
+                    tableName={deployment.tableName}
+                    chainId={deployment.chainId}
+                    tableId={deployment.tableId}
+                    createdAt={new Date(deployment.createdAt)}
+                    schema={selectedDef.schema}
+                    environment={selectedEnvironment}
+                    defData={selectedDef}
+                    deploymentData={deployment}
+                  />
+                ) : (
+                  <DefDetails def={selectedDef} />
+                )}
+              </TableWrapper>
             ) : (
-              <ExecDeployment
-                team={team}
-                project={project}
-                environment={selectedEnvironment}
-                def={selectedDef}
-              />
-            )
-          ) : (
-            <div className="m-auto my-16 flex max-w-xl flex-1 flex-col justify-center space-y-4 p-4">
-              <div className="flex items-center space-x-4">
-                <Table2 className="flex-shrink-0" />
-                <h1 className="text-2xl font-medium">Your tables</h1>
+              <div className="m-auto my-16 flex max-w-xl flex-1 flex-col justify-center space-y-4 p-4">
+                <div className="flex items-center space-x-4">
+                  <Table2 className="flex-shrink-0" />
+                  <h1 className="text-2xl font-medium">Your tables</h1>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Info className="flex-shrink-0" />
+                  <p className="text-muted-foreground">
+                    Tables are definitions from your Project, created as tables
+                    on the Tableland network. To the left, you&apos;ll see a
+                    list of all your Project&apos;s deployed and undeployed
+                    tables.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Table2 className="flex-shrink-0" />
+                  <p className="text-muted-foreground">
+                    Deployed tables are incicated by a white table icon. You can
+                    select any deployed table to see details about it and view
+                    the table&apos;s data.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Table2 className="flex-shrink-0 text-red-400 opacity-40" />
+                  <p className="text-muted-foreground">
+                    Undeployed definitions are incicated by a red table icon.
+                    You can select any undeployed definition to deploy it on the
+                    Tableland network.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center space-x-4">
-                <Info className="flex-shrink-0" />
-                <p className="text-muted-foreground">
-                  Tables are definitions from your Project, created as tables on
-                  the Tableland network. To the left, you&apos;ll see a list of
-                  all your Project&apos;s deployed and undeployed tables.
-                </p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Table2 className="flex-shrink-0" />
-                <p className="text-muted-foreground">
-                  Deployed tables are incicated by a white table icon. You can
-                  select any deployed table to see details about it and view the
-                  table&apos;s data.
-                </p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Table2 className="flex-shrink-0 text-red-400 opacity-40" />
-                <p className="text-muted-foreground">
-                  Undeployed definitions are incicated by a red table icon. You
-                  can select any undeployed definition to deploy it on the
-                  Tableland network.
-                </p>
-              </div>
-            </div>
-          )}
+            )}
+          </main>
         </>
       ) : (
-        <div className="m-auto my-16 flex max-w-xl flex-1 flex-col justify-center space-y-4">
+        <main className="m-auto my-16 flex max-w-xl flex-1 flex-col justify-center space-y-4">
           <div className="flex items-center space-x-4">
             <Rocket className="flex-shrink-0" />
             <h1 className="text-2xl font-medium">
@@ -152,7 +158,7 @@ export default async function Deployments({
               tab to do that.
             </p>
           </div>
-        </div>
+        </main>
       )}
     </div>
   );
