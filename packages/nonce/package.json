@@ -1,6 +1,6 @@
 {
   "name": "@tableland/nonce",
-  "version": "0.0.2",
+  "version": "1.0.0-pre.0",
   "description": "",
   "repository": "https://github.com/tablelandnetwork/studio/packages/nonce",
   "publishConfig": {
@@ -26,6 +26,6 @@
     "ethers": "^6.12.0"
   },
   "devDependencies": {
-    "@tableland/sdk": "^7.0.0-pre.0"
+    "@tableland/sdk": "^7.0.0-pre.1"
   }
 }
