@@ -124,7 +124,10 @@ export default function Info({
       <HoverCardTrigger asChild>
         <InfoIcon
           {...props}
-          className={cn(className, "text-muted-foreground hover:text-accent-foreground")}
+          className={cn(
+            className,
+            "text-muted-foreground hover:text-accent-foreground",
+          )}
         />
       </HoverCardTrigger>
       <HoverCardContent className="w-auto">{content()}</HoverCardContent>
