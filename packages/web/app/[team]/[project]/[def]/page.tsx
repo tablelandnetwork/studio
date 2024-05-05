@@ -82,7 +82,7 @@ export default async function DefDetails({
                 key={deploymentInfo.environment.id}
                 href={`/${team.slug}/${project.slug}/tables/${deploymentInfo.environment.slug}/${def.slug}`}
               >
-                <div className="flex items-center rounded-md p-3 hover:bg-slate-100">
+                <div className="flex items-center rounded-md p-3 transition-colors hover:bg-accent hover:text-accent-foreground">
                   <Rocket />
                   <div className="ml-4 space-y-1">
                     <p className="text-sm font-medium leading-none">
