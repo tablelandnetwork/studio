@@ -9,7 +9,10 @@ import ImportTableForm, {
 
 export default function ImportTable(
   props: Required<
-    Pick<ImportTableFormProps, "teamPreset" | "projectPreset" | "envPreset">
+    Pick<
+      ImportTableFormProps,
+      "teamPreset" | "projectPreset" | "envPreset" | "onSuccess"
+    >
   >,
 ) {
   const router = useRouter();
@@ -17,14 +20,10 @@ export default function ImportTable(
   return (
     <ImportTableForm
       trigger={
-        <Button variant="ghost" className="mr-2">
-          <Import className="mr-2" />
-          Import Table
+        <Button variant="ghost" size="icon">
+          <Import />
         </Button>
       }
-      onSuccess={() => {
-        router.refresh();
-      }}
       {...props}
     />
   );

@@ -75,6 +75,20 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
       return res;
     },
 
+    deploymentByEnvAndDefId: async function (envId: string, defId: string) {
+      const res = await db
+        .select()
+        .from(deployments)
+        .where(
+          and(
+            eq(deployments.environmentId, envId),
+            eq(deployments.defId, defId),
+          ),
+        )
+        .get();
+      return res;
+    },
+
     deploymentReferences: async function (chainId: number, tableId: string) {
       const res = await db
         .select({

@@ -6,21 +6,19 @@ import NewDefForm, { type NewDefFormProps } from "@/components/new-def-form";
 import { Button } from "@/components/ui/button";
 
 export default function NewDef(
-  props: Required<Pick<NewDefFormProps, "teamPreset" | "projectPreset">>,
+  props: Required<
+    Pick<NewDefFormProps, "teamPreset" | "projectPreset" | "onSuccess">
+  >,
 ) {
   const router = useRouter();
 
   return (
     <NewDefForm
       trigger={
-        <Button variant="ghost" className="mr-2">
-          <Plus className="mr-2" />
-          New definition
+        <Button variant="ghost" size="icon">
+          <Plus />
         </Button>
       }
-      onSuccess={() => {
-        router.refresh();
-      }}
       {...props}
     />
   );

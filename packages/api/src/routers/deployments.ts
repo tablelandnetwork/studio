@@ -1,6 +1,7 @@
 import { type Store } from "@tableland/studio-store";
 import { z } from "zod";
 import { publicProcedure, createTRPCRouter, defProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 export function deploymentsRouter(store: Store) {
   return createTRPCRouter({
@@ -54,6 +55,26 @@ export function deploymentsRouter(store: Store) {
         return await store.deployments.deploymentsByEnvironmentId(
           input.environmentId,
         );
+      }),
+    deploymentByEnvAndDefId: publicProcedure
+      .input(
+        z.object({
+          envId: z.string().trim().nonempty(),
+          defId: z.string().trim().nonempty(),
+        }),
+      )
+      .query(async ({ input }) => {
+        const res = await store.deployments.deploymentByEnvAndDefId(
+          input.envId,
+          input.defId,
+        );
+        if (!res) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Deployment not found",
+          });
+        }
+        return res;
       }),
     deploymentReferences: publicProcedure
       .input(

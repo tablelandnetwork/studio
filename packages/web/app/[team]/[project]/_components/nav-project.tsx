@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 function projectLinks(
   team: schema.Team,
   project: schema.Project,
+  env: schema.Environment,
   includeSettings: boolean,
 ) {
   const links: Array<{
@@ -19,15 +20,10 @@ function projectLinks(
     isActive: (pathname: string) => boolean;
   }> = [
     {
-      label: "Definitions",
-      href: `/${team.slug}/${project.slug}`,
-      isActive: (pathname) => pathname === `/${team.slug}/${project.slug}`,
-    },
-    {
       label: "Tables",
-      href: `/${team.slug}/${project.slug}/tables`,
+      href: `/${team.slug}/${project.slug}/${env.slug}`,
       isActive: (pathname) =>
-        pathname.includes(`/${team.slug}/${project.slug}/tables`),
+        pathname.includes(`/${team.slug}/${project.slug}/${env.slug}`),
     },
   ];
   if (includeSettings) {
@@ -45,15 +41,26 @@ export default function NavProject({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement> & Record<string, unknown>) {
-  const { team: teamSlug, project: projectSlug } = useParams<{
+  const {
+    team: teamSlug,
+    project: projectSlug,
+    env: envSlug,
+  } = useParams<{
     team: string;
     project: string;
+    env?: string;
   }>();
   const pathname = usePathname();
 
   const { data: team } = api.teams.teamBySlug.useQuery({ slug: teamSlug });
   const { data: project } = api.projects.projectBySlug.useQuery(
     team ? { teamId: team.id, slug: projectSlug } : skipToken,
+  );
+  const { data: env } = api.environments.environmentBySlug.useQuery(
+    project && envSlug ? { projectId: project.id, slug: envSlug } : skipToken,
+  );
+  const { data: envs } = api.environments.projectEnvironments.useQuery(
+    project && !env ? { projectId: project.id } : skipToken,
   );
   const { data: authorization } = api.teams.isAuthorized.useQuery(
     team ? { teamId: team.id } : skipToken,
@@ -72,23 +79,30 @@ export default function NavProject({
   return (
     <div className="flex flex-1 items-end">
       <div className="flex flex-col">
-        <nav
-          className={cn("flex items-center space-x-4 lg:space-x-6", className)}
-          {...props}
-        >
-          {projectLinks(team, project, !!authorization).map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                !link.isActive(pathname) && "text-muted-foreground",
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {(!!env || (!!envs && envs.length > 0)) && (
+          <nav
+            className={cn(
+              "flex items-center space-x-4 lg:space-x-6",
+              className,
+            )}
+            {...props}
+          >
+            {projectLinks(team, project, env ?? envs![0], !!authorization).map(
+              (link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary",
+                    !link.isActive(pathname) && "text-muted-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
+          </nav>
+        )}
       </div>
       <Share className="ml-auto self-end" project={project} />
     </div>
