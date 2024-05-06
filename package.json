@@ -23,7 +23,7 @@
     "clean": "lerna run clean"
   },
   "devDependencies": {
-    "@tableland/local": "^3.0.0-pre.2",
+    "@tableland/local": "^3.0.0",
     "@types/cookie": "^0.6.0",
     "@types/cosmiconfig": "^6.0.0",
     "@types/inquirer": "^9.0.2",
