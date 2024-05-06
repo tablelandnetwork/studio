@@ -46,9 +46,13 @@ export default async function Invite({
           <CardTitle>Tableland Studio Invite</CardTitle>
           <CardDescription>
             User{" "}
-            <span className="font-semibold text-black">{inviterTeam.name}</span>{" "}
+            <span className="font-semibold text-foreground">
+              {inviterTeam.name}
+            </span>{" "}
             invited you to join the team{" "}
-            <span className="font-semibold text-black">{targetTeam.name}</span>
+            <span className="font-semibold text-foreground">
+              {targetTeam.name}
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -61,7 +65,7 @@ export default async function Invite({
           {session.auth && (
             <p className="text-center">
               You are signed in as{" "}
-              <span className="font-semibold text-black">
+              <span className="font-semibold text-foreground">
                 {session.auth.personalTeam.name}
               </span>{" "}
               and you can accept or ignore your invitation now.

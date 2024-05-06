@@ -81,7 +81,7 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
 
     function statusComponent() {
       if (debouncing || !value) {
-        return <CircleDashed className="text-gray-300" />;
+        return <CircleDashed className="text-foreground" />;
       } else if (queryStatus.isFetching) {
         return <Loader2 className="animate-spin" />;
       } else if (queryStatus.isSuccess) {
@@ -99,7 +99,7 @@ const InputWithCheck = forwardRef<HTMLInputElement, Props>(
           </p>
         );
       } else {
-        return <CircleDashed className="text-gray-300" />;
+        return <CircleDashed className="text-foreground" />;
       }
     }
   },
