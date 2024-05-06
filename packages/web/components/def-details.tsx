@@ -1,3 +1,4 @@
+import { type schema } from "@tableland/studio-store";
 import {
   Card,
   CardContent,
@@ -7,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import DefColumns from "@/components/def-columns";
 import DefConstraints from "@/components/def-constraints";
-import { schema } from "@tableland/studio-store";
 
 export default async function DefDetails({
   def,

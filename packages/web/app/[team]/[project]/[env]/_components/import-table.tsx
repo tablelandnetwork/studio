@@ -1,7 +1,6 @@
 "use client";
 
 import { Import } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import ImportTableForm, {
   type ImportTableFormProps,
@@ -15,8 +14,6 @@ export default function ImportTable(
     >
   >,
 ) {
-  const router = useRouter();
-
   return (
     <ImportTableForm
       trigger={

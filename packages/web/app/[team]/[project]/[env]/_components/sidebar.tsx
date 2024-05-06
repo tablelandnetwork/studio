@@ -3,20 +3,19 @@
 import { type schema } from "@tableland/studio-store";
 import { LayoutDashboard, Table2 } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useParams } from "next/navigation";
-import { api } from "@/trpc/react";
+import { useParams, useRouter } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
 import NewDef from "./new-def";
 import ImportTable from "./import-table";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { api } from "@/trpc/react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRouter } from "next/navigation";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -90,16 +89,30 @@ export function Sidebar({ className }: SidebarProps) {
     project: schema.Project,
     def: schema.Def,
   ) => {
-    defsQuery.refetch();
-    if (environmentQuery.data) {
-      router.push(
-        `/${team.slug}/${project.slug}/${environmentQuery.data.slug}/${def.slug}`,
-      );
-    }
+    defsQuery
+      .refetch()
+      .then(() => {
+        if (environmentQuery.data) {
+          router.push(
+            `/${team.slug}/${project.slug}/${environmentQuery.data.slug}/${def.slug}`,
+          );
+        }
+      })
+      .catch(() => {});
   };
 
-  const onImportTableSuccess = () => {
-    defsQuery.refetch();
+  const onImportTableSuccess = (
+    team: schema.Team,
+    project: schema.Project,
+    def: schema.Def,
+    env: schema.Environment,
+  ) => {
+    defsQuery
+      .refetch()
+      .then(() => {
+        router.push(`/${team.slug}/${project.slug}/${env.slug}/${def.slug}`);
+      })
+      .catch(() => {});
   };
 
   if (!teamQuery.data || !projectQuery.data || !environmentQuery.data) {

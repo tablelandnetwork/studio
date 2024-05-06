@@ -1,7 +1,5 @@
 import { AlertOctagon, HelpCircle, Rocket } from "lucide-react";
 import Link from "next/link";
-import { cache } from "react";
-import { api } from "@/trpc/server";
 import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
 
 export default async function Deployments({

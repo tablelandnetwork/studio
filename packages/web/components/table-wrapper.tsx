@@ -1,6 +1,5 @@
-import { ComponentProps, PropsWithoutRef } from "react";
+import { Validator, helpers } from "@tableland/sdk";
 import TableMenu from "./table-menu";
-import { Database, Validator, type Schema, helpers } from "@tableland/sdk";
 
 export default async function TableWrapper({
   chainId,

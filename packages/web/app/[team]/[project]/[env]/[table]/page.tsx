@@ -1,5 +1,6 @@
 import { type schema } from "@tableland/studio-store";
 import { cache } from "react";
+import { TRPCError } from "@trpc/server";
 import Table from "@/components/table";
 import { api } from "@/trpc/server";
 import {
@@ -10,7 +11,6 @@ import {
 } from "@/lib/api-helpers";
 import DefDetails from "@/components/def-details";
 import TableWrapper from "@/components/table-wrapper";
-import { TRPCError } from "@trpc/server";
 
 export default async function Deployments({
   params,
@@ -18,9 +18,6 @@ export default async function Deployments({
   params: { team: string; project: string; env: string; table: string };
 }) {
   const team = await teamBySlug(params.team);
-  const authorized = await cache(api.teams.isAuthorized)({
-    teamId: team.id,
-  });
   const project = await projectBySlug(params.project, team.id);
   const env = await environmentBySlug(project.id, params.env);
   const def = await defBySlug(project.id, params.table);

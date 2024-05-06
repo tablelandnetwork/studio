@@ -1,7 +1,7 @@
 import { type Store } from "@tableland/studio-store";
 import { z } from "zod";
-import { publicProcedure, createTRPCRouter, defProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { publicProcedure, createTRPCRouter, defProcedure } from "../trpc";
 
 export function deploymentsRouter(store: Store) {
   return createTRPCRouter({

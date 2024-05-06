@@ -1,4 +1,4 @@
-import { Database, Validator, type Schema, helpers } from "@tableland/sdk";
+import { Database, type Schema, helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Blocks, Coins, Hash, Rocket, Table2, Workflow } from "lucide-react";
@@ -67,7 +67,6 @@ export default async function Table({
 
   const baseUrl = helpers.getBaseUrl(chainId);
   const tbl = new Database({ baseUrl });
-  const validator = new Validator({ baseUrl });
 
   const data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   const formattedData = objectToTableData(data.results);
@@ -77,7 +76,6 @@ export default async function Table({
         header: col,
       }))
     : [];
-  const table = await validator.getTableById({ chainId, tableId });
   const deploymentReferences = (
     await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);

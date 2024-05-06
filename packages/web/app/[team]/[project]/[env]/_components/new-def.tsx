@@ -1,7 +1,6 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 import NewDefForm, { type NewDefFormProps } from "@/components/new-def-form";
 import { Button } from "@/components/ui/button";
 
@@ -10,8 +9,6 @@ export default function NewDef(
     Pick<NewDefFormProps, "teamPreset" | "projectPreset" | "onSuccess">
   >,
 ) {
-  const router = useRouter();
-
   return (
     <NewDefForm
       trigger={
