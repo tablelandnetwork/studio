@@ -39,8 +39,8 @@ const polygonAmoy = defineChain({
   },
   blockExplorers: {
     default: {
-      name: "OK LINK",
-      url: "https://www.oklink.com/amoy",
+      name: "Polygonscan",
+      url: "https://amoy.polygonscan.com",
     },
   },
   contracts: {
