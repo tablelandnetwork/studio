@@ -28,7 +28,7 @@
     "@tableland/studio-validators": "^0.0.0-pre.1",
     "@trpc/server": "^11.0.0-next-beta.318",
     "iron-session": "^8.0.1",
-    "siwe": "^2.1.4",
+    "siwe": "^2.3.2",
     "superjson": "^2.2.1"
   }
 }
