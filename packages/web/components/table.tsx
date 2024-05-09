@@ -25,7 +25,6 @@ import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
 
 interface Props {
-  displayName: string;
   tableName: string;
   chainId: number;
   tableId: string;
@@ -51,7 +50,6 @@ interface DeploymentData {
 }
 
 export default async function Table({
-  displayName,
   tableName,
   chainId,
   tableId,

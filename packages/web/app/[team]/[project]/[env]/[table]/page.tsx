@@ -34,30 +34,30 @@ export default async function Deployments({
   }
 
   return (
-    <div className="flex flex-1">
-      <main className="flex-1 p-4">
-        <TableWrapper
-          displayName={def.name}
-          chainId={deployment?.chainId}
-          tableId={deployment?.tableId}
-        >
-          {deployment ? (
-            <Table
-              displayName={def.name}
-              tableName={deployment.tableName}
-              chainId={deployment.chainId}
-              tableId={deployment.tableId}
-              createdAt={new Date(deployment.createdAt)}
-              schema={def.schema}
-              environment={env}
-              defData={def}
-              deploymentData={deployment}
-            />
-          ) : (
-            <DefDetails def={def} />
-          )}
-        </TableWrapper>
-      </main>
-    </div>
+    <main className="flex-1 p-4">
+      <TableWrapper
+        env={env}
+        def={def}
+        displayName={def.name}
+        chainId={deployment?.chainId}
+        tableId={deployment?.tableId}
+        schema={def.schema}
+      >
+        {deployment ? (
+          <Table
+            tableName={deployment.tableName}
+            chainId={deployment.chainId}
+            tableId={deployment.tableId}
+            createdAt={new Date(deployment.createdAt)}
+            schema={def.schema}
+            environment={env}
+            defData={def}
+            deploymentData={deployment}
+          />
+        ) : (
+          <DefDetails def={def} />
+        )}
+      </TableWrapper>
+    </main>
   );
 }

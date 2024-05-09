@@ -5,6 +5,7 @@ import {
   helpers,
 } from "@tableland/sdk";
 import Table from "@/components/table";
+import TableWrapper from "@/components/table-wrapper";
 
 export default async function TablePage({
   params,
@@ -21,7 +22,7 @@ export default async function TablePage({
   }
 
   // const [tokenId, chainIdString, ...rest] = [
-  const [tokenId, chainIdString] = [parts.pop()!, parts.pop()!, ...parts];
+  const [tableId, chainIdString] = [parts.pop()!, parts.pop()!, ...parts];
   // const prefix = rest.join("_");
   const chainId = parseInt(chainIdString, 10);
   if (isNaN(chainId)) {
@@ -40,14 +41,14 @@ export default async function TablePage({
   try {
     tablelandTable = await validator.getTableById({
       chainId,
-      tableId: tokenId,
+      tableId,
     });
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
       return (
         <div className="p-4">
           <p>
-            Table id {tokenId} not found on chain {chainId}.
+            Table id {tableId} not found on chain {chainId}.
           </p>
         </div>
       );
@@ -73,13 +74,21 @@ export default async function TablePage({
   const createdAt = new Date(createdAttr.value * 1000);
 
   return (
-    <Table
-      displayName={params.name}
-      chainId={chainId}
-      createdAt={createdAt}
-      schema={tablelandTable.schema}
-      tableName={params.name}
-      tableId={tokenId}
-    />
+    <main className="flex-1 p-4">
+      <TableWrapper
+        displayName={params.name}
+        chainId={chainId}
+        tableId={tableId}
+        schema={tablelandTable.schema}
+      >
+        <Table
+          chainId={chainId}
+          createdAt={createdAt}
+          schema={tablelandTable.schema}
+          tableName={params.name}
+          tableId={tableId}
+        />
+      </TableWrapper>
+    </main>
   );
 }

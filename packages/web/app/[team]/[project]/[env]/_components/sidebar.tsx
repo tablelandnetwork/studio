@@ -69,17 +69,9 @@ export function Sidebar({ className }: SidebarProps) {
       {
         select(items) {
           return items.reduce((acc, item) => {
-            if (!acc.has(item.deployment.environmentId)) {
-              acc.set(
-                item.deployment.environmentId,
-                new Map<string, schema.Deployment>(),
-              );
-            }
-            acc
-              .get(item.deployment.environmentId)
-              ?.set(item.deployment.defId, item.deployment);
+            acc.set(item.deployment.defId, item.deployment);
             return acc;
-          }, new Map<string, Map<string, schema.Deployment>>());
+          }, new Map<string, schema.Deployment>());
         },
       },
     );
@@ -146,11 +138,7 @@ export function Sidebar({ className }: SidebarProps) {
           </h2>
         </div>
         {defsQuery.data?.map((def) => {
-          const deployment = environmentQuery.data
-            ? deploymentsMapQuery.data
-                ?.get(environmentQuery.data.id)
-                ?.get(def.id)
-            : undefined;
+          const deployment = deploymentsMapQuery.data?.get(def.id);
           return (
             <Link
               key={def.id}
