@@ -1,5 +1,4 @@
-import NavProject from "./_components/nav-project";
-import SubNavHeader from "@/components/sub-nav-header";
+import { Sidebar } from "./_components/sidebar";
 
 export default async function ProjectLayout({
   children,
@@ -7,11 +6,11 @@ export default async function ProjectLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-1 flex-col">
-      <SubNavHeader>
-        <NavProject />
-      </SubNavHeader>
-      {children}
+    <div className="flex flex-1 items-stretch">
+      <div className="min-w-40 bg-card">
+        <Sidebar />
+      </div>
+      <div className="w-full">{children}</div>
     </div>
   );
 }

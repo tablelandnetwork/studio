@@ -1,12 +1,16 @@
 "use client";
 
 import { type schema } from "@tableland/studio-store";
-import { LayoutDashboard, Table2 } from "lucide-react";
+import { LayoutDashboard, Settings, Table2 } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import {
+  useParams,
+  useRouter,
+  useSelectedLayoutSegment,
+} from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
-import NewDef from "./new-def";
-import ImportTable from "./import-table";
+import NewDef from "../[env]/_components/new-def";
+import ImportTable from "../[env]/_components/import-table";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
@@ -32,6 +36,7 @@ export function Sidebar({ className }: SidebarProps) {
     table?: string;
   }>();
   const router = useRouter();
+  const selectedLayoutSegment = useSelectedLayoutSegment();
 
   const teamQuery = api.teams.teamBySlug.useQuery({ slug: teamSlug });
 
@@ -46,6 +51,18 @@ export function Sidebar({ className }: SidebarProps) {
       ? { projectId: projectQuery.data.id, slug: envSlug }
       : skipToken,
   );
+
+  const environmentsQuery = api.environments.projectEnvironments.useQuery(
+    !envSlug && projectQuery.data
+      ? { projectId: projectQuery.data.id }
+      : skipToken,
+  );
+
+  const env =
+    environmentQuery.data ??
+    (environmentsQuery.data && environmentsQuery.data.length > 0
+      ? environmentsQuery.data?.[0]
+      : undefined);
 
   const defQuery = api.defs.defByProjectIdAndSlug.useQuery(
     projectQuery.data && defSlug
@@ -63,9 +80,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   const deploymentsMapQuery =
     api.deployments.deploymentsByEnvironmentId.useQuery(
-      environmentQuery.data
-        ? { environmentId: environmentQuery.data.id }
-        : skipToken,
+      env ? { environmentId: env.id } : skipToken,
       {
         select(items) {
           return items.reduce((acc, item) => {
@@ -107,19 +122,19 @@ export function Sidebar({ className }: SidebarProps) {
       .catch(() => {});
   };
 
-  if (!teamQuery.data || !projectQuery.data || !environmentQuery.data) {
+  if (!teamQuery.data || !projectQuery.data || !env) {
     return null;
   }
 
   return (
-    <div className={cn("space-y-5 p-3", className)}>
+    <div className={cn("space-y-6 p-3", className)}>
       <div className="flex flex-col space-y-1">
         <Link
-          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${environmentQuery.data.slug}`}
+          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${env.slug}`}
         >
           <Button
             variant={
-              !defSlug && envSlug === environmentQuery.data?.slug
+              !defSlug && !!envSlug && envSlug === environmentQuery.data?.slug
                 ? "secondary"
                 : "ghost"
             }
@@ -142,7 +157,7 @@ export function Sidebar({ className }: SidebarProps) {
           return (
             <Link
               key={def.id}
-              href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${environmentQuery.data.slug}/${def.slug}`}
+              href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${env.slug}/${def.slug}`}
             >
               <Button
                 key={def.id}
@@ -178,7 +193,7 @@ export function Sidebar({ className }: SidebarProps) {
                 <ImportTable
                   teamPreset={teamQuery.data}
                   projectPreset={projectQuery.data}
-                  envPreset={environmentQuery.data}
+                  envPreset={env}
                   onSuccess={onImportTableSuccess}
                 />
               </TooltipTrigger>
@@ -188,6 +203,21 @@ export function Sidebar({ className }: SidebarProps) {
             </Tooltip>
           </TooltipProvider>
         </div>
+      </div>
+      <div className="flex flex-col space-y-1">
+        <Link
+          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
+        >
+          <Button
+            variant={
+              selectedLayoutSegment === "settings" ? "secondary" : "ghost"
+            }
+            className="w-full justify-start gap-x-2 pl-1"
+          >
+            <Settings />
+            Settings
+          </Button>
+        </Link>
       </div>
     </div>
   );

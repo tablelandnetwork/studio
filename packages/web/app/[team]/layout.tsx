@@ -1,6 +1,6 @@
 import { Sidebar } from "./_components/sidebar";
 
-export default async function EnvLayout({
+export default async function LayoutTeam({
   children,
 }: {
   children: React.ReactNode;

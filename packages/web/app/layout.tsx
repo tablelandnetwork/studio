@@ -71,13 +71,13 @@ export default async function RootLayout({
             <body className="flex min-h-screen flex-col">
               <Hotjar></Hotjar>
               <TRPCReactProvider headers={headers()}>
-                <PathAwareHeader className="flex items-center justify-between bg-[#202132] px-4 py-3">
+                <header className="sticky top-0 flex items-center justify-between border-b border-[#080A1E] bg-[#202132] px-4 py-3">
                   <PrimaryHeaderItem teams={teams} />
                   <div className="ml-auto flex items-center space-x-4">
                     <NavPrimary />
                     <Profile />
                   </div>
-                </PathAwareHeader>
+                </header>
                 <div className="flex flex-1 flex-col">{children}</div>
                 <Toaster />
               </TRPCReactProvider>
