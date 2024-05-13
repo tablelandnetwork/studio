@@ -24,7 +24,7 @@ export default function Footer() {
                   fill="currentColor"
                   strokeWidth="0"
                   viewBox="0 0 496 512"
-                  className="mr-4 inline-block text-lg text-gray-400 hover:text-accent-foreground"
+                  className="mr-4 inline-block text-lg text-foreground hover:text-accent-foreground"
                   height="1em"
                   width="1em"
                   xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@ export default function Footer() {
                   fill="currentColor"
                   strokeWidth="0"
                   viewBox="0 0 512 512"
-                  className="mr-4 inline-block text-lg text-gray-400 hover:text-accent-foreground"
+                  className="mr-4 inline-block text-lg text-foreground hover:text-accent-foreground"
                   height="1em"
                   width="1em"
                   xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +55,7 @@ export default function Footer() {
                   fill="currentColor"
                   strokeWidth="0"
                   viewBox="0 0 576 512"
-                  className="mr-4 inline-block text-lg text-gray-400 hover:text-accent-foreground"
+                  className="mr-4 inline-block text-lg text-foreground hover:text-accent-foreground"
                   height="1em"
                   width="1em"
                   xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +69,7 @@ export default function Footer() {
                   fill="currentColor"
                   strokeWidth="0"
                   viewBox="0 0 640 512"
-                  className="mr-4 inline-block text-lg text-gray-400 hover:text-accent-foreground"
+                  className="mr-4 inline-block text-lg text-foreground hover:text-accent-foreground"
                   height="1em"
                   width="1em"
                   xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +87,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/use-cases/#application-data"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Application Data
                   </Link>
@@ -96,7 +96,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/use-cases/#nfts--gaming"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     NFTs &amp; Gaming
                   </Link>
@@ -105,7 +105,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/use-cases/#data-daos--token-gating"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Data DAOs &amp; Token Gating
                   </Link>
@@ -119,7 +119,7 @@ export default function Footer() {
                   <Link
                     href="https://mirror.xyz/tableland.eth"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Blog
                   </Link>
@@ -128,7 +128,7 @@ export default function Footer() {
                   <Link
                     href="https://dev.tableland.xyz"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Tech Blog
                   </Link>
@@ -136,7 +136,7 @@ export default function Footer() {
                 <li className="text-xs">
                   <Link
                     target="_self"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                     href="https://tableland.xyz/pilot-program"
                   >
                     Pilot Program
@@ -146,7 +146,7 @@ export default function Footer() {
                   <Link
                     href="https://tableland.xyz/jobs"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Jobs
                   </Link>
@@ -155,7 +155,7 @@ export default function Footer() {
                   <Link
                     href="https://tableland.xyz/newsletter"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Newsletter
                   </Link>
@@ -164,7 +164,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/about/general-faqs"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     FAQ
                   </Link>
@@ -178,7 +178,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/quickstarts"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Quickstarts
                   </Link>
@@ -187,7 +187,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/specs/sql"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     SQL Spec
                   </Link>
@@ -196,7 +196,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/sdk"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     SDK
                   </Link>
@@ -205,7 +205,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/cli"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     CLI
                   </Link>
@@ -214,7 +214,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/tutorials"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Tutorials
                   </Link>
@@ -223,7 +223,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/quickstarts/local-tableland"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Local Tableland
                   </Link>
@@ -236,7 +236,7 @@ export default function Footer() {
                 <li className="text-xs">
                   <Link
                     target="_self"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                     href="https://tableland.xyz/rigs"
                   >
                     Info
@@ -246,7 +246,7 @@ export default function Footer() {
                   <Link
                     href="https://garage.tableland.xyz"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Garage
                   </Link>
@@ -254,7 +254,7 @@ export default function Footer() {
                 <li className="text-xs">
                   <Link
                     target="_self"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                     href="https://tableland.xyz/rigs/samples"
                   >
                     Samples
@@ -264,7 +264,7 @@ export default function Footer() {
                   <Link
                     href="https://opensea.io/collection/tableland-rigs"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     OpenSea
                   </Link>
@@ -278,7 +278,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/architecture/protocol-design"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Protocol
                   </Link>
@@ -287,7 +287,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/fundamentals/about/roadmap"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Roadmap
                   </Link>
@@ -296,7 +296,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/validator"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Run a Node
                   </Link>
@@ -305,7 +305,7 @@ export default function Footer() {
                   <Link
                     href="https://docs.tableland.xyz/gateway-api"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Gateway
                   </Link>
@@ -314,7 +314,7 @@ export default function Footer() {
                   <Link
                     href="https://tableland.xyz/token"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Token Info
                   </Link>
@@ -323,7 +323,7 @@ export default function Footer() {
                   <Link
                     href="https://textile.notion.site/Tableland-Privacy-Policy-6fd160e7f485491d9dc4cbab188043d5"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Privacy
                   </Link>
@@ -332,7 +332,7 @@ export default function Footer() {
                   <Link
                     href="https://textile.notion.site/Tableland-Terms-of-Use-cf80f1b550b843ad9d4b8c3140b78e35"
                     target="_blank"
-                    className="text-gray-300 hover:text-accent-foreground"
+                    className="text-muted-foreground hover:text-accent-foreground"
                   >
                     Terms
                   </Link>

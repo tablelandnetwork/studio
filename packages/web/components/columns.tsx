@@ -85,7 +85,7 @@ const Columns = forwardRef<React.ElementRef<"div">, Props>(
                   Type
                   <HoverCard>
                     <HoverCardTrigger>
-                      <HelpCircle className="h-5 w-5 text-gray-200 hover:text-gray-400" />
+                      <HelpCircle className="h-5 w-5 text-muted-foreground hover:text-accent-foreground" />
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
                       <Table>

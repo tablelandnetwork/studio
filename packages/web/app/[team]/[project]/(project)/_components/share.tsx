@@ -136,7 +136,7 @@ export default function Share({
                   className="ml-1 px-2"
                   onClick={handleCopyLink}
                 >
-                  <Copy className="text-gray-300" />
+                  <Copy className="text-muted-foreground" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
