@@ -20,10 +20,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SidebarContainer, SidebarSection } from "@/components/sidebar";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar() {
   const {
     team: teamSlug,
     project: projectSlug,
@@ -127,8 +126,8 @@ export function Sidebar({ className }: SidebarProps) {
   }
 
   return (
-    <div className={cn("space-y-6 p-3", className)}>
-      <div className="flex flex-col space-y-1">
+    <SidebarContainer>
+      <SidebarSection>
         <Link
           href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${env.slug}`}
         >
@@ -144,8 +143,8 @@ export function Sidebar({ className }: SidebarProps) {
             Overview
           </Button>
         </Link>
-      </div>
-      <div className="flex flex-col space-y-1">
+      </SidebarSection>
+      <SidebarSection>
         <div className="flex items-center pl-1">
           <Table2 className="mr-2" />
           <h2 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
@@ -203,8 +202,8 @@ export function Sidebar({ className }: SidebarProps) {
             </Tooltip>
           </TooltipProvider>
         </div>
-      </div>
-      <div className="flex flex-col space-y-1">
+      </SidebarSection>
+      <SidebarSection>
         <Link
           href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
         >
@@ -218,7 +217,7 @@ export function Sidebar({ className }: SidebarProps) {
             Settings
           </Button>
         </Link>
-      </div>
-    </div>
+      </SidebarSection>
+    </SidebarContainer>
   );
 }

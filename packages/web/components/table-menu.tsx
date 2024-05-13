@@ -6,10 +6,8 @@ import { useState } from "react";
 import { type Schema, type schema } from "@tableland/studio-store";
 import { skipToken } from "@tanstack/react-query";
 import { Button } from "./ui/button";
-import NewDefForm, { type NewDefFormProps } from "./new-def-form";
-import ImportTableForm, {
-  type ImportTableFormProps,
-} from "./import-table-form";
+import NewDefForm from "./new-def-form";
+import ImportTableForm from "./import-table-form";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,7 +66,7 @@ export default function TableMenu(props: {
           def={{ ...props.def, schema: props.schema }}
           onSuccess={() => {
             router.refresh();
-            deploymentsQuery.refetch();
+            void deploymentsQuery.refetch();
           }}
         />
       )}

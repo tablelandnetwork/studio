@@ -1,31 +1,17 @@
 "use client";
 
-import {
-  Folders,
-  LayoutDashboard,
-  Settings,
-  User,
-  User2,
-  Users,
-} from "lucide-react";
+import { Folders, Settings, Users } from "lucide-react";
 import Link from "next/link";
-import {
-  useParams,
-  useRouter,
-  useSelectedLayoutSegment,
-} from "next/navigation";
+import { useParams, useSelectedLayoutSegment } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
+import { SidebarContainer, SidebarSection } from "@/components/sidebar";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar() {
   const { team: teamSlug } = useParams<{
     team: string;
   }>();
-  const router = useRouter();
   const selectedLayoutSegment = useSelectedLayoutSegment();
 
   const teamQuery = api.teams.teamBySlug.useQuery({ slug: teamSlug });
@@ -39,8 +25,8 @@ export function Sidebar({ className }: SidebarProps) {
   }
 
   return (
-    <div className={cn("space-y-6 p-3", className)}>
-      <div className="flex flex-col space-y-1">
+    <SidebarContainer>
+      <SidebarSection>
         <Link href={`/${teamQuery.data.slug}`}>
           <Button
             variant={!selectedLayoutSegment ? "secondary" : "ghost"}
@@ -76,7 +62,7 @@ export function Sidebar({ className }: SidebarProps) {
             </Button>
           </Link>
         )}
-      </div>
-    </div>
+      </SidebarSection>
+    </SidebarContainer>
   );
 }

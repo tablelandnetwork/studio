@@ -5,7 +5,6 @@ import { headers, cookies } from "next/headers";
 // import Script from "next/script";
 import { cache } from "react";
 import { Analytics } from "@vercel/analytics/react";
-import PathAwareHeader from "./_components/path-aware-header";
 import PrimaryHeaderItem from "./_components/primary-header-item";
 import { api } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
