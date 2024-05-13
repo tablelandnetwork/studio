@@ -48,6 +48,7 @@ export default function SignInButton({
 
         // Create SIWE message with pre-fetched nonce and sign with wallet
         const rawMessage = new SiweMessage({
+          scheme: window.location.protocol.slice(0, -1),
           domain: window.location.host,
           address,
           statement:

@@ -63,7 +63,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.46.2",
     "react-share": "^4.4.1",
-    "siwe": "^2.1.4",
+    "siwe": "^2.3.2",
     "superjson": "^2.2.1",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
