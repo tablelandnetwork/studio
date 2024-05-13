@@ -18,15 +18,9 @@ export default async function DefDetails({
     <div className="container max-w-2xl space-y-5">
       <Card>
         <CardHeader>
-          <CardTitle>Description</CardTitle>
-          <CardDescription>{def.description}</CardDescription>
-        </CardHeader>
-      </Card>
-      <Card>
-        <CardHeader>
           <CardTitle>Columns</CardTitle>
           <CardDescription>
-            Definition {def.name} has the following columns:
+            Table definition {def.name} has the following columns:
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -35,12 +29,12 @@ export default async function DefDetails({
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Definition constraints</CardTitle>
+          <CardTitle>Table-wide constraints</CardTitle>
           <CardDescription>
             {def.schema.tableConstraints
-              ? `Definition ${def.name} includes the following table-wide constraints
+              ? `Table definition ${def.name} includes the following table-wide constraints
             that apply to one or more columns:`
-              : `Definition ${def.name} doesn't have any table-wide constraints.`}
+              : `Table definition ${def.name} doesn't have any table-wide constraints.`}
           </CardDescription>
         </CardHeader>
         <CardContent>

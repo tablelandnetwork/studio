@@ -39,6 +39,7 @@ export default async function Deployments({
         env={env}
         def={def}
         displayName={def.name}
+        description={def.description}
         chainId={deployment?.chainId}
         tableId={deployment?.tableId}
         schema={def.schema}
