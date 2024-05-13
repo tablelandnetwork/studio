@@ -26,7 +26,7 @@ export default async function TableWrapper({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <p className="line-clamp-2 max-w-md text-muted-foreground">
+                  <p className="line-clamp-1 max-w-md text-muted-foreground">
                     {description}
                   </p>
                 </TooltipTrigger>
