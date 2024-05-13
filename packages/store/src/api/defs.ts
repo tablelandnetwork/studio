@@ -11,6 +11,7 @@ const projectDefs = schema.projectDefs;
 const defs = schema.defs;
 const teamProjects = schema.teamProjects;
 const teams = schema.teams;
+const deployments = schema.deployments;
 
 export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
   return {
@@ -64,6 +65,56 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
         tbl.prepare(defSql).bind(defParams),
       ]);
       return def;
+    },
+
+    updateDef: async function (
+      defId: string,
+      name?: string,
+      description?: string,
+      schema?: Schema,
+    ) {
+      const now = new Date().toISOString();
+      const slug = name ? slugify(name) : undefined;
+      await db
+        .update(defs)
+        .set({
+          name,
+          slug,
+          description,
+          schema,
+          updatedAt: now,
+        })
+        .where(eq(defs.id, defId))
+        .execute();
+      return await db.select().from(defs).where(eq(defs.id, defId)).get();
+    },
+
+    deleteDef: async function (defId: string) {
+      // projectDefs
+      const { sql: projectDefsSql, params: projectDefsParams } = db
+        .delete(projectDefs)
+        .where(eq(projectDefs.defId, defId))
+        .toSQL();
+
+      // defs
+      const { sql: defsSql, params: defsParams } = db
+        .delete(defs)
+        .where(eq(defs.id, defId))
+        .toSQL();
+
+      // deployments
+      const { sql: deploymentsSql, params: deploymentsParams } = db
+        .delete(deployments)
+        .where(eq(deployments.defId, defId))
+        .toSQL();
+
+      const batch = [
+        tbl.prepare(projectDefsSql).bind(projectDefsParams),
+        tbl.prepare(defsSql).bind(defsParams),
+        tbl.prepare(deploymentsSql).bind(deploymentsParams),
+      ];
+
+      await tbl.batch(batch);
     },
 
     defsByProjectId: async function (projectId: string) {

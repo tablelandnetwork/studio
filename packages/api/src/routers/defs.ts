@@ -1,11 +1,17 @@
-import { type Store } from "@tableland/studio-store";
+import { type schema, type Store } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   newDefApiSchema,
   defNameAvailableSchema,
+  updateDefSchema,
 } from "@tableland/studio-validators";
-import { projectProcedure, publicProcedure, createTRPCRouter } from "../trpc";
+import {
+  projectProcedure,
+  publicProcedure,
+  createTRPCRouter,
+  defAdminProcedure,
+} from "../trpc";
 import { internalError } from "../utils/internalError";
 
 export function defsRouter(store: Store) {
@@ -55,5 +61,45 @@ export function defsRouter(store: Store) {
           throw internalError("Error saving def record.", err);
         }
       }),
+    updateDef: defAdminProcedure(store)
+      .input(updateDefSchema)
+      .mutation(async ({ input }) => {
+        let def: schema.Def | undefined;
+        if (input.schema) {
+          const deployments = await store.deployments.deploymentsByDefId(
+            input.defId,
+          );
+          if (deployments.length) {
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+              message: "Cannot update schema of a definition with deployments.",
+            });
+          }
+        }
+        try {
+          def = await store.defs.updateDef(
+            input.defId,
+            input.name,
+            input.description,
+            input.schema,
+          );
+        } catch (err) {
+          throw internalError("Error updating def record.", err);
+        }
+        if (!def) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Definition not found",
+          });
+        }
+        return def;
+      }),
+    deleteDef: defAdminProcedure(store).mutation(async ({ input }) => {
+      try {
+        await store.defs.deleteDef(input.defId);
+      } catch (err) {
+        throw internalError("Error deleting def record.", err);
+      }
+    }),
   });
 }

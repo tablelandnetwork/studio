@@ -1,7 +1,13 @@
 import { type Store } from "@tableland/studio-store";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { publicProcedure, createTRPCRouter, defProcedure } from "../trpc";
+import {
+  publicProcedure,
+  createTRPCRouter,
+  defProcedure,
+  defAdminProcedure,
+} from "../trpc";
+import { internalError } from "../utils/internalError";
 
 export function deploymentsRouter(store: Store) {
   return createTRPCRouter({
@@ -30,6 +36,15 @@ export function deploymentsRouter(store: Store) {
           createdAt: input.createdAt,
         });
         return res;
+      }),
+    deleteDeployments: defAdminProcedure(store)
+      .input(z.object({ envId: z.string().trim().uuid().optional() }))
+      .mutation(async ({ input }) => {
+        try {
+          await store.deployments.deleteDeployments(input.defId, input.envId);
+        } catch (err) {
+          throw internalError("error deleting deployment", err);
+        }
       }),
     deploymentsByDefId: publicProcedure
       .input(

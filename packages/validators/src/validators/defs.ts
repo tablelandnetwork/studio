@@ -2,6 +2,8 @@ import { z } from "zod";
 import { type Schema } from "@tableland/studio-store";
 import { defNameSchema } from "../common";
 
+const defDescriptionSchema = z.string().trim().nonempty().max(1024);
+
 const columnNameSchema = z
   .string()
   .trim()
@@ -19,7 +21,7 @@ export const defNameAvailableSchema = z.object({
 
 export const newDefFormSchema = z.object({
   name: defNameSchema,
-  description: z.string().trim().nonempty(),
+  description: defDescriptionSchema,
   columns: z
     .array(
       z.object({
@@ -51,6 +53,12 @@ const schemaSchema: z.ZodType<Schema> = z.object({
 
 export const newDefApiSchema = z.object({
   name: defNameSchema,
-  description: z.string().trim().nonempty().max(1024),
+  description: defDescriptionSchema,
   schema: schemaSchema,
+});
+
+export const updateDefSchema = z.object({
+  name: defNameSchema.optional(),
+  description: defDescriptionSchema.optional(),
+  schema: schemaSchema.optional(),
 });
