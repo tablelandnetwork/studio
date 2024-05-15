@@ -65,23 +65,11 @@ export function defsRouter(store: Store) {
       .input(updateDefApiSchema)
       .mutation(async ({ input }) => {
         let def: schema.Def | undefined;
-        if (input.schema) {
-          const deployments = await store.deployments.deploymentsByDefId(
-            input.defId,
-          );
-          if (deployments.length) {
-            throw new TRPCError({
-              code: "PRECONDITION_FAILED",
-              message: "Cannot update schema of a definition with deployments.",
-            });
-          }
-        }
         try {
           def = await store.defs.updateDef(
             input.defId,
             input.name,
             input.description,
-            input.schema,
           );
         } catch (err) {
           throw internalError("Error updating def record.", err);
