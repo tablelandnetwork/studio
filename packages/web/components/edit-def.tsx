@@ -31,7 +31,7 @@ export interface EditDefProps {
     schema: Schema;
   };
   onPendingChanged: (pending: boolean) => void;
-  onSuccess: (def: schema.Def) => void;
+  onEditDefSuccess: (def: schema.Def) => void;
   disabled?: boolean;
 }
 
@@ -39,7 +39,7 @@ export default function EditDef({
   projectId,
   def,
   onPendingChanged,
-  onSuccess,
+  onEditDefSuccess,
   disabled = false,
 }: EditDefProps) {
   const [query, setQuery] = useState(def.name);
@@ -67,7 +67,7 @@ export default function EditDef({
       onPendingChanged(false);
     },
     onSuccess: (def) => {
-      onSuccess(def);
+      onEditDefSuccess(def);
     },
     onError: (err: any) => {
       const error = ensureError(err);

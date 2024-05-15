@@ -1,7 +1,7 @@
 "use client";
 
 import { Ellipsis } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { type Schema, type schema } from "@tableland/studio-store";
 import { skipToken } from "@tanstack/react-query";
@@ -10,6 +10,8 @@ import { Button } from "./ui/button";
 import NewDefForm from "./new-def-form";
 import ImportTableForm from "./import-table-form";
 import TableSettings from "./table-settings";
+import { DeleteTableDialog } from "./delete-table-dialog";
+import { UndeployTableDialog } from "./undeploy-table-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,16 +25,18 @@ export default function TableMenu(props: {
   schema: Schema;
   chainId?: number;
   tableId?: string;
-  projectId?: string;
+  team?: schema.Team;
+  project?: schema.Project;
   env?: schema.Environment;
   def?: { id: string; name: string; description: string; slug: string };
   isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
 }) {
-  const [editDefFormOpen, setEditDefFormOpen] = useState(false);
+  const [tableSettingsOpen, setTableSettingnsOpen] = useState(false);
   const [execDeploymentOpen, setExecDeploymentOpen] = useState(false);
   const [newDefFormOpen, setNewDefFormOpen] = useState(false);
   const [importTableFormOpen, setImportTableFormOpen] = useState(false);
-  const pathname = usePathname();
+  const [deleteTableOpen, setDeleteTableOpen] = useState(false);
+  const [undeployTableOpen, setUndeployTableOpen] = useState(false);
   const router = useRouter();
 
   const deploymentsQuery = api.deployments.deploymentsByEnvironmentId.useQuery(
@@ -40,8 +44,33 @@ export default function TableMenu(props: {
   );
 
   const defsQuery = api.defs.projectDefs.useQuery(
-    props.projectId ? { projectId: props.projectId } : skipToken,
+    props.project ? { projectId: props.project.id } : skipToken,
   );
+
+  const onDeleteTable = () => {
+    setTableSettingnsOpen(false);
+    setDeleteTableOpen(true);
+  };
+
+  const onUndeployTable = () => {
+    setTableSettingnsOpen(false);
+    setUndeployTableOpen(true);
+  };
+
+  const onDeleteTableSuccess = () => {
+    setDeleteTableOpen(false);
+    void defsQuery.refetch();
+    if (!props.team || !props.project || !props.env) return;
+    router.replace(
+      `/${props.team.slug}/${props.project.slug}/${props.env.slug}`,
+    );
+  };
+
+  const onUndeployTableSuccess = () => {
+    setUndeployTableOpen(false);
+    void deploymentsQuery.refetch();
+    router.refresh();
+  };
 
   return (
     <>
@@ -80,22 +109,47 @@ export default function TableMenu(props: {
           }}
         />
       )}
-      {props.isAuthorized && props.def && props.projectId && (
-        <TableSettings
-          open={editDefFormOpen}
-          onOpenChange={setEditDefFormOpen}
-          isAuthorized={props.isAuthorized}
-          def={{ ...props.def, schema: props.schema }}
-          projectId={props.projectId}
-          onSuccess={(updatedDef) => {
-            if (props.def?.slug !== updatedDef.slug) {
-              router.replace(
-                pathname.replace(`/${props.def!.slug}`, `/${updatedDef.slug}`),
-              );
-            }
-            router.refresh();
-            void defsQuery.refetch();
-          }}
+      {props.isAuthorized &&
+        props.def &&
+        props.team &&
+        props.project &&
+        props.env && (
+          <TableSettings
+            open={tableSettingsOpen}
+            onOpenChange={setTableSettingnsOpen}
+            isAuthorized={props.isAuthorized}
+            def={{ ...props.def, schema: props.schema }}
+            projectId={props.project.id}
+            onEditDefSuccess={(updatedDef) => {
+              if (props.def?.slug !== updatedDef.slug) {
+                router.replace(
+                  `/${props.team!.slug}/${props.project!.slug}/${
+                    props.env!.slug
+                  }/${updatedDef.slug}`,
+                );
+              }
+              router.refresh();
+              void defsQuery.refetch();
+            }}
+            onDeleteTable={onDeleteTable}
+            onUndeployTable={onUndeployTable}
+          />
+        )}
+      {props.def && (
+        <DeleteTableDialog
+          open={deleteTableOpen}
+          onOpenChange={setDeleteTableOpen}
+          defId={props.def.id}
+          onSuccess={onDeleteTableSuccess}
+        />
+      )}
+      {props.def && props.env && (
+        <UndeployTableDialog
+          open={undeployTableOpen}
+          onOpenChange={setUndeployTableOpen}
+          defId={props.def.id}
+          envId={props.env.id}
+          onSuccess={onUndeployTableSuccess}
         />
       )}
       <DropdownMenu>
@@ -105,8 +159,8 @@ export default function TableMenu(props: {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          {props.isAuthorized && props.def && props.projectId && (
-            <DropdownMenuItem onSelect={() => setEditDefFormOpen(true)}>
+          {props.isAuthorized && props.def && props.project && (
+            <DropdownMenuItem onSelect={() => setTableSettingnsOpen(true)}>
               Table settings
             </DropdownMenuItem>
           )}

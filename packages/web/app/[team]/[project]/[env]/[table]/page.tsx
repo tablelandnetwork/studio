@@ -38,7 +38,8 @@ export default async function Deployments({
   return (
     <main className="flex-1 p-4">
       <TableWrapper
-        projectId={project.id}
+        team={team}
+        project={project}
         env={env}
         def={def}
         displayName={def.name}

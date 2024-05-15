@@ -23,12 +23,16 @@ export type TableSettingsProps = Omit<EditDefProps, "onPendingChanged"> & {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
+  onDeleteTable: () => void;
+  onUndeployTable: () => void;
 };
 
 export default function TableSettings({
   open,
   onOpenChange,
   isAuthorized,
+  onDeleteTable,
+  onUndeployTable,
   ...props
 }: TableSettingsProps) {
   const [openSheet, setOpenSheet] = useState(open ?? false);
@@ -102,13 +106,17 @@ export default function TableSettings({
                 <p className="text-sm font-medium">
                   Delete the {props.def.name} table from your project:
                 </p>
-                <Button variant="secondary">Delete table</Button>
+                <Button variant="secondary" onClick={onDeleteTable}>
+                  Delete table
+                </Button>
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium">
                   Un-deploy the {props.def.name} table:
                 </p>
-                <Button variant="secondary">Un-depoloy table</Button>
+                <Button variant="secondary" onClick={onUndeployTable}>
+                  Un-depoloy table
+                </Button>
               </div>
             </CardContent>
           </Card>
