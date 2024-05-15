@@ -4,7 +4,7 @@ import { z } from "zod";
 import {
   newDefApiSchema,
   defNameAvailableSchema,
-  updateDefSchema,
+  updateDefApiSchema,
 } from "@tableland/studio-validators";
 import {
   projectProcedure,
@@ -62,7 +62,7 @@ export function defsRouter(store: Store) {
         }
       }),
     updateDef: defAdminProcedure(store)
-      .input(updateDefSchema)
+      .input(updateDefApiSchema)
       .mutation(async ({ input }) => {
         let def: schema.Def | undefined;
         if (input.schema) {

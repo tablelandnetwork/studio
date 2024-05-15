@@ -1,36 +1,46 @@
 "use client";
 
 import { Ellipsis } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import { type Schema, type schema } from "@tableland/studio-store";
 import { skipToken } from "@tanstack/react-query";
+import { type RouterOutputs } from "@tableland/studio-api";
 import { Button } from "./ui/button";
 import NewDefForm from "./new-def-form";
 import ImportTableForm from "./import-table-form";
+import TableSettings from "./table-settings";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ExecDeployment from "@/app/[team]/[project]/[env]/_components/exec-deployment";
+import ExecDeployment from "@/components/exec-deployment";
 import { api } from "@/trpc/react";
 
 export default function TableMenu(props: {
   schema: Schema;
   chainId?: number;
   tableId?: string;
+  projectId?: string;
   env?: schema.Environment;
-  def?: { id: string; name: string };
+  def?: { id: string; name: string; description: string; slug: string };
+  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
 }) {
+  const [editDefFormOpen, setEditDefFormOpen] = useState(false);
   const [execDeploymentOpen, setExecDeploymentOpen] = useState(false);
   const [newDefFormOpen, setNewDefFormOpen] = useState(false);
   const [importTableFormOpen, setImportTableFormOpen] = useState(false);
+  const pathname = usePathname();
   const router = useRouter();
 
   const deploymentsQuery = api.deployments.deploymentsByEnvironmentId.useQuery(
     props.env ? { environmentId: props.env.id } : skipToken,
+  );
+
+  const defsQuery = api.defs.projectDefs.useQuery(
+    props.projectId ? { projectId: props.projectId } : skipToken,
   );
 
   return (
@@ -70,6 +80,24 @@ export default function TableMenu(props: {
           }}
         />
       )}
+      {props.isAuthorized && props.def && props.projectId && (
+        <TableSettings
+          open={editDefFormOpen}
+          onOpenChange={setEditDefFormOpen}
+          isAuthorized={props.isAuthorized}
+          def={{ ...props.def, schema: props.schema }}
+          projectId={props.projectId}
+          onSuccess={(updatedDef) => {
+            if (props.def?.slug !== updatedDef.slug) {
+              router.replace(
+                pathname.replace(`/${props.def!.slug}`, `/${updatedDef.slug}`),
+              );
+            }
+            router.refresh();
+            void defsQuery.refetch();
+          }}
+        />
+      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -77,6 +105,11 @@ export default function TableMenu(props: {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
+          {props.isAuthorized && props.def && props.projectId && (
+            <DropdownMenuItem onSelect={() => setEditDefFormOpen(true)}>
+              Table settings
+            </DropdownMenuItem>
+          )}
           {!props.chainId && !props.tableId && props.def && props.env && (
             <DropdownMenuItem onSelect={() => setExecDeploymentOpen(true)}>
               Deploy definition to Tableland
@@ -88,7 +121,7 @@ export default function TableMenu(props: {
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onSelect={() => setNewDefFormOpen(true)}>
-            Use table schema in Studio project
+            Use table definition in Studio project
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -9,8 +9,8 @@ import {
   useSelectedLayoutSegment,
 } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
-import NewDef from "../[env]/_components/new-def";
-import ImportTable from "../[env]/_components/import-table";
+import NewDef from "./new-def";
+import ImportTable from "./import-table";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
@@ -174,7 +174,7 @@ export function Sidebar() {
         <div className="flex flex-1 items-center justify-center gap-x-2">
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <NewDef
                   teamPreset={teamQuery.data}
                   projectPreset={projectQuery.data}
@@ -188,7 +188,7 @@ export function Sidebar() {
           </TooltipProvider>
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <ImportTable
                   teamPreset={teamQuery.data}
                   projectPreset={projectQuery.data}

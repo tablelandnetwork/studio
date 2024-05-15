@@ -33,9 +33,12 @@ export default async function Deployments({
     }
   }
 
+  const isAuthorized = await cache(api.teams.isAuthorized)({ teamId: team.id });
+
   return (
     <main className="flex-1 p-4">
       <TableWrapper
+        projectId={project.id}
         env={env}
         def={def}
         displayName={def.name}
@@ -43,6 +46,7 @@ export default async function Deployments({
         chainId={deployment?.chainId}
         tableId={deployment?.tableId}
         schema={def.schema}
+        isAuthorized={isAuthorized}
       >
         {deployment ? (
           <Table
