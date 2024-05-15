@@ -23,6 +23,7 @@ export type TableSettingsProps = Omit<EditDefProps, "onPendingChanged"> & {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
+  showUndeploy: boolean;
   onDeleteTable: () => void;
   onUndeployTable: () => void;
 };
@@ -31,6 +32,7 @@ export default function TableSettings({
   open,
   onOpenChange,
   isAuthorized,
+  showUndeploy,
   onDeleteTable,
   onUndeployTable,
   ...props
@@ -80,7 +82,7 @@ export default function TableSettings({
           )}
           <Card className={cn(!isAdmin && "opacity-50")}>
             <CardHeader>
-              <CardTitle>Definition info</CardTitle>
+              <CardTitle>Table definition</CardTitle>
               <CardDescription>
                 Update general information about the {props.def.name} table
                 definition.
@@ -110,14 +112,16 @@ export default function TableSettings({
                   Delete table
                 </Button>
               </div>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">
-                  Un-deploy the {props.def.name} table:
-                </p>
-                <Button variant="secondary" onClick={onUndeployTable}>
-                  Un-depoloy table
-                </Button>
-              </div>
+              {showUndeploy && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    Un-deploy the {props.def.name} table:
+                  </p>
+                  <Button variant="secondary" onClick={onUndeployTable}>
+                    Un-depoloy table
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

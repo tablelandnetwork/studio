@@ -47,6 +47,18 @@ export default function TableMenu(props: {
     props.project ? { projectId: props.project.id } : skipToken,
   );
 
+  const onEditDefSuccess = (updatedDef: schema.Def) => {
+    if (props.def?.slug !== updatedDef.slug) {
+      router.replace(
+        `/${props.team!.slug}/${props.project!.slug}/${props.env!.slug}/${
+          updatedDef.slug
+        }`,
+      );
+    }
+    router.refresh();
+    void defsQuery.refetch();
+  };
+
   const onDeleteTable = () => {
     setTableSettingnsOpen(false);
     setDeleteTableOpen(true);
@@ -120,17 +132,8 @@ export default function TableMenu(props: {
             isAuthorized={props.isAuthorized}
             def={{ ...props.def, schema: props.schema }}
             projectId={props.project.id}
-            onEditDefSuccess={(updatedDef) => {
-              if (props.def?.slug !== updatedDef.slug) {
-                router.replace(
-                  `/${props.team!.slug}/${props.project!.slug}/${
-                    props.env!.slug
-                  }/${updatedDef.slug}`,
-                );
-              }
-              router.refresh();
-              void defsQuery.refetch();
-            }}
+            showUndeploy={!!props.chainId && !!props.tableId}
+            onEditDefSuccess={onEditDefSuccess}
             onDeleteTable={onDeleteTable}
             onUndeployTable={onUndeployTable}
           />
@@ -166,7 +169,7 @@ export default function TableMenu(props: {
           )}
           {!props.chainId && !props.tableId && props.def && props.env && (
             <DropdownMenuItem onSelect={() => setExecDeploymentOpen(true)}>
-              Deploy definition to Tableland
+              Deploy table definition to Tableland
             </DropdownMenuItem>
           )}
           {props.chainId && props.tableId && (
