@@ -173,7 +173,6 @@ export default function ExecDeployment({
         setRecordDeploymentState(
           error instanceof Error ? error : new Error(String(error)),
         );
-        
       }
     });
   };
