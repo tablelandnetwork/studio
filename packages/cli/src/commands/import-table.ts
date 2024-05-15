@@ -157,11 +157,6 @@ export const builder = function (args: Yargs) {
           }
 
           // Do a dry run to check for any errors before importing
-          // TODO: idk if we really need the `sanitize` flag. the main thing I had to
-          // figure out was `defNameSchema.parseAsync` because imports were failing
-          // without context. the regex below uses the flag to just replace all
-          // invalid SQLite characters with underscores... I had to do it somehow
-          // so just included it in the command itself, for fun.
           const sanitize = argv.sanitize as boolean;
           const data = await Promise.all(
             rows.map(async (row) => {
