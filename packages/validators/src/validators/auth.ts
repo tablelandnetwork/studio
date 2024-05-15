@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { teamNameSchema } from "../common";
+import { teamNameSchema } from "../common.js";
 
 export const registerSchema = z.object({
   username: teamNameSchema,

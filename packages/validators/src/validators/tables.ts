@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { defNameSchema } from "../common";
+import { defNameSchema } from "../common.js";
 
 export const importTableSchema = z.object({
   chainId: z.coerce.number().gt(0),
