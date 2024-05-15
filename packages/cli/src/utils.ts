@@ -642,5 +642,5 @@ export function wrapText(text: string, maxWidth: number = 80): string {
     formattedText += currentLine.padEnd(maxWidth, " ");
   });
 
-  return formattedText;
+  return formattedText.trim();
 }
