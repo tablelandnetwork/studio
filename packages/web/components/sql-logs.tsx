@@ -11,7 +11,7 @@ import { type SqlLog, getSqlLogs } from "@/lib/validator-queries";
 export default function SQLLogs({
   tables,
 }: {
-  tables: { chainId: number; tableId: string }[];
+  tables: Array<{ chainId: number; tableId: string }>;
 }) {
   const [logs, setLogs] = useState<SqlLog[]>([]);
   const [loading, setLoading] = useState(false);

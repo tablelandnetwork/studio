@@ -2,7 +2,6 @@
 
 import { type schema } from "@tableland/studio-store";
 import { Copy } from "lucide-react";
-import { useState } from "react";
 import {
   EmailIcon,
   EmailShareButton,
@@ -32,7 +31,6 @@ export default function Share({
   project,
   className,
 }: React.HTMLAttributes<HTMLElement> & { project: schema.Project }) {
-  const [showDialog, setShowDialog] = useState(false);
   const { toast } = useToast();
 
   const handleCopyLink = () => {

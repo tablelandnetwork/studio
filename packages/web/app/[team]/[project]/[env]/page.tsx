@@ -1,16 +1,12 @@
 import {
-  AlertOctagon,
-  Car,
   CircleAlert,
   Database,
   Folder,
-  HelpCircle,
-  Rocket,
   Rows4,
   Share2,
   Table2,
 } from "lucide-react";
-import Link from "next/link";
+import Share from "./_components/share";
 import {
   environmentBySlug,
   projectBySlug,
@@ -26,7 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Share from "./_components/share";
 import { chainsMap } from "@/lib/chains-map";
 import HashDisplay from "@/components/hash-display";
 

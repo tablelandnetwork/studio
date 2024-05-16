@@ -5,13 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { type schema } from "@tableland/studio-store";
 import { useState } from "react";
+import { skipToken } from "@tanstack/react-query";
 import NewTeamForm from "./new-team-form";
 import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
 import MesaSvg from "@/components/mesa-svg";
 import ProjectSwitcher from "@/components/project-switcher";
 import { api } from "@/trpc/react";
-import { skipToken } from "@tanstack/react-query";
 
 export default function PrimaryHeaderItem({
   teams,

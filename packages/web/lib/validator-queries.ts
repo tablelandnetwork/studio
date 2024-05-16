@@ -81,7 +81,7 @@ export interface SqlLog {
 // Tables should all be on mainnets or all be on testnets,
 // othwerwise the results will not be as expected.
 export async function getSqlLogs(
-  tables: { chainId: number; tableId: string }[],
+  tables: Array<{ chainId: number; tableId: string }>,
   limit: number,
   beforeTimestamp?: number,
 ) {
