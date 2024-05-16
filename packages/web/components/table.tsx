@@ -199,7 +199,7 @@ export default async function Table({
           <DataTable columns={columns} data={formattedData} />
         </TabsContent>
         <TabsContent value="logs">
-          <SQLLogs chain={chainId} tableId={tableId} />
+          <SQLLogs tables={[{ chainId, tableId }]} />
         </TabsContent>
         {defData && (
           <TabsContent value="definition">

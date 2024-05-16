@@ -9,11 +9,9 @@ import { cn } from "@/lib/utils";
 import { type SqlLog, getSqlLogs } from "@/lib/validator-queries";
 
 export default function SQLLogs({
-  chain,
-  tableId,
+  tables,
 }: {
-  chain: number;
-  tableId: string;
+  tables: { chainId: number; tableId: string }[];
 }) {
   const [logs, setLogs] = useState<SqlLog[]>([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +32,7 @@ export default function SQLLogs({
         beforeTimestamp = undefined;
       }
       setLoading(true);
-      const res = await getSqlLogs(chain, tableId, pageSize, beforeTimestamp);
+      const res = await getSqlLogs(tables, pageSize, beforeTimestamp);
       setLoading(false);
       setLogs(maxLoadedPage === -1 ? res : [...logs, ...res]);
       setLoadedPage(page);
@@ -45,7 +43,7 @@ export default function SQLLogs({
       setLoading(false);
       setError(err.message);
     });
-  }, [page, pageSize, maxLoadedPage, chain, logs, tableId]);
+  }, [page, pageSize, maxLoadedPage, tables, logs]);
 
   function refresh() {
     setMaxLoadedPage(-1);
@@ -74,7 +72,7 @@ export default function SQLLogs({
                 "flex items-center rounded-md border bg-card p-2 transition-all",
                 log.error ? "bg-red-900 hover:bg-red-800" : "hover:bg-accent",
               )}
-              href={`/sql-log?chainId=${chain}&txnHash=${log.txHash}&index=${log.eventIndex}`}
+              href={`/sql-log?chainId=${log.chainId}&txnHash=${log.txHash}&index=${log.eventIndex}`}
               target="_blank"
             >
               {log.error && <AlertCircle className="shrink-0" />}

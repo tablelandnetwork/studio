@@ -66,6 +66,7 @@ export async function getPopularTables(
 }
 
 export interface SqlLog {
+  chainId: number;
   blockNumber: number;
   txIndex: number;
   caller: string | null;
@@ -77,15 +78,28 @@ export interface SqlLog {
   txHash: string;
 }
 
+// Tables should all be on mainnets or all be on testnets,
+// othwerwise the results will not be as expected.
 export async function getSqlLogs(
-  chain: number,
-  tableId: string,
+  tables: { chainId: number; tableId: string }[],
   limit: number,
   beforeTimestamp?: number,
 ) {
+  if (tables.length === 0) {
+    return [] as SqlLog[];
+  }
+
+  const ors = tables
+    .map(
+      (t) =>
+        `(json_extract(event_json,'$.TableId') = ${t.tableId} and  e.chain_id = ${t.chainId})`,
+    )
+    .join(" or ");
+
   // TODO: Just filtering on timestamp is probably going to miss some logs. Need to investigate.
   const query = `
   SELECT
+    e.chain_id as chainId,
     e.block_number as blockNumber,
     e.tx_index as txIndex,
     e.event_index as eventIndex,
@@ -99,15 +113,16 @@ export async function getSqlLogs(
     system_evm_events e join system_evm_blocks b on e.block_number = b.block_number and e.chain_id = b.chain_id inner join system_txn_receipts tr on tr.txn_hash = e.tx_hash AND tr.chain_id = e.chain_id
   WHERE
     ${beforeTimestamp ? `timestamp < ${beforeTimestamp} AND` : ""}
-    json_extract(event_json,'$.TableId') = ${tableId} AND
-    e.chain_id = ${chain} AND
+    ${ors} AND
     (eventType = 'ContractCreateTable' OR eventType = 'ContractRunSQL')
   ORDER BY
-    blockNumber DESC, eventIndex DESC
+    timestamp DESC, e.chain_id ASC, blockNumber DESC, eventIndex DESC
   LIMIT ${limit}
   `;
 
-  const uri = encodeURI(`${baseUrlForChain(chain)}/query?statement=${query}`);
+  const uri = encodeURI(
+    `${baseUrlForChain(tables[0].chainId)}/query?statement=${query}`,
+  );
   const res = await fetch(uri);
 
   if (!res.ok) {
@@ -125,6 +140,7 @@ export async function getSqlLog(
 ) {
   const query = `
   SELECT
+    e.chain_id as chainId,
     e.block_number as blockNumber,
     e.tx_index as txIndex,
     e.event_index as eventIndex,

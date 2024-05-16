@@ -10,6 +10,8 @@ import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
 import MesaSvg from "@/components/mesa-svg";
 import ProjectSwitcher from "@/components/project-switcher";
+import { api } from "@/trpc/react";
+import { skipToken } from "@tanstack/react-query";
 
 export default function PrimaryHeaderItem({
   teams,
@@ -24,10 +26,12 @@ export default function PrimaryHeaderItem({
   const [openNewProjectSheet, setOpenNewProjectSheet] = useState(false);
   const router = useRouter();
 
-  const team = teams.find((team) => team.slug === teamSlug);
+  const { data: team } = api.teams.teamBySlug.useQuery(
+    teamSlug ? { slug: teamSlug } : skipToken,
+  );
 
-  const project = team?.projects.find(
-    (project) => project.slug === projectSlug,
+  const { data: project } = api.projects.projectBySlug.useQuery(
+    team && projectSlug ? { teamId: team.id, slug: projectSlug } : skipToken,
   );
 
   function onTeamSelected(team: schema.Team) {
