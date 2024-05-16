@@ -109,18 +109,22 @@ export default function TableMenu(props: {
           }}
         />
       )}
-      {!props.chainId && !props.tableId && props.def && props.env && (
-        <ExecDeployment
-          open={execDeploymentOpen}
-          onOpenChange={setExecDeploymentOpen}
-          environment={props.env}
-          def={{ ...props.def, schema: props.schema }}
-          onSuccess={() => {
-            router.refresh();
-            void deploymentsQuery.refetch();
-          }}
-        />
-      )}
+      {props.isAuthorized &&
+        !props.chainId &&
+        !props.tableId &&
+        props.def &&
+        props.env && (
+          <ExecDeployment
+            open={execDeploymentOpen}
+            onOpenChange={setExecDeploymentOpen}
+            environment={props.env}
+            def={{ ...props.def, schema: props.schema }}
+            onSuccess={() => {
+              router.refresh();
+              void deploymentsQuery.refetch();
+            }}
+          />
+        )}
       {props.isAuthorized &&
         props.def &&
         props.team &&
@@ -167,11 +171,15 @@ export default function TableMenu(props: {
               Table settings
             </DropdownMenuItem>
           )}
-          {!props.chainId && !props.tableId && props.def && props.env && (
-            <DropdownMenuItem onSelect={() => setExecDeploymentOpen(true)}>
-              Deploy table definition to Tableland
-            </DropdownMenuItem>
-          )}
+          {props.isAuthorized &&
+            !props.chainId &&
+            !props.tableId &&
+            props.def &&
+            props.env && (
+              <DropdownMenuItem onSelect={() => setExecDeploymentOpen(true)}>
+                Deploy table definition to Tableland
+              </DropdownMenuItem>
+            )}
           {props.chainId && props.tableId && (
             <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
               Import table into Studio project
