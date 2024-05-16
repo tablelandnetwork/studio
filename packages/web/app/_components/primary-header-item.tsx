@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { type schema } from "@tableland/studio-store";
 import { useState } from "react";
-import { skipToken } from "@tanstack/react-query";
 import NewTeamForm from "./new-team-form";
 import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
@@ -26,14 +25,11 @@ export default function PrimaryHeaderItem({
   const [openNewProjectSheet, setOpenNewProjectSheet] = useState(false);
   const router = useRouter();
 
-  const { data: team } = api.teams.teamBySlug.useQuery(
-    teamSlug ? { slug: teamSlug } : skipToken,
-  );
+  const team = teams.find((team) => team.slug === teamSlug);
 
-  const { data: project } = api.projects.projectBySlug.useQuery(
-    team && projectSlug ? { teamId: team.id, slug: projectSlug } : skipToken,
+  const project = team?.projects.find(
+    (project) => project.slug === projectSlug,
   );
-
   function onTeamSelected(team: schema.Team) {
     router.push(`/${team.slug}`);
   }
