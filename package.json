@@ -68,11 +68,5 @@
     "ts-node": "^10.9.1",
     "tsx": "^3.12.7",
     "typescript": "^5.4.5"
-  },
-  "optionalDependencies": {
-    "@nx/nx-darwin-arm64": "16.5.1",
-    "@nx/nx-darwin-x64": "16.5.1",
-    "@nx/nx-linux-x64-gnu": "16.5.1",
-    "@nx/nx-win32-x64-msvc": "16.5.1"
   }
 }
