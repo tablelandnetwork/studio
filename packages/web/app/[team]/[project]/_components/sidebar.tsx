@@ -1,7 +1,7 @@
 "use client";
 
 import { type schema } from "@tableland/studio-store";
-import { LayoutDashboard, Settings, Table2 } from "lucide-react";
+import { Import, LayoutDashboard, Plus, Settings, Table2 } from "lucide-react";
 import Link from "next/link";
 import {
   useParams,
@@ -9,8 +9,7 @@ import {
   useSelectedLayoutSegment,
 } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
-import NewDef from "./new-def";
-import ImportTable from "./import-table";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
@@ -21,6 +20,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SidebarContainer, SidebarSection } from "@/components/sidebar";
+import ImportTableForm from "@/components/import-table-form";
+import NewDefForm from "@/components/new-def-form";
 
 export function Sidebar() {
   const {
@@ -36,6 +37,8 @@ export function Sidebar() {
   }>();
   const router = useRouter();
   const selectedLayoutSegment = useSelectedLayoutSegment();
+  const [newDefOpen, setNewDefOpen] = useState(false);
+  const [importTableOpen, setImportTableOpen] = useState(false);
 
   const teamQuery = api.teams.teamBySlug.useQuery({ slug: teamSlug });
 
@@ -183,11 +186,13 @@ export function Sidebar() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <NewDef
-                    teamPreset={teamQuery.data}
-                    projectPreset={projectQuery.data}
-                    onSuccess={onNewDefSuccess}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setNewDefOpen(true)}
+                  >
+                    <Plus />
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>New table</p>
@@ -197,12 +202,13 @@ export function Sidebar() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <ImportTable
-                    teamPreset={teamQuery.data}
-                    projectPreset={projectQuery.data}
-                    envPreset={env}
-                    onSuccess={onImportTableSuccess}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setImportTableOpen(true)}
+                  >
+                    <Import />
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Import table</p>
@@ -227,6 +233,21 @@ export function Sidebar() {
           </Button>
         </Link>
       </SidebarSection>
+      <NewDefForm
+        open={newDefOpen}
+        onOpenChange={setNewDefOpen}
+        teamPreset={teamQuery.data}
+        projectPreset={projectQuery.data}
+        onSuccess={onNewDefSuccess}
+      />
+      <ImportTableForm
+        open={importTableOpen}
+        onOpenChange={setImportTableOpen}
+        teamPreset={teamQuery.data}
+        projectPreset={projectQuery.data}
+        envPreset={env}
+        onSuccess={onImportTableSuccess}
+      />
     </SidebarContainer>
   );
 }
