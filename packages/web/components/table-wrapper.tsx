@@ -1,5 +1,4 @@
-import { type ComponentProps } from "react";
-import TableMenu from "./table-menu";
+import TableMenu, { type TableMenuProps } from "./table-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -10,11 +9,13 @@ import {
 export default async function TableWrapper({
   displayName,
   description,
+  isAuthenticated,
   children,
   ...props
-}: ComponentProps<typeof TableMenu> & {
+}: TableMenuProps & {
   displayName: string;
   description?: string;
+  isAuthenticated: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -37,7 +38,7 @@ export default async function TableWrapper({
             </TooltipProvider>
           )}
         </div>
-        <TableMenu {...props} />
+        {isAuthenticated && <TableMenu {...props} />}
       </div>
       {children}
     </div>

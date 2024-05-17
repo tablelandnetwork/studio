@@ -21,7 +21,7 @@ import {
 import ExecDeployment from "@/components/exec-deployment";
 import { api } from "@/trpc/react";
 
-export default function TableMenu(props: {
+export interface TableMenuProps {
   schema: Schema;
   chainId?: number;
   tableId?: string;
@@ -30,7 +30,18 @@ export default function TableMenu(props: {
   env?: schema.Environment;
   def?: { id: string; name: string; description: string; slug: string };
   isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
-}) {
+}
+
+export default function TableMenu({
+  schema,
+  chainId,
+  tableId,
+  team,
+  project,
+  env,
+  def,
+  isAuthorized,
+}: TableMenuProps) {
   const [tableSettingsOpen, setTableSettingnsOpen] = useState(false);
   const [execDeploymentOpen, setExecDeploymentOpen] = useState(false);
   const [newDefFormOpen, setNewDefFormOpen] = useState(false);
@@ -40,19 +51,17 @@ export default function TableMenu(props: {
   const router = useRouter();
 
   const deploymentsQuery = api.deployments.deploymentsByEnvironmentId.useQuery(
-    props.env ? { environmentId: props.env.id } : skipToken,
+    env ? { environmentId: env.id } : skipToken,
   );
 
   const defsQuery = api.defs.projectDefs.useQuery(
-    props.project ? { projectId: props.project.id } : skipToken,
+    project ? { projectId: project.id } : skipToken,
   );
 
   const onEditDefSuccess = (updatedDef: schema.Def) => {
-    if (props.def?.slug !== updatedDef.slug) {
+    if (def?.slug !== updatedDef.slug) {
       router.replace(
-        `/${props.team!.slug}/${props.project!.slug}/${props.env!.slug}/${
-          updatedDef.slug
-        }`,
+        `/${team!.slug}/${project!.slug}/${env!.slug}/${updatedDef.slug}`,
       );
     }
     router.refresh();
@@ -72,10 +81,8 @@ export default function TableMenu(props: {
   const onDeleteTableSuccess = () => {
     setDeleteTableOpen(false);
     void defsQuery.refetch();
-    if (!props.team || !props.project || !props.env) return;
-    router.replace(
-      `/${props.team.slug}/${props.project.slug}/${props.env.slug}`,
-    );
+    if (!team || !project || !env) return;
+    router.replace(`/${team.slug}/${project.slug}/${env.slug}`);
   };
 
   const onUndeployTableSuccess = () => {
@@ -84,21 +91,58 @@ export default function TableMenu(props: {
     router.refresh();
   };
 
+  const displaySettings =
+    !!isAuthorized && !!def && !!team && !!project && !!env;
+  const displayDeploy =
+    !!isAuthorized && !chainId && !tableId && !!def && !!env;
+  const displayImport = !!chainId && !!tableId;
+
   return (
     <>
-      <NewDefForm
-        schemaPreset={props.schema}
-        open={newDefFormOpen}
-        onOpenChange={setNewDefFormOpen}
-        onSuccess={(team, project, def) => {
-          router.refresh();
-          router.push(`/${team.slug}/${project.slug}/${def.slug}`);
-        }}
-      />
-      {props.chainId && props.tableId && (
+      {displaySettings && (
+        <>
+          <TableSettings
+            open={tableSettingsOpen}
+            onOpenChange={setTableSettingnsOpen}
+            isAdmin={!!isAuthorized.isOwner}
+            def={{ ...def, schema }}
+            projectId={project.id}
+            showUndeploy={!!chainId && !!tableId}
+            onEditDefSuccess={onEditDefSuccess}
+            onDeleteTable={onDeleteTable}
+            onUndeployTable={onUndeployTable}
+          />
+          <DeleteTableDialog
+            open={deleteTableOpen}
+            onOpenChange={setDeleteTableOpen}
+            defId={def.id}
+            onSuccess={onDeleteTableSuccess}
+          />
+          <UndeployTableDialog
+            open={undeployTableOpen}
+            onOpenChange={setUndeployTableOpen}
+            defId={def.id}
+            envId={env.id}
+            onSuccess={onUndeployTableSuccess}
+          />
+        </>
+      )}
+      {displayDeploy && (
+        <ExecDeployment
+          open={execDeploymentOpen}
+          onOpenChange={setExecDeploymentOpen}
+          environment={env}
+          def={{ ...def, schema }}
+          onSuccess={() => {
+            router.refresh();
+            void deploymentsQuery.refetch();
+          }}
+        />
+      )}
+      {displayImport && (
         <ImportTableForm
-          chainIdPreset={props.chainId}
-          tableIdPreset={props.tableId}
+          chainIdPreset={chainId}
+          tableIdPreset={tableId}
           open={importTableFormOpen}
           onOpenChange={setImportTableFormOpen}
           onSuccess={(team, project, def, env) => {
@@ -109,56 +153,15 @@ export default function TableMenu(props: {
           }}
         />
       )}
-      {props.isAuthorized &&
-        !props.chainId &&
-        !props.tableId &&
-        props.def &&
-        props.env && (
-          <ExecDeployment
-            open={execDeploymentOpen}
-            onOpenChange={setExecDeploymentOpen}
-            environment={props.env}
-            def={{ ...props.def, schema: props.schema }}
-            onSuccess={() => {
-              router.refresh();
-              void deploymentsQuery.refetch();
-            }}
-          />
-        )}
-      {props.isAuthorized &&
-        props.def &&
-        props.team &&
-        props.project &&
-        props.env && (
-          <TableSettings
-            open={tableSettingsOpen}
-            onOpenChange={setTableSettingnsOpen}
-            isAuthorized={props.isAuthorized}
-            def={{ ...props.def, schema: props.schema }}
-            projectId={props.project.id}
-            showUndeploy={!!props.chainId && !!props.tableId}
-            onEditDefSuccess={onEditDefSuccess}
-            onDeleteTable={onDeleteTable}
-            onUndeployTable={onUndeployTable}
-          />
-        )}
-      {props.def && (
-        <DeleteTableDialog
-          open={deleteTableOpen}
-          onOpenChange={setDeleteTableOpen}
-          defId={props.def.id}
-          onSuccess={onDeleteTableSuccess}
-        />
-      )}
-      {props.def && props.env && (
-        <UndeployTableDialog
-          open={undeployTableOpen}
-          onOpenChange={setUndeployTableOpen}
-          defId={props.def.id}
-          envId={props.env.id}
-          onSuccess={onUndeployTableSuccess}
-        />
-      )}
+      <NewDefForm
+        schemaPreset={schema}
+        open={newDefFormOpen}
+        onOpenChange={setNewDefFormOpen}
+        onSuccess={(team, project, def) => {
+          router.refresh();
+          router.push(`/${team.slug}/${project.slug}/${def.slug}`);
+        }}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -166,21 +169,17 @@ export default function TableMenu(props: {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          {props.isAuthorized && props.def && props.project && (
+          {displaySettings && (
             <DropdownMenuItem onSelect={() => setTableSettingnsOpen(true)}>
               Table settings
             </DropdownMenuItem>
           )}
-          {props.isAuthorized &&
-            !props.chainId &&
-            !props.tableId &&
-            props.def &&
-            props.env && (
-              <DropdownMenuItem onSelect={() => setExecDeploymentOpen(true)}>
-                Deploy table definition to Tableland
-              </DropdownMenuItem>
-            )}
-          {props.chainId && props.tableId && (
+          {displayDeploy && (
+            <DropdownMenuItem onSelect={() => setExecDeploymentOpen(true)}>
+              Deploy table definition to Tableland
+            </DropdownMenuItem>
+          )}
+          {displayImport && (
             <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
               Import table into Studio project
             </DropdownMenuItem>

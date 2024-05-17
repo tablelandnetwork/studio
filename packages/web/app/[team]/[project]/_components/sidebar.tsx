@@ -164,44 +164,53 @@ export function Sidebar() {
                 className="w-full justify-start"
               >
                 <span className={cn(!deployment && "mr-4")}>{def.name}</span>
-                {!deployment && isAuthorizedQuery.data && (
-                  <div className="ml-auto size-2 rounded-full bg-destructive" />
+                {!deployment && (
+                  <div
+                    className={cn(
+                      "ml-auto size-2 rounded-full",
+                      isAuthorizedQuery.data
+                        ? "bg-destructive"
+                        : "bg-foreground",
+                    )}
+                  />
                 )}
               </Button>
             </Link>
           );
         })}
-        <div className="flex flex-1 items-center justify-center gap-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <NewDef
-                  teamPreset={teamQuery.data}
-                  projectPreset={projectQuery.data}
-                  onSuccess={onNewDefSuccess}
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>New table</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <ImportTable
-                  teamPreset={teamQuery.data}
-                  projectPreset={projectQuery.data}
-                  envPreset={env}
-                  onSuccess={onImportTableSuccess}
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Import table</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+        {!!isAuthorizedQuery.data && (
+          <div className="flex flex-1 items-center justify-center gap-x-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <NewDef
+                    teamPreset={teamQuery.data}
+                    projectPreset={projectQuery.data}
+                    onSuccess={onNewDefSuccess}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>New table</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <ImportTable
+                    teamPreset={teamQuery.data}
+                    projectPreset={projectQuery.data}
+                    envPreset={env}
+                    onSuccess={onImportTableSuccess}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Import table</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </SidebarSection>
       <SidebarSection>
         <Link

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { OctagonAlert } from "lucide-react";
-import { type RouterOutputs } from "@tableland/studio-api";
 import EditDef, { type EditDefProps } from "./edit-def";
 import { Button } from "./ui/button";
 import {
@@ -22,7 +21,7 @@ import { cn } from "@/lib/utils";
 export type TableSettingsProps = Omit<EditDefProps, "onPendingChanged"> & {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
+  isAdmin: boolean;
   showUndeploy: boolean;
   onDeleteTable: () => void;
   onUndeployTable: () => void;
@@ -31,7 +30,7 @@ export type TableSettingsProps = Omit<EditDefProps, "onPendingChanged"> & {
 export default function TableSettings({
   open,
   onOpenChange,
-  isAuthorized,
+  isAdmin,
   showUndeploy,
   onDeleteTable,
   onUndeployTable,
@@ -47,8 +46,6 @@ export default function TableSettings({
   useEffect(() => {
     setOpenSheet(open ?? false);
   }, [open]);
-
-  const isAdmin = !!isAuthorized && !!isAuthorized.isOwner;
 
   return (
     <Sheet open={openSheet} onOpenChange={setOpenSheet}>

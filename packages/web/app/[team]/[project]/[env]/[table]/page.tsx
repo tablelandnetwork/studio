@@ -1,6 +1,8 @@
 import { type schema } from "@tableland/studio-store";
 import { cache } from "react";
 import { TRPCError } from "@trpc/server";
+import { getSession } from "@tableland/studio-api";
+import { cookies, headers } from "next/headers";
 import Table from "@/components/table";
 import { api } from "@/trpc/server";
 import {
@@ -17,6 +19,7 @@ export default async function Deployments({
 }: {
   params: { team: string; project: string; env: string; table: string };
 }) {
+  const session = await getSession({ headers: headers(), cookies: cookies() });
   const team = await teamBySlug(params.team);
   const project = await projectBySlug(params.project, team.id);
   const env = await environmentBySlug(project.id, params.env);
@@ -47,6 +50,7 @@ export default async function Deployments({
         chainId={deployment?.chainId}
         tableId={deployment?.tableId}
         schema={def.schema}
+        isAuthenticated={!!session.auth}
         isAuthorized={isAuthorized}
       >
         {deployment ? (

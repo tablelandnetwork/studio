@@ -4,6 +4,8 @@ import {
   Validator,
   helpers,
 } from "@tableland/sdk";
+import { getSession } from "@tableland/studio-api";
+import { cookies, headers } from "next/headers";
 import Table from "@/components/table";
 import TableWrapper from "@/components/table-wrapper";
 
@@ -12,6 +14,8 @@ export default async function TablePage({
 }: {
   params: { name: string };
 }) {
+  const session = await getSession({ headers: headers(), cookies: cookies() });
+
   const parts = params.name.split("_");
   if (parts.length < 3) {
     return (
@@ -80,6 +84,7 @@ export default async function TablePage({
         chainId={chainId}
         tableId={tableId}
         schema={tablelandTable.schema}
+        isAuthenticated={!!session.auth}
       >
         <Table
           chainId={chainId}
