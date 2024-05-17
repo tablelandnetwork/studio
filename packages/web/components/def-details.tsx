@@ -68,9 +68,11 @@ export default async function DefDetails({
               : `Table definition ${def.name} doesn't have any table-wide constraints.`}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <DefConstraints tableConstraints={def.schema.tableConstraints} />
-        </CardContent>
+        {def.schema.tableConstraints && (
+          <CardContent>
+            <DefConstraints tableConstraints={def.schema.tableConstraints} />
+          </CardContent>
+        )}
       </Card>
     </div>
   );
