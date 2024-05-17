@@ -160,7 +160,7 @@ export default async function Page() {
                 {featuredProjects.map((item) => (
                   <Link
                     key={item.project.id}
-                    href={`/${item.team.slug}/${item.project.slug}`}
+                    href={`/${item.team.slug}/${item.project.slug}/default`} // TODO: deal with multiple envs
                     className="flex grow basis-1 flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
                   >
                     <div className="flex w-full flex-col gap-4">
