@@ -44,7 +44,8 @@ export default function PrimaryHeaderItem({
 
   function onProjectSelected(project: schema.Project) {
     if (!team) return;
-    router.push(`/${team.slug}/${project.slug}`);
+    // TODO: Deal with multiple envs
+    router.push(`/${team.slug}/${project.slug}/default`);
   }
 
   function onNewProjectSelected() {
@@ -54,7 +55,8 @@ export default function PrimaryHeaderItem({
   function onNewProjectSuccess(project: schema.Project) {
     if (!team) return;
     router.refresh();
-    router.push(`/${team.slug}/${project.slug}`);
+    // TODO: Deal with multiple envs
+    router.push(`/${team.slug}/${project.slug}/default`);
   }
 
   const items: React.ReactNode[] = [

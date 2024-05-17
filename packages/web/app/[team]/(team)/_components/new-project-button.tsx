@@ -20,7 +20,8 @@ export default function NewProjectButton({ team }: { team: schema.Team }) {
       }
       onSuccess={(project) => {
         router.refresh();
-        router.push(`/${team.slug}/${project.slug}`);
+        // TODO: Deal with multiple envs
+        router.push(`/${team.slug}/${project.slug}/default`);
       }}
     ></NewProjectForm>
   );
