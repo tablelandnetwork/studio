@@ -182,6 +182,18 @@ async function startStudioApi({ store }: { store: Store }) {
     try {
       req.url = `${TEST_API_BASE_URL}${req.url as string}`;
       req.headers = new Headers(req.headers);
+      req.json = async function () {
+        return await new Promise(function (resolve, reject) {
+          const body: any[] = [];
+          req
+            .on("data", (chunk: any) => {
+              body.push(chunk);
+            })
+            .on("end", () => {
+              resolve(JSON.parse(Buffer.concat(body).toString()));
+            });
+        });
+      };
       req.text = async function () {
         return await new Promise(function (resolve, reject) {
           const body: any[] = [];
