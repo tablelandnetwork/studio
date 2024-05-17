@@ -158,7 +158,8 @@ export default async function Deployments({
                 <Rows4 className="ml-auto text-muted-foreground" />
               </div>
               <CardDescription>
-                Logs for all write operations to all tables in your project.
+                Logs for all write operations to all deployed tables in your
+                project.
               </CardDescription>
             </CardHeader>
             <CardContent>

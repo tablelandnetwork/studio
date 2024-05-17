@@ -61,7 +61,11 @@ export default async function Deployments({
             deploymentData={deployment}
           />
         ) : (
-          <DefDetails def={def} />
+          <DefDetails
+            def={def}
+            env={!deployment ? env : undefined}
+            isAuthorized={isAuthorized}
+          />
         )}
       </TableWrapper>
     </main>

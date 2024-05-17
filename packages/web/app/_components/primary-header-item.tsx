@@ -10,7 +10,6 @@ import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
 import MesaSvg from "@/components/mesa-svg";
 import ProjectSwitcher from "@/components/project-switcher";
-import { api } from "@/trpc/react";
 
 export default function PrimaryHeaderItem({
   teams,
