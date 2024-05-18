@@ -43,12 +43,9 @@ export default async function Deployments({
     tableId: d.deployment.tableId,
   }));
 
-  const chainTypes = new Set();
-  for (const table of tables) {
-    chainTypes.add(
-      chainsMap.get(table.chainId)?.testnet ? "testnet" : "mainnet",
-    );
-  }
+  const chainTypes = tables.reduce((acc, table) => {
+    return acc.add(chainsMap.get(table.chainId)?.testnet);
+  }, new Set<boolean | undefined>());
 
   return (
     <main className="m-4 flex flex-1 flex-col justify-center">
