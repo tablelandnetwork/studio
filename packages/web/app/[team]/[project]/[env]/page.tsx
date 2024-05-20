@@ -117,7 +117,7 @@ export default async function Deployments({
                 SDK.
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
+            <CardContent>
               <HashDisplay
                 hash={project.id}
                 hashDesc="Project ID"
@@ -137,7 +137,7 @@ export default async function Deployments({
                 Tableland SDK.
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
+            <CardContent>
               <HashDisplay
                 hash={env.id}
                 hashDesc="Environment ID"
