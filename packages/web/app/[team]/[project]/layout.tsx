@@ -7,7 +7,7 @@ export default async function ProjectLayout({
 }) {
   return (
     <div className="flex flex-1 items-stretch">
-      <div className="min-w-40 border-r border-[#080A1E] bg-card">
+      <div className="sticky top-[3.55rem] h-[calc(100vh-3.55rem)] min-w-40 overflow-y-auto overflow-x-hidden border-r border-[#080A1E] bg-card">
         <Sidebar />
       </div>
       <div className="w-full">{children}</div>
