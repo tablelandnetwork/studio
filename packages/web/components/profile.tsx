@@ -125,7 +125,7 @@ export default function Profile({
   };
 
   return (
-    <div className="flex flex-row gap-2">
+    <div className="flex items-center gap-2">
       {isConnected && (
         <>
           {/* Wallet content goes here */}
