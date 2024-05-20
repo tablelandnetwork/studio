@@ -24,6 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import { useEffect, useState } from "react";
 
 const socialIconSize = 48;
 
@@ -32,6 +33,11 @@ export default function Share({
   className,
 }: React.HTMLAttributes<HTMLElement> & { project: schema.Project }) {
   const { toast } = useToast();
+  const [url, setUrl] = useState("");
+
+  useEffect(() => {
+    setUrl(window.location.href);
+  }, []);
 
   const handleCopyLink = () => {
     navigator.clipboard
@@ -61,46 +67,44 @@ export default function Share({
     <div className="space-y-4">
       <div className="flex justify-center space-x-4">
         <TwitterShareButton
-          url={window.location.href}
+          url={url}
           className="transform transition duration-100 hover:scale-110"
         >
           <TwitterIcon size={socialIconSize} round />
         </TwitterShareButton>
         <FacebookShareButton
-          url={window.location.href}
+          url={url}
           className="transform transition duration-100 hover:scale-110"
         >
           <FacebookIcon size={socialIconSize} round />
         </FacebookShareButton>
         <RedditShareButton
-          url={window.location.href}
+          url={url}
           className="transform transition duration-100 hover:scale-110"
         >
           <RedditIcon size={socialIconSize} round />
         </RedditShareButton>
         <TelegramShareButton
-          url={window.location.href}
+          url={url}
           className="transform transition duration-100 hover:scale-110"
         >
           <TelegramIcon size={socialIconSize} round />
         </TelegramShareButton>
         <WeiboShareButton
-          url={window.location.href}
+          url={url}
           className="transform transition duration-100 hover:scale-110"
         >
           <WeiboIcon size={socialIconSize} round />
         </WeiboShareButton>
         <EmailShareButton
-          url={window.location.href}
+          url={url}
           className="transform transition duration-100 hover:scale-110"
         >
           <EmailIcon size={socialIconSize} round />
         </EmailShareButton>
       </div>
       <div className="flex items-center justify-center">
-        <p className="text-base text-muted-foreground">
-          {window.location.href}
-        </p>
+        <p className="text-base text-muted-foreground">{url}</p>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
