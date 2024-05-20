@@ -129,7 +129,9 @@ export default function Profile({
       {isConnected && (
         <>
           {/* Wallet content goes here */}
-          {address && !hideAddress && <HashDisplay hash={address} copy />}
+          {address && !hideAddress && (
+            <HashDisplay className="text-sm font-medium" hash={address} copy />
+          )}
           {auth ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
