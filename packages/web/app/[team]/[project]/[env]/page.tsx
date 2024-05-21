@@ -2,6 +2,7 @@ import {
   CircleAlert,
   Database,
   Folder,
+  Info,
   Rows4,
   Share2,
   Table2,
@@ -72,6 +73,15 @@ export default async function Deployments({
           </div>
         )}
         <div className="col-span-2 grid gap-4 lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Info className="text-muted-foreground" />
+                <CardTitle>Project description</CardTitle>
+              </div>
+              <CardDescription>{project.description}</CardDescription>
+            </CardHeader>
+          </Card>
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
