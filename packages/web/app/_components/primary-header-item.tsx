@@ -5,13 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { type schema } from "@tableland/studio-store";
 import { useState } from "react";
+import { skipToken } from "@tanstack/react-query";
+import Image from "next/image";
 import NewTeamForm from "./new-team-form";
 import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
-import MesaSvg from "@/components/mesa-svg";
 import ProjectSwitcher from "@/components/project-switcher";
 import { api } from "@/trpc/react";
-import { skipToken } from "@tanstack/react-query";
+import logo from "@/public/logo.svg";
 
 export default function PrimaryHeaderItem({
   userTeams,
@@ -80,7 +81,7 @@ export default function PrimaryHeaderItem({
 
   const items: React.ReactNode[] = [
     <Link href="/" key="logo">
-      <MesaSvg />
+      <Image src={logo} alt="Tableland Studio" priority={true} />
     </Link>,
   ];
 
@@ -125,15 +126,6 @@ export default function PrimaryHeaderItem({
         />,
       );
     }
-  } else {
-    items.push(
-      <h1
-        className="text-2xl font-normal uppercase text-[#6358dc]"
-        key="studio"
-      >
-        Studio
-      </h1>,
-    );
   }
 
   return <div className="flex flex-row items-center gap-x-3">{items}</div>;
