@@ -8,9 +8,12 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useAccount, useConnect } from "wagmi";
 import { ChevronDown } from "lucide-react";
 import React from "react";
+import { Database, Validator, helpers } from "@tableland/sdk";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -29,18 +32,36 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: Array<ColumnDef<TData, TValue>>;
   data: TData[];
+  chainId: number;
+  tableId: string;
+  tableName: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  chainId,
+  tableId,
+  tableName,
 }: DataTableProps<TData, TValue>) {
+  const { isConnected, address } = useAccount();
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
+  const [showEdit, setShowEdit] = React.useState(false);
+
+  const baseUrl = helpers.getBaseUrl(chainId);
+  const db = new Database({ baseUrl });
+  const validator = new Validator({ baseUrl });
+
+  // Some tables are escaped with the tick mark, need to remove those from the column name
+  const cols = columns.map((col: any) => {
+    const formattedName = col.name.replace(/^`/, "").replace(/`$/, "");
+    return { accessorKey: formattedName, header: formattedName };
+  });
 
   const table = useReactTable({
     data,
-    columns,
+    columns: cols,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -54,13 +75,109 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const cellCount = table.getRowModel().rows[0]?.getVisibleCells().length;
+  const [insertingRow, setInsertingRow] = React.useState(false);
+  const [insertingValues, setInsertingValues] = React.useState({});
+  const [saving, setSaving] = React.useState(false);
+  const toggleInsert = function () {
+    setInsertingRow(!insertingRow);
+  };
+  const setInputValue = function (eve, cellId) {
+    const column = cellId.split("_").pop();
+    setInsertingValues({ ...insertingValues, [column]: eve.target.value });
+  };
+  const commitInsert = async function () {
+    console.log("Saving inserted row");
+    setSaving(true);
+    console.log(insertingValues);
+
+    // TODO: this is tricky... need to map columns back to values and depending on type add ticks or quotes etc...
+    const entries = Object.entries(insertingValues);
+    const cols = entries.map((val) => {
+      const colTicks = columns.find(
+        (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
+      );
+      if (colTicks) return "`" + colTicks.name + "`";
+
+      const colPlain = columns.find((col) => col.name === val[0]);
+      if (colPlain) return colPlain.name;
+    });
+
+    const vals = entries.map((val) => {
+      const col = columns.find(
+        (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
+      );
+
+      if (col.type === "text") return `'${val[1]}'`;
+      return val[1];
+    });
+
+    if (!vals.length || vals.length !== cols.length)
+      throw new Error("cannot build insert statement");
+
+    await db
+      .prepare(
+        `insert into ${tableName} (${cols.join(",")}) values (${vals.join(
+          ",",
+        )});`,
+      )
+      .all();
+
+    // TODO: we need to refresh the data
+
+    setInsertingRow(false);
+    setSaving(false);
+  };
+
+  // TODO: we need a nice way to decide who is allowed to edit.
+  //    e.g. owners can edit and addresses that have been `GRANT`ed insert perms
+  const loadPermission = async function () {
+    const [acl] = await validator.queryByStatement({
+      statement: `select* from system_acl where chain_id=${chainId} and table_id=${tableId}`,
+    });
+
+    const show = isConnected && acl?.controller === address;
+    setShowEdit(show);
+  };
+
+  React.useEffect(function () {
+    loadPermission();
+  }, []);
+
   return (
     <div>
-      <div className="flex items-center">
+      <div className="text-right">
+        {showEdit &&
+          (insertingRow ? (
+            <>
+              <Button
+                variant="secondary"
+                className="ml-4"
+                onClick={commitInsert}
+              >
+                Save
+              </Button>
+              <Button
+                variant="destructive"
+                className="ml-4"
+                onClick={toggleInsert}
+              >
+                Cancel Insert
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant={saving ? "loading" : "outline"}
+              className="ml-4"
+              onClick={toggleInsert}
+            >
+              + Insert Row
+            </Button>
+          ))}
         {!!data.length && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
+              <Button variant="outline" className="ml-4">
                 Columns
                 <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
               </Button>
@@ -107,6 +224,45 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
+            {insertingRow && (
+              <TableRow key="insertonly" data-state="selected">
+                {table.getHeaderGroups()[0].headers?.map((cell) => (
+                  <TableCell key={cell.id}>
+                    <div>
+                      <p className="text-foreground-muted">
+                        type:{" "}
+                        <b>
+                          {
+                            columns.find(
+                              (col) =>
+                                col.name.replace(/^`/, "").replace(/`$/, "") ===
+                                cell.id,
+                            ).type
+                          }
+                        </b>
+                      </p>
+                      <p className="text-foreground-muted">
+                        constraints:{" "}
+                        <b>
+                          {columns
+                            .find(
+                              (col) =>
+                                col.name.replace(/^`/, "").replace(/`$/, "") ===
+                                cell.id,
+                            )
+                            .constraints?.join(", ") || "none"}
+                        </b>
+                      </p>
+                      <Input
+                        name={cell.id}
+                        onChange={(value) => setInputValue(value, cell.id)}
+                      />
+                    </div>
+                  </TableCell>
+                ))}
+              </TableRow>
+            )}
+
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow

@@ -86,15 +86,9 @@ export default async function Table({
     error = ensureError(err);
   }
 
-  const formattedData = data ? objectToTableData(data.results) : undefined;
-  const columns: Array<ColumnDef<unknown>> | undefined = data
-    ? data.results.length
-      ? Object.keys(data.results[0] as object).map((col) => ({
-          accessorKey: col,
-          header: col,
-        }))
-      : []
-    : undefined;
+  const table = await validator.getTableById({ chainId, tableId });
+  const columns = table.schema.columns;
+
   const deploymentReferences = (
     await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);
@@ -238,16 +232,20 @@ export default async function Table({
           {data && <TabsTrigger value="logs">SQL Logs</TabsTrigger>}
           <TabsTrigger value="definition">Definition</TabsTrigger>
         </TabsList>
-        {formattedData && columns && (
-          <TabsContent value="data">
-            <DataTable columns={columns} data={formattedData} />
-          </TabsContent>
-        )}
-        {data && (
-          <TabsContent value="logs">
-            <SQLLogs tables={[{ chainId, tableId }]} />
-          </TabsContent>
-        )}
+
+        <TabsContent value="data">
+          <DataTable
+            columns={columns}
+            data={formattedData}
+            chainId={chainId}
+            tableId={tableId}
+            tableName={tableName}
+          />
+        </TabsContent>
+        <TabsContent value="logs">
+          <SQLLogs tables={[{ chainId, tableId }]} />
+        </TabsContent>
+
         <TabsContent value="definition" className="space-y-4">
           <DefDetails name={defData?.name ?? tableName} schema={schema} />
         </TabsContent>
