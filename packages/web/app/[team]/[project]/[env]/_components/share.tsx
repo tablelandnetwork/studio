@@ -104,17 +104,12 @@ export default function Share({
         </EmailShareButton>
       </div>
       <div className="flex items-center justify-center">
-        <p className="text-base text-muted-foreground">{url}</p>
+        <p className="text-sm text-muted-foreground">{url}</p>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-1 px-2"
-                onClick={handleCopyLink}
-              >
-                <Copy className="text-muted-foreground" />
+              <Button variant="ghost" size="icon" onClick={handleCopyLink}>
+                <Copy className="size-5 text-muted-foreground" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>

@@ -54,11 +54,11 @@ export default async function Deployments({
           <div className="col-span-2 grid gap-4">
             <Card className="col-span-2">
               <CardHeader>
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
+                  <CircleAlert className="text-destructive" />
                   <CardTitle className="text-destructive">
                     Warning: Mainnet/testnet collision
                   </CardTitle>
-                  <CircleAlert className="ml-auto text-destructive" />
                 </div>
                 <CardDescription>
                   Your project includes both tables that have been deployed a
@@ -74,9 +74,9 @@ export default async function Deployments({
         <div className="col-span-2 grid gap-4 lg:col-span-1">
           <Card>
             <CardHeader>
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                <Table2 className="text-muted-foreground" />
                 <CardTitle>Tables</CardTitle>
-                <Table2 className="ml-auto text-muted-foreground" />
               </div>
             </CardHeader>
             <CardContent className="text-center">
@@ -90,9 +90,9 @@ export default async function Deployments({
           </Card>
           <Card>
             <CardHeader>
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                <Share2 className="text-muted-foreground" />
                 <CardTitle>Share project</CardTitle>
-                <Share2 className="ml-auto text-muted-foreground" />
               </div>
               <CardDescription>
                 Please share the {project.name} project to let everyone know
@@ -108,9 +108,9 @@ export default async function Deployments({
         <div className="col-span-2 grid gap-4 lg:col-span-1">
           <Card>
             <CardHeader>
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                <Folder className="text-muted-foreground" />
                 <CardTitle>Project ID</CardTitle>
-                <Folder className="ml-auto text-muted-foreground" />
               </div>
               <CardDescription>
                 Your project ID is useful when using the Studio CLI or Tableland
@@ -128,9 +128,9 @@ export default async function Deployments({
           </Card>
           <Card>
             <CardHeader>
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                <Database className="text-muted-foreground" />
                 <CardTitle>Environment ID</CardTitle>
-                <Database className="ml-auto text-muted-foreground" />
               </div>
               <CardDescription>
                 Your environment ID is useful when using the Studio CLI or
@@ -150,9 +150,9 @@ export default async function Deployments({
         <div className="col-span-2 grid gap-4">
           <Card className="col-span-2">
             <CardHeader>
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                <Rows4 className="text-muted-foreground" />
                 <CardTitle>SQL Logs</CardTitle>
-                <Rows4 className="ml-auto text-muted-foreground" />
               </div>
               <CardDescription>
                 Logs for all write operations to all deployed tables in your
