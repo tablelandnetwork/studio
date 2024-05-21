@@ -218,21 +218,23 @@ export function Sidebar() {
           </div>
         )}
       </SidebarSection>
-      <SidebarSection>
-        <Link
-          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
-        >
-          <Button
-            variant={
-              selectedLayoutSegment === "settings" ? "secondary" : "ghost"
-            }
-            className="w-full justify-start gap-x-2 pl-1"
+      {!!isAuthorizedQuery.data && (
+        <SidebarSection>
+          <Link
+            href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
           >
-            <Settings />
-            Settings
-          </Button>
-        </Link>
-      </SidebarSection>
+            <Button
+              variant={
+                selectedLayoutSegment === "settings" ? "secondary" : "ghost"
+              }
+              className="w-full justify-start gap-x-2 pl-1"
+            >
+              <Settings />
+              Settings
+            </Button>
+          </Link>
+        </SidebarSection>
+      )}
       <NewDefForm
         open={newDefOpen}
         onOpenChange={setNewDefOpen}

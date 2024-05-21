@@ -47,7 +47,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getSession({ cookies: cookies(), headers: headers() });
-  let teams: RouterOutputs["teams"]["userTeams"] = [];
+  let teams: RouterOutputs["teams"]["userTeams"] | undefined;
   if (session.auth) {
     try {
       teams = await cache(api.teams.userTeams)({
@@ -71,7 +71,7 @@ export default async function RootLayout({
               <Hotjar></Hotjar>
               <TRPCReactProvider headers={headers()}>
                 <header className="sticky top-0 z-50 flex items-center justify-between gap-x-10 border-b border-[#080A1E] bg-[#202132] px-4 py-3">
-                  <PrimaryHeaderItem teams={teams} />
+                  <PrimaryHeaderItem userTeams={teams} />
                   <NavPrimary className="ml-auto" />
                   <Profile />
                 </header>

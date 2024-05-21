@@ -71,80 +71,83 @@ export default function TeamSwitcher({
           {selectedTeam.name}
         </Link>
       )}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild disabled={disabled}>
-          <Button
-            variant={variant === "navigation" ? "ghost" : "outline"}
-            size={variant === "navigation" ? "sm" : "default"}
-            role="combobox"
-            aria-expanded={open}
-            aria-label="Select a team"
-            className={cn(
-              "justify-between",
-              variant === "navigation" && "px-0",
-              className,
-            )}
-          >
-            {variant === "select" && (selectedTeam?.name ?? "Select a team...")}
-            <ChevronsUpDown className="m-1 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandList>
-              {/* <CommandInput placeholder="Search team..." /> */}
-              <CommandEmpty>No team found.</CommandEmpty>
-              {teamGroups.map((group) => {
-                if (!group.teams.length) {
-                  return undefined;
-                }
-                return (
-                  <CommandGroup key={group.label} heading={group.label}>
-                    {group.teams.map((groupTeam) => (
+      {teams && (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild disabled={disabled}>
+            <Button
+              variant={variant === "navigation" ? "ghost" : "outline"}
+              size={variant === "navigation" ? "sm" : "default"}
+              role="combobox"
+              aria-expanded={open}
+              aria-label="Select a team"
+              className={cn(
+                "justify-between",
+                variant === "navigation" && "px-0",
+                className,
+              )}
+            >
+              {variant === "select" &&
+                (selectedTeam?.name ?? "Select a team...")}
+              <ChevronsUpDown className="m-1 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0">
+            <Command>
+              <CommandList>
+                {/* <CommandInput placeholder="Search team..." /> */}
+                <CommandEmpty>No team found.</CommandEmpty>
+                {teamGroups.map((group) => {
+                  if (!group.teams.length) {
+                    return undefined;
+                  }
+                  return (
+                    <CommandGroup key={group.label} heading={group.label}>
+                      {group.teams.map((groupTeam) => (
+                        <CommandItem
+                          key={groupTeam.id}
+                          onSelect={() => {
+                            onTeamSelected?.(groupTeam);
+                            setOpen(false);
+                          }}
+                          className="text-sm"
+                        >
+                          {groupTeam.name}
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              selectedTeam?.id === groupTeam.id
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  );
+                })}
+              </CommandList>
+              {onNewTeamSelected && (
+                <>
+                  <CommandSeparator />
+                  <CommandList>
+                    <CommandGroup>
                       <CommandItem
-                        key={groupTeam.id}
                         onSelect={() => {
-                          onTeamSelected?.(groupTeam);
                           setOpen(false);
+                          onNewTeamSelected();
                         }}
-                        className="text-sm"
                       >
-                        {groupTeam.name}
-                        <Check
-                          className={cn(
-                            "ml-auto h-4 w-4",
-                            selectedTeam?.id === groupTeam.id
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
+                        <PlusCircle className="mr-2 h-5 w-5" />
+                        New Team
                       </CommandItem>
-                    ))}
-                  </CommandGroup>
-                );
-              })}
-            </CommandList>
-            {onNewTeamSelected && (
-              <>
-                <CommandSeparator />
-                <CommandList>
-                  <CommandGroup>
-                    <CommandItem
-                      onSelect={() => {
-                        setOpen(false);
-                        onNewTeamSelected();
-                      }}
-                    >
-                      <PlusCircle className="mr-2 h-5 w-5" />
-                      New Team
-                    </CommandItem>
-                  </CommandGroup>
-                </CommandList>
-              </>
-            )}
-          </Command>
-        </PopoverContent>
-      </Popover>
+                    </CommandGroup>
+                  </CommandList>
+                </>
+              )}
+            </Command>
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   );
 }

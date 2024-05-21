@@ -10,11 +10,13 @@ import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
 import MesaSvg from "@/components/mesa-svg";
 import ProjectSwitcher from "@/components/project-switcher";
+import { api } from "@/trpc/react";
+import { skipToken } from "@tanstack/react-query";
 
 export default function PrimaryHeaderItem({
-  teams,
+  userTeams,
 }: {
-  teams: RouterOutputs["teams"]["userTeams"];
+  userTeams?: RouterOutputs["teams"]["userTeams"];
 }) {
   const { team: teamSlug, project: projectSlug } = useParams<{
     team?: string;
@@ -24,11 +26,28 @@ export default function PrimaryHeaderItem({
   const [openNewProjectSheet, setOpenNewProjectSheet] = useState(false);
   const router = useRouter();
 
-  const team = teams.find((team) => team.slug === teamSlug);
+  const foundTeam = userTeams?.find((team) => team.slug === teamSlug);
+  const teamQuery = api.teams.teamBySlug.useQuery(
+    teamSlug && !foundTeam ? { slug: teamSlug } : skipToken,
+  );
+  const team = foundTeam ?? teamQuery.data;
 
-  const project = team?.projects.find(
+  const foundProjects = foundTeam?.projects;
+  const projectsQuery = api.projects.teamProjects.useQuery(
+    !foundTeam && team ? { teamId: team.id } : skipToken,
+  );
+  const projects = foundProjects ?? projectsQuery.data;
+
+  const foundProject = foundProjects?.find(
     (project) => project.slug === projectSlug,
   );
+  const projectQuery = api.projects.projectBySlug.useQuery(
+    !foundProject && team && projectSlug
+      ? { teamId: team.id, slug: projectSlug }
+      : skipToken,
+  );
+  const project = foundProject ?? projectQuery.data;
+
   function onTeamSelected(team: schema.Team) {
     router.push(`/${team.slug}`);
   }
@@ -72,7 +91,7 @@ export default function PrimaryHeaderItem({
       </p>,
       <TeamSwitcher
         selectedTeam={team}
-        teams={teams}
+        teams={userTeams}
         onTeamSelected={onTeamSelected}
         onNewTeamSelected={onNewTeamSelected}
         key="team-switcher"
@@ -92,9 +111,9 @@ export default function PrimaryHeaderItem({
         <ProjectSwitcher
           team={team}
           selectedProject={project}
-          projects={team.projects}
+          projects={projects}
           onProjectSelected={onProjectSelected}
-          onNewProjectSelected={onNewProjectSelected}
+          onNewProjectSelected={foundTeam ? onNewProjectSelected : undefined}
           key="project-switcher"
         />,
         <NewProjectForm
