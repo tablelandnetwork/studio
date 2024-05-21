@@ -71,9 +71,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return team;
       }),
     userTeams: publicProcedure
-      .input(
-        z.object({ userTeamId: z.string().trim().nonempty() }).or(z.void()),
-      )
+      .input(z.object({ userTeamId: z.string().trim().min(1) }).or(z.void()))
       .query(async ({ input, ctx }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -87,7 +85,7 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
         return await store.teams.teamsByMemberId(teamId);
       }),
     userTeamsFromAddress: publicProcedure
-      .input(z.object({ userAddress: z.string().trim().nonempty() }))
+      .input(z.object({ userAddress: z.string().trim().min(1) }))
       .query(async ({ input, ctx }) => {
         const personalTeam = await store.users.userPersonalTeam(
           input?.userAddress,

@@ -9,11 +9,11 @@ export function deploymentsRouter(store: Store) {
         z.object({
           defId: z.string().trim().uuid(),
           environmentId: z.string().trim().uuid(),
-          tableName: z.string().trim().nonempty(),
+          tableName: z.string().trim().min(1),
           chainId: z.number().int().nonnegative(),
-          tableId: z.string().trim().nonempty(),
+          tableId: z.string().trim().min(1),
           blockNumber: z.number().int().nonnegative().optional(),
-          txnHash: z.string().trim().nonempty().optional(),
+          txnHash: z.string().trim().min(1).optional(),
           createdAt: z.date(),
         }),
       )
@@ -59,7 +59,7 @@ export function deploymentsRouter(store: Store) {
       .input(
         z.object({
           chainId: z.number().int().gt(0),
-          tableId: z.string().trim().nonempty(),
+          tableId: z.string().trim().min(1),
         }),
       )
       .query(async ({ input }) => {

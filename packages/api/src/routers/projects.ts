@@ -17,7 +17,7 @@ import { internalError } from "../utils/internalError";
 export function projectsRouter(store: Store) {
   return createTRPCRouter({
     teamProjects: publicProcedure
-      .input(z.object({ teamId: z.string().trim().nonempty() }).or(z.void()))
+      .input(z.object({ teamId: z.string().trim().min(1) }).or(z.void()))
       .query(async ({ ctx, input }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing

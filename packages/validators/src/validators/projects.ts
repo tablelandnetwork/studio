@@ -10,7 +10,7 @@ const projectNameSchema = z
     message: "You can't use a restricted word as a project name.",
   });
 
-const projectDescriptionSchema = z.string().trim().nonempty().max(1024);
+const projectDescriptionSchema = z.string().trim().min(1).max(1024);
 
 export const projectNameAvailableSchema = z.object({
   teamId: z.string().trim().optional(),

@@ -33,7 +33,7 @@ export function generateCreateTableStatement(
   const cleaned = cleanSchema(schema);
   const columnDefinitions = cleaned.columns
     .map((column) => {
-      const definition = `${column.name} ${column.type}`;
+      const definition = `"${column.name}" ${column.type}`;
       const columnConstraints = column.constraints?.length
         ? " " + column.constraints.join(" ")
         : "";
@@ -41,11 +41,13 @@ export function generateCreateTableStatement(
     })
     .join(", ");
 
+  // TODO: When we support creating table contraints in studio,
+  // be sure column names are properly escaped.
   const tableConstraints = cleaned.tableConstraints
     ? cleaned.tableConstraints.join(",")
     : "";
 
-  return `create table ${tableName}(${columnDefinitions}${
+  return `create table "${tableName}"(${columnDefinitions}${
     tableConstraints ? `, ${tableConstraints}` : ""
   });`;
 }

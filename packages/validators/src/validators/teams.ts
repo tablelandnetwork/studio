@@ -2,7 +2,7 @@ import { z } from "zod";
 import { teamNameSchema } from "../common";
 
 export const teamNameAvailableSchema = z.object({
-  teamId: z.string().trim().nonempty().optional(),
+  teamId: z.string().trim().min(1).optional(),
   name: teamNameSchema,
 });
 

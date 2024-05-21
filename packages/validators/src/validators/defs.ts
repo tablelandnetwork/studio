@@ -1,19 +1,15 @@
 import { z } from "zod";
 import { type Schema } from "@tableland/studio-store";
-import { sqliteKeywords } from "../sqlite-keywords";
 import { defNameSchema } from "../common";
 
 const columnNameSchema = z
   .string()
   .trim()
-  .nonempty()
+  .min(1)
   .regex(
     /^(?!\d)[A-Za-z0-9_]+$/,
     "Column name can't start with a number and can contain any combination of letters, numbers, and underscores.",
-  )
-  .refine((val) => !sqliteKeywords.includes(val.toUpperCase()), {
-    message: "You can't use a SQL keyword as a column name.",
-  });
+  );
 
 export const defNameAvailableSchema = z.object({
   projectId: z.string().trim(),
@@ -44,13 +40,13 @@ const schemaSchema: z.ZodType<Schema> = z.object({
     .array(
       z.object({
         name: columnNameSchema,
-        type: z.string().trim().nonempty(),
-        constraints: z.array(z.string().trim().nonempty()).optional(),
+        type: z.string().trim().min(1),
+        constraints: z.array(z.string().trim().min(1)).optional(),
       }),
     )
     .min(1, "At least one column is required.")
     .max(24, "A definition can have at most 24 columns."),
-  defConstraints: z.array(z.string().trim().nonempty()).optional(),
+  defConstraints: z.array(z.string().trim().min(1)).optional(),
 });
 
 export const newDefApiSchema = z.object({

@@ -209,7 +209,7 @@ export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 
 export const teamProcedure = (store: Store) =>
   protectedProcedure
-    .input(z.object({ teamId: z.string().trim().nonempty().optional() }))
+    .input(z.object({ teamId: z.string().trim().min(1).optional() }))
     .use(async ({ ctx, input, next }) => {
       // we want to check for null, undefined, and ""
       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -248,7 +248,7 @@ export const teamAdminProcedure = (store: Store) =>
 
 export const projectProcedure = (store: Store) =>
   protectedProcedure
-    .input(z.object({ projectId: z.string().trim().nonempty() }))
+    .input(z.object({ projectId: z.string().trim().min(1) }))
     .use(async ({ ctx, input, next }) => {
       const team = await store.projects.projectTeamByProjectId(input.projectId);
       if (!team) {

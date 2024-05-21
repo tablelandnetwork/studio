@@ -243,7 +243,7 @@ function getCurrencySymbol(chainId: number) {
   return "ETH";
 }
 
-const ValidStringValue = z.string().trim().nonempty();
+const ValidStringValue = z.string().trim().min(1);
 const ValidString = z.string();
 
 export const helpers = {
