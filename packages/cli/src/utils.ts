@@ -1,12 +1,12 @@
 import readline from "node:readline/promises";
 import { readFileSync, writeFileSync } from "node:fs";
 import {
+  type Provider,
   type Signer,
-  BigNumber,
-  Wallet,
+  formatUnits,
   getDefaultProvider,
-  providers,
-  utils as ethersUtils,
+  JsonRpcProvider,
+  Wallet,
 } from "ethers";
 import { z } from "zod";
 import createKeccakHash from "keccak";
@@ -103,8 +103,8 @@ export function getLink(chain: sdkHelpers.ChainName, hash: string): string {
   } else if (chain === "sepolia") {
     return `https://sepolia.etherscan.io/tx/${hash}`;
   } else if (chain.includes("polygon")) {
-    if (chain.includes("mumbai")) {
-      return `https://mumbai.polygonscan.com/tx/${hash}`;
+    if (chain.includes("amoy")) {
+      return `https://amoy.polygonscan.com/tx/${hash}`;
     }
     return `https://polygonscan.com/tx/${hash}`;
   } else if (chain.includes("optimism")) {
@@ -295,28 +295,29 @@ export const helpers = {
       params.chainId,
     );
 
-    // using `any` to enable indexing unknown method name by string
-    const estGas = contract.contract.estimateGas as any;
-    const gas = await estGas[params.method].apply(
-      estGas[params.method],
+    // get contract's methods via arbitrary method name
+    const tables = contract.contract;
+    const estGas = (method: string) => {
+      const fn = tables.getFunction(method);
+      if (typeof fn.estimateGas !== "function") {
+        throw new Error("contract does not support gas estimation");
+      }
+      return fn.estimateGas;
+    };
+    const gas = await estGas(params.method).apply(
+      estGas(params.method),
       params.args,
     );
 
-    if (!(gas instanceof BigNumber)) {
+    if (!(typeof gas === "bigint")) {
       throw new Error("could not get gas estimation");
     }
 
     const feeData = await params.signer.provider?.getFeeData();
-    // {
-    //   gasPrice: { BigNumber: "23238878592" },
-    //   lastBaseFeePerGas: { BigNumber: "23169890320" },
-    //   maxFeePerGas: { BigNumber: "47839780640" },
-    //   maxPriorityFeePerGas: { BigNumber: "1500000000" }
-    // }
 
     if (feeData?.gasPrice) {
-      const costGwei = feeData?.gasPrice.mul(gas);
-      return `${ethersUtils.formatUnits(costGwei, 18)} ${getCurrencySymbol(
+      const costGwei = feeData?.gasPrice * BigInt(gas);
+      return `${formatUnits(costGwei, 18)} ${getCurrencySymbol(
         params.chainId,
       )}`;
     }
@@ -503,16 +504,16 @@ export const helpers = {
     const wallet = new Wallet(privateKey);
 
     // We want to aquire a provider using the params given by the caller.
-    let provider: providers.BaseProvider | undefined;
+    let provider: Provider | undefined;
     // first we check if a providerUrl was given.
     if (typeof providerUrl === "string" && providerUrl.trim() !== "") {
-      provider = new providers.JsonRpcProvider(providerUrl, network.name);
+      provider = new JsonRpcProvider(providerUrl, network.name);
     }
 
     // Second we will check if the "local-tableland" chain is being used,
     // because the default provider won't work with this chain.
     if (provider == null && network.chainName === "local-tableland") {
-      provider = new providers.JsonRpcProvider("http://127.0.0.1:8545");
+      provider = new JsonRpcProvider("http://127.0.0.1:8545");
     }
 
     // Here we try to use the studio public provider
@@ -526,7 +527,7 @@ export const helpers = {
         const chainId = helpers.getChainId(network.chainName);
         const providerUrl = await helpers.getStudioProvider(chainId, api);
 
-        provider = new providers.JsonRpcProvider(providerUrl, network.name);
+        provider = new JsonRpcProvider(providerUrl, network.name);
       } catch (err) {
         // TODO: not a big fan of swallowing this error, but seems ok here since
         //    we need to try to use the ethers default provider
@@ -551,7 +552,7 @@ export const helpers = {
       throw new Error("unable to create ETH API provider");
     }
 
-    let providerChainId: number | undefined;
+    let providerChainId: bigint | undefined;
     try {
       const providerNetwork = await provider.getNetwork();
       providerChainId = providerNetwork.chainId;
@@ -559,7 +560,7 @@ export const helpers = {
       throw new Error("cannot determine provider chain ID");
     }
 
-    if (providerChainId !== network.chainId) {
+    if (providerChainId.toString() !== network.chainId.toString()) {
       throw new Error("provider / chain mismatch.");
     }
 

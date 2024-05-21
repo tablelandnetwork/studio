@@ -5,13 +5,12 @@ import fs from "fs";
 import { readFile } from "fs/promises";
 import http from "http";
 import { createHash } from "crypto";
-import { NonceManager } from "@ethersproject/experimental";
 import { LocalTableland } from "@tableland/local";
 import { Database, Validator, helpers } from "@tableland/sdk";
 import { appRouter, createTRPCContext } from "@tableland/studio-api";
 import { init } from "@tableland/studio-store";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { Wallet, getDefaultProvider } from "ethers";
+import { NonceManager, Wallet, getDefaultProvider } from "ethers";
 import { after, before } from "mocha";
 import {
   TEST_API_BASE_URL,
@@ -183,6 +182,18 @@ async function startStudioApi({ store }: { store: Store }) {
     try {
       req.url = `${TEST_API_BASE_URL}${req.url as string}`;
       req.headers = new Headers(req.headers);
+      req.json = async function () {
+        return await new Promise(function (resolve, reject) {
+          const body: any[] = [];
+          req
+            .on("data", (chunk: any) => {
+              body.push(chunk);
+            })
+            .on("end", () => {
+              resolve(JSON.parse(Buffer.concat(body).toString()));
+            });
+        });
+      };
       req.text = async function () {
         return await new Promise(function (resolve, reject) {
           const body: any[] = [];

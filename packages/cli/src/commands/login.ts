@@ -1,5 +1,6 @@
 import { SiweMessage } from "siwe";
 import type { Arguments } from "yargs";
+import { helpers as sdkHelpers } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
 import {
   FileStore,
@@ -48,7 +49,7 @@ export const handler = async (
         "Sign in to Studio with your wallet address. This only requires a signature, no transaction will be sent.",
       uri: apiUrl,
       version: "1",
-      chainId: await wallet.getChainId(),
+      chainId: await sdkHelpers.extractChainId({ signer: wallet }),
       nonce: await api.auth.nonce.mutate(),
     });
     const message = rawMessage.prepareMessage();

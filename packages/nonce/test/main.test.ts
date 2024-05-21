@@ -5,10 +5,12 @@ import { after, beforeEach, describe, test } from "mocha";
 import { Wallet, getDefaultProvider } from "ethers";
 import { Redis } from "@upstash/redis";
 import { Database } from "@tableland/sdk";
+import { getAccounts } from "@tableland/local";
 import { NonceManager } from "../src/main";
 import {
   TEST_TIMEOUT_FACTOR,
   TEST_REGISTRY_PORT,
+  TEST_REGISTRY_RPC_URL,
   TEST_VALIDATOR_URL,
 } from "./utils";
 
@@ -17,15 +19,17 @@ const sendTxn = async function (prom: Promise<any>) {
     const result = await prom;
     return { result, threw: false };
   } catch (err: any) {
+    console.log("sendTxn:");
+    console.log(err);
     return { error: err.message, threw: true };
   }
 };
 
-const account2 =
-  "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
-const account2Public = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
-const provider1 = getDefaultProvider(`http://127.0.0.1:${TEST_REGISTRY_PORT}`);
-const provider2 = getDefaultProvider(`http://127.0.0.1:${TEST_REGISTRY_PORT}`);
+const account2Wallet = getAccounts(TEST_REGISTRY_RPC_URL)[2];
+const account2 = account2Wallet.privateKey; // 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
+const account2Public = account2Wallet.address; // 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+const provider1 = getDefaultProvider(TEST_REGISTRY_RPC_URL);
+const provider2 = getDefaultProvider(TEST_REGISTRY_RPC_URL);
 
 if (
   typeof process.env.KV_REST_API_URL !== "string" ||

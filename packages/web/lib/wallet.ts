@@ -1,6 +1,9 @@
-import { Wallet, getDefaultProvider } from "ethers";
+import {
+  Wallet,
+  getDefaultProvider,
+  NonceManager as EthersNonceManager,
+} from "ethers";
 import { NonceManager as TablelandNonceManager } from "@tableland/nonce";
-import { NonceManager as EthersNonceManager } from "@ethersproject/experimental";
 
 if (!process.env.STORE_PRIVATE_KEY) {
   throw new Error("Must provide STORE_PRIVATE_KEY env var.");

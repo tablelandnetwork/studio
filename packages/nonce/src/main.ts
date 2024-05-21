@@ -1,5 +1,14 @@
 import * as dotenv from "dotenv";
-import { ethers } from "ethers";
+import {
+  AbstractSigner,
+  type BlockTag,
+  type Provider,
+  type Signer,
+  type TransactionRequest,
+  type TransactionResponse,
+  type TypedDataDomain,
+  type TypedDataField,
+} from "ethers";
 import { Redis } from "@upstash/redis";
 
 dotenv.config();
@@ -11,9 +20,8 @@ dotenv.config();
 // The logic we need to implement here should follow the ethers.js
 // implementation logic, but the delta from on chain nonce
 
-export class NonceManager extends ethers.Signer {
-  readonly signer: ethers.Signer;
-  readonly provider: ethers.providers.Provider;
+export class NonceManager extends AbstractSigner<Provider> {
+  readonly signer: Signer;
 
   // This redis instance is a singleton in the scope of all NonceManager
   // instances in this process, i.e. each process gets a single redis client.
@@ -21,12 +29,8 @@ export class NonceManager extends ethers.Signer {
 
   _lock: string | undefined;
 
-  constructor(
-    signer: ethers.Signer,
-    opts: { redisUrl: string; redisToken: string },
-  ) {
-    super();
-    if (typeof signer.provider === "undefined") {
+  constructor(signer: Signer, opts: { redisUrl: string; redisToken: string }) {
+    if (signer.provider == null) {
       throw new Error("NonceManager requires a provider at instantiation");
     }
     if (typeof opts.redisUrl !== "string") {
@@ -36,15 +40,15 @@ export class NonceManager extends ethers.Signer {
       throw new Error("NonceManager requires a redis token at instantiation");
     }
 
+    super(signer.provider);
     this.memStore = new Redis({
       url: opts.redisUrl,
       token: opts.redisToken,
     });
     this.signer = signer;
-    this.provider = signer.provider;
   }
 
-  connect(provider: ethers.providers.Provider): ethers.Signer {
+  connect(provider: Provider): NonceManager {
     throw new Error("changing providers in not supported");
   }
 
@@ -52,66 +56,57 @@ export class NonceManager extends ethers.Signer {
     return await this.signer.getAddress();
   }
 
-  async getTransactionCount(
-    blockTag?: ethers.providers.BlockTag,
-  ): Promise<number> {
+  async getNonce(blockTag?: BlockTag): Promise<number> {
     if (blockTag === "pending") {
       await this._acquireLock();
-
-      const currentCount = await this.signer.getTransactionCount("pending");
-      // this returns null if the key doesn't exist
-      const deltaCount = await this.memStore.get(
-        `delta:${await this.getAddress()}`,
+      const address = await this.signer.getAddress();
+      const currentCount = await this.provider.getTransactionCount(
+        address,
+        "pending",
       );
+      // this returns null if the key doesn't exist
+      const deltaCount = await this.memStore.get(`delta:${address}`);
       await this._releaseLock();
-
       return currentCount + (typeof deltaCount === "number" ? deltaCount : 0);
     }
 
-    return await this.signer.getTransactionCount(blockTag);
+    return await super.getNonce(blockTag);
   }
 
-  async setTransactionCount(
-    transactionCount: ethers.BigNumberish | Promise<ethers.BigNumberish>,
-  ): Promise<void> {
+  async reset(): Promise<void> {
     await this._acquireLock();
     await this._resetDelta();
     await this._releaseLock();
   }
 
-  async incrementTransactionCount(count?: number): Promise<number> {
+  async increment(count?: number): Promise<number> {
     return await this.memStore.incrby(
       `delta:${await this.getAddress()}`,
       count == null ? 1 : count,
     );
   }
 
-  async signMessage(message: ethers.Bytes | string): Promise<string> {
+  async signMessage(message: string | Uint8Array): Promise<string> {
     return await this.signer.signMessage(message);
   }
 
-  async signTransaction(
-    transaction: ethers.utils.Deferrable<ethers.providers.TransactionRequest>,
-  ): Promise<string> {
+  async signTransaction(transaction: TransactionRequest): Promise<string> {
     return await this.signer.signTransaction(transaction);
   }
 
   async sendTransaction(
-    transaction: ethers.utils.Deferrable<ethers.providers.TransactionRequest>,
-  ): Promise<ethers.providers.TransactionResponse> {
-    if (transaction.nonce instanceof Promise) {
-      transaction.nonce = await transaction.nonce;
-    }
-
+    transaction: TransactionRequest,
+  ): Promise<TransactionResponse> {
     if (transaction.nonce == null) {
-      transaction = ethers.utils.shallowCopy(transaction);
-      transaction.nonce = await this.getTransactionCount("pending");
-      await this.incrementTransactionCount();
+      transaction = { ...transaction };
+      transaction.nonce = await this.getNonce("pending");
+      await this.increment();
     } else {
-      await this.setTransactionCount(transaction.nonce);
+      await this.reset();
       await this.memStore.incr(`delta:${await this.getAddress()}`);
     }
 
+    transaction = await this.signer.populateTransaction(transaction);
     const tx = await this.signer.sendTransaction(transaction);
 
     this.provider
@@ -119,14 +114,22 @@ export class NonceManager extends ethers.Signer {
       .then(async () => {
         await this._resetDelta();
       })
-      .catch((err) => console.log("Error reseting delta:", err));
+      .catch((err) => console.log("Error resetting delta:", err));
 
     return tx;
   }
 
+  async signTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, TypedDataField[]>,
+    value: Record<string, any>,
+  ): Promise<string> {
+    return await this.signer.signTypedData(domain, types, value);
+  }
+
   // There is one lock per public key.  The "key" is the public key, and the
   // value is something only a single nonce manager instance knows.  This
-  // ensures that only the nonce manager that aquired the lock will release the
+  // ensures that only the nonce manager that acquired the lock will release the
   // lock.
   async _setLock() {
     if (!this._lock) {

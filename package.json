@@ -23,7 +23,8 @@
     "clean": "lerna run clean"
   },
   "devDependencies": {
-    "@tableland/local": "^2.4.1",
+    "@tableland/local": "^3.0.1",
+    "@trpc/server": "^11.0.0-next-beta.318",
     "@types/cookie": "^0.6.0",
     "@types/cosmiconfig": "^6.0.0",
     "@types/inquirer": "^9.0.2",
@@ -66,6 +67,6 @@
     "tailwindcss": "^3.3.2",
     "ts-node": "^10.9.1",
     "tsx": "^3.12.7",
-    "typescript": "^5.0.2"
+    "typescript": "^5.4.5"
   }
 }

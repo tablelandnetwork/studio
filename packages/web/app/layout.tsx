@@ -2,7 +2,7 @@ import { type RouterOutputs, getSession } from "@tableland/studio-api";
 import dynamic from "next/dynamic";
 import { Source_Code_Pro, Source_Sans_3 } from "next/font/google";
 import { headers, cookies } from "next/headers";
-import Script from "next/script";
+// import Script from "next/script";
 import { cache } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import PathAwareHeader from "./_components/path-aware-header";
@@ -81,13 +81,33 @@ export default async function RootLayout({
                 <div className="flex flex-1 flex-col">{children}</div>
                 <Toaster />
               </TRPCReactProvider>
-              <Script
+              <script
+                id="maze"
+                data-document-language="true"
+                dangerouslySetInnerHTML={{
+                  __html: `
+                  (function (m, a, z, e) {var s, t;try {t = m.sessionStorage.getItem('maze-us');} catch (err) {} if (!t) {t = new Date().getTime();try {m.sessionStorage.setItem('maze-us', t);} catch (err) {}} s = a.createElement('script');s.src = z + '?apiKey=' + e;s.async = true;a.getElementsByTagName('head')[0].appendChild(s);m.mazeUniversalSnippetApiKey = e;})(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'ee647aa6-0377-4302-b3f0-67b50f58c48b');
+                  `,
+                }}
+                async
+              ></script>
+              {/* TODO: the script above attempts to implement the same as below with a raw `<script>`. 
+
+                The component below causes a hydration error that breaks all routes...eslint disabling doesn't fix it:
+                ```
+                `next/script`'s `beforeInteractive` strategy should not be used outside of 
+                `pages/_document.js`. See: https://nextjs.org/docs/messages/no-before-interactive-script-outside-document 
+                ```
+                The docs in that link are incorrect, so it's not clear how to fix it. 
+                See this for more detail: https://github.com/vercel/next.js/pull/63401
+               */}
+              {/* <Script
                 id="maze"
                 strategy="beforeInteractive"
                 dangerouslySetInnerHTML={{
                   __html: `(function (m, a, z, e) {var s, t;try {t = m.sessionStorage.getItem('maze-us');} catch (err) {} if (!t) {t = new Date().getTime();try {m.sessionStorage.setItem('maze-us', t);} catch (err) {}} s = a.createElement('script');s.src = z + '?apiKey=' + e;s.async = true;a.getElementsByTagName('head')[0].appendChild(s);m.mazeUniversalSnippetApiKey = e;})(window, document, 'https://snippet.maze.co/maze-universal-loader.js', 'ee647aa6-0377-4302-b3f0-67b50f58c48b');`,
                 }}
-              ></Script>
+              ></Script> */}
               <Analytics />
             </body>
           </html>

@@ -1,6 +1,6 @@
 {
   "name": "@tableland/studio-mail",
-  "version": "0.0.0-pre.0",
+  "version": "0.0.1",
   "repository": "https://github.com/tablelandnetwork/studio/mail",
   "publishConfig": {
     "access": "public"
@@ -21,9 +21,10 @@
   "license": "MIT AND Apache-2.0",
   "dependencies": {
     "@react-email/components": "0.0.6",
+    "@react-email/render": "^0.0.12",
     "postmark": "^3.0.19",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-email": "1.9.3"
   }
 }

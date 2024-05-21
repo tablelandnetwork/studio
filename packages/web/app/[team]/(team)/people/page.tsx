@@ -144,7 +144,7 @@ export default async function People({ params }: { params: { team: string } }) {
                   invite={i.invite}
                   inviter={i.inviter}
                   user={auth.personalTeam}
-                  membership={teamAuthorization!}
+                  membership={teamAuthorization}
                 />
               </div>
             );

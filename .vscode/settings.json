@@ -15,5 +15,16 @@
   ],
   "eslint.codeActionsOnSave.mode": "all",
   "eslint.lintTask.enable": true,
+  "eslint.workingDirectories": [
+    "./packages/api",
+    "./packages/chains",
+    "./packages/cli",
+    "./packages/client",
+    "./packages/mail",
+    "./packages/nonce",
+    "./packages/store",
+    "./packages/validators",
+    "./packages/web"
+  ],
   "typescript.tsdk": "node_modules/typescript/lib"
 }
