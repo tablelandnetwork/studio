@@ -80,7 +80,7 @@ export default function PrimaryHeaderItem({
   }
 
   const items: React.ReactNode[] = [
-    <Link href="/" key="logo">
+    <Link href="/" key="logo" className="shrink-0">
       <Image src={logo} alt="Tableland Studio" priority={true} />
     </Link>,
   ];
