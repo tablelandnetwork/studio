@@ -2,7 +2,7 @@ import { z } from "zod";
 import { type Schema } from "@tableland/studio-store";
 import { defNameSchema } from "../common";
 
-const defDescriptionSchema = z.string().trim().nonempty().max(1024);
+const defDescriptionSchema = z.string().trim().min(1).max(1024);
 
 const columnNameSchema = z
   .string()
@@ -43,7 +43,7 @@ const schemaSchema: z.ZodType<Schema> = z.object({
 
 export const defNameAvailableSchema = z.object({
   projectId: z.string().trim(),
-  defId: z.string().trim().nonempty().optional(),
+  defId: z.string().trim().min(1).optional(),
   name: defNameSchema,
 });
 

@@ -74,8 +74,8 @@ export function deploymentsRouter(store: Store) {
     deploymentByEnvAndDefId: publicProcedure
       .input(
         z.object({
-          envId: z.string().trim().nonempty(),
-          defId: z.string().trim().nonempty(),
+          envId: z.string().trim().min(1),
+          defId: z.string().trim().min(1),
         }),
       )
       .query(async ({ input }) => {

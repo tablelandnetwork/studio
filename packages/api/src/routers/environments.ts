@@ -28,8 +28,8 @@ export function environmentsRouter(store: Store) {
     environmentBySlug: publicProcedure
       .input(
         z.object({
-          projectId: z.string().trim().nonempty(),
-          slug: z.string().trim().nonempty(),
+          projectId: z.string().trim().min(1),
+          slug: z.string().trim().min(1),
         }),
       )
       .query(async ({ input }) => {
