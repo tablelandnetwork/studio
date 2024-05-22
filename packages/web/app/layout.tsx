@@ -5,6 +5,7 @@ import { headers, cookies } from "next/headers";
 // import Script from "next/script";
 import { cache } from "react";
 import { Analytics } from "@vercel/analytics/react";
+import { getBaseUrl } from "@tableland/studio-client";
 import PrimaryHeaderItem from "./_components/primary-header-item";
 import { api } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
@@ -72,6 +73,7 @@ export default async function RootLayout({
               <TRPCReactProvider headers={headers()}>
                 <header className="sticky top-0 z-50 flex items-center justify-between gap-x-10 border-b border-[#080A1E] bg-[#202132] px-4 py-3">
                   <PrimaryHeaderItem userTeams={teams} />
+                  <p>{getBaseUrl()}</p>
                   <NavPrimary className="ml-auto" />
                   <Profile />
                 </header>
