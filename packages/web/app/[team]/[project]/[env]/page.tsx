@@ -105,9 +105,8 @@ export default async function Deployments({
                 <CardTitle>Share project</CardTitle>
               </div>
               <CardDescription>
-                Please share the {project.name} project to let everyone know
-                what you&apos;re working on and help us spread the word about
-                Tableland Studio. Thank you!
+                Share the {project.name} project to let everyone know what
+                you&apos;re working on.
               </CardDescription>
             </CardHeader>
             <CardContent>
