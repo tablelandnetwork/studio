@@ -11,10 +11,10 @@ import {
   RedditShareButton,
   TelegramIcon,
   TelegramShareButton,
-  TwitterIcon,
   TwitterShareButton,
   WeiboIcon,
   WeiboShareButton,
+  XIcon,
 } from "react-share";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 
-const socialIconSize = 48;
+const socialIconSize = 32;
 
 export default function Share({
   project,
@@ -70,7 +70,7 @@ export default function Share({
           url={url}
           className="transform transition duration-100 hover:scale-110"
         >
-          <TwitterIcon size={socialIconSize} round />
+          <XIcon size={socialIconSize} round />
         </TwitterShareButton>
         <FacebookShareButton
           url={url}
