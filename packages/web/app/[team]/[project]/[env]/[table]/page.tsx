@@ -3,6 +3,7 @@ import { cache } from "react";
 import { TRPCError } from "@trpc/server";
 import { getSession } from "@tableland/studio-api";
 import { cookies, headers } from "next/headers";
+import NeedsDeploy from "./_components/needs-deploy";
 import Table from "@/components/table";
 import { api } from "@/trpc/server";
 import {
@@ -65,11 +66,12 @@ export default async function Deployments({
             deploymentData={deployment}
           />
         ) : (
-          <DefDetails
-            def={def}
-            env={!deployment ? env : undefined}
-            isAuthorized={isAuthorized}
-          />
+          <div className="container max-w-2xl space-y-5">
+            {!deployment && (
+              <NeedsDeploy def={def} env={env} isAuthorized={isAuthorized} />
+            )}
+            <DefDetails name={def.name} schema={def.schema} />
+          </div>
         )}
       </TableWrapper>
     </main>

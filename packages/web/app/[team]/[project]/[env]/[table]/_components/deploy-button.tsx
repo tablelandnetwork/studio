@@ -4,8 +4,8 @@ import { Rocket } from "lucide-react";
 import { useState } from "react";
 import { type Schema, type schema } from "@tableland/studio-store";
 import { useRouter } from "next/navigation";
-import ExecDeployment from "./exec-deployment";
-import { Button } from "./ui/button";
+import ExecDeployment from "@/components/exec-deployment";
+import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 
 export default function DeployButton({

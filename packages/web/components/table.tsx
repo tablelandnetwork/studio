@@ -193,7 +193,7 @@ export default async function Table({
         <TabsList>
           <TabsTrigger value="data">Table Data</TabsTrigger>
           <TabsTrigger value="logs">SQL Logs</TabsTrigger>
-          {defData && <TabsTrigger value="definition">Definition</TabsTrigger>}
+          <TabsTrigger value="definition">Definition</TabsTrigger>
         </TabsList>
         <TabsContent value="data">
           <DataTable columns={columns} data={formattedData} />
@@ -201,11 +201,9 @@ export default async function Table({
         <TabsContent value="logs">
           <SQLLogs tables={[{ chainId, tableId }]} />
         </TabsContent>
-        {defData && (
-          <TabsContent value="definition">
-            <DefDetails def={{ ...defData, schema }} />
-          </TabsContent>
-        )}
+        <TabsContent value="definition" className="space-y-4">
+          <DefDetails name={defData?.name ?? tableName} schema={schema} />
+        </TabsContent>
       </Tabs>
     </div>
   );
