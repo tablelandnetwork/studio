@@ -148,11 +148,47 @@ export function Sidebar() {
         </Link>
       </SidebarSection>
       <SidebarSection>
-        <div className="flex items-center pl-1">
-          <Table2 className="mr-2" />
+        <div className="flex items-center gap-2 pl-1">
+          <Table2 className="shrink-0" />
           <h2 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
             Tables
           </h2>
+          {!!isAuthorizedQuery.data && (
+            <>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setNewDefOpen(true)}
+                    >
+                      <Plus className="size-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>New table</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setImportTableOpen(true)}
+                    >
+                      <Import className="size-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Import table</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </>
+          )}
         </div>
         {defsQuery.data?.map((def) => {
           const deployment = deploymentsMapQuery.data?.get(def.id);
@@ -181,42 +217,6 @@ export function Sidebar() {
             </Link>
           );
         })}
-        {!!isAuthorizedQuery.data && (
-          <div className="flex flex-1 items-center justify-center gap-x-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setNewDefOpen(true)}
-                  >
-                    <Plus />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>New table</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setImportTableOpen(true)}
-                  >
-                    <Import />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Import table</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
       </SidebarSection>
       {!!isAuthorizedQuery.data && (
         <SidebarSection>
