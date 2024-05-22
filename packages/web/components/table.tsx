@@ -29,7 +29,6 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
-import { objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
@@ -235,9 +234,7 @@ export default async function Table({
 
         <TabsContent value="data">
           <DataTable
-            // @ts-ignore
             columns={columns}
-            data={formattedData}
             chainId={chainId}
             tableId={tableId}
             tableName={tableName}

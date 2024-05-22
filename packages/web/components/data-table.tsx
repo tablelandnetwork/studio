@@ -9,9 +9,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useAccount, useConnect } from "wagmi";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import React from "react";
 import { Database, Validator, helpers } from "@tableland/sdk";
+import { objectToTableData } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,9 +30,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+type PartialRequired<T, S extends keyof T> = Omit<Required<T>, S> & Partial<Pick<T, S>>;
+
 interface DataTableProps<TData, TValue> {
-  columns: Array<ColumnDef<TData, TValue>>;
-  data: TData[];
+  columns: PartialRequired<{ readonly name?: string | undefined; readonly type?: string | undefined; readonly constraints?: readonly string[] | undefined; }, "constraints">[];
   chainId: number;
   tableId: string;
   tableName: string;
@@ -39,7 +41,6 @@ interface DataTableProps<TData, TValue> {
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
   chainId,
   tableId,
   tableName,
@@ -48,9 +49,10 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [showEdit, setShowEdit] = React.useState(false);
+  const [data, setData] = React.useState([]);
 
   const baseUrl = helpers.getBaseUrl(chainId);
-  const db = new Database({ baseUrl });
+  const db = new Database({ baseUrl, autoWait: true });
   const validator = new Validator({ baseUrl });
 
   // Some tables are escaped with the tick mark, need to remove those from the column name
@@ -82,38 +84,34 @@ export function DataTable<TData, TValue>({
   const toggleInsert = function () {
     setInsertingRow(!insertingRow);
   };
-  const setInputValue = function (eve: Event, cellId: string) {
+  const setInputValue = function (eve: React.FormEvent<HTMLInputElement>, cellId: string) {
     const column = cellId.split("_").pop();
     if (typeof column !== "string") throw new Error("invalid cell id");
-    // @ts-ignore
-    setInsertingValues({ ...insertingValues, [column]: eve.target.value });
+
+    // TODO: Not sure why I have to type cast here.
+    setInsertingValues({ ...insertingValues, [column]: (eve.target as HTMLInputElement).value });
   };
   const commitInsert = async function () {
-    console.log("Saving inserted row");
     setSaving(true);
-    console.log(insertingValues);
 
-    // TODO: this is tricky... need to map columns back to values and depending on type add ticks or quotes etc...
+    // this is tricky... need to map columns back to values and depending on
+    // column name and data type add ticks or quotes etc...
     const entries = Object.entries(insertingValues);
     const cols = entries.map((val) => {
       const colTicks = columns.find(
-        // @ts-ignore
         (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
       );
-      // @ts-ignore
       if (colTicks) return "`" + colTicks.name + "`";
-      // @ts-ignore
+
       const colPlain = columns.find((col) => col.name === val[0]);
-      // @ts-ignore
       if (colPlain) return colPlain.name;
     });
 
     const vals = entries.map((val) => {
       const col = columns.find(
-        // @ts-ignore
         (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
       );
-      // @ts-ignore
+
       if (col?.type === "text") return `'${val[1]}'`;
       return val[1];
     });
@@ -121,33 +119,56 @@ export function DataTable<TData, TValue>({
     if (!vals.length || vals.length !== cols.length)
       throw new Error("cannot build insert statement");
 
-    await db
-      .prepare(
-        `insert into ${tableName} (${cols.join(",")}) values (${vals.join(
-          ",",
-        )});`,
-      )
-      .all();
+    try {
+      await db
+        .prepare(
+          `insert into ${tableName} (${cols.join(",")}) values (${vals.join(
+            ",",
+          )});`,
+        )
+        .all();
 
-    // TODO: we need to refresh the data
+      await refreshData();
+      setInsertingRow(false);
+      setSaving(false);
+    } catch (err: any) {
+      console.log(err);
+      setInsertingRow(false);
+      setSaving(false);
 
-    setInsertingRow(false);
-    setSaving(false);
+      throw err;
+    }
   };
 
   // TODO: we need a nice way to decide who is allowed to edit.
   //    e.g. owners can edit and addresses that have been `GRANT`ed insert perms
   const loadPermission = async function () {
-    const [acl] = await validator.queryByStatement({
-      statement: `select* from system_acl where chain_id=${chainId} and table_id=${tableId}`,
+    const [acl] = await validator.queryByStatement<{
+      chain_id: number;
+      controller: string;
+      created_at: number;
+      privileges: number;
+      table_id: number;
+      updated_at: number | null;
+    }>({
+      statement: `select * from system_acl where chain_id=${chainId} and table_id=${tableId}`,
     });
-    // @ts-ignore
-    const show = isConnected && acl?.controller === address;
-    setShowEdit(show);
-  };
 
+    if (!isConnected) return setShowEdit(false);
+    if (typeof acl.controller !== "string") setShowEdit(false);
+    if (acl.controller !== address) setShowEdit(false);
+
+    setShowEdit(true);
+  };
   React.useEffect(function () {
     loadPermission();
+  }, []);
+  const refreshData = async function () {
+    const data = await db.prepare(`SELECT * FROM ${tableName};`).all();
+    setData(objectToTableData(data.results));
+  };
+  React.useEffect(function () {
+    refreshData();
   }, []);
 
   return (
@@ -156,25 +177,28 @@ export function DataTable<TData, TValue>({
         {showEdit &&
           (insertingRow ? (
             <>
-              <Button
-                variant="secondary"
-                className="ml-4"
-                onClick={commitInsert}
-              >
-                Save
-              </Button>
-              <Button
+              {!saving && (<Button
                 variant="destructive"
                 className="ml-4"
                 onClick={toggleInsert}
               >
                 Cancel Insert
+              </Button>)}
+              <Button
+                variant="outline"
+                className="ml-4"
+                disabled={saving}
+                onClick={commitInsert}
+              >
+                {saving && (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                )}
+                Save
               </Button>
             </>
           ) : (
             <Button
-              // @ts-ignore
-              variant={saving ? "loading" : "outline"}
+              variant="outline"
               className="ml-4"
               onClick={toggleInsert}
             >
@@ -240,13 +264,10 @@ export function DataTable<TData, TValue>({
                         type:{" "}
                         <b>
                           {
-                            // @ts-ignore
                             columns.find(
                               (col) =>
-                                // @ts-ignore
                                 col.name.replace(/^`/, "").replace(/`$/, "") ===
                                 cell.id,
-                            // @ts-ignore
                             )?.type
                           }
                         </b>
@@ -254,17 +275,12 @@ export function DataTable<TData, TValue>({
                       <p className="text-foreground-muted">
                         constraints:{" "}
                         <b>
-                          {
-                          // @ts-ignore
-                          columns
-                            .find(
-                              (col) =>
-                                // @ts-ignore
-                                col.name.replace(/^`/, "").replace(/`$/, "") ===
-                                cell.id,
-                            )
-                            // @ts-ignore
-                            .constraints?.join(", ") || "none"}
+                          { 
+                            typeof columns !== "undefined" && 
+                            columns.find((col: any) => {
+                                return col.name.replace(/^`/, "").replace(/`$/, "") === cell.id;
+                            })?.constraints?.join(", ")
+                          }
                         </b>
                       </p>
                       <Input
