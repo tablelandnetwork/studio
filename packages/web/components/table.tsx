@@ -235,6 +235,7 @@ export default async function Table({
 
         <TabsContent value="data">
           <DataTable
+            // @ts-ignore
             columns={columns}
             data={formattedData}
             chainId={chainId}

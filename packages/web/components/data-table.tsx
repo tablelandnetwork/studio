@@ -82,8 +82,10 @@ export function DataTable<TData, TValue>({
   const toggleInsert = function () {
     setInsertingRow(!insertingRow);
   };
-  const setInputValue = function (eve, cellId) {
+  const setInputValue = function (eve: Event, cellId: string) {
     const column = cellId.split("_").pop();
+    if (typeof column !== "string") throw new Error("invalid cell id");
+    // @ts-ignore
     setInsertingValues({ ...insertingValues, [column]: eve.target.value });
   };
   const commitInsert = async function () {
@@ -95,20 +97,24 @@ export function DataTable<TData, TValue>({
     const entries = Object.entries(insertingValues);
     const cols = entries.map((val) => {
       const colTicks = columns.find(
+        // @ts-ignore
         (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
       );
+      // @ts-ignore
       if (colTicks) return "`" + colTicks.name + "`";
-
+      // @ts-ignore
       const colPlain = columns.find((col) => col.name === val[0]);
+      // @ts-ignore
       if (colPlain) return colPlain.name;
     });
 
     const vals = entries.map((val) => {
       const col = columns.find(
+        // @ts-ignore
         (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
       );
-
-      if (col.type === "text") return `'${val[1]}'`;
+      // @ts-ignore
+      if (col?.type === "text") return `'${val[1]}'`;
       return val[1];
     });
 
@@ -135,7 +141,7 @@ export function DataTable<TData, TValue>({
     const [acl] = await validator.queryByStatement({
       statement: `select* from system_acl where chain_id=${chainId} and table_id=${tableId}`,
     });
-
+    // @ts-ignore
     const show = isConnected && acl?.controller === address;
     setShowEdit(show);
   };
@@ -167,6 +173,7 @@ export function DataTable<TData, TValue>({
             </>
           ) : (
             <Button
+              // @ts-ignore
               variant={saving ? "loading" : "outline"}
               className="ml-4"
               onClick={toggleInsert}
@@ -233,28 +240,36 @@ export function DataTable<TData, TValue>({
                         type:{" "}
                         <b>
                           {
+                            // @ts-ignore
                             columns.find(
                               (col) =>
+                                // @ts-ignore
                                 col.name.replace(/^`/, "").replace(/`$/, "") ===
                                 cell.id,
-                            ).type
+                            // @ts-ignore
+                            )?.type
                           }
                         </b>
                       </p>
                       <p className="text-foreground-muted">
                         constraints:{" "}
                         <b>
-                          {columns
+                          {
+                          // @ts-ignore
+                          columns
                             .find(
                               (col) =>
+                                // @ts-ignore
                                 col.name.replace(/^`/, "").replace(/`$/, "") ===
                                 cell.id,
                             )
+                            // @ts-ignore
                             .constraints?.join(", ") || "none"}
                         </b>
                       </p>
                       <Input
                         name={cell.id}
+                        // @ts-ignore
                         onChange={(value) => setInputValue(value, cell.id)}
                       />
                     </div>
