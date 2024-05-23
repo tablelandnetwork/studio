@@ -43,7 +43,6 @@ export default function Profile({
   const logout = api.auth.logout.useMutation({
     onSuccess: () => {
       setAuth(undefined);
-      router.push("/");
       router.refresh();
     },
   });
@@ -99,6 +98,15 @@ export default function Profile({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, router]);
 
+  // If our user session's address no longer matches
+  // the connected wallet address, log out. This can
+  // happen if the user switches the connected wallet address.
+  useEffect(() => {
+    if (auth && address && auth.user.address !== address) {
+      logout.mutate();
+    }
+  }, [address, auth, logout]);
+
   const onSignInSuccess = ({ auth }: { auth: Auth | undefined }) => {
     if (auth) {
       router.refresh();
@@ -126,66 +134,67 @@ export default function Profile({
 
   return (
     <div className="flex items-center gap-2">
-      {isConnected && (
-        <>
-          {/* Wallet content goes here */}
-          {address && !hideAddress && (
-            <HashDisplay className="text-sm font-medium" hash={address} copy />
-          )}
-          {auth ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={`https://avatar.vercel.sh/${auth.personalTeam.slug}.png`}
-                      alt={auth.personalTeam.name}
-                    />
-                    <AvatarFallback>
-                      {auth.personalTeam.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {auth.personalTeam.name}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {/* <DropdownMenuGroup> */}
-                {/* <DropdownMenuItem> */}
-                {/* <Settings className="mr-2 h-4 w-4" /> */}
-                {/* <span>Settings</span> */}
-                {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
-                {/* </DropdownMenuItem> */}
-                {/* </DropdownMenuGroup> */}
-                {/* <DropdownMenuSeparator /> */}
-                <DropdownMenuItem onClick={() => logout.mutate()}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                  {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <SignInButton onSuccess={onSignInSuccess} onError={onSignInError} />
-          )}
-        </>
-      )}
-      {!isConnected && (
+      {!isConnected ? (
         <Button
           onClick={() => connect({ connector: connectors[0] })}
           disabled={isLoading}
         >
           Connect Wallet
         </Button>
+      ) : (
+        address &&
+        !hideAddress && (
+          <HashDisplay className="text-sm font-medium" hash={address} copy />
+        )
+      )}
+      {auth ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src={`https://avatar.vercel.sh/${auth.personalTeam.slug}.png`}
+                  alt={auth.personalTeam.name}
+                />
+                <AvatarFallback>
+                  {auth.personalTeam.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-0">
+                <p className="text-sm font-medium leading-none">
+                  {auth.personalTeam.name}
+                </p>
+                <HashDisplay
+                  className="text-xs"
+                  hash={auth.user.address}
+                  numCharacters={6}
+                />
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {/* <DropdownMenuGroup> */}
+            {/* <DropdownMenuItem> */}
+            {/* <Settings className="mr-2 h-4 w-4" /> */}
+            {/* <span>Settings</span> */}
+            {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
+            {/* </DropdownMenuItem> */}
+            {/* </DropdownMenuGroup> */}
+            {/* <DropdownMenuSeparator /> */}
+            <DropdownMenuItem onClick={() => logout.mutate()}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign out</span>
+              {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        isConnected && (
+          <SignInButton onSuccess={onSignInSuccess} onError={onSignInError} />
+        )
       )}
       <RegistrationDialog
         showDialog={showRegisterDialog}
