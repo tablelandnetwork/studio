@@ -146,8 +146,21 @@ export function Sidebar() {
             Overview
           </Button>
         </Link>
-      </SidebarSection>
-      <SidebarSection>
+        {!!isAuthorizedQuery.data && (
+          <Link
+            href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
+          >
+            <Button
+              variant={
+                selectedLayoutSegment === "settings" ? "secondary" : "ghost"
+              }
+              className="w-full justify-start gap-x-2 pl-1"
+            >
+              <Settings />
+              Settings
+            </Button>
+          </Link>
+        )}
         <div className="flex items-center gap-2 pl-1">
           <Table2 className="shrink-0" />
           <h2 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
@@ -218,23 +231,6 @@ export function Sidebar() {
           );
         })}
       </SidebarSection>
-      {!!isAuthorizedQuery.data && (
-        <SidebarSection>
-          <Link
-            href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
-          >
-            <Button
-              variant={
-                selectedLayoutSegment === "settings" ? "secondary" : "ghost"
-              }
-              className="w-full justify-start gap-x-2 pl-1"
-            >
-              <Settings />
-              Settings
-            </Button>
-          </Link>
-        </SidebarSection>
-      )}
       <NewDefForm
         open={newDefOpen}
         onOpenChange={setNewDefOpen}
