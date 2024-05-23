@@ -24,7 +24,6 @@ export interface CommandOptions extends GlobalOptions {
   sanitize?: boolean;
 }
 
-// note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = wrapText("import <sub>");
 export const desc = wrapText(
   `Import existing Tableland tables into a project, either individually or in bulk from a CSV file.`,
