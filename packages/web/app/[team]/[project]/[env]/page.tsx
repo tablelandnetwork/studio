@@ -2,7 +2,6 @@ import {
   CircleAlert,
   Database,
   Folder,
-  Info,
   Rows4,
   Share2,
   Table2,
@@ -25,6 +24,12 @@ import {
 } from "@/components/ui/card";
 import { chainsMap } from "@/lib/chains-map";
 import HashDisplay from "@/components/hash-display";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default async function Deployments({
   params,
@@ -50,6 +55,19 @@ export default async function Deployments({
 
   return (
     <main className="m-4 flex flex-1 flex-col justify-center">
+      <h1 className="text-3xl font-medium">{project.name}</h1>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <p className="line-clamp-1 max-w-md text-muted-foreground">
+              {project.description}
+            </p>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-xs">{project.description}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <div className="m-auto grid max-w-4xl items-start justify-center gap-4 md:grid-cols-2">
         {chainTypes.size > 1 && (
           <div className="col-span-2 grid gap-4">
@@ -73,15 +91,6 @@ export default async function Deployments({
           </div>
         )}
         <div className="col-span-2 grid gap-4 lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Info className="text-muted-foreground" />
-                <CardTitle>Project description</CardTitle>
-              </div>
-              <CardDescription>{project.description}</CardDescription>
-            </CardHeader>
-          </Card>
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">

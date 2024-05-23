@@ -20,25 +20,25 @@ export default async function TableWrapper({
 }) {
   return (
     <div className="flex-1 space-y-4">
-      <div className="flex items-end justify-between">
-        <div>
+      <div className="space-y-2">
+        <div className="flex items-center gap-4">
           <h1 className="text-3xl font-medium">{displayName}</h1>
-          {description && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="line-clamp-1 max-w-md text-muted-foreground">
-                    {description}
-                  </p>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">{description}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          {isAuthenticated && <TableMenu {...props} />}
         </div>
-        {isAuthenticated && <TableMenu {...props} />}
+        {description && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="line-clamp-1 max-w-md text-muted-foreground">
+                  {description}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs">{description}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
       {children}
     </div>
