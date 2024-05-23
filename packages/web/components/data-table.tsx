@@ -1,14 +1,13 @@
 "use client";
 
 import {
-  type ColumnDef,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useAccount, useConnect } from "wagmi";
+import { useAccount } from "wagmi";
 import { ChevronDown, Loader2 } from "lucide-react";
 import React from "react";
 import { Database, Validator, helpers } from "@tableland/sdk";
@@ -30,21 +29,31 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type PartialRequired<T, S extends keyof T> = Omit<Required<T>, S> & Partial<Pick<T, S>>;
+type PartialRequired<T, S extends keyof T> = Omit<Required<T>, S> &
+  Partial<Pick<T, S>>;
 
-interface DataTableProps<TData, TValue> {
-  columns: PartialRequired<{ readonly name?: string | undefined; readonly type?: string | undefined; readonly constraints?: readonly string[] | undefined; }, "constraints">[];
+interface DataTableProps {
+  columns: Array<
+    PartialRequired<
+      {
+        readonly name?: string | undefined;
+        readonly type?: string | undefined;
+        readonly constraints?: readonly string[] | undefined;
+      },
+      "constraints"
+    >
+  >;
   chainId: number;
   tableId: string;
   tableName: string;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable({
   columns,
   chainId,
   tableId,
   tableName,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps) {
   const { isConnected, address } = useAccount();
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -77,19 +86,24 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const cellCount = table.getRowModel().rows[0]?.getVisibleCells().length;
   const [insertingRow, setInsertingRow] = React.useState(false);
   const [insertingValues, setInsertingValues] = React.useState({});
   const [saving, setSaving] = React.useState(false);
   const toggleInsert = function () {
     setInsertingRow(!insertingRow);
   };
-  const setInputValue = function (eve: React.FormEvent<HTMLInputElement>, cellId: string) {
+  const setInputValue = function (
+    eve: React.FormEvent<HTMLInputElement>,
+    cellId: string,
+  ) {
     const column = cellId.split("_").pop();
     if (typeof column !== "string") throw new Error("invalid cell id");
 
     // TODO: Not sure why I have to type cast here.
-    setInsertingValues({ ...insertingValues, [column]: (eve.target as HTMLInputElement).value });
+    setInsertingValues({
+      ...insertingValues,
+      [column]: (eve.target as HTMLInputElement).value,
+    });
   };
   const commitInsert = async function () {
     setSaving(true);
@@ -97,22 +111,27 @@ export function DataTable<TData, TValue>({
     // this is tricky... need to map columns back to values and depending on
     // column name and data type add ticks or quotes etc...
     const entries = Object.entries(insertingValues);
-    const cols = entries.map((val) => {
-      const colTicks = columns.find(
-        (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
-      );
-      if (colTicks) return "`" + colTicks.name + "`";
+    const cols = entries
+      .map((val) => {
+        const colTicks = columns.find(
+          (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
+        );
+        if (colTicks) return "`" + colTicks.name + "`";
 
-      const colPlain = columns.find((col) => col.name === val[0]);
-      if (colPlain) return colPlain.name;
-    });
+        const colPlain = columns.find((col) => col.name === val[0]);
+        if (colPlain) return colPlain.name;
+
+        return "";
+      })
+      .filter((v) => v);
 
     const vals = entries.map((val) => {
       const col = columns.find(
         (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
       );
 
-      if (col?.type === "text") return `'${val[1]}'`;
+      // casting to ignore @typescript-eslint/restrict-template-expressions lint rule
+      if (col?.type === "text") return `'${val[1] as string}'`;
       return val[1];
     });
 
@@ -161,14 +180,14 @@ export function DataTable<TData, TValue>({
     setShowEdit(true);
   };
   React.useEffect(function () {
-    loadPermission();
+    loadPermission().catch((e) => console.log(e));
   }, []);
   const refreshData = async function () {
     const data = await db.prepare(`SELECT * FROM ${tableName};`).all();
     setData(objectToTableData(data.results));
   };
   React.useEffect(function () {
-    refreshData();
+    refreshData().catch((e) => console.log(e));
   }, []);
 
   return (
@@ -177,31 +196,29 @@ export function DataTable<TData, TValue>({
         {showEdit &&
           (insertingRow ? (
             <>
-              {!saving && (<Button
-                variant="destructive"
-                className="ml-4"
-                onClick={toggleInsert}
-              >
-                Cancel Insert
-              </Button>)}
+              {!saving && (
+                <Button
+                  variant="destructive"
+                  className="ml-4"
+                  onClick={toggleInsert}
+                >
+                  Cancel Insert
+                </Button>
+              )}
               <Button
                 variant="outline"
                 className="ml-4"
                 disabled={saving}
-                onClick={commitInsert}
+                onClick={() => {
+                  commitInsert().catch((e) => e);
+                }}
               >
-                {saving && (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                )}
+                {saving && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                 Save
               </Button>
             </>
           ) : (
-            <Button
-              variant="outline"
-              className="ml-4"
-              onClick={toggleInsert}
-            >
+            <Button variant="outline" className="ml-4" onClick={toggleInsert}>
               + Insert Row
             </Button>
           ))}
@@ -275,17 +292,20 @@ export function DataTable<TData, TValue>({
                       <p className="text-foreground-muted">
                         constraints:{" "}
                         <b>
-                          { 
-                            typeof columns !== "undefined" && 
-                            columns.find((col: any) => {
-                                return col.name.replace(/^`/, "").replace(/`$/, "") === cell.id;
-                            })?.constraints?.join(", ")
-                          }
+                          {typeof columns !== "undefined" &&
+                            columns
+                              .find((col: any) => {
+                                return (
+                                  col.name
+                                    .replace(/^`/, "")
+                                    .replace(/`$/, "") === cell.id
+                                );
+                              })
+                              ?.constraints?.join(", ")}
                         </b>
                       </p>
                       <Input
                         name={cell.id}
-                        // @ts-ignore
                         onChange={(value) => setInputValue(value, cell.id)}
                       />
                     </div>

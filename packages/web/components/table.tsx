@@ -1,6 +1,4 @@
-import { Database, type Schema, helpers, type Result } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import { type ColumnDef } from "@tanstack/react-table";
 import {
   Blocks,
   Coins,
@@ -10,6 +8,7 @@ import {
   Table2,
   Workflow,
 } from "lucide-react";
+import { Validator, type Schema, helpers } from "@tableland/sdk";
 import Link from "next/link";
 import { type RouterOutputs } from "@tableland/studio-api";
 import { DataTable } from "./data-table";
@@ -75,15 +74,8 @@ export default async function Table({
   const blockExplorer = blockExplorers.get(chainId);
   const openSeaLink = openSeaLinks.get(chainId);
 
-  let data: Result<Record<string, unknown>> | undefined;
-  let error: Error | undefined;
-  try {
-    const baseUrl = helpers.getBaseUrl(chainId);
-    const tbl = new Database({ baseUrl });
-    data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
-  } catch (err) {
-    error = ensureError(err);
-  }
+  const baseUrl = helpers.getBaseUrl(chainId);
+  const validator = new Validator({ baseUrl });
 
   const table = await validator.getTableById({ chainId, tableId });
   const columns = table.schema.columns;
@@ -223,13 +215,11 @@ export default async function Table({
           </MetricCard>
         )}
       </div>
-      <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
+      <Tabs defaultValue="definition"} className="py-4">
         <TabsList>
-          {formattedData && columns && (
-            <TabsTrigger value="data">Table Data</TabsTrigger>
-          )}
-          {data && <TabsTrigger value="logs">SQL Logs</TabsTrigger>}
           <TabsTrigger value="definition">Definition</TabsTrigger>
+          <TabsTrigger value="data">Table Data</TabsTrigger>
+          <TabsTrigger value="logs">SQL Logs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="data">
