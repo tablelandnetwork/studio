@@ -57,7 +57,7 @@ export function DataTable({
   const { isConnected, address } = useAccount();
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [showEdit, setShowEdit] = React.useState(false);
+  const [canInsert, setCanInsert] = React.useState(false);
   const [data, setData] = React.useState([]);
 
   const baseUrl = helpers.getBaseUrl(chainId);
@@ -139,6 +139,8 @@ export function DataTable({
       throw new Error("cannot build insert statement");
 
     try {
+      // TODO: need to confirm the wallet is connected to the right chain
+
       await db
         .prepare(
           `insert into ${tableName} (${cols.join(",")}) values (${vals.join(
@@ -159,8 +161,7 @@ export function DataTable({
     }
   };
 
-  // TODO: we need a nice way to decide who is allowed to edit.
-  //    e.g. owners can edit and addresses that have been `GRANT`ed insert perms
+  // privileges greater than or equal 4 means the address can insert
   const loadPermission = async function () {
     const [acl] = await validator.queryByStatement<{
       chain_id: number;
@@ -170,14 +171,19 @@ export function DataTable({
       table_id: number;
       updated_at: number | null;
     }>({
-      statement: `select * from system_acl where chain_id=${chainId} and table_id=${tableId}`,
+      statement: `select * from system_acl
+        where chain_id = ${chainId}
+          and table_id = ${tableId}
+          and controller = '${address}'
+          and privileges >= 4`
     });
 
-    if (!isConnected) return setShowEdit(false);
-    if (typeof acl.controller !== "string") setShowEdit(false);
-    if (acl.controller !== address) setShowEdit(false);
+    if (!isConnected) return setCanInsert(false);
+    if (typeof acl.controller !== "string") setCanInsert(false);
+    if (acl.controller !== address) setCanInsert(false);
 
-    setShowEdit(true);
+
+    setCanInsert(true);
   };
   React.useEffect(function () {
     loadPermission().catch((e) => console.log(e));
@@ -193,35 +199,33 @@ export function DataTable({
   return (
     <div>
       <div className="text-right">
-        {showEdit &&
-          (insertingRow ? (
-            <>
-              {!saving && (
-                <Button
-                  variant="destructive"
-                  className="ml-4"
-                  onClick={toggleInsert}
-                >
-                  Cancel Insert
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                className="ml-4"
-                disabled={saving}
-                onClick={() => {
-                  commitInsert().catch((e) => e);
-                }}
-              >
-                {saving && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                Save
-              </Button>
-            </>
-          ) : (
-            <Button variant="outline" className="ml-4" onClick={toggleInsert}>
-              + Insert Row
-            </Button>
-          ))}
+        {canInsert && insertingRow && !saving && (
+          <Button
+            variant="secondary"
+            className="ml-4"
+            onClick={toggleInsert}
+          >
+            Cancel Insert
+          </Button>
+        )}
+        {canInsert && insertingRow && (
+          <Button
+            className="ml-4"
+            disabled={saving}
+            onClick={() => {
+              commitInsert().catch((e) => e);
+            }}
+          >
+            {saving && <Loader2 className="h-5 w-5 animate-spin" />}
+            Save
+          </Button>
+        )}
+        {canInsert && !insertingRow && (
+          <Button variant="outline" className="ml-4" onClick={toggleInsert}>
+            + Insert Row
+          </Button>
+        )}
+
         {!!data.length && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
