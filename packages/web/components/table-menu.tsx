@@ -74,6 +74,7 @@ export default function TableMenu({
   };
 
   const onUndeployTable = () => {
+    void deploymentsQuery.refetch();
     setTableSettingnsOpen(false);
     setUndeployTableOpen(true);
   };
@@ -148,7 +149,7 @@ export default function TableMenu({
           onSuccess={(team, project, def, env) => {
             router.refresh();
             router.push(
-              `/${team.slug}/${project.slug}/tables/${env.slug}/${def.slug}`,
+              `/${team.slug}/${project.slug}/${env.slug}/${def.slug}`,
             );
           }}
         />
@@ -159,7 +160,8 @@ export default function TableMenu({
         onOpenChange={setNewDefFormOpen}
         onSuccess={(team, project, def) => {
           router.refresh();
-          router.push(`/${team.slug}/${project.slug}/${def.slug}`);
+          // TODO: Handle multiple envs.
+          router.push(`/${team.slug}/${project.slug}/default/${def.slug}`);
         }}
       />
       <DropdownMenu>

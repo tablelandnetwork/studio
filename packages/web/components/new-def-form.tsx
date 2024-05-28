@@ -83,7 +83,18 @@ export default function NewDefForm({
     defaultValues: {
       name: "",
       description: "",
-      columns: [],
+      columns: schemaPreset
+        ? [
+            {
+              id: "dummy",
+              name: "dummy",
+              type: "int",
+              notNull: false,
+              primaryKey: false,
+              unique: false,
+            },
+          ]
+        : [],
     },
   });
 
