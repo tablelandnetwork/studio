@@ -47,11 +47,13 @@ describe("NonceManager", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
   beforeEach(async function () {
-    await redis.set(`delta:${account2Public}`, 0);
+    // `px` ensures the key expires after 60 seconds
+    await redis.set(`delta:${account2Public}`, 0, { px: 60000 });
   });
 
   after(async function () {
-    await redis.set(`delta:${account2Public}`, 0);
+    // `px` ensures the key expires after 60 seconds
+    await redis.set(`delta:${account2Public}`, 0, { px: 60000 });
   });
 
   test("sending two transactions at the same time WITHOUT nonce manager fails", async function () {
