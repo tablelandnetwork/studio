@@ -174,6 +174,7 @@ export function Sidebar() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="ml-auto"
                       onClick={() => setNewDefOpen(true)}
                     >
                       <Plus className="size-5" />
