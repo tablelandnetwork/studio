@@ -1,15 +1,12 @@
+import { getBaseUrl } from "@tableland/studio-client";
 import { store } from "./store";
 
 export async function featuredProjectSlugs() {
+  const baseUrl = getBaseUrl();
+
   if (process.env.NODE_ENV === "development") {
     return await store.projects.firstNProjectSlugs(5);
-  } else if (process.env.SITE_DOMAIN?.includes("staging")) {
-    return [
-      { team: "aaron", project: "four-project" },
-      { team: "joe", project: "students" },
-      { team: "aaron", project: "with-timestamp" },
-    ];
-  } else {
+  } else if (baseUrl === "https://studio.tableland.xyz") {
     return [
       {
         team: "partners",
@@ -31,6 +28,13 @@ export async function featuredProjectSlugs() {
         team: "tableland",
         project: "rigs", // Active Tableland Rigs tables
       },
+    ];
+  } else {
+    // It's a preview deployment.
+    return [
+      { team: "aaron", project: "four-project" },
+      { team: "joe", project: "students" },
+      { team: "aaron", project: "with-timestamp" },
     ];
   }
 }

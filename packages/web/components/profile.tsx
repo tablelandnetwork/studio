@@ -125,11 +125,13 @@ export default function Profile({
   };
 
   return (
-    <div className="flex flex-row gap-2">
+    <div className="flex items-center gap-2">
       {isConnected && (
         <>
           {/* Wallet content goes here */}
-          {address && !hideAddress && <HashDisplay hash={address} copy />}
+          {address && !hideAddress && (
+            <HashDisplay className="text-sm font-medium" hash={address} copy />
+          )}
           {auth ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

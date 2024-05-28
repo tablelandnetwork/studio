@@ -1,4 +1,4 @@
-import { Database, Validator, type Schema, helpers } from "@tableland/sdk";
+import { Database, type Schema, helpers } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Blocks, Coins, Hash, Rocket, Table2, Workflow } from "lucide-react";
@@ -14,7 +14,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SQLLogs from "./sql-logs";
 import HashDisplay from "./hash-display";
-import TableMenu from "./table-menu";
 import { CardContent } from "./ui/card";
 import ProjectsReferencingTable from "./projects-referencing-table";
 import { blockExplorers } from "@/lib/block-explorers";
@@ -23,9 +22,9 @@ import { chainsMap } from "@/lib/chains-map";
 import { objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
+import DefDetails from "@/components/def-details";
 
 interface Props {
-  displayName: string;
   tableName: string;
   chainId: number;
   tableId: string;
@@ -51,11 +50,11 @@ interface DeploymentData {
 }
 
 export default async function Table({
-  displayName,
   tableName,
   chainId,
   tableId,
   createdAt,
+  schema,
   environment,
   defData,
   deploymentData,
@@ -66,7 +65,6 @@ export default async function Table({
 
   const baseUrl = helpers.getBaseUrl(chainId);
   const tbl = new Database({ baseUrl });
-  const validator = new Validator({ baseUrl });
 
   const data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   const formattedData = objectToTableData(data.results);
@@ -76,33 +74,12 @@ export default async function Table({
         header: col,
       }))
     : [];
-  const table = await validator.getTableById({ chainId, tableId });
   const deploymentReferences = (
     await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);
 
   return (
-    <div className="flex-1 space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-medium">{displayName}</h1>
-        <TableMenu
-          schemaPreset={table.schema}
-          chainIdPreset={chainId}
-          tableIdPreset={tableId}
-        />
-        {/* <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Staging" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Environments</SelectLabel>
-              <SelectItem value="staging">Staging</SelectItem>
-              <SelectItem value="production">Production</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select> */}
-      </div>
+    <div className="flex-1 space-y-4">
       <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <MetricCard>
           <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
@@ -216,12 +193,16 @@ export default async function Table({
         <TabsList>
           <TabsTrigger value="data">Table Data</TabsTrigger>
           <TabsTrigger value="logs">SQL Logs</TabsTrigger>
+          <TabsTrigger value="definition">Definition</TabsTrigger>
         </TabsList>
         <TabsContent value="data">
           <DataTable columns={columns} data={formattedData} />
         </TabsContent>
         <TabsContent value="logs">
-          <SQLLogs chain={chainId} tableId={tableId} />
+          <SQLLogs tables={[{ chainId, tableId }]} />
+        </TabsContent>
+        <TabsContent value="definition" className="space-y-4">
+          <DefDetails name={defData?.name ?? tableName} schema={schema} />
         </TabsContent>
       </Tabs>
     </div>

@@ -308,3 +308,14 @@ export const defProcedure = (store: Store) =>
         ctx: { ...ctx, session: ctx.session, teamAuthorization: membership },
       });
     });
+
+export const defAdminProcedure = (store: Store) =>
+  defProcedure(store).use(async ({ ctx, next }) => {
+    if (!ctx.teamAuthorization.isOwner) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "not authorized as def admin",
+      });
+    }
+    return await next({ ctx });
+  });

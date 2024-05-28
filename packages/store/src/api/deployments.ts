@@ -36,6 +36,21 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
       return deployment;
     },
 
+    deleteDeployments: async function (defId: string, environmentId?: string) {
+      // deployments
+      await db
+        .delete(deployments)
+        .where(
+          and(
+            eq(deployments.defId, defId),
+            environmentId
+              ? eq(deployments.environmentId, environmentId)
+              : undefined,
+          ),
+        )
+        .execute();
+    },
+
     deploymentsByDefId: async function (defId: string) {
       const res = await db
         .select()
@@ -72,6 +87,20 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
         .innerJoin(defs, eq(deployments.defId, defs.id))
         .where(eq(deployments.environmentId, environmentId))
         .all();
+      return res;
+    },
+
+    deploymentByEnvAndDefId: async function (envId: string, defId: string) {
+      const res = await db
+        .select()
+        .from(deployments)
+        .where(
+          and(
+            eq(deployments.environmentId, envId),
+            eq(deployments.defId, defId),
+          ),
+        )
+        .get();
       return res;
     },
 

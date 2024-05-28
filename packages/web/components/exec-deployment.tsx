@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Database,
   Validator,
@@ -7,13 +5,14 @@ import {
   helpers,
 } from "@tableland/sdk";
 import {
+  type Schema,
   generateCreateTableStatement,
   type schema,
 } from "@tableland/studio-store";
 import { JsonRpcSigner, BrowserProvider } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useWalletClient, type WalletClient } from "wagmi";
 import {
   getNetwork,
@@ -36,18 +35,23 @@ import { Button } from "@/components/ui/button";
 import ChainSelector from "@/components/chain-selector";
 
 export default function ExecDeployment({
-  team,
-  project,
+  open,
+  onOpenChange,
   environment,
   def,
+  onSuccess,
 }: {
-  team: schema.Team;
-  project: schema.Project;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   environment: schema.Environment;
-  def: schema.Def;
+  def: {
+    id: string;
+    name: string;
+    schema: Schema;
+  };
+  onSuccess: (deployment: schema.Deployment) => void;
 }) {
   const router = useRouter();
-  const [showDialog, setShowDialog] = useState(false);
   const [chainId, setChainId] = useState<number | undefined>(undefined);
   const [pendingDeploy, startDeployTransition] = useTransition();
   const [signerState, setSignerState] = useState<
@@ -62,10 +66,6 @@ export default function ExecDeployment({
   const [recordDeploymentState, setRecordDeploymentState] = useState<
     "pending" | "processing" | "complete" | Error
   >("pending");
-
-  useEffect(() => {
-    setShowDialog(true);
-  }, []);
 
   const recordDeployment = api.deployments.recordDeployment.useMutation({
     onSuccess: () => {
@@ -155,7 +155,7 @@ export default function ExecDeployment({
 
       setRecordDeploymentState("processing");
       try {
-        await recordDeployment.mutateAsync({
+        const deployment = await recordDeployment.mutateAsync({
           defId: def.id,
           environmentId: environment.id,
           tableName: txn.name,
@@ -165,35 +165,27 @@ export default function ExecDeployment({
           blockNumber: txn.blockNumber,
           txnHash: txn.transactionHash,
         });
+        setRecordDeploymentState("complete");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        onSuccess(deployment);
+        onOpenChange(false);
       } catch (error) {
         setRecordDeploymentState(
           error instanceof Error ? error : new Error(String(error)),
         );
-        return;
       }
-      setRecordDeploymentState("complete");
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setShowDialog(false);
     });
   };
 
   const handleCancel = () => {
-    handleOnOpenChange(false);
-  };
-
-  const handleOnOpenChange = (open: boolean) => {
-    setShowDialog(open);
-    if (!open) {
-      router.replace(`/${team.slug}/${project.slug}/tables`);
-    }
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={showDialog} onOpenChange={handleOnOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-auto flex-col gap-y-4 overflow-auto">
         <DialogHeader>
-          <DialogTitle>Deploy definition: {def.name}</DialogTitle>
+          <DialogTitle>Deploy table definition: {def.name}</DialogTitle>
           <DialogDescription>
             Deploying a definition to Tableland will require you to sign and
             send a transaction, as well as pay any transaction fees. Once the

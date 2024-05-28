@@ -15,6 +15,13 @@ export async function projectBySlug(slug: string, teamId?: string) {
   );
 }
 
+export async function environmentBySlug(projectId: string, slug: string) {
+  return await catch404(
+    async () =>
+      await cache(api.environments.environmentBySlug)({ projectId, slug }),
+  );
+}
+
 export async function defBySlug(projectId: string, slug: string) {
   return await catch404(
     async () =>

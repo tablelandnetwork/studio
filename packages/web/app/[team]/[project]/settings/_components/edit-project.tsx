@@ -125,7 +125,9 @@ export default function EditProject({
             variant="outline"
             type="reset"
             onClick={onReset}
-            disabled={!form.formState.isDirty || updateProject.isPending}
+            disabled={
+              !form.formState.isDirty || updateProject.isPending || disabled
+            }
           >
             Reset
           </Button>

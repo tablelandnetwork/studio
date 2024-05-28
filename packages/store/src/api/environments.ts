@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { type Database } from "@tableland/sdk";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
 import { slugify } from "../helpers.js";
@@ -49,6 +49,19 @@ export function initEnvironments(
 
       const res = await tbl.prepare(sql).bind(params).all();
       return res.results as Environment[];
+    },
+
+    environmentBySlug: async function (projectId: string, slug: string) {
+      return await db
+        .select()
+        .from(environments)
+        .where(
+          and(
+            eq(environments.projectId, projectId),
+            eq(environments.slug, slug),
+          ),
+        )
+        .get();
     },
   };
 }

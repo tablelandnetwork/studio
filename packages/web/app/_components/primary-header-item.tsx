@@ -5,16 +5,19 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { type schema } from "@tableland/studio-store";
 import { useState } from "react";
+import { skipToken } from "@tanstack/react-query";
+import Image from "next/image";
 import NewTeamForm from "./new-team-form";
 import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
-import MesaSvg from "@/components/mesa-svg";
 import ProjectSwitcher from "@/components/project-switcher";
+import { api } from "@/trpc/react";
+import logo from "@/public/logo.svg";
 
 export default function PrimaryHeaderItem({
-  teams,
+  userTeams,
 }: {
-  teams: RouterOutputs["teams"]["userTeams"];
+  userTeams?: RouterOutputs["teams"]["userTeams"];
 }) {
   const { team: teamSlug, project: projectSlug } = useParams<{
     team?: string;
@@ -24,11 +27,27 @@ export default function PrimaryHeaderItem({
   const [openNewProjectSheet, setOpenNewProjectSheet] = useState(false);
   const router = useRouter();
 
-  const team = teams.find((team) => team.slug === teamSlug);
+  const foundTeam = userTeams?.find((team) => team.slug === teamSlug);
+  const teamQuery = api.teams.teamBySlug.useQuery(
+    teamSlug && !foundTeam ? { slug: teamSlug } : skipToken,
+  );
+  const team = foundTeam ?? teamQuery.data;
 
-  const project = team?.projects.find(
+  const foundProjects = foundTeam?.projects;
+  const projectsQuery = api.projects.teamProjects.useQuery(
+    !foundTeam && team ? { teamId: team.id } : skipToken,
+  );
+  const projects = foundProjects ?? projectsQuery.data;
+
+  const foundProject = foundProjects?.find(
     (project) => project.slug === projectSlug,
   );
+  const projectQuery = api.projects.projectBySlug.useQuery(
+    !foundProject && team && projectSlug
+      ? { teamId: team.id, slug: projectSlug }
+      : skipToken,
+  );
+  const project = foundProject ?? projectQuery.data;
 
   function onTeamSelected(team: schema.Team) {
     router.push(`/${team.slug}`);
@@ -45,7 +64,8 @@ export default function PrimaryHeaderItem({
 
   function onProjectSelected(project: schema.Project) {
     if (!team) return;
-    router.push(`/${team.slug}/${project.slug}`);
+    // TODO: Deal with multiple envs
+    router.push(`/${team.slug}/${project.slug}/default`);
   }
 
   function onNewProjectSelected() {
@@ -55,12 +75,13 @@ export default function PrimaryHeaderItem({
   function onNewProjectSuccess(project: schema.Project) {
     if (!team) return;
     router.refresh();
-    router.push(`/${team.slug}/${project.slug}`);
+    // TODO: Deal with multiple envs
+    router.push(`/${team.slug}/${project.slug}/default`);
   }
 
   const items: React.ReactNode[] = [
-    <Link href="/" key="logo">
-      <MesaSvg />
+    <Link href="/" key="logo" className="shrink-0">
+      <Image src={logo} alt="Tableland Studio" priority={true} />
     </Link>,
   ];
 
@@ -71,7 +92,7 @@ export default function PrimaryHeaderItem({
       </p>,
       <TeamSwitcher
         selectedTeam={team}
-        teams={teams}
+        teams={userTeams}
         onTeamSelected={onTeamSelected}
         onNewTeamSelected={onNewTeamSelected}
         key="team-switcher"
@@ -91,9 +112,9 @@ export default function PrimaryHeaderItem({
         <ProjectSwitcher
           team={team}
           selectedProject={project}
-          projects={team.projects}
+          projects={projects}
           onProjectSelected={onProjectSelected}
-          onNewProjectSelected={onNewProjectSelected}
+          onNewProjectSelected={foundTeam ? onNewProjectSelected : undefined}
           key="project-switcher"
         />,
         <NewProjectForm
@@ -105,15 +126,6 @@ export default function PrimaryHeaderItem({
         />,
       );
     }
-  } else {
-    items.push(
-      <h1
-        className="text-2xl font-normal uppercase text-[#6358dc]"
-        key="studio"
-      >
-        Studio
-      </h1>,
-    );
   }
 
   return <div className="flex flex-row items-center gap-x-3">{items}</div>;

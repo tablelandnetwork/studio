@@ -5,7 +5,6 @@ import { headers, cookies } from "next/headers";
 // import Script from "next/script";
 import { cache } from "react";
 import { Analytics } from "@vercel/analytics/react";
-import PathAwareHeader from "./_components/path-aware-header";
 import PrimaryHeaderItem from "./_components/primary-header-item";
 import { api } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
@@ -48,7 +47,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getSession({ cookies: cookies(), headers: headers() });
-  let teams: RouterOutputs["teams"]["userTeams"] = [];
+  let teams: RouterOutputs["teams"]["userTeams"] | undefined;
   if (session.auth) {
     try {
       teams = await cache(api.teams.userTeams)({
@@ -71,13 +70,11 @@ export default async function RootLayout({
             <body className="flex min-h-screen flex-col">
               <Hotjar></Hotjar>
               <TRPCReactProvider headers={headers()}>
-                <PathAwareHeader className="flex items-center justify-between bg-[#202132] px-4 py-3">
-                  <PrimaryHeaderItem teams={teams} />
-                  <div className="ml-auto flex items-center space-x-4">
-                    <NavPrimary />
-                    <Profile />
-                  </div>
-                </PathAwareHeader>
+                <header className="sticky top-0 z-50 flex items-center justify-between gap-x-10 border-b border-[#080A1E] bg-[#202132] px-4 py-3">
+                  <PrimaryHeaderItem userTeams={teams} />
+                  <NavPrimary className="ml-auto" />
+                  <Profile />
+                </header>
                 <div className="flex flex-1 flex-col">{children}</div>
                 <Toaster />
               </TRPCReactProvider>
