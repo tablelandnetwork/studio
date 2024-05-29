@@ -109,7 +109,7 @@ export const builder = function (args: Yargs) {
     .command(
       wrapText("bulk <file> [sanitize]"),
       wrapText(
-        `Import existing Tableland tables into a project with CSV file that includes:\n- Full Tableland table name, a description, & (optional) new definition name\n- CSV header order: 'tableName', 'description', 'definitionName'\n\nOptionally, sanitize the custom definition names to ensure they are valid by replacing any invalid characters with underscores.`,
+        `Import existing Tableland tables into a project with CSV file that includes:\n- Full Tableland table name, a description, & (optional) new definition name\n- CSV header order: 'tableName', 'description', (optional) 'definitionName'\n\nOptionally, sanitize the custom definition names to ensure they are valid by replacing any invalid characters with underscores.`,
       ),
       function (args) {
         return args
@@ -148,8 +148,11 @@ export const builder = function (args: Yargs) {
           const headers = csvHelp.prepareCsvHeaders(dataObject[0]);
           const rows = dataObject.slice(1);
           // Must be CSV file and have headers in the order: `tableName`,
-          // `description`, and `definitionName` (optional)
-          if (headers.length < 3) {
+          // `description`, and `definitionName` (optional). Note: we don't
+          // enforce headers to have a specific name format but only expect the
+          // correct column ordering
+          const hasRequiredHeaders = headers.length >= 2;
+          if (!hasRequiredHeaders) {
             throw new Error(
               "CSV file must have headers for `tableName`, `description`, and (optionally) `definitionName`",
             );
@@ -167,7 +170,7 @@ export const builder = function (args: Yargs) {
                 row[0],
                 "must provide full tableland table name",
               );
-              const definitionName = row[2] ? row[2].trim() : "";
+              const definitionName = row[2]?.trim() ?? null;
 
               const chainId = helpers.getChainIdFromTableName(tableName);
               const tableId = helpers
