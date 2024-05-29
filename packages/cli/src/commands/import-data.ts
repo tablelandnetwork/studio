@@ -1,6 +1,5 @@
 import { readFileSync } from "fs";
 import type { Arguments } from "yargs";
-import { parse } from "csv-parse";
 import chalk from "chalk";
 import { type Wallet } from "ethers";
 import { studioAliases } from "@tableland/studio-client";
@@ -12,6 +11,7 @@ import {
   helpers,
   logger,
   normalizePrivateKey,
+  parseCsvFile,
   FileStore,
 } from "../utils.js";
 
@@ -100,31 +100,6 @@ export const handler = async (
   } catch (err: any) {
     logger.error(err);
   }
-};
-
-const parseCsvFile = async function (file: string): Promise<string[][]> {
-  return await new Promise(function (resolve, reject) {
-    const parser = parse();
-    const rows: any[] = [];
-
-    parser.on("readable", function () {
-      let row;
-      while ((row = parser.read()) !== null) {
-        rows.push(row);
-      }
-    });
-
-    parser.on("error", function (err) {
-      reject(err);
-    });
-
-    parser.on("end", function () {
-      resolve(rows);
-    });
-
-    parser.write(file);
-    parser.end();
-  });
 };
 
 async function confirmImport(info: {

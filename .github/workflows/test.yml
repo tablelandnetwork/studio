@@ -5,9 +5,8 @@ name: Test
 
 on:
   push:
-    branches: ["main", "staging"]
+    branches: ["main"]
   pull_request:
-    branches: ["main", "staging"]
 
 env:
   # This is local hardhat account #7 key.

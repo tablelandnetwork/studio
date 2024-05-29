@@ -1,5 +1,6 @@
 import readline from "node:readline/promises";
 import { readFileSync, writeFileSync } from "node:fs";
+import { parse } from "csv-parse";
 import {
   type Provider,
   type Signer,
@@ -595,3 +596,51 @@ export const logger = {
     console.error(message);
   },
 };
+
+export const parseCsvFile = async function (file: string): Promise<string[][]> {
+  return await new Promise(function (resolve, reject) {
+    const parser = parse();
+    const rows: any[] = [];
+
+    parser.on("readable", function () {
+      let row;
+      while ((row = parser.read()) !== null) {
+        rows.push(row);
+      }
+    });
+
+    parser.on("error", function (err) {
+      reject(err);
+    });
+
+    parser.on("end", function () {
+      resolve(rows);
+    });
+
+    parser.write(file);
+    parser.end();
+  });
+};
+
+// Pretty print yargs help descriptions to wrap + pad to 80 characters per line
+export function wrapText(text: string, maxWidth: number = 80): string {
+  const sections = text.split("\n");
+  let formattedText = "";
+
+  sections.forEach((section) => {
+    const words = section.split(" ");
+    let currentLine = words[0];
+
+    for (let i = 1; i < words.length; i++) {
+      if (currentLine.length + words[i].length + 1 <= maxWidth) {
+        currentLine += " " + words[i];
+      } else {
+        formattedText += currentLine.padEnd(maxWidth, " ");
+        currentLine = words[i];
+      }
+    }
+    formattedText += currentLine.padEnd(maxWidth, " ");
+  });
+
+  return formattedText.trim();
+}

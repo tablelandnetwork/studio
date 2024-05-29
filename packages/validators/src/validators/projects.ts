@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { slugify } from "@tableland/studio-store";
-import { restrictedProjectSlugs } from "../restricted-slugs";
+import { restrictedProjectSlugs } from "../restricted-slugs.js";
 
 const projectNameSchema = z
   .string()

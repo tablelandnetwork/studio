@@ -65,6 +65,7 @@
     "prettier-plugin-tailwindcss": "^0.5.3",
     "sinon": "^15.0.1",
     "tailwindcss": "^3.4.3",
+    "tempy": "^3.1.0",
     "ts-node": "^10.9.1",
     "tsx": "^4.10.5",
     "typescript": "^5.4.5"

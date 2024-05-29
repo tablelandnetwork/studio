@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { teamNameSchema } from "../common";
+import { teamNameSchema } from "../common.js";
 
 export const teamNameAvailableSchema = z.object({
   teamId: z.string().trim().min(1).optional(),

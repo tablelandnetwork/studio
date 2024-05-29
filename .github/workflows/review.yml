@@ -5,9 +5,8 @@ name: Review
 
 on:
   push:
-    branches: ["main", "staging"]
+    branches: ["main"]
   pull_request:
-    branches: ["main", "staging"]
 
 env:
   STORE_PRIVATE_KEY: ${{ secrets.STORE_PRIVATE_KEY }}

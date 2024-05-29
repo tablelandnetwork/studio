@@ -1,5 +1,6 @@
-export * from "./validators/defs";
-export * from "./validators/teams";
-export * from "./validators/projects";
-export * from "./validators/auth";
-export * from "./validators/tables";
+export { defNameSchema } from "./common.js";
+export * from "./validators/defs.js";
+export * from "./validators/teams.js";
+export * from "./validators/projects.js";
+export * from "./validators/auth.js";
+export * from "./validators/tables.js";
