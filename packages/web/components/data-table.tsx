@@ -174,7 +174,7 @@ export function DataTable({
       statement: `select * from system_acl
         where chain_id = ${chainId}
           and table_id = ${tableId}
-          and controller = '${address}'
+          and controller = '${address?.toString() ?? ""}'
           and privileges >= 4`,
     });
 
@@ -186,6 +186,7 @@ export function DataTable({
   };
   React.useEffect(function () {
     loadPermission().catch((e) => console.log(e));
+    // pass an empty array so this only runs on the inital loading
   }, []);
   const refreshData = async function () {
     const data = await db.prepare(`SELECT * FROM ${tableName};`).all();
@@ -193,6 +194,7 @@ export function DataTable({
   };
   React.useEffect(function () {
     refreshData().catch((e) => console.log(e));
+    // pass an empty array so this only runs on the inital loading
   }, []);
 
   return (
