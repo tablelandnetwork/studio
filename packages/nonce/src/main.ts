@@ -169,7 +169,7 @@ export class NonceManager extends AbstractSigner<Provider> {
   }
 
   async _acquireLock() {
-    debugLogger("_acquireLock", process.pid);
+    debugLogger("_acquireLock (start)", process.pid);
 
     // If the lock was not acquired, we want to retry using increasing backoff
     // combined with "jitter".  For a nice overview of the reasoning here, read
@@ -189,6 +189,7 @@ export class NonceManager extends AbstractSigner<Provider> {
         setTimeout(() => {
           // capture resolve & reject in scope
           (async () => {
+            debugLogger("_acquireLock (try)", process.pid);
             // make sure we can't aquire simultaneously in this instance
             if (this._lock) {
               return resolve(await doTry());
@@ -203,6 +204,7 @@ export class NonceManager extends AbstractSigner<Provider> {
               return resolve(await doTry());
             }
 
+            debugLogger("_acquireLock (end)", process.pid);
             resolve(res);
           })().catch((err) => reject(err));
         }, wait);
