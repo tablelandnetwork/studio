@@ -158,10 +158,14 @@ export default function TableMenu({
         schemaPreset={schema}
         open={newDefFormOpen}
         onOpenChange={setNewDefFormOpen}
-        onSuccess={(team, project, def) => {
+        onSuccess={(selectedTeam, selectedProject, def) => {
           router.refresh();
-          // TODO: Handle multiple envs.
-          router.push(`/${team.slug}/${project.slug}/default/${def.slug}`);
+          router.push(
+            `/${selectedTeam.slug}/${selectedProject.slug}${env ? `/${env.slug}/${def.slug}` : `?table=${def.slug}`}`,
+          );
+          if (selectedProject.id === project?.id) {
+            void defsQuery.refetch();
+          }
         }}
       />
       <DropdownMenu>

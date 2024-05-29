@@ -77,10 +77,7 @@ export default async function Projects({
             const defCount = defs[i].length;
             const deploymentsCount = deployments[i].length;
             return (
-              <Link
-                key={project.id}
-                href={`/${team.slug}/${project.slug}/default`} // TODO: Handle multiple environments and read from local storage or session.
-              >
+              <Link key={project.id} href={`/${team.slug}/${project.slug}`}>
                 <Card className="">
                   <CardHeader>
                     <CardTitle>{project.name}</CardTitle>
