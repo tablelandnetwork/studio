@@ -175,13 +175,12 @@ export function DataTable({
         where chain_id = ${chainId}
           and table_id = ${tableId}
           and controller = '${address}'
-          and privileges >= 4`
+          and privileges >= 4`,
     });
 
     if (!isConnected) return setCanInsert(false);
     if (typeof acl.controller !== "string") setCanInsert(false);
     if (acl.controller !== address) setCanInsert(false);
-
 
     setCanInsert(true);
   };
@@ -200,11 +199,7 @@ export function DataTable({
     <div>
       <div className="text-right">
         {canInsert && insertingRow && !saving && (
-          <Button
-            variant="secondary"
-            className="ml-4"
-            onClick={toggleInsert}
-          >
+          <Button variant="secondary" className="ml-4" onClick={toggleInsert}>
             Cancel Insert
           </Button>
         )}
