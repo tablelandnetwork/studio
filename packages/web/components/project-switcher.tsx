@@ -49,7 +49,7 @@ export default function ProjectSwitcher({
     <div className="flex items-center gap-1">
       {variant === "navigation" && team && selectedProject && (
         <Link
-          href={`/${team.slug}/${selectedProject.slug}/default`} // TODO: Handle multiple environments and read from local storage or session.
+          href={`/${team.slug}/${selectedProject.slug}`}
           className="underline-offset-2 hover:underline"
         >
           {selectedProject.name}

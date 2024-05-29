@@ -25,7 +25,7 @@ export function LatestProjects({ projects }: { projects: Projects }) {
         {projects.slice(offset, offset + pageSize).map((item) => (
           <Link
             key={item.project.id}
-            href={`/${item.team.slug}/${item.project.slug}/default`} // TODO: deal with multiple envs
+            href={`/${item.team.slug}/${item.project.slug}`}
             className="flex flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
           >
             <div className="flex w-full flex-col gap-1">
