@@ -11,6 +11,7 @@ import {
   Workflow,
 } from "lucide-react";
 import Link from "next/link";
+import { type RouterOutputs } from "@tableland/studio-api";
 import { DataTable } from "./data-table";
 import {
   MetricCard,
@@ -43,6 +44,7 @@ interface Props {
   environment?: schema.Environment;
   defData?: DefData;
   deploymentData?: DeploymentData;
+  isAuthorized: RouterOutputs["teams"]["isAuthorized"];
 }
 
 interface DefData {
@@ -68,6 +70,7 @@ export default async function Table({
   environment,
   defData,
   deploymentData,
+  isAuthorized,
 }: Props) {
   const chain = chainsMap.get(chainId);
   const blockExplorer = blockExplorers.get(chainId);
@@ -107,12 +110,13 @@ export default async function Table({
             </AlertTitle>
             <AlertDescription>
               <p>{error.message}</p>
-              {error.message.includes("cannot use unsupported chain") && (
-                <p>
-                  You should undeploy this table and redeploy it to a supported
-                  chain.
-                </p>
-              )}
+              {isAuthorized &&
+                error.message.includes("cannot use unsupported chain") && (
+                  <p>
+                    You should undeploy this table and redeploy it to a
+                    supported chain.
+                  </p>
+                )}
             </AlertDescription>
           </Alert>
         )}

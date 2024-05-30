@@ -64,6 +64,7 @@ export default async function Deployments({
             environment={env}
             defData={def}
             deploymentData={deployment}
+            isAuthorized={isAuthorized}
           />
         ) : (
           <div className="container max-w-2xl space-y-5">
