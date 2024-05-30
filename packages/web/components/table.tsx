@@ -1,7 +1,15 @@
-import { Database, type Schema, helpers } from "@tableland/sdk";
+import { Database, type Schema, helpers, type Result } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Blocks, Coins, Hash, Rocket, Table2, Workflow } from "lucide-react";
+import {
+  Blocks,
+  Coins,
+  Hash,
+  AlertCircle,
+  Rocket,
+  Table2,
+  Workflow,
+} from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "./data-table";
 import {
@@ -16,6 +24,7 @@ import SQLLogs from "./sql-logs";
 import HashDisplay from "./hash-display";
 import { CardContent } from "./ui/card";
 import ProjectsReferencingTable from "./projects-referencing-table";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
@@ -23,6 +32,7 @@ import { objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
+import { ensureError } from "@/lib/ensure-error";
 
 interface Props {
   tableName: string;
@@ -63,17 +73,25 @@ export default async function Table({
   const blockExplorer = blockExplorers.get(chainId);
   const openSeaLink = openSeaLinks.get(chainId);
 
-  const baseUrl = helpers.getBaseUrl(chainId);
-  const tbl = new Database({ baseUrl });
+  let data: Result<Record<string, unknown>> | undefined;
+  let error: Error | undefined;
+  try {
+    const baseUrl = helpers.getBaseUrl(chainId);
+    const tbl = new Database({ baseUrl });
+    data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
+  } catch (err) {
+    error = ensureError(err);
+  }
 
-  const data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
-  const formattedData = objectToTableData(data.results);
-  const columns: Array<ColumnDef<unknown>> = data.results.length
-    ? Object.keys(data.results[0] as object).map((col) => ({
-        accessorKey: col,
-        header: col,
-      }))
-    : [];
+  const formattedData = data ? objectToTableData(data.results) : undefined;
+  const columns: Array<ColumnDef<unknown>> | undefined = data
+    ? data.results.length
+      ? Object.keys(data.results[0] as object).map((col) => ({
+          accessorKey: col,
+          header: col,
+        }))
+      : []
+    : undefined;
   const deploymentReferences = (
     await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);
@@ -81,16 +99,35 @@ export default async function Table({
   return (
     <div className="flex-1 space-y-4">
       <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <MetricCard>
-          <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
-            <Rocket className="h-4 w-4 text-muted-foreground" />
-            <MetricCardTitle>Deployed to</MetricCardTitle>
-          </MetricCardHeader>
-          <MetricCardContent>{chain?.name}</MetricCardContent>
-          <MetricCardFooter>
-            <TimeSince time={createdAt} />
-          </MetricCardFooter>
-        </MetricCard>
+        {error && (
+          <Alert className="col-span-full">
+            <AlertCircle className="size-5 stroke-destructive" />
+            <AlertTitle className="text-destructive">
+              Error loading table data
+            </AlertTitle>
+            <AlertDescription>
+              <p>{error.message}</p>
+              {error.message.includes("cannot use unsupported chain") && (
+                <p>
+                  You should undeploy this table and redeploy it to a supported
+                  chain.
+                </p>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+        {chain && (
+          <MetricCard>
+            <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
+              <Rocket className="h-4 w-4 text-muted-foreground" />
+              <MetricCardTitle>Deployed to</MetricCardTitle>
+            </MetricCardHeader>
+            <MetricCardContent>{chain.name}</MetricCardContent>
+            <MetricCardFooter>
+              <TimeSince time={createdAt} />
+            </MetricCardFooter>
+          </MetricCard>
+        )}
         <MetricCard>
           <MetricCardHeader
             className="flex flex-row items-center gap-2 space-y-0"
@@ -189,18 +226,24 @@ export default async function Table({
           </MetricCard>
         )}
       </div>
-      <Tabs defaultValue="data" className="py-4">
+      <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
         <TabsList>
-          <TabsTrigger value="data">Table Data</TabsTrigger>
-          <TabsTrigger value="logs">SQL Logs</TabsTrigger>
+          {formattedData && columns && (
+            <TabsTrigger value="data">Table Data</TabsTrigger>
+          )}
+          {data && <TabsTrigger value="logs">SQL Logs</TabsTrigger>}
           <TabsTrigger value="definition">Definition</TabsTrigger>
         </TabsList>
-        <TabsContent value="data">
-          <DataTable columns={columns} data={formattedData} />
-        </TabsContent>
-        <TabsContent value="logs">
-          <SQLLogs tables={[{ chainId, tableId }]} />
-        </TabsContent>
+        {formattedData && columns && (
+          <TabsContent value="data">
+            <DataTable columns={columns} data={formattedData} />
+          </TabsContent>
+        )}
+        {data && (
+          <TabsContent value="logs">
+            <SQLLogs tables={[{ chainId, tableId }]} />
+          </TabsContent>
+        )}
         <TabsContent value="definition" className="space-y-4">
           <DefDetails name={defData?.name ?? tableName} schema={schema} />
         </TabsContent>
