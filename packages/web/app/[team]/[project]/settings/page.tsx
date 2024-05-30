@@ -3,6 +3,7 @@ import { cache } from "react";
 import { OctagonAlert } from "lucide-react";
 import EditProject from "./_components/edit-project";
 import DeleteButton from "./_components/delete-button";
+import Envs from "./_components/envs";
 import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
 import {
   Card,
@@ -24,6 +25,9 @@ export default async function ProjectSettings({
   const project = await projectBySlug(params.project, team.id);
   const authorization = await cache(api.teams.isAuthorized)({
     teamId: team.id,
+  });
+  const envs = await cache(api.environments.projectEnvironments)({
+    projectId: project.id,
   });
 
   if (!authorization) {
@@ -58,6 +62,19 @@ export default async function ProjectSettings({
             project={project}
             disabled={!isAdmin}
           />
+        </CardContent>
+      </Card>
+      <Card className={cn(!isAdmin && "opacity-50")}>
+        <CardHeader>
+          <CardTitle>Environments</CardTitle>
+          <CardDescription>
+            Environments are logical groups of tables. You could, for example,
+            use them to create &quot;staging&quot; and &quot;production&quot;
+            groups of tables.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Envs envs={envs} />
         </CardContent>
       </Card>
       <Card className={cn(!isAdmin && "opacity-50")}>
