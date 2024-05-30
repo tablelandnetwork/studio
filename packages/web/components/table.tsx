@@ -44,7 +44,7 @@ interface Props {
   environment?: schema.Environment;
   defData?: DefData;
   deploymentData?: DeploymentData;
-  isAuthorized: RouterOutputs["teams"]["isAuthorized"];
+  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
 }
 
 interface DefData {
