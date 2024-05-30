@@ -66,3 +66,14 @@ export const handleCopy = function (text: string, desc: string, toast: Toast) {
       });
     });
 };
+
+// Given a column name with escape characters, return the fomatted name.
+export const formatIdentifierName = function (name: string) {
+  return name
+    .replace(/^`/, "")
+    .replace(/`$/, "")
+    .replace(/^"/, "")
+    .replace(/"$/, "")
+    .replace(/^\[/, "")
+    .replace(/"\]/, "");
+};
