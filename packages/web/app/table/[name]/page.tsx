@@ -1,13 +1,9 @@
-import {
-  ApiError,
-  type Table as TblTable,
-  Validator,
-  helpers,
-} from "@tableland/sdk";
+import { type Table as TblTable, Validator, helpers } from "@tableland/sdk";
 import { getSession } from "@tableland/studio-api";
 import { cookies, headers } from "next/headers";
 import Table from "@/components/table";
 import TableWrapper from "@/components/table-wrapper";
+import { ensureError } from "@/lib/ensure-error";
 
 export default async function TablePage({
   params,
@@ -37,30 +33,19 @@ export default async function TablePage({
     );
   }
 
-  const validator = new Validator({
-    baseUrl: helpers.getBaseUrl(chainId),
-  });
-
   let tablelandTable: TblTable;
   try {
+    const validator = new Validator({
+      baseUrl: helpers.getBaseUrl(chainId),
+    });
     tablelandTable = await validator.getTableById({
       chainId,
       tableId,
     });
   } catch (err) {
-    if (err instanceof ApiError && err.status === 404) {
-      return (
-        <div className="p-4">
-          <p>
-            Table id {tableId} not found on chain {chainId}.
-          </p>
-        </div>
-      );
-    }
-    console.error("Error getting table by id:", { err });
     return (
       <div className="p-4">
-        <p>Error getting table by id</p>
+        <p>Error getting table by id: {ensureError(err).message}</p>
       </div>
     );
   }

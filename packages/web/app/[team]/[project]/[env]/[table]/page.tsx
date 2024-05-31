@@ -64,12 +64,11 @@ export default async function Deployments({
             environment={env}
             defData={def}
             deploymentData={deployment}
+            isAuthorized={isAuthorized}
           />
         ) : (
           <div className="container max-w-2xl space-y-5">
-            {!deployment && (
-              <NeedsDeploy def={def} env={env} isAuthorized={isAuthorized} />
-            )}
+            <NeedsDeploy def={def} env={env} isAuthorized={isAuthorized} />
             <DefDetails name={def.name} schema={def.schema} />
           </div>
         )}
