@@ -10,7 +10,7 @@
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "scripts": {
-    "test": "mocha",
+    "test": "DEBUG=nonce mocha",
     "lint": "eslint '**/*.ts'",
     "lint:fix": "npm run lint -- --fix",
     "prettier": "prettier '**/*.{ts,json}' --check",
@@ -23,6 +23,7 @@
   "license": "MIT AND Apache-2.0",
   "dependencies": {
     "@upstash/redis": "^1.28.3",
+    "debug": "^4.3.4",
     "ethers": "^6.12.0"
   }
 }

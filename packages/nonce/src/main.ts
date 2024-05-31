@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv";
+import debug from "debug";
 import {
   AbstractSigner,
   type BlockTag,
@@ -12,6 +13,8 @@ import {
 import { Redis } from "@upstash/redis";
 
 dotenv.config();
+
+const debugLogger = debug("nonce");
 
 // from ethers.js experimental NonceManager implementation
 // TODO: Keep a per-NonceManager pool of sent but unmined transactions for
@@ -57,6 +60,7 @@ export class NonceManager extends AbstractSigner<Provider> {
   }
 
   async getNonce(blockTag?: BlockTag): Promise<number> {
+    debugLogger("getNonce");
     if (blockTag === "pending") {
       await this._acquireLock();
       const address = await this.signer.getAddress();
@@ -66,20 +70,34 @@ export class NonceManager extends AbstractSigner<Provider> {
       );
       // this returns null if the key doesn't exist
       const deltaCount = await this.memStore.get(`delta:${address}`);
-      await this._releaseLock();
-      return currentCount + (typeof deltaCount === "number" ? deltaCount : 0);
+      const nonce =
+        currentCount + (typeof deltaCount === "number" ? deltaCount : 0);
+
+      const release = this._releaseLock.bind(this);
+      setImmediate(function () {
+        release().catch(function (err: any) {
+          console.log("_releaseLock error:", err);
+        });
+      });
+
+      debugLogger("getNonce: nonce (pending):", nonce);
+      return nonce;
     }
 
-    return await super.getNonce(blockTag);
+    const nonce = await super.getNonce(blockTag);
+    debugLogger("getNonce: nonce (not pending):", nonce);
+    return nonce;
   }
 
   async reset(): Promise<void> {
+    debugLogger("reset");
     await this._acquireLock();
     await this._resetDelta();
     await this._releaseLock();
   }
 
   async increment(count?: number): Promise<number> {
+    debugLogger("increment");
     return await this.memStore.incrby(
       `delta:${await this.getAddress()}`,
       count == null ? 1 : count,
@@ -91,12 +109,14 @@ export class NonceManager extends AbstractSigner<Provider> {
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
+    debugLogger("signTransaction");
     return await this.signer.signTransaction(transaction);
   }
 
   async sendTransaction(
     transaction: TransactionRequest,
   ): Promise<TransactionResponse> {
+    debugLogger("sendTransaction");
     if (transaction.nonce == null) {
       transaction = { ...transaction };
       transaction.nonce = await this.getNonce("pending");
@@ -132,23 +152,28 @@ export class NonceManager extends AbstractSigner<Provider> {
   // ensures that only the nonce manager that acquired the lock will release the
   // lock.
   async _setLock() {
+    const radn = Math.random();
+    debugLogger("_setLock (start)", radn, process.pid);
     if (!this._lock) {
       throw new Error("must have a value to set lock");
     }
-    return await this.memStore.set(
+    const res = await this.memStore.set(
       `lock:${await this.getAddress()}`,
       this._lock,
       // `nx` specifies we will only set if the key does NOT exist
       // `px` specifies the key expires after a given number of milliseconds
       { nx: true, px: 3000 },
     );
+    debugLogger("_setLock (end)", radn, process.pid);
+    return res;
   }
 
   async _acquireLock() {
+    debugLogger("_acquireLock (start)", process.pid);
+
     // If the lock was not acquired, we want to retry using increasing backoff
     // combined with "jitter".  For a nice overview of the reasoning here, read
     // https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter
-
     const acquire = this._setLock.bind(this);
     const backoffRate = 50; // ms
     const maxWait = 2000; // ms
@@ -164,6 +189,7 @@ export class NonceManager extends AbstractSigner<Provider> {
         setTimeout(() => {
           // capture resolve & reject in scope
           (async () => {
+            debugLogger("_acquireLock (try)", process.pid);
             // make sure we can't aquire simultaneously in this instance
             if (this._lock) {
               return resolve(await doTry());
@@ -178,6 +204,7 @@ export class NonceManager extends AbstractSigner<Provider> {
               return resolve(await doTry());
             }
 
+            debugLogger("_acquireLock (end)", process.pid);
             resolve(res);
           })().catch((err) => reject(err));
         }, wait);
@@ -189,6 +216,8 @@ export class NonceManager extends AbstractSigner<Provider> {
 
   async _releaseLock() {
     if (!this._lock) return;
+
+    debugLogger("_releaseLock", process.pid);
 
     // we are using a Lua script to atomically make sure we only delete the
     // lock if this process created it. This covers the case where the lock ttl
@@ -208,6 +237,8 @@ export class NonceManager extends AbstractSigner<Provider> {
 
   // NOTE: The delta key expires in 30 seconds. This should be fine for Nova.
   async _resetDelta() {
+    debugLogger("_resetDelta", process.pid);
+
     await this.memStore.eval(
       `if redis.call("get",KEYS[1]) ~= ARGV[1] then
           return redis.call("setex", KEYS[1], 30, 0)

@@ -47,11 +47,11 @@ describe("NonceManager", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
   beforeEach(async function () {
-    await redis.set(`delta:${account2Public}`, 0);
+    await redis.del(`delta:${account2Public}`);
   });
 
   after(async function () {
-    await redis.set(`delta:${account2Public}`, 0);
+    await redis.del(`delta:${account2Public}`);
   });
 
   test("sending two transactions at the same time WITHOUT nonce manager fails", async function () {
@@ -104,7 +104,7 @@ describe("NonceManager", function () {
     equal(results[1].threw, false);
   });
 
-  const parallelFork = async function (without: boolean) {
+  const parallelFork = async function (without: boolean, uuid?: string) {
     const filePath = join(
       process.cwd(),
       "test",
@@ -133,11 +133,12 @@ describe("NonceManager", function () {
 
     return await new Promise(function (resolve, reject) {
       forkPs.on("message", function (message: any) {
+        if (uuid) console.log(uuid, ":", message);
         results.messages.push(message);
         if (message.startsWith("err:")) {
           results.success = false;
         }
-        if (message.startsWith("res:")) {
+        if (message.startsWith("res:") && results.success !== false) {
           results.success = true;
         }
       });
@@ -187,14 +188,15 @@ describe("NonceManager", function () {
 
   test("sending transactions from two processes WITH nonce manager succeeds", async function () {
     const results = await Promise.all([
-      parallelFork(false),
-      parallelFork(false),
+      parallelFork(false, "ps1"),
+      parallelFork(false, "ps2"),
     ]);
 
     const fork1 = results[0];
     const fork2 = results[1];
     const hasError: any = [fork1, fork2].find((f: any) => !f.success);
-
+    console.log("fork1", fork1);
+    console.log("fork2", fork2);
     equal(!!hasError, false);
   });
 });
