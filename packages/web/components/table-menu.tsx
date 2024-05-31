@@ -97,7 +97,7 @@ export default function TableMenu({
     !!isAuthorized && !!def && !!team && !!project && !!env;
   const displayDeploy =
     !!isAuthorized && !chainId && !tableId && !!def && !!env;
-  const displayImport = !!chainId && !!tableId && chainsMap.get(80001);
+  const displayImport = !!chainId && !!tableId && chainsMap.get(chainId);
 
   return (
     <>
