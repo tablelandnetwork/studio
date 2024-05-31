@@ -9,7 +9,7 @@ import {
   generateCreateTableStatement,
   type schema,
 } from "@tableland/studio-store";
-import { JsonRpcSigner, BrowserProvider } from "ethers";
+import { type JsonRpcSigner } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
@@ -21,7 +21,7 @@ import {
   waitForTransaction,
 } from "wagmi/actions";
 import { api } from "@/trpc/react";
-import { cn } from "@/lib/utils";
+import { cn, walletClientToSigner } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -304,20 +304,6 @@ function DeployStep({
         return state.message;
     }
   }
-}
-
-export function walletClientToSigner(
-  walletClient: WalletClient,
-): JsonRpcSigner {
-  const { account, chain, transport } = walletClient;
-  const network = {
-    chainId: chain.id,
-    name: chain.name,
-    ensAddress: chain.contracts?.ensRegistry?.address,
-  };
-  const provider = new BrowserProvider(transport, network);
-  const signer = new JsonRpcSigner(provider, account.address);
-  return signer;
 }
 
 /** Hook to convert a viem Wallet Client to an ethers.js Signer. */

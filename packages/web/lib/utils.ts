@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";
+import { JsonRpcSigner, BrowserProvider } from "ethers";
+import { type WalletClient } from "wagmi";
 import { type useToast } from "@/components/ui/use-toast";
 
 type Toast = ReturnType<typeof useToast>["toast"];
@@ -69,5 +71,25 @@ export const handleCopy = function (text: string, desc: string, toast: Toast) {
 
 // Given a column name with escape characters, return the fomatted name.
 export const formatIdentifierName = function (name: string) {
-  return name.replace(/^`/, "").replace(/`$/, "").replace(/^"/, "").replace(/"$/, "").replace(/^\[/, "").replace(/"\]/, "");
+  return name
+    .replace(/^`/, "")
+    .replace(/`$/, "")
+    .replace(/^"/, "")
+    .replace(/"$/, "")
+    .replace(/^\[/, "")
+    .replace(/"\]/, "");
+};
+
+export const walletClientToSigner = function (
+  walletClient: WalletClient,
+): JsonRpcSigner {
+  const { account, chain, transport } = walletClient;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+  const provider = new BrowserProvider(transport, network);
+  const signer = new JsonRpcSigner(provider, account.address);
+  return signer;
 };

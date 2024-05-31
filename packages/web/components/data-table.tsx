@@ -7,11 +7,16 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { getNetwork, getWalletClient, switchNetwork } from "wagmi/actions";
 import { useAccount } from "wagmi";
 import { ChevronDown, Loader2 } from "lucide-react";
 import React from "react";
 import { Database, Validator, helpers } from "@tableland/sdk";
-import { objectToTableData, formatIdentifierName } from "@/lib/utils";
+import {
+  objectToTableData,
+  formatIdentifierName,
+  walletClientToSigner,
+} from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -61,7 +66,7 @@ export function DataTable({
   const [data, setData] = React.useState([]);
 
   const baseUrl = helpers.getBaseUrl(chainId);
-  const db = new Database({ baseUrl, autoWait: true });
+  const readDb = new Database({ baseUrl });
   const validator = new Validator({ baseUrl });
 
   // Some tables are escaped with the tick mark, need to remove those from the column name
@@ -96,7 +101,7 @@ export function DataTable({
     eve: React.FormEvent<HTMLInputElement>,
     cellId: string,
   ) {
-    const column = cellId; //.split("_").slice(1).join("_");
+    const column = cellId; // .split("_").slice(1).join("_");
     if (typeof column !== "string") throw new Error("invalid cell id");
 
     // TODO: Not sure why I have to type cast here.
@@ -116,7 +121,7 @@ export function DataTable({
         const colTicks = columns.find(
           (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
         );
-        if (colTicks) return "`" + colTicks.name + "`";
+        if (colTicks) return colTicks.name;
 
         const colQuotes = columns.find(
           (col) => col.name.replace(/^"/, "").replace(/"$/, "") === val[0],
@@ -147,8 +152,19 @@ export function DataTable({
     }
 
     try {
-      // TODO: need to confirm the wallet is connected to the right chain
+      const currentNetwork = getNetwork();
+      if (currentNetwork.chain?.id !== chainId) {
+        await switchNetwork({ chainId });
+      }
+      const walletClient = await getWalletClient({
+        chainId,
+      });
+      if (!walletClient) {
+        throw new Error("Unable to get wallet client");
+      }
+      const signer = walletClientToSigner(walletClient);
 
+      const db = new Database({ baseUrl, signer, autoWait: true });
       await db
         .prepare(
           `insert into ${tableName} (${cols.join(",")}) values (${vals.join(
@@ -187,17 +203,17 @@ export function DataTable({
     });
 
     if (!isConnected) return setCanInsert(false);
-    if (typeof acl.controller !== "string") setCanInsert(false);
-    if (acl.controller !== address) setCanInsert(false);
+    if (typeof acl?.controller !== "string") return setCanInsert(false);
+    if (acl.controller !== address) return setCanInsert(false);
 
-    setCanInsert(true);
+    return setCanInsert(true);
   };
   React.useEffect(function () {
     loadPermission().catch((e) => console.log(e));
     // pass an empty array so this only runs on the inital loading
   }, []);
   const refreshData = async function () {
-    const data = await db.prepare(`SELECT * FROM ${tableName};`).all();
+    const data = await readDb.prepare(`SELECT * FROM ${tableName};`).all();
     setData(objectToTableData(data.results));
   };
   React.useEffect(function () {
@@ -294,8 +310,7 @@ export function DataTable({
                           {
                             columns.find(
                               (col) =>
-                                formatIdentifierName(col.name) ===
-                                cell.id,
+                                formatIdentifierName(col.name) === cell.id,
                             )?.type
                           }
                         </b>
