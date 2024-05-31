@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ExecDeployment from "@/components/exec-deployment";
 import { api } from "@/trpc/react";
+import { chainsMap } from "@/lib/chains-map";
 
 export interface TableMenuProps {
   schema: Schema;
@@ -42,7 +43,7 @@ export default function TableMenu({
   def,
   isAuthorized,
 }: TableMenuProps) {
-  const [tableSettingsOpen, setTableSettingnsOpen] = useState(false);
+  const [tableSettingsOpen, setTableSettingsOpen] = useState(false);
   const [execDeploymentOpen, setExecDeploymentOpen] = useState(false);
   const [newDefFormOpen, setNewDefFormOpen] = useState(false);
   const [importTableFormOpen, setImportTableFormOpen] = useState(false);
@@ -69,13 +70,13 @@ export default function TableMenu({
   };
 
   const onDeleteTable = () => {
-    setTableSettingnsOpen(false);
+    setTableSettingsOpen(false);
     setDeleteTableOpen(true);
   };
 
   const onUndeployTable = () => {
     void deploymentsQuery.refetch();
-    setTableSettingnsOpen(false);
+    setTableSettingsOpen(false);
     setUndeployTableOpen(true);
   };
 
@@ -96,7 +97,7 @@ export default function TableMenu({
     !!isAuthorized && !!def && !!team && !!project && !!env;
   const displayDeploy =
     !!isAuthorized && !chainId && !tableId && !!def && !!env;
-  const displayImport = !!chainId && !!tableId;
+  const displayImport = !!chainId && !!tableId && chainsMap.get(80001);
 
   return (
     <>
@@ -104,7 +105,7 @@ export default function TableMenu({
         <>
           <TableSettings
             open={tableSettingsOpen}
-            onOpenChange={setTableSettingnsOpen}
+            onOpenChange={setTableSettingsOpen}
             isAdmin={!!isAuthorized.isOwner}
             def={{ ...def, schema }}
             projectId={project.id}
@@ -176,7 +177,7 @@ export default function TableMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {displaySettings && (
-            <DropdownMenuItem onSelect={() => setTableSettingnsOpen(true)}>
+            <DropdownMenuItem onSelect={() => setTableSettingsOpen(true)}>
               Table settings
             </DropdownMenuItem>
           )}
