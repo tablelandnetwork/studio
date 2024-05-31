@@ -11,7 +11,7 @@ import { useAccount } from "wagmi";
 import { ChevronDown, Loader2 } from "lucide-react";
 import React from "react";
 import { Database, Validator, helpers } from "@tableland/sdk";
-import { objectToTableData } from "@/lib/utils";
+import { objectToTableData, formatIdentifierName } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -66,7 +66,7 @@ export function DataTable({
 
   // Some tables are escaped with the tick mark, need to remove those from the column name
   const cols = columns.map((col: any) => {
-    const formattedName = col.name.replace(/^`/, "").replace(/`$/, "");
+    const formattedName = formatIdentifierName(col.name);
     return { accessorKey: formattedName, header: formattedName };
   });
 
@@ -96,7 +96,7 @@ export function DataTable({
     eve: React.FormEvent<HTMLInputElement>,
     cellId: string,
   ) {
-    const column = cellId.split("_").pop();
+    const column = cellId; //.split("_").slice(1).join("_");
     if (typeof column !== "string") throw new Error("invalid cell id");
 
     // TODO: Not sure why I have to type cast here.
@@ -118,6 +118,11 @@ export function DataTable({
         );
         if (colTicks) return "`" + colTicks.name + "`";
 
+        const colQuotes = columns.find(
+          (col) => col.name.replace(/^"/, "").replace(/"$/, "") === val[0],
+        );
+        if (colQuotes) return colQuotes.name;
+
         const colPlain = columns.find((col) => col.name === val[0]);
         if (colPlain) return colPlain.name;
 
@@ -127,7 +132,7 @@ export function DataTable({
 
     const vals = entries.map((val) => {
       const col = columns.find(
-        (col) => col.name.replace(/^`/, "").replace(/`$/, "") === val[0],
+        (col) => formatIdentifierName(col.name) === val[0],
       );
 
       // casting to ignore @typescript-eslint/restrict-template-expressions lint rule
@@ -135,8 +140,11 @@ export function DataTable({
       return val[1];
     });
 
-    if (!vals.length || vals.length !== cols.length)
+    if (!vals.length || vals.length !== cols.length) {
+      console.log("cannot build insert statement");
+      setSaving(false);
       throw new Error("cannot build insert statement");
+    }
 
     try {
       // TODO: need to confirm the wallet is connected to the right chain
@@ -210,7 +218,9 @@ export function DataTable({
             className="ml-4"
             disabled={saving}
             onClick={() => {
-              commitInsert().catch((e) => e);
+              commitInsert().catch((err) => {
+                throw err;
+              });
             }}
           >
             {saving && <Loader2 className="h-5 w-5 animate-spin" />}
@@ -284,7 +294,7 @@ export function DataTable({
                           {
                             columns.find(
                               (col) =>
-                                col.name.replace(/^`/, "").replace(/`$/, "") ===
+                                formatIdentifierName(col.name) ===
                                 cell.id,
                             )?.type
                           }
@@ -297,9 +307,7 @@ export function DataTable({
                             columns
                               .find((col: any) => {
                                 return (
-                                  col.name
-                                    .replace(/^`/, "")
-                                    .replace(/`$/, "") === cell.id
+                                  formatIdentifierName(col.name) === cell.id
                                 );
                               })
                               ?.constraints?.join(", ")}
