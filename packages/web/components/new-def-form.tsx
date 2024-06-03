@@ -128,31 +128,12 @@ export default function NewDefForm({
     },
   });
 
-  const { handleSubmit, register, control, setError } = form;
+  const { handleSubmit, control, setError } = form;
 
   const { fields: columnFields } = useFieldArray({
     control,
     name: "columns",
   });
-
-  const addColumn = () => {
-    form.setValue("columns", [
-      ...form.getValues("columns"),
-      {
-        id: new Date().getTime().toString(),
-        name: "",
-        type: "integer",
-        notNull: false,
-        primaryKey: false,
-        unique: false,
-      },
-    ]);
-  };
-
-  const removeColumn = (index: number) => {
-    const cols = [...form.getValues("columns")];
-    form.setValue("columns", cols.toSpliced(index, 1));
-  };
 
   const handleTeamSelected = (team: schema.Team) => {
     setTeam(team);
@@ -303,14 +284,7 @@ export default function NewDefForm({
                   <FormItem>
                     <FormLabel>Columns</FormLabel>
                     <FormControl>
-                      <Columns
-                        columns={columnFields}
-                        control={control}
-                        register={register}
-                        addColumn={addColumn}
-                        removeColumn={removeColumn}
-                        {...field}
-                      />
+                      <Columns columns={columnFields} form={form} {...field} />
                     </FormControl>
                     <FormDescription>
                       Specify at least one column for your definition.

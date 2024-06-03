@@ -1,5 +1,11 @@
 import { type Schema, hasConstraint } from "@tableland/studio-store";
-import { Check } from "lucide-react";
+import { ArrowUp01, Check } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 import {
   Table,
   TableBody,
@@ -29,6 +35,7 @@ export default function DefColumns({
       )}
       <TableBody>
         {columns.map((column, index) => {
+          const isPkAuto = hasConstraint(column, "primary key autoincrement");
           return (
             <TableRow key={column.name}>
               <TableCell>
@@ -41,7 +48,23 @@ export default function DefColumns({
                 {hasConstraint(column, "not null") && <Check />}
               </TableCell>
               <TableCell align="center">
-                {hasConstraint(column, "primary key") && <Check />}
+                {(hasConstraint(column, "primary key") || isPkAuto) && (
+                  <div className="flex items-center justify-center gap-2">
+                    <Check />
+                    {isPkAuto && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <ArrowUp01 className="opacity-30 hover:opacity-100" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Primary key is auto-incrementing
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                )}
               </TableCell>
               <TableCell align="center">
                 {hasConstraint(column, "unique") && <Check />}

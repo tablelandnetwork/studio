@@ -1,6 +1,10 @@
 import { type Schema } from "./index.js";
 
-export type Constraint = "not null" | "primary key" | "unique";
+export type Constraint =
+  | "not null"
+  | "primary key"
+  | "primary key autoincrement"
+  | "unique";
 
 export function hasConstraint(
   column: Schema["columns"][number],
@@ -33,7 +37,7 @@ export function generateCreateTableStatement(
   const cleaned = cleanSchema(schema);
   const columnDefinitions = cleaned.columns
     .map((column) => {
-      const definition = `"${column.name}" ${column.type}`;
+      const definition = `\`${column.name}\` ${column.type}`;
       const columnConstraints = column.constraints?.length
         ? " " + column.constraints.join(" ")
         : "";
@@ -41,13 +45,13 @@ export function generateCreateTableStatement(
     })
     .join(", ");
 
-  // TODO: When we support creating table contraints in studio,
+  // TODO: When we support creating table constraints in studio,
   // be sure column names are properly escaped.
   const tableConstraints = cleaned.tableConstraints
     ? cleaned.tableConstraints.join(",")
     : "";
 
-  return `create table "${tableName}"(${columnDefinitions}${
+  return `create table [${tableName}](${columnDefinitions}${
     tableConstraints ? `, ${tableConstraints}` : ""
   });`;
 }
@@ -58,6 +62,23 @@ export function cleanSchema(schema: Schema) {
     columns: schema.columns.filter(
       (column) => column.name.length && column.type.length,
     ),
+  };
+}
+
+// Given a SQL identifier with escape characters, return the unescaped version.
+export function unescapeIdentifier(name: string) {
+  return name.replace(/^[`"[]/, "").replace(/[`"\]]$/, "");
+}
+
+// TODO: Needs to deal with table constraints. They should
+// be modeled in a more structured way.
+export function unescapeSchema(schema: Schema): Schema {
+  return {
+    ...schema,
+    columns: schema.columns.map((col) => ({
+      ...col,
+      name: unescapeIdentifier(col.name),
+    })),
   };
 }
 

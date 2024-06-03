@@ -1,5 +1,5 @@
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
-import { type Store } from "@tableland/studio-store";
+import { type Store, unescapeSchema } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { importTableSchema } from "@tableland/studio-validators";
 import { projectProcedure, createTRPCRouter } from "../trpc";
@@ -10,12 +10,11 @@ export function tablesRouter(store: Store) {
     importTable: projectProcedure(store)
       .input(importTableSchema)
       .mutation(async ({ input }) => {
-        const validator = new Validator({
-          baseUrl: helpers.getBaseUrl(input.chainId),
-        });
-
         let tablelandTable: Table;
         try {
+          const validator = new Validator({
+            baseUrl: helpers.getBaseUrl(input.chainId),
+          });
           tablelandTable = await validator.getTableById({
             chainId: input.chainId,
             tableId: input.tableId,
@@ -29,6 +28,8 @@ export function tablesRouter(store: Store) {
           }
           throw internalError("Error getting table by id.", err);
         }
+
+        const schema = unescapeSchema(tablelandTable.schema);
 
         const createdAttr = tablelandTable.attributes?.find(
           (attr) => attr.traitType === "created",
@@ -46,7 +47,7 @@ export function tablesRouter(store: Store) {
             input.projectId,
             input.defName,
             input.defDescription,
-            tablelandTable.schema,
+            schema,
           );
           const deployment = await store.deployments.recordDeployment({
             defId: def.id,
@@ -59,7 +60,7 @@ export function tablesRouter(store: Store) {
           return { def, deployment };
         } catch (err) {
           throw internalError(
-            "Error saving defintion and deployment records.",
+            "Error saving definition and deployment records.",
             err,
           );
         }

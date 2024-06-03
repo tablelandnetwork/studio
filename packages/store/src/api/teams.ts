@@ -163,7 +163,7 @@ export function initTeams(
           .all()
       ).map((r) => r.projectId);
 
-      // If the team has projects, delete them and all realated data
+      // If the team has projects, delete them and all related data
       if (teamProjectIds.length) {
         // projects
         const { sql: projectsSql, params: projectsParams } = db

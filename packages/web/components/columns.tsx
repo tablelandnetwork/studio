@@ -1,6 +1,14 @@
-import { HelpCircle, Plus, X } from "lucide-react";
-import { type Control, type UseFormRegister } from "react-hook-form";
-import { forwardRef } from "react";
+import { ArrowUp01, HelpCircle, Plus, X } from "lucide-react";
+import { type UseFormReturn } from "react-hook-form";
+import { forwardRef, useState } from "react";
+import { type z } from "zod";
+import { type newDefFormSchema } from "@tableland/studio-validators";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 import {
   Table,
   TableBody,
@@ -41,39 +49,46 @@ interface Props {
     primaryKey: boolean;
     unique: boolean;
   }>;
-  control: Control<
-    {
-      name: string;
-      description: string;
-      columns: Array<{
-        name: string;
-        type: "integer" | "int" | "text" | "blob";
-        id: string;
-        notNull: boolean;
-        primaryKey: boolean;
-        unique: boolean;
-      }>;
-    },
-    any
-  >;
-  register: UseFormRegister<{
-    name: string;
-    description: string;
-    columns: Array<{
-      name: string;
-      type: "integer" | "int" | "text" | "blob";
-      id: string;
-      notNull: boolean;
-      primaryKey: boolean;
-      unique: boolean;
-    }>;
-  }>;
-  addColumn: () => void;
-  removeColumn: (index: number) => void;
+  form: UseFormReturn<z.infer<typeof newDefFormSchema>>;
 }
 
 const Columns = forwardRef<React.ElementRef<"div">, Props>(
-  ({ columns, control, register, addColumn, removeColumn }: Props, ref) => {
+  ({ columns, form }: Props, ref) => {
+    const [columnTypes, setColumnTypes] = useState<string[]>([]);
+
+    const { control, register, setValue, getValues } = form;
+
+    const addColumn = () => {
+      setValue("columns", [
+        ...getValues("columns"),
+        {
+          id: new Date().getTime().toString(),
+          name: "",
+          type: "integer",
+          notNull: false,
+          primaryKey: false,
+          unique: false,
+        },
+      ]);
+      setColumnTypes([...columnTypes, "integer"]);
+    };
+
+    const removeColumn = (index: number) => {
+      const cols = [...getValues("columns")];
+      setValue("columns", cols.toSpliced(index, 1));
+      setColumnTypes(columnTypes.toSpliced(index, 1));
+    };
+
+    const makeOnTypeChange = (
+      index: number,
+      target: (value: string) => void,
+    ) => {
+      return (value: string) => {
+        setColumnTypes(columnTypes.toSpliced(index, 1, value));
+        target(value);
+      };
+    };
+
     return (
       <div ref={ref}>
         {columns.length ? (
@@ -172,14 +187,17 @@ const Columns = forwardRef<React.ElementRef<"div">, Props>(
                         <FormItem>
                           <Select
                             key={column.id}
-                            onValueChange={field.onChange}
+                            value={field.value}
+                            onValueChange={makeOnTypeChange(
+                              index,
+                              field.onChange,
+                            )}
                             defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger
                                 className="w-auto gap-x-2"
                                 key={column.id}
-                                // {...register(`columns.${index}.type`)} // TODO: Not sure how to register this select.
                               >
                                 <SelectValue placeholder="Select column type" />
                               </SelectTrigger>
@@ -222,11 +240,25 @@ const Columns = forwardRef<React.ElementRef<"div">, Props>(
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Checkbox
-                              key={column.id}
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <div className="flex items-center justify-start gap-2">
+                              <Checkbox
+                                key={column.id}
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                              {columnTypes[index] === "integer" && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <ArrowUp01 className="opacity-30 hover:opacity-100" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      Primary key will be auto-incrementing
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

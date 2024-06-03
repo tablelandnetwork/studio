@@ -1,6 +1,7 @@
 import { type Table as TblTable, Validator, helpers } from "@tableland/sdk";
 import { getSession } from "@tableland/studio-api";
 import { cookies, headers } from "next/headers";
+import { unescapeSchema } from "@tableland/studio-store";
 import Table from "@/components/table";
 import TableWrapper from "@/components/table-wrapper";
 import { ensureError } from "@/lib/ensure-error";
@@ -50,6 +51,8 @@ export default async function TablePage({
     );
   }
 
+  const schema = unescapeSchema(tablelandTable.schema);
+
   const createdAttr = tablelandTable.attributes?.find(
     (attr) => attr.traitType === "created",
   );
@@ -68,13 +71,13 @@ export default async function TablePage({
         displayName={params.name}
         chainId={chainId}
         tableId={tableId}
-        schema={tablelandTable.schema}
+        schema={schema}
         isAuthenticated={!!session.auth}
       >
         <Table
           chainId={chainId}
           createdAt={createdAt}
-          schema={tablelandTable.schema}
+          schema={schema}
           tableName={params.name}
           tableId={tableId}
         />
