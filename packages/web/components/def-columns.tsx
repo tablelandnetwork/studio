@@ -1,4 +1,8 @@
-import { type Schema, hasConstraint } from "@tableland/studio-store";
+import {
+  type Schema,
+  hasConstraint,
+  isPrimaryKeyAutoIncrement,
+} from "@tableland/studio-store";
 import { ArrowUp01, Check } from "lucide-react";
 import {
   Tooltip,
@@ -35,9 +39,7 @@ export default function DefColumns({
       )}
       <TableBody>
         {columns.map((column, index) => {
-          const isPkAuto =
-            hasConstraint(column, "primary key autoincrement") ||
-            (column.type === "integer" && hasConstraint(column, "primary key"));
+          const isPkAuto = isPrimaryKeyAutoIncrement(column);
           return (
             <TableRow key={column.name}>
               <TableCell>

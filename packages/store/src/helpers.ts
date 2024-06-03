@@ -27,6 +27,13 @@ export function setConstraint(
   }
 }
 
+export function isPrimaryKeyAutoIncrement(column: Schema["columns"][number]) {
+  return (
+    hasConstraint(column, "primary key autoincrement") ||
+    (hasConstraint(column, "primary key") && column.type === "integer")
+  );
+}
+
 export function generateCreateTableStatement(
   tableName: string,
   schema: Schema,
