@@ -35,7 +35,9 @@ export default function DefColumns({
       )}
       <TableBody>
         {columns.map((column, index) => {
-          const isPkAuto = hasConstraint(column, "primary key autoincrement");
+          const isPkAuto =
+            hasConstraint(column, "primary key autoincrement") ||
+            (column.type === "integer" && hasConstraint(column, "primary key"));
           return (
             <TableRow key={column.name}>
               <TableCell>
