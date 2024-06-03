@@ -1,7 +1,6 @@
-import { unescapeSchema, type Store } from "@tableland/studio-store";
+import { type Store } from "@tableland/studio-store";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
 import {
   publicProcedure,
   createTRPCRouter,
@@ -26,27 +25,6 @@ export function deploymentsRouter(store: Store) {
         }),
       )
       .mutation(async ({ input }) => {
-        let tablelandTable: Table;
-        try {
-          const validator = new Validator({
-            baseUrl: helpers.getBaseUrl(input.chainId),
-          });
-          tablelandTable = await validator.getTableById({
-            chainId: input.chainId,
-            tableId: input.tableId,
-          });
-        } catch (err) {
-          if (err instanceof ApiError && err.status === 404) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: `Table id ${input.tableId} not found on chain ${input.chainId}.`,
-            });
-          }
-          throw internalError("Error getting table by id.", err);
-        }
-
-        const schema = unescapeSchema(tablelandTable.schema);
-
         const res = await store.deployments.recordDeployment({
           defId: input.defId,
           environmentId: input.environmentId,
@@ -57,8 +35,6 @@ export function deploymentsRouter(store: Store) {
           txnHash: input.txnHash,
           createdAt: input.createdAt,
         });
-        // TODO: Figure out how to submit both updates in one transaction
-        await store.defs.updateDef(input.defId, undefined, undefined, schema);
         return res;
       }),
     deleteDeployments: defAdminProcedure(store)
