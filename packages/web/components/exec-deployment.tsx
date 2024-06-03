@@ -13,7 +13,7 @@ import { type JsonRpcSigner } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { useWalletClient, type WalletClient } from "wagmi";
+import { useWalletClient } from "wagmi";
 import {
   getNetwork,
   getWalletClient,

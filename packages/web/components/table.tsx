@@ -31,7 +31,6 @@ import { chainsMap } from "@/lib/chains-map";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
-import { ensureError } from "@/lib/ensure-error";
 
 interface Props {
   tableName: string;
@@ -71,37 +70,40 @@ export default async function Table({
   isAuthorized,
 }: Props) {
   const chain = chainsMap.get(chainId);
+  const invalidChain = !chain;
+
   const blockExplorer = blockExplorers.get(chainId);
   const openSeaLink = openSeaLinks.get(chainId);
 
-  const baseUrl = helpers.getBaseUrl(chainId);
-  const validator = new Validator({ baseUrl });
+  const baseUrl = invalidChain ? undefined : helpers.getBaseUrl(chainId);
+  const validator = invalidChain ? null : new Validator({ baseUrl });
 
-  const table = await validator.getTableById({ chainId, tableId });
-  const columns = table.schema.columns;
+  const table = validator
+    ? await validator.getTableById({ chainId, tableId })
+    : null;
+  const columns = table?.schema?.columns ?? [];
 
-  const deploymentReferences = (
-    await api.deployments.deploymentReferences({ chainId, tableId })
-  ).filter((p) => p.environment.id !== environment?.id);
+  const deploymentReferences = invalidChain
+    ? []
+    : (await api.deployments.deploymentReferences({ chainId, tableId })).filter(
+        (p) => p.environment.id !== environment?.id,
+      );
 
   return (
     <div className="flex-1 space-y-4">
       <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {error && (
+        {invalidChain && (
           <Alert className="col-span-full">
             <AlertCircle className="size-5 stroke-destructive" />
             <AlertTitle className="text-destructive">
               Error loading table data
             </AlertTitle>
             <AlertDescription>
-              <p>{error.message}</p>
-              {isAuthorized &&
-                error.message.includes("cannot use unsupported chain") && (
-                  <p>
-                    You should undeploy this table and redeploy it to a
-                    supported chain.
-                  </p>
-                )}
+              <p>cannot use unsupported chain</p>
+              <p>
+                You should undeploy this table and redeploy it to a supported
+                chain.
+              </p>
             </AlertDescription>
           </Alert>
         )}
@@ -215,7 +217,7 @@ export default async function Table({
           </MetricCard>
         )}
       </div>
-      <Tabs defaultValue="definition"} className="py-4">
+      <Tabs defaultValue="definition" className="py-4">
         <TabsList>
           <TabsTrigger value="definition">Definition</TabsTrigger>
           <TabsTrigger value="data">Table Data</TabsTrigger>
@@ -223,15 +225,17 @@ export default async function Table({
         </TabsList>
 
         <TabsContent value="data">
-          <DataTable
-            columns={columns}
-            chainId={chainId}
-            tableId={tableId}
-            tableName={tableName}
-          />
+          {!invalidChain && (
+            <DataTable
+              columns={columns}
+              chainId={chainId}
+              tableId={tableId}
+              tableName={tableName}
+            />
+          )}
         </TabsContent>
         <TabsContent value="logs">
-          <SQLLogs tables={[{ chainId, tableId }]} />
+          {!invalidChain && <SQLLogs tables={[{ chainId, tableId }]} />}
         </TabsContent>
 
         <TabsContent value="definition" className="space-y-4">
