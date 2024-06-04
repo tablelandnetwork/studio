@@ -44,6 +44,7 @@ export function auth(
       teamName: string,
       email?: string,
     ) {
+      const now = new Date().toISOString();
       const teamId = randomUUID();
       const sealed = await sealData(
         { email },
@@ -60,6 +61,8 @@ export function auth(
           personal: 1,
           name: teamName,
           slug: slugify(teamName),
+          createdAt: now,
+          updatedAt: now,
         })
         .toSQL();
       const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
