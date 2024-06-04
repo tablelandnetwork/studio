@@ -88,6 +88,14 @@ export const blockExplorers = new Map<
     },
   ],
   [
+    84532,
+    {
+      explorer: "BaseScan",
+      blockUrl: (block) => `https://sepolia.basescan.org/block/${block}`,
+      txUrl: (hash) => `https://sepolia.basescan.org/tx/${hash}`,
+    },
+  ],
+  [
     137,
     {
       explorer: "PolygonScan",

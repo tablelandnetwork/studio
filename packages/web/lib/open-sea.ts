@@ -48,6 +48,13 @@ export const openSeaLinks = new Map<
   //   },
   // ],
   [
+    11155420,
+    {
+      tokenUrl: (tokenId) =>
+        `https://testnets.opensea.io/assets/base-sepolia/0xA85aAE9f0Aec5F5638E5F13840797303Ab29c9f9/${tokenId}`,
+    },
+  ],
+  [
     137,
     {
       tokenUrl: (tokenId) =>
