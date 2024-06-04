@@ -37,11 +37,11 @@ export default function EditEnv({ team }: { team: schema.Team }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      name: "",
     },
   });
 
-  const email = form.watch("email");
+  const name = form.watch("name");
 
   function onNewInvite() {
     setShowForm(true);
@@ -58,7 +58,7 @@ export default function EditEnv({ team }: { team: schema.Team }) {
 
   useEffect(() => {
     if (showForm) {
-      form.setFocus("email", { shouldSelect: true });
+      form.setFocus("name", { shouldSelect: true });
     }
   }, [form, showForm]);
 
@@ -73,16 +73,16 @@ export default function EditEnv({ team }: { team: schema.Team }) {
           {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex">
             <Avatar>
-              <AvatarFallback>{email.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{name.charAt(0)}</AvatarFallback>
             </Avatar>
             <FormField
               control={form.control}
-              name="email"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Input
-                      placeholder="Email address"
+                      placeholder="Environment name"
                       className="ml-4"
                       disabled={inviteEmails.isPending}
                       {...field}
