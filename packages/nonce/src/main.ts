@@ -60,7 +60,7 @@ export class NonceManager extends AbstractSigner<Provider> {
   }
 
   async getNonce(blockTag?: BlockTag): Promise<number> {
-    debugLogger("getNonce");
+    debugLogger("getNonce", process.pid);
     if (blockTag === "pending") {
       await this._acquireLock();
       const address = await this.signer.getAddress();
@@ -80,24 +80,24 @@ export class NonceManager extends AbstractSigner<Provider> {
         });
       });
 
-      debugLogger("getNonce: nonce (pending):", nonce);
+      debugLogger("getNonce: nonce (pending):", nonce, process.pid);
       return nonce;
     }
 
     const nonce = await super.getNonce(blockTag);
-    debugLogger("getNonce: nonce (not pending):", nonce);
+    debugLogger("getNonce: nonce (not pending):", nonce, process.pid);
     return nonce;
   }
 
   async reset(): Promise<void> {
-    debugLogger("reset");
+    debugLogger("reset", process.pid);
     await this._acquireLock();
     await this._resetDelta();
     await this._releaseLock();
   }
 
   async increment(count?: number): Promise<number> {
-    debugLogger("increment");
+    debugLogger("increment", process.pid);
     return await this.memStore.incrby(
       `delta:${await this.getAddress()}`,
       count == null ? 1 : count,
@@ -109,14 +109,14 @@ export class NonceManager extends AbstractSigner<Provider> {
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
-    debugLogger("signTransaction");
+    debugLogger("signTransaction", process.pid);
     return await this.signer.signTransaction(transaction);
   }
 
   async sendTransaction(
     transaction: TransactionRequest,
   ): Promise<TransactionResponse> {
-    debugLogger("sendTransaction");
+    debugLogger("sendTransaction", process.pid);
     if (transaction.nonce == null) {
       transaction = { ...transaction };
       transaction.nonce = await this.getNonce("pending");
