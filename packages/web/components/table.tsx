@@ -31,6 +31,14 @@ import { chainsMap } from "@/lib/chains-map";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
+import {
+  Table as UiTable,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface Props {
   tableName: string;
@@ -81,7 +89,12 @@ export default async function Table({
   const table = validator
     ? await validator.getTableById({ chainId, tableId })
     : null;
-  const columns = table?.schema?.columns ?? [];
+  const columns = (table?.schema?.columns ?? []).map(function (col) {
+    if (!col.constraints) col.constraints = [];
+    if (col.constraints.length === 0) col.constraints.push("none");
+
+    return col;
+  });
 
   const deploymentReferences = invalidChain
     ? []
@@ -217,21 +230,41 @@ export default async function Table({
           </MetricCard>
         )}
       </div>
-      <Tabs defaultValue="definition" className="py-4">
+      <Tabs defaultValue="data" className="py-4">
         <TabsList>
-          <TabsTrigger value="definition">Definition</TabsTrigger>
           <TabsTrigger value="data">Table Data</TabsTrigger>
+          <TabsTrigger value="definition">Definition</TabsTrigger>
           <TabsTrigger value="logs">SQL Logs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="data">
-          {!invalidChain && (
+          {!invalidChain ? (
             <DataTable
               columns={columns}
               chainId={chainId}
               tableId={tableId}
               tableName={tableName}
             />
+          ) : (
+            <div>
+              <div className="mt-4 rounded-md border">
+                <UiTable>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="h-24 text-center">
+                        No results.
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </UiTable>
+              </div>
+            </div>
           )}
         </TabsContent>
         <TabsContent value="logs">
