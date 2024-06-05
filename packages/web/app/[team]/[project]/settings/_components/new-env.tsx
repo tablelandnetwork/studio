@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { skipToken } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,17 +16,28 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
+import InputWithCheck from "@/components/input-with-check";
 
 const formSchema = z.object({
   name: z.string().trim().min(1),
 });
 
-export default function EditEnv({ team }: { team: schema.Team }) {
+export default function NewEnv({
+  project,
+  disabled,
+}: {
+  project: schema.Project;
+  disabled?: boolean;
+}) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
-  const inviteEmails = api.environments.newEnvironment.useMutation({
+  const [query, setQuery] = useState("");
+  const nameAvailable = api.environments.nameAvailable.useQuery(
+    query ? { projectId: project.id, name: query } : skipToken,
+    { retry: false },
+  );
+  const newEnv = api.environments.newEnvironment.useMutation({
     onSuccess: () => {
       router.refresh();
       setShowForm(false);
@@ -41,14 +52,12 @@ export default function EditEnv({ team }: { team: schema.Team }) {
     },
   });
 
-  const name = form.watch("name");
-
-  function onNewInvite() {
+  function onNewEnv() {
     setShowForm(true);
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    inviteEmails.mutate({ teamId: team.id, emails: [values.email] });
+    newEnv.mutate({ projectId: project.id, ...values });
   }
 
   function onCancel() {
@@ -64,7 +73,7 @@ export default function EditEnv({ team }: { team: schema.Team }) {
 
   return (
     <>
-      {showForm && (
+      {showForm ? (
         <Form {...form}>
           {
             // TODO: `form.handleSubmit` creates a floating promise, as a result the linter is complaining
@@ -72,19 +81,17 @@ export default function EditEnv({ team }: { team: schema.Team }) {
           }
           {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex">
-            <Avatar>
-              <AvatarFallback>{name.charAt(0)}</AvatarFallback>
-            </Avatar>
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
+                    <InputWithCheck
                       placeholder="Environment name"
-                      className="ml-4"
-                      disabled={inviteEmails.isPending}
+                      disabled={newEnv.isPending}
+                      updateQuery={setQuery}
+                      queryStatus={nameAvailable}
                       {...field}
                     />
                   </FormControl>
@@ -92,38 +99,40 @@ export default function EditEnv({ team }: { team: schema.Team }) {
                 </FormItem>
               )}
             />
+
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={newEnv.isPending}
+              onClick={onCancel}
+              className="ml-auto"
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               size="sm"
-              disabled={inviteEmails.isPending}
-              className="ml-auto"
+              disabled={newEnv.isPending}
+              className="ml-3"
             >
-              {inviteEmails.isPending && (
+              {newEnv.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               )}
               Submit
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={inviteEmails.isPending}
-              onClick={onCancel}
-              className="ml-2"
-            >
-              Cancel
-            </Button>
           </form>
         </Form>
+      ) : (
+        <Button
+          variant="outline"
+          className="self-end"
+          disabled={showForm || disabled}
+          onClick={onNewEnv}
+        >
+          <Plus className="mr-2" />
+          New environment
+        </Button>
       )}
-      <Button
-        variant="outline"
-        className="self-start"
-        disabled={showForm}
-        onClick={onNewInvite}
-      >
-        <Plus className="mr-2" />
-        New Invite
-      </Button>
     </>
   );
 }

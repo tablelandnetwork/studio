@@ -3,6 +3,7 @@ import { cache } from "react";
 import { OctagonAlert } from "lucide-react";
 import EditProject from "./_components/edit-project";
 import DeleteButton from "./_components/delete-button";
+import NewEnv from "./_components/new-env";
 import Envs from "./_components/envs";
 import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
 import {
@@ -73,8 +74,9 @@ export default async function ProjectSettings({
             groups of tables.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Envs envs={envs} />
+        <CardContent className="flex flex-col gap-y-4">
+          <Envs envs={envs} disabled={!isAdmin} />
+          <NewEnv project={project} disabled={!isAdmin} />
         </CardContent>
       </Card>
       <Card className={cn(!isAdmin && "opacity-50")}>
