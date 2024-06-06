@@ -63,6 +63,19 @@ export function environmentsRouter(store: Store) {
           input.projectId,
         );
       }),
+    userEnvironmentForProject: publicProcedure
+      .input(
+        z.object({
+          projectId: z.string().uuid(),
+        }),
+      )
+      .query(async ({ input, ctx }) => {
+        // TODO: Check the user session for their last used env.
+        const envs = await store.environments.getEnvironmentsByProjectId(
+          input.projectId,
+        );
+        return envs[0];
+      }),
     environmentBySlug: publicProcedure
       .input(
         z.object({

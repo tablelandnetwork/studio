@@ -48,23 +48,17 @@ export function Sidebar() {
       : skipToken,
   );
 
-  const environmentQuery = api.environments.environmentBySlug.useQuery(
+  const { data: env } = api.environments.environmentBySlug.useQuery(
     projectQuery.data && envSlug
       ? { projectId: projectQuery.data.id, slug: envSlug }
       : skipToken,
   );
 
-  const environmentsQuery = api.environments.projectEnvironments.useQuery(
-    !envSlug && projectQuery.data
-      ? { projectId: projectQuery.data.id }
-      : skipToken,
+  const userEnvForProject = api.environments.userEnvironmentForProject.useQuery(
+    projectQuery.data ? { projectId: projectQuery.data.id } : skipToken,
   );
 
-  const env =
-    environmentQuery.data ??
-    (environmentsQuery.data && environmentsQuery.data.length > 0
-      ? environmentsQuery.data?.[0]
-      : undefined);
+  const linkEnv = env ?? userEnvForProject.data;
 
   const defQuery = api.defs.defByProjectIdAndSlug.useQuery(
     projectQuery.data && defSlug
@@ -101,10 +95,8 @@ export function Sidebar() {
     defsQuery
       .refetch()
       .then(() => {
-        if (environmentQuery.data) {
-          router.push(
-            `/${team.slug}/${project.slug}/${environmentQuery.data.slug}/${def.slug}`,
-          );
+        if (env) {
+          router.push(`/${team.slug}/${project.slug}/${env.slug}/${def.slug}`);
         }
       })
       .catch(() => {});
@@ -124,19 +116,19 @@ export function Sidebar() {
       .catch(() => {});
   };
 
-  if (!teamQuery.data || !projectQuery.data || !env) {
+  if (!teamQuery.data || !projectQuery.data || !linkEnv) {
     return null;
   }
 
   return (
     <SidebarContainer>
-      <SidebarSection>
+      <SidebarSection className="p-3">
         <Link
-          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${env.slug}`}
+          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}`}
         >
           <Button
             variant={
-              !defSlug && !!envSlug && envSlug === environmentQuery.data?.slug
+              !defSlug && !!envSlug && envSlug === env?.slug
                 ? "secondary"
                 : "ghost"
             }
@@ -146,21 +138,6 @@ export function Sidebar() {
             Overview
           </Button>
         </Link>
-        {!!isAuthorizedQuery.data && (
-          <Link
-            href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
-          >
-            <Button
-              variant={
-                selectedLayoutSegment === "settings" ? "secondary" : "ghost"
-              }
-              className="w-full justify-start gap-x-2 pl-1"
-            >
-              <Settings />
-              Settings
-            </Button>
-          </Link>
-        )}
         <div className="flex items-center gap-2 pl-1">
           <Table2 className="shrink-0" />
           <h2 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
@@ -209,7 +186,7 @@ export function Sidebar() {
           return (
             <Link
               key={def.id}
-              href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${env.slug}/${def.slug}`}
+              href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}/${def.slug}`}
             >
               <Button
                 key={def.id}
@@ -217,7 +194,7 @@ export function Sidebar() {
                 className="w-full justify-start"
               >
                 <span className={cn(!deployment && "mr-4")}>{def.name}</span>
-                {!deployment && (
+                {env && !deployment && (
                   <div
                     className={cn(
                       "ml-auto size-2 rounded-full",
@@ -232,6 +209,25 @@ export function Sidebar() {
           );
         })}
       </SidebarSection>
+      {!!isAuthorizedQuery.data && (
+        <SidebarSection className="sticky bottom-0 bg-card">
+          <div className="p-3">
+            <Link
+              href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
+            >
+              <Button
+                variant={
+                  selectedLayoutSegment === "settings" ? "secondary" : "ghost"
+                }
+                className="w-full justify-start gap-x-2 pl-1"
+              >
+                <Settings />
+                Settings
+              </Button>
+            </Link>
+          </div>
+        </SidebarSection>
+      )}
       <NewDefForm
         open={newDefOpen}
         onOpenChange={setNewDefOpen}

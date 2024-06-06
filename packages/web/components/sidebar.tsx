@@ -7,7 +7,7 @@ export function SidebarContainer({
   ...props
 }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("space-y-8 p-3", className)} {...props}>
+    <div className={cn("space-y-8", className)} {...props}>
       {children}
     </div>
   );

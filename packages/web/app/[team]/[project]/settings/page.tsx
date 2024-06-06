@@ -71,7 +71,9 @@ export default async function ProjectSettings({
           <CardDescription>
             Environments are logical groups of tables. You could, for example,
             use them to create &quot;staging&quot; and &quot;production&quot;
-            groups of tables.
+            groups of tables. All of your project&apos;s table definitions are
+            available in each environment, but you can deploy those table
+            definitions to Tableland separately per environment.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-y-4">
