@@ -1,31 +1,40 @@
 "use client";
 
 import { type RouterOutputs } from "@tableland/studio-api";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { type schema } from "@tableland/studio-store";
 import { useState } from "react";
 import { skipToken } from "@tanstack/react-query";
 import Image from "next/image";
 import NewTeamForm from "./new-team-form";
+import NewEnvForm from "./new-env-form";
 import NewProjectForm from "@/components/new-project-form";
 import TeamSwitcher from "@/components/team-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { api } from "@/trpc/react";
 import logo from "@/public/logo.svg";
+import EnvSwitcher from "@/components/env-switcher";
 
 export default function PrimaryHeaderItem({
   userTeams,
 }: {
   userTeams?: RouterOutputs["teams"]["userTeams"];
 }) {
-  const { team: teamSlug, project: projectSlug } = useParams<{
+  const {
+    team: teamSlug,
+    project: projectSlug,
+    env: envSlug,
+  } = useParams<{
     team?: string;
     project?: string;
+    env?: string;
   }>();
   const [openNewTeamSheet, setOpenNewTeamSheet] = useState(false);
   const [openNewProjectSheet, setOpenNewProjectSheet] = useState(false);
+  const [openNewEnvSheet, setOpenNewEnvSheet] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const foundTeam = userTeams?.find((team) => team.slug === teamSlug);
   const teamQuery = api.teams.teamBySlug.useQuery(
@@ -48,6 +57,12 @@ export default function PrimaryHeaderItem({
       : skipToken,
   );
   const project = foundProject ?? projectQuery.data;
+
+  const envsQuery = api.environments.projectEnvironments.useQuery(
+    project ? { projectId: project.id } : skipToken,
+  );
+
+  const env = envsQuery.data?.find((env) => env.slug === envSlug);
 
   function onTeamSelected(team: schema.Team) {
     router.push(`/${team.slug}`);
@@ -77,6 +92,33 @@ export default function PrimaryHeaderItem({
     router.push(`/${team.slug}/${project.slug}`);
   }
 
+  function onEnvironmentSelected(selectedEnv: schema.Environment) {
+    navToEnv(selectedEnv);
+    // TODO: Set session record of this change.
+  }
+
+  function onNewEnvironmentSelected() {
+    setOpenNewEnvSheet(true);
+  }
+
+  function onNewEnvSuccess(newEnv: schema.Environment) {
+    if (!team || !project) return;
+    router.refresh();
+    navToEnv(newEnv);
+    // TODO: Set session record of this change.
+  }
+
+  function navToEnv(nextEnv: schema.Environment) {
+    if (!team || !project) return;
+    const nextPath = env
+      ? pathname.replace(
+          `/${project.slug}/${env.slug}`,
+          `/${project.slug}/${nextEnv.slug}`,
+        )
+      : `/${team.slug}/${project.slug}/${nextEnv.slug}`;
+    router.push(nextPath);
+  }
+
   const items: React.ReactNode[] = [
     <Link href="/" key="logo" className="shrink-0">
       <Image src={logo} alt="Tableland Studio" priority={true} />
@@ -104,7 +146,7 @@ export default function PrimaryHeaderItem({
     );
     if (project) {
       items.push(
-        <p className="text-lg text-slate-300" key="divder-2">
+        <p className="text-lg text-slate-300" key="divider-2">
           /
         </p>,
         <ProjectSwitcher
@@ -121,6 +163,29 @@ export default function PrimaryHeaderItem({
           onOpenChange={setOpenNewProjectSheet}
           onSuccess={onNewProjectSuccess}
           key="new-project-form"
+        />,
+      );
+    }
+    if (project && env) {
+      items.push(
+        <p className="text-lg text-slate-300" key="divider-3">
+          /
+        </p>,
+        <EnvSwitcher
+          team={team}
+          project={project}
+          selectedEnv={env}
+          envs={envsQuery.data}
+          onEnvSelected={onEnvironmentSelected}
+          onNewEnvSelected={onNewEnvironmentSelected}
+          key="environment-switcher"
+        />,
+        <NewEnvForm
+          projectId={project.id}
+          open={openNewEnvSheet}
+          onOpenChange={setOpenNewEnvSheet}
+          onSuccess={onNewEnvSuccess}
+          key="new-env-form"
         />,
       );
     }

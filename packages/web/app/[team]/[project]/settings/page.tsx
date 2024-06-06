@@ -77,7 +77,7 @@ export default async function ProjectSettings({
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-y-4">
-          <Envs envs={envs} disabled={!isAdmin} />
+          <Envs project={project} envs={envs} disabled={!isAdmin} />
           <NewEnv project={project} disabled={!isAdmin} />
         </CardContent>
       </Card>

@@ -6,8 +6,9 @@ import { Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
+import { envNameSchema } from "@tableland/studio-validators";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,10 +19,6 @@ import {
 } from "@/components/ui/form";
 import { api } from "@/trpc/react";
 import InputWithCheck from "@/components/input-with-check";
-
-const formSchema = z.object({
-  name: z.string().trim().min(1),
-});
 
 export default function NewEnv({
   project,
@@ -45,8 +42,8 @@ export default function NewEnv({
     },
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof envNameSchema>>({
+    resolver: zodResolver(envNameSchema),
     defaultValues: {
       name: "",
     },
@@ -56,7 +53,7 @@ export default function NewEnv({
     setShowForm(true);
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof envNameSchema>) {
     newEnv.mutate({ projectId: project.id, ...values });
   }
 

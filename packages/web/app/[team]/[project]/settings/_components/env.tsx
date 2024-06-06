@@ -4,8 +4,9 @@ import { Loader2, Edit, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
+import { envNameSchema } from "@tableland/studio-validators";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,10 +18,6 @@ import {
 import { api } from "@/trpc/react";
 import InputWithCheck from "@/components/input-with-check";
 import { cn } from "@/lib/utils";
-
-const formSchema = z.object({
-  name: z.string().trim().min(1),
-});
 
 export default function Env({
   env,
@@ -50,8 +47,8 @@ export default function Env({
     },
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof envNameSchema>>({
+    resolver: zodResolver(envNameSchema),
     defaultValues: {
       name: env.name,
     },
@@ -61,7 +58,7 @@ export default function Env({
     setShowForm(true);
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof envNameSchema>) {
     updateEnv.mutate({ envId: env.id, ...values });
   }
 

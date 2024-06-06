@@ -18,9 +18,11 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function Envs({
+  project,
   envs,
   disabled,
 }: {
+  project: schema.Project;
   envs: schema.Environment[];
   disabled?: boolean;
 }) {
@@ -29,9 +31,14 @@ export default function Envs({
     schema.Environment | undefined
   >();
 
+  const projectsEnvs = api.environments.projectEnvironments.useQuery({
+    projectId: project.id,
+  });
+
   const deleteEnv = api.environments.deleteEnvironment.useMutation({
     onSuccess: () => {
       router.refresh();
+      void projectsEnvs.refetch();
       setEnvToDelete(undefined);
     },
   });
