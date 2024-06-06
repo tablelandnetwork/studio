@@ -89,12 +89,7 @@ export default async function Table({
   const table = validator
     ? await validator.getTableById({ chainId, tableId })
     : null;
-  const columns = (table?.schema?.columns ?? []).map(function (col) {
-    if (!col.constraints) col.constraints = [];
-    if (col.constraints.length === 0) col.constraints.push("none");
-
-    return col;
-  });
+  const columns = table?.schema?.columns ?? [];
 
   const deploymentReferences = invalidChain
     ? []

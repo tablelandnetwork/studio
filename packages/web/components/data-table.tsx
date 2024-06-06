@@ -69,7 +69,7 @@ export function DataTable({
   const readDb = new Database({ baseUrl });
   const validator = new Validator({ baseUrl });
 
-  // Some tables are escaped with the tick mark, need to remove those from the column name
+  // Some tables are escaped with ``, "", or []. We need to remove those from the column name
   const cols = columns.map((col: any) => {
     const formattedName = formatIdentifierName(col.name);
     return { accessorKey: formattedName, header: formattedName };
@@ -319,13 +319,13 @@ export function DataTable({
                         constraints:{" "}
                         <b>
                           {typeof columns !== "undefined" &&
-                            columns
-                              .find((col: any) => {
+                            (
+                              columns.find((col: any) => {
                                 return (
                                   formatIdentifierName(col.name) === cell.id
                                 );
-                              })
-                              ?.constraints?.join(", ")}
+                              })?.constraints ?? ["none"]
+                            ).join(", ")}
                         </b>
                       </p>
                       <Input
