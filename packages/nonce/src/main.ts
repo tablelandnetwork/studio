@@ -89,30 +89,6 @@ export class NonceManager extends AbstractSigner<Provider> {
     return nonce;
   }
 
-  async reset(): Promise<void> {
-    debugLogger("reset", process.pid);
-    await this._acquireLock();
-    await this._resetDelta();
-    await this._releaseLock();
-  }
-
-  async increment(count?: number): Promise<number> {
-    debugLogger("increment", process.pid);
-    return await this.memStore.incrby(
-      `delta:${await this.getAddress()}`,
-      count == null ? 1 : count,
-    );
-  }
-
-  async signMessage(message: string | Uint8Array): Promise<string> {
-    return await this.signer.signMessage(message);
-  }
-
-  async signTransaction(transaction: TransactionRequest): Promise<string> {
-    debugLogger("signTransaction", process.pid);
-    return await this.signer.signTransaction(transaction);
-  }
-
   async sendTransaction(
     transaction: TransactionRequest,
   ): Promise<TransactionResponse> {
@@ -137,6 +113,32 @@ export class NonceManager extends AbstractSigner<Provider> {
       .catch((err) => console.log("Error resetting delta:", err));
 
     return tx;
+  }
+
+  async reset(): Promise<void> {
+    debugLogger("reset", process.pid);
+    await this._acquireLock();
+    await this._resetDelta();
+    await this._releaseLock();
+  }
+
+  async increment(count?: number): Promise<number> {
+    debugLogger("increment (start)", process.pid);
+    const res = await this.memStore.incrby(
+      `delta:${await this.getAddress()}`,
+      count == null ? 1 : count,
+    );
+    debugLogger("increment (end)", process.pid);
+    return res;
+  }
+
+  async signMessage(message: string | Uint8Array): Promise<string> {
+    return await this.signer.signMessage(message);
+  }
+
+  async signTransaction(transaction: TransactionRequest): Promise<string> {
+    debugLogger("signTransaction", process.pid);
+    return await this.signer.signTransaction(transaction);
   }
 
   async signTypedData(
@@ -199,6 +201,8 @@ export class NonceManager extends AbstractSigner<Provider> {
             // returns null or "OK"
             const res = await acquire();
 
+            // The _setLock method will only return a value if the lock didn't
+            // perviously exist. This is because the nx option is used.
             if (res === null) {
               this._lock = undefined;
               return resolve(await doTry());
