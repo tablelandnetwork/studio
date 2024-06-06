@@ -73,6 +73,10 @@ export class NonceManager extends AbstractSigner<Provider> {
       const nonce =
         currentCount + (typeof deltaCount === "number" ? deltaCount : 0);
 
+      // Need to make sure we increment before returning the nonce value.
+      // Otherwise there is a race condition between other processes getting a
+      // nonce after the lock release and this call to increment.
+      await this.increment();
       const release = this._releaseLock.bind(this);
       setImmediate(function () {
         release().catch(function (err: any) {
@@ -96,7 +100,6 @@ export class NonceManager extends AbstractSigner<Provider> {
     if (transaction.nonce == null) {
       transaction = { ...transaction };
       transaction.nonce = await this.getNonce("pending");
-      await this.increment();
     } else {
       await this.reset();
       await this.memStore.incr(`delta:${await this.getAddress()}`);
