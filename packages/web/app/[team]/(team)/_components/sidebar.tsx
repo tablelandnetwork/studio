@@ -32,7 +32,7 @@ export function Sidebar() {
             variant={!selectedLayoutSegment ? "secondary" : "ghost"}
             className="w-full justify-start gap-x-2 pl-1"
           >
-            <Folders />
+            <Folders className="size-5" />
             Projects
           </Button>
         </Link>
@@ -44,7 +44,7 @@ export function Sidebar() {
               }
               className="w-full justify-start gap-x-2 pl-1"
             >
-              <Users />
+              <Users className="size-5" />
               People
             </Button>
           </Link>
@@ -57,7 +57,7 @@ export function Sidebar() {
               }
               className="w-full justify-start gap-x-2 pl-1"
             >
-              <Settings />
+              <Settings className="size-5" />
               Settings
             </Button>
           </Link>
