@@ -112,10 +112,10 @@ export default function TableSettings({
               {showUndeploy && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium">
-                    Un-deploy the {props.def.name} table:
+                    Undeploy the {props.def.name} table:
                   </p>
                   <Button variant="secondary" onClick={onUndeployTable}>
-                    Un-depoloy table
+                    Undeploy table
                   </Button>
                 </div>
               )}

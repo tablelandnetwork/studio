@@ -70,7 +70,7 @@ export function UndeployTableDialog({
             {undeployTable.isPending && (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             )}
-            Yes, un-deploy table
+            Yes, undeploy table
           </Button>
         </DialogFooter>
       </DialogContent>
