@@ -288,7 +288,7 @@ export const environmentProcedure = (store: Store) =>
     .input(z.object({ envId: z.string().uuid() }))
     .use(async ({ ctx, input, next }) => {
       const { team, project } =
-        (await store.environments.environmentTeamAndProject(input.envId)) || {};
+        (await store.environments.environmentTeamAndProject(input.envId)) ?? {};
       if (!team) {
         throw new TRPCError({
           code: "NOT_FOUND",
