@@ -16,6 +16,7 @@ import {
 } from "./ui/sheet";
 import TeamSwitcher from "./team-switcher";
 import ProjectSwitcher from "./project-switcher";
+import EnvSwitcher from "./env-switcher";
 import ChainSelector from "@/components/chain-selector";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
@@ -38,7 +39,6 @@ export interface ImportTableFormProps {
   teamPreset?: schema.Team;
   projectPreset?: schema.Project;
   envPreset?: schema.Environment;
-  showSelectors?: boolean;
   chainIdPreset?: number;
   tableIdPreset?: string;
   open?: boolean;
@@ -57,7 +57,6 @@ export default function ImportTableForm({
   teamPreset,
   projectPreset,
   envPreset,
-  showSelectors,
   chainIdPreset,
   tableIdPreset,
   open,
@@ -103,22 +102,15 @@ export default function ImportTableForm({
     if (!openSheet) {
       setTeam(teamPreset);
       setProject(projectPreset);
+      setEnv(envPreset);
       form.reset();
     }
     onOpenChange?.(openSheet);
-  }, [openSheet, teamPreset, projectPreset, onOpenChange, form]);
+  }, [openSheet, teamPreset, projectPreset, envPreset, onOpenChange, form]);
 
   useEffect(() => {
     setOpenSheet(open ?? false);
   }, [open]);
-
-  // TODO: Display UI to choose environment.
-  useEffect(() => {
-    const env = envs?.[0];
-    if (!env) return;
-    setValue("environmentId", env.id);
-    setEnv(env);
-  }, [envs, setValue]);
 
   useEffect(() => {
     if (!(!!chainId && !!tableId)) {
@@ -204,29 +196,43 @@ export default function ImportTableForm({
                 account and remove your data from our servers.
               </SheetDescription> */}
             </SheetHeader>
-            {(showSelectors ?? !teamPreset ?? !projectPreset) && (
-              <>
-                <div className="space-y-2">
-                  <FormLabel>Team</FormLabel>
-                  <TeamSwitcher
-                    variant="select"
-                    teams={teams}
-                    selectedTeam={team}
-                    onTeamSelected={handleTeamSelected}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <FormLabel>Project</FormLabel>
-                  <ProjectSwitcher
-                    variant="select"
-                    team={team}
-                    projects={projects}
-                    selectedProject={project}
-                    onProjectSelected={setProject}
-                    disabled={!team}
-                  />
-                </div>
-              </>
+            {!teamPreset && (
+              <div className="space-y-2">
+                <FormLabel>Team</FormLabel>
+                <TeamSwitcher
+                  variant="select"
+                  teams={teams}
+                  selectedTeam={team}
+                  onTeamSelected={handleTeamSelected}
+                />
+              </div>
+            )}
+            {!projectPreset && (
+              <div className="space-y-2">
+                <FormLabel>Project</FormLabel>
+                <ProjectSwitcher
+                  variant="select"
+                  team={team}
+                  projects={projects}
+                  selectedProject={project}
+                  onProjectSelected={setProject}
+                  disabled={!team}
+                />
+              </div>
+            )}
+            {!envPreset && (
+              <div className="space-y-2">
+                <FormLabel>Environment</FormLabel>
+                <EnvSwitcher
+                  variant="select"
+                  team={team}
+                  project={project}
+                  envs={envs}
+                  selectedEnv={env}
+                  onEnvSelected={setEnv}
+                  disabled={!project}
+                />
+              </div>
             )}
             <FormField
               control={control}

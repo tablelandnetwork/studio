@@ -42,7 +42,6 @@ import DefColumns from "@/components/def-columns";
 export interface NewDefFormProps {
   teamPreset?: schema.Team;
   projectPreset?: schema.Project;
-  showSelectors?: boolean;
   schemaPreset?: Schema;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -57,7 +56,6 @@ export interface NewDefFormProps {
 export default function NewDefForm({
   teamPreset,
   projectPreset,
-  showSelectors,
   schemaPreset,
   open,
   onOpenChange,
@@ -197,29 +195,29 @@ export default function NewDefForm({
                 account and remove your data from our servers.
               </SheetDescription> */}
             </SheetHeader>
-            {(showSelectors ?? !teamPreset ?? !projectPreset) && (
-              <>
-                <div className="space-y-2">
-                  <FormLabel>Team</FormLabel>
-                  <TeamSwitcher
-                    variant="select"
-                    teams={teams}
-                    selectedTeam={team}
-                    onTeamSelected={handleTeamSelected}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <FormLabel>Project</FormLabel>
-                  <ProjectSwitcher
-                    variant="select"
-                    team={team}
-                    projects={projects}
-                    selectedProject={project}
-                    onProjectSelected={setProject}
-                    disabled={!team}
-                  />
-                </div>
-              </>
+            {!teamPreset && (
+              <div className="space-y-2">
+                <FormLabel>Team</FormLabel>
+                <TeamSwitcher
+                  variant="select"
+                  teams={teams}
+                  selectedTeam={team}
+                  onTeamSelected={handleTeamSelected}
+                />
+              </div>
+            )}
+            {!projectPreset && (
+              <div className="space-y-2">
+                <FormLabel>Project</FormLabel>
+                <ProjectSwitcher
+                  variant="select"
+                  team={team}
+                  projects={projects}
+                  selectedProject={project}
+                  onProjectSelected={setProject}
+                  disabled={!team}
+                />
+              </div>
             )}
             <FormField
               control={control}
