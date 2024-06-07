@@ -43,6 +43,7 @@ export function initProjects(
       teamId: string,
       name: string,
       description: string,
+      envNames: string[],
     ) {
       const projectId = randomUUID();
       const slug = slugify(name);
@@ -63,9 +64,22 @@ export function initProjects(
         .insert(teamProjects)
         .values({ projectId, teamId, isOwner: 1 })
         .toSQL();
+      const envs: schema.Environment[] = envNames.map((name) => ({
+        id: randomUUID(),
+        projectId,
+        name,
+        slug: slugify(name),
+        createdAt: now,
+        updatedAt: now,
+      }));
+      const { sql: envsSql, params: envsParams } = db
+        .insert(environments)
+        .values(envs)
+        .toSQL();
       await tbl.batch([
         tbl.prepare(projectsSql).bind(projectsParams),
         tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
+        tbl.prepare(envsSql).bind(envsParams),
       ]);
       return project;
     },

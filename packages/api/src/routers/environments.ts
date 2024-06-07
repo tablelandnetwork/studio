@@ -52,7 +52,16 @@ export function environmentsRouter(store: Store) {
         return environment;
       }),
     deleteEnvironment: environmentAdminProcedure(store).mutation(
-      async ({ input }) => {
+      async ({ input, ctx }) => {
+        const envs = await store.environments.getEnvironmentsByProjectId(
+          ctx.project.id,
+        );
+        if (envs.length === 1) {
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "Cannot delete the last environment in a project",
+          });
+        }
         await store.environments.deleteEnvironment(input.envId);
       },
     ),

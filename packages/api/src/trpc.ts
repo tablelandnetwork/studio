@@ -287,11 +287,18 @@ export const environmentProcedure = (store: Store) =>
   protectedProcedure
     .input(z.object({ envId: z.string().uuid() }))
     .use(async ({ ctx, input, next }) => {
-      const team = await store.environments.environmentTeam(input.envId);
+      const { team, project } =
+        (await store.environments.environmentTeamAndProject(input.envId)) || {};
       if (!team) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "no team for env id found",
+        });
+      }
+      if (!project) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "no project for env id found",
         });
       }
       const membership = await store.teams.isAuthorizedForTeam(
@@ -305,7 +312,13 @@ export const environmentProcedure = (store: Store) =>
         });
       }
       return await next({
-        ctx: { ...ctx, session: ctx.session, teamAuthorization: membership },
+        ctx: {
+          ...ctx,
+          session: ctx.session,
+          team,
+          project,
+          teamAuthorization: membership,
+        },
       });
     });
 

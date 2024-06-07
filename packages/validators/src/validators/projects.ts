@@ -21,6 +21,12 @@ export const projectNameAvailableSchema = z.object({
 export const newProjectSchema = z.object({
   name: projectNameSchema,
   description: projectDescriptionSchema,
+  envNames: z
+    .array(z.object({ name: z.string().trim().min(1) }))
+    .min(1)
+    .refine((names) => {
+      return new Set(names.map((val) => val.name)).size === names.length;
+    }, "Environment names must be unique."),
 });
 
 export const updateProjectSchema = z.object({

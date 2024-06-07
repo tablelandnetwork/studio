@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type schema } from "@tableland/studio-store";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
 import { newProjectSchema } from "@tableland/studio-validators";
+import { Input } from "./ui/input";
 import { api } from "@/trpc/react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -66,7 +67,19 @@ export default function NewProjectForm({
     defaultValues: {
       name: "",
       description: "",
+      envNames: [{ name: "default" }],
     },
+  });
+
+  const { setError, control, register } = form;
+
+  const {
+    fields: envNamesFields,
+    append: appendEnvName,
+    remove: removeEnvName,
+  } = useFieldArray({
+    control,
+    name: "envNames",
   });
 
   useEffect(() => {
@@ -80,8 +93,6 @@ export default function NewProjectForm({
   useEffect(() => {
     setOpenSheet(open ?? false);
   }, [open]);
-
-  const { setError } = form;
 
   function onSubmit(values: z.infer<typeof newProjectSchema>) {
     newProject.mutate({
@@ -113,6 +124,7 @@ export default function NewProjectForm({
           >
             <SheetHeader>
               <SheetTitle>New Project</SheetTitle>
+              <pre>{JSON.stringify(envNamesFields, null, 2)}</pre>
               {/* <SheetDescription>
                 This action cannot be undone. This will permanently delete your
                 account and remove your data from our servers.
@@ -152,6 +164,67 @@ export default function NewProjectForm({
                   <FormDescription>
                     Provide a description of your Project so others can
                     understand what you&apos;re up to.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="envNames"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Environments</FormLabel>
+                  <FormControl>
+                    <div className="space-y-3" {...field}>
+                      {envNamesFields.map((envName, index) => (
+                        <FormField
+                          key={envName.id}
+                          control={control}
+                          name={`envNames.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    placeholder="Environment name"
+                                    {...register(`envNames.${index}.name`)}
+                                    {...field}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeEnvName(index)}
+                                  >
+                                    <X />
+                                  </Button>
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => appendEnvName({ name: "" })}
+                      >
+                        <Plus className="mr-2 size-5" />
+                        Add Environment
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Specify at least one environment for your Project.
+                    Environments are logical groups of tables. You could, for
+                    example, use them to create &quot;staging&quot; and
+                    &quot;production&quot; groups of tables. All of your
+                    project&apos;s table definitions are available in each
+                    environment, but you can deploy those table definitions to
+                    Tableland separately per environment.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

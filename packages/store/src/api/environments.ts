@@ -8,6 +8,7 @@ import { slugify } from "../helpers.js";
 type Environment = schema.Environment;
 const environments = schema.environments;
 const deployments = schema.deployments;
+const projects = schema.projects;
 const teamProjects = schema.teamProjects;
 const teams = schema.teams;
 
@@ -92,18 +93,16 @@ export function initEnvironments(
       await tbl.batch(batch);
     },
 
-    environmentTeam: async function (id: string) {
+    environmentTeamAndProject: async function (id: string) {
       const res = await db
-        .select({ teams })
+        .select({ team: teams, project: projects })
         .from(environments)
-        .innerJoin(
-          teamProjects,
-          eq(environments.projectId, teamProjects.projectId),
-        )
+        .innerJoin(projects, eq(environments.projectId, projects.id))
+        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
         .innerJoin(teams, eq(teamProjects.teamId, teams.id))
         .where(eq(environments.id, id))
         .get();
-      return res?.teams;
+      return res;
     },
 
     getEnvironmentsByProjectId: async function (
