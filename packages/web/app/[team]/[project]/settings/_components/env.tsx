@@ -20,11 +20,13 @@ import InputWithCheck from "@/components/input-with-check";
 import { cn } from "@/lib/utils";
 
 export default function Env({
+  projectId,
   env,
   showDelete,
   onDelete,
   disabled,
 }: {
+  projectId: string;
   env: schema.Environment;
   showDelete: boolean;
   onDelete: () => void;
@@ -39,9 +41,13 @@ export default function Env({
       : skipToken,
     { retry: false },
   );
+  const userEnvForProject = api.environments.userEnvironmentForProject.useQuery(
+    { projectId },
+  );
   const updateEnv = api.environments.updateEnvironment.useMutation({
     onSuccess: () => {
       router.refresh();
+      void userEnvForProject.refetch();
       setShowForm(false);
       form.reset();
     },
