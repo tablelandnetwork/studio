@@ -25,7 +25,7 @@ export function Sidebar() {
   }
 
   return (
-    <SidebarContainer>
+    <SidebarContainer className="p-3">
       <SidebarSection>
         <Link href={`/${teamQuery.data.slug}`}>
           <Button

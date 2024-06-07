@@ -1,4 +1,12 @@
-export const restrictedTeamSlugs = ["api", "invite", "sql-log", "table", "def"];
+export const restrictedTeamSlugs = [
+  "api",
+  "invite",
+  "sql-log",
+  "table",
+  "def",
+  "dash",
+  "dashboard",
+];
 
 export const restrictedProjectSlugs = ["people", "settings"];
 

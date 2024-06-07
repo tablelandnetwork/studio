@@ -1,6 +1,6 @@
 "use client";
 
-import { EllipsisVertical } from "lucide-react";
+import { Ellipsis } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { type Schema, type schema } from "@tableland/studio-store";
@@ -172,7 +172,7 @@ export default function TableMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
-            <EllipsisVertical />
+            <Ellipsis />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>

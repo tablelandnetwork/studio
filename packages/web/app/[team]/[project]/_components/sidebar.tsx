@@ -1,7 +1,7 @@
 "use client";
 
 import { type schema } from "@tableland/studio-store";
-import { Import, LayoutDashboard, Plus, Settings, Table2 } from "lucide-react";
+import { Ellipsis, LayoutDashboard, Settings, Table2 } from "lucide-react";
 import Link from "next/link";
 import {
   useParams,
@@ -10,15 +10,15 @@ import {
 } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
 import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { SidebarContainer, SidebarSection } from "@/components/sidebar";
 import ImportTableForm from "@/components/import-table-form";
 import NewDefForm from "@/components/new-def-form";
@@ -122,7 +122,7 @@ export function Sidebar() {
 
   return (
     <SidebarContainer>
-      <SidebarSection className="p-3">
+      <SidebarSection className="px-3 pt-3">
         <Link
           href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}`}
         >
@@ -134,53 +134,39 @@ export function Sidebar() {
             }
             className="w-full justify-start gap-x-2 pl-1"
           >
-            <LayoutDashboard />
+            <LayoutDashboard className="size-5" />
             Overview
           </Button>
         </Link>
+      </SidebarSection>
+      <SidebarSection className="px-3">
         <div className="flex items-center gap-2 pl-1">
-          <Table2 className="shrink-0" />
-          <h2 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+          <h2 className="text-base font-medium text-muted-foreground">
             Tables
           </h2>
           {!!isAuthorizedQuery.data && (
-            <>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="ml-auto"
-                      onClick={() => setNewDefOpen(true)}
-                    >
-                      <Plus className="size-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>New table</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setImportTableOpen(true)}
-                    >
-                      <Import className="size-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Import table</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="ml-auto">
+                  <Ellipsis className="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => setNewDefOpen(true)}>
+                  New table
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setImportTableOpen(true)}>
+                  Import table
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
+        {!defsQuery.data?.length && (
+          <span className="text-center text-sm italic opacity-50">
+            No tables
+          </span>
+        )}
         {defsQuery.data?.map((def) => {
           const deployment = deploymentsMapQuery.data?.get(def.id);
           return (
@@ -191,8 +177,9 @@ export function Sidebar() {
               <Button
                 key={def.id}
                 variant={def.id === defQuery.data?.id ? "secondary" : "ghost"}
-                className="w-full justify-start"
+                className="w-full justify-start gap-x-2 pl-1"
               >
+                <Table2 className="size-5 shrink-0" />
                 <span className={cn(!deployment && "mr-4")}>{def.name}</span>
                 {env && !deployment && (
                   <div
@@ -211,7 +198,7 @@ export function Sidebar() {
       </SidebarSection>
       {!!isAuthorizedQuery.data && (
         <SidebarSection className="sticky bottom-0 bg-card">
-          <div className="p-3">
+          <div className="px-3 pb-3">
             <Link
               href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
             >
@@ -221,7 +208,7 @@ export function Sidebar() {
                 }
                 className="w-full justify-start gap-x-2 pl-1"
               >
-                <Settings />
+                <Settings className="size-5" />
                 Settings
               </Button>
             </Link>
