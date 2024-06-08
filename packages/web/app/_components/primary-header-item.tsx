@@ -181,7 +181,7 @@ export default function PrimaryHeaderItem({
           selectedEnv={env}
           envs={envsQuery.data}
           onEnvSelected={onEnvironmentSelected}
-          onNewEnvSelected={onNewEnvironmentSelected}
+          onNewEnvSelected={foundTeam ? onNewEnvironmentSelected : undefined}
           key="environment-switcher"
         />,
         <NewEnvForm
