@@ -18,12 +18,14 @@ export interface SessionData {
   nonce?: string;
   siweFields?: SiweFields;
   auth?: Auth;
+  projectEnvs?: Record<string, string>;
 }
 
 export const defaultSession: SessionData = {
   nonce: undefined,
   siweFields: undefined,
   auth: undefined,
+  projectEnvs: undefined,
 };
 
 export const sessionOptions: SessionOptions = {

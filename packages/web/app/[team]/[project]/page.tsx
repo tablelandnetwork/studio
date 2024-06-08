@@ -12,7 +12,7 @@ export default async function Page({
   const table =
     typeof searchParams.table === "string" ? searchParams.table : undefined;
   const project = await projectBySlug(params.project);
-  const env = await api.environments.userEnvironmentForProject({
+  const env = await api.environments.environmentPreferenceForProject({
     projectId: project.id,
   });
   const path = table

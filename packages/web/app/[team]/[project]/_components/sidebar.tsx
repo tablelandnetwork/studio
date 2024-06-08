@@ -54,11 +54,12 @@ export function Sidebar() {
       : skipToken,
   );
 
-  const userEnvForProject = api.environments.userEnvironmentForProject.useQuery(
-    projectQuery.data ? { projectId: projectQuery.data.id } : skipToken,
-  );
+  const envPreference =
+    api.environments.environmentPreferenceForProject.useQuery(
+      projectQuery.data ? { projectId: projectQuery.data.id } : skipToken,
+    );
 
-  const linkEnv = env ?? userEnvForProject.data;
+  const linkEnv = env ?? envPreference.data;
 
   const defQuery = api.defs.defByProjectIdAndSlug.useQuery(
     projectQuery.data && defSlug

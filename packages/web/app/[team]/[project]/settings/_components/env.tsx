@@ -41,13 +41,12 @@ export default function Env({
       : skipToken,
     { retry: false },
   );
-  const userEnvForProject = api.environments.userEnvironmentForProject.useQuery(
-    { projectId },
-  );
+  const envPreference =
+    api.environments.environmentPreferenceForProject.useQuery({ projectId });
   const updateEnv = api.environments.updateEnvironment.useMutation({
     onSuccess: () => {
       router.refresh();
-      void userEnvForProject.refetch();
+      void envPreference.refetch();
       setShowForm(false);
       form.reset();
     },

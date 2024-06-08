@@ -35,15 +35,16 @@ export default function Envs({
     projectId: project.id,
   });
 
-  const userEnvForProject = api.environments.userEnvironmentForProject.useQuery(
-    { projectId: project.id },
-  );
+  const envPreference =
+    api.environments.environmentPreferenceForProject.useQuery({
+      projectId: project.id,
+    });
 
   const deleteEnv = api.environments.deleteEnvironment.useMutation({
     onSuccess: () => {
       router.refresh();
       void projectsEnvs.refetch();
-      void userEnvForProject.refetch();
+      void envPreference.refetch();
       setEnvToDelete(undefined);
     },
   });

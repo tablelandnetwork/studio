@@ -64,6 +64,9 @@ export default function PrimaryHeaderItem({
 
   const env = envsQuery.data?.find((env) => env.slug === envSlug);
 
+  const setEnvPreference =
+    api.environments.setEnvironmentPreferenceForProject.useMutation();
+
   function onTeamSelected(team: schema.Team) {
     router.push(`/${team.slug}`);
   }
@@ -94,7 +97,8 @@ export default function PrimaryHeaderItem({
 
   function onEnvironmentSelected(selectedEnv: schema.Environment) {
     navToEnv(selectedEnv);
-    // TODO: Set session record of this change.
+    if (!project) return;
+    setEnvPreference.mutate({ projectId: project.id, envId: selectedEnv.id });
   }
 
   function onNewEnvironmentSelected() {

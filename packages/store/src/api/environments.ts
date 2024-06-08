@@ -105,6 +105,14 @@ export function initEnvironments(
       return res;
     },
 
+    environmentById: async function (id: string) {
+      return await db
+        .select()
+        .from(environments)
+        .where(eq(environments.id, id))
+        .get();
+    },
+
     getEnvironmentsByProjectId: async function (
       projectId: string,
     ): Promise<Environment[]> {
