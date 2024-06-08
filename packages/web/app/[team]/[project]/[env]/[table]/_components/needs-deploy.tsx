@@ -23,13 +23,9 @@ export default async function NeedsDeploy({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2 text-destructive">
-          <AlertCircle
-            className={cn(!isAuthorized && "text-muted-foreground")}
-          />
-          <CardTitle className={cn(!isAuthorized && "text-foreground")}>
-            Table undeployed
-          </CardTitle>
+        <div className="flex items-center gap-2">
+          <AlertCircle />
+          <CardTitle>Table undeployed</CardTitle>
         </div>
         <CardDescription>
           Table definition {def.name} has has not yet been deployed to

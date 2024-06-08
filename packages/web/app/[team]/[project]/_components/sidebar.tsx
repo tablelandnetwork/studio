@@ -186,9 +186,7 @@ export function Sidebar() {
                   <div
                     className={cn(
                       "ml-auto size-2 rounded-full",
-                      isAuthorizedQuery.data
-                        ? "bg-destructive"
-                        : "bg-foreground",
+                      isAuthorizedQuery.data ? "bg-primary" : "bg-foreground",
                     )}
                   />
                 )}
