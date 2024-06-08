@@ -127,6 +127,8 @@ export const builder = function (args: Yargs) {
             teamId,
             name,
             description,
+            // TODO: Allow user to specify env names
+            envNames: [{ name: "default" }],
           });
 
           logger.log(JSON.stringify(result, null, 4));
