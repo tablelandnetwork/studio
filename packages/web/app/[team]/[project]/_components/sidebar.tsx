@@ -140,7 +140,7 @@ export function Sidebar() {
           </Button>
         </Link>
       </SidebarSection>
-      <SidebarSection className="px-3">
+      <SidebarSection className={cn("px-3", !isAuthorizedQuery.data && "pb-3")}>
         <div className="flex items-center gap-2 pl-1">
           <h2 className="text-base font-medium text-muted-foreground">
             Tables
