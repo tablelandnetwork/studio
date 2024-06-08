@@ -28,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import InputWithCheck from "@/components/input-with-check";
 import { FormRootMessage } from "@/components/form-root";
+import { cn } from "@/lib/utils";
 
 export interface NewProjectFormProps {
   team: schema.Team;
@@ -71,7 +72,9 @@ export default function NewProjectForm({
     },
   });
 
-  const { setError, control, register } = form;
+  const { setError, control, register, watch } = form;
+
+  const envsCount = watch("envNames").length;
 
   const {
     fields: envNamesFields,
@@ -124,7 +127,6 @@ export default function NewProjectForm({
           >
             <SheetHeader>
               <SheetTitle>New Project</SheetTitle>
-              <pre>{JSON.stringify(envNamesFields, null, 2)}</pre>
               {/* <SheetDescription>
                 This action cannot be undone. This will permanently delete your
                 account and remove your data from our servers.
@@ -169,67 +171,61 @@ export default function NewProjectForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={control}
-              name="envNames"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Environments</FormLabel>
-                  <FormControl>
-                    <div className="space-y-3" {...field}>
-                      {envNamesFields.map((envName, index) => (
-                        <FormField
-                          key={envName.id}
-                          control={control}
-                          name={`envNames.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <div className="flex items-center gap-2">
-                                  <Input
-                                    placeholder="Environment name"
-                                    {...register(`envNames.${index}.name`)}
-                                    {...field}
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => removeEnvName(index)}
-                                  >
-                                    <X />
-                                  </Button>
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
+            <div>
+              {envNamesFields.map((envName, index) => (
+                <FormField
+                  key={envName.id}
+                  control={control}
+                  name={`envNames.${index}.name`}
+                  render={({ field, formState }) => (
+                    <FormItem>
+                      <FormLabel className={cn(index !== 0 && "sr-only")}>
+                        Environments
+                      </FormLabel>
+                      <FormDescription className={cn(index !== 0 && "sr-only")}>
+                        Environments are logical groups of tables. You could,
+                        for example, use them to create &quot;staging&quot; and
+                        &quot;production&quot; groups of tables. All of your
+                        project&apos;s table definitions are available in each
+                        environment, but you can deploy those table definitions
+                        to Tableland separately per environment. Your project
+                        must have at least one environment.
+                      </FormDescription>
+                      <FormControl>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            placeholder="Environment name"
+                            {...register(`envNames.${index}.name`)}
+                            {...field}
+                          />
+                          {envsCount > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeEnvName(index)}
+                            >
+                              <X />
+                            </Button>
                           )}
-                        />
-                      ))}
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => appendEnvName({ name: "" })}
-                      >
-                        <Plus className="mr-2 size-5" />
-                        Add Environment
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    Specify at least one environment for your Project.
-                    Environments are logical groups of tables. You could, for
-                    example, use them to create &quot;staging&quot; and
-                    &quot;production&quot; groups of tables. All of your
-                    project&apos;s table definitions are available in each
-                    environment, but you can deploy those table definitions to
-                    Tableland separately per environment.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => appendEnvName({ name: "" })}
+              >
+                <Plus className="mr-2 size-5" />
+                Add Environment
+              </Button>
+            </div>
             <FormRootMessage />
             <Button
               type="submit"
