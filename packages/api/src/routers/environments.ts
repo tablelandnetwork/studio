@@ -83,7 +83,8 @@ export function environmentsRouter(store: Store) {
         const envId = ctx.session.projectEnvs?.[input.projectId];
         if (envId) {
           env = await store.environments.environmentById(envId);
-        } else {
+        }
+        if (!env) {
           const envs = await store.environments.getEnvironmentsByProjectId(
             input.projectId,
           );
