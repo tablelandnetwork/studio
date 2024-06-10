@@ -135,7 +135,7 @@ export default function PrimaryHeaderItem({
       <p className="text-lg text-slate-300" key="divider-1">
         /
       </p>,
-      <div className="flex items-center gap-x-2">
+      <div key="team-switcher" className="flex items-center gap-x-2">
         {team.personal ? (
           <User className="size-5" />
         ) : (
@@ -146,7 +146,6 @@ export default function PrimaryHeaderItem({
           teams={userTeams}
           onTeamSelected={onTeamSelected}
           onNewTeamSelected={onNewTeamSelected}
-          key="team-switcher"
         />
       </div>,
       <NewTeamForm
@@ -161,7 +160,7 @@ export default function PrimaryHeaderItem({
         <p className="text-lg text-slate-300" key="divider-2">
           /
         </p>,
-        <div className="flex items-center gap-x-2">
+        <div key="project-switcher" className="flex items-center gap-x-2">
           <Folder className="size-5" />
           <ProjectSwitcher
             team={team}
@@ -169,7 +168,6 @@ export default function PrimaryHeaderItem({
             projects={projects}
             onProjectSelected={onProjectSelected}
             onNewProjectSelected={foundTeam ? onNewProjectSelected : undefined}
-            key="project-switcher"
           />
         </div>,
         <NewProjectForm
@@ -186,7 +184,7 @@ export default function PrimaryHeaderItem({
         <p className="text-lg text-slate-300" key="divider-3">
           /
         </p>,
-        <div className="flex items-center gap-x-2">
+        <div key="environment-switcher" className="flex items-center gap-x-2">
           <Database className="size-5" />
           <EnvSwitcher
             team={team}
@@ -195,7 +193,6 @@ export default function PrimaryHeaderItem({
             envs={envsQuery.data}
             onEnvSelected={onEnvironmentSelected}
             onNewEnvSelected={foundTeam ? onNewEnvironmentSelected : undefined}
-            key="environment-switcher"
           />
         </div>,
         <NewEnvForm
