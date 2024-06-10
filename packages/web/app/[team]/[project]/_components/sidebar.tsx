@@ -123,7 +123,7 @@ export function Sidebar() {
 
   return (
     <SidebarContainer>
-      <SidebarSection className="px-3 pt-3">
+      <SidebarSection>
         <Link
           href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}`}
         >
@@ -140,17 +140,13 @@ export function Sidebar() {
           </Button>
         </Link>
       </SidebarSection>
-      <SidebarSection className={cn("px-3", !isAuthorizedQuery.data && "pb-3")}>
-        <div className="flex items-center gap-2 pl-1">
-          <h2 className="text-base font-medium text-muted-foreground">
-            Tables
-          </h2>
+      <SidebarSection>
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-medium text-muted-foreground">Tables</h2>
           {!!isAuthorizedQuery.data && (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="ml-auto">
-                  <Ellipsis className="size-5" />
-                </Button>
+              <DropdownMenuTrigger className="ml-auto text-muted-foreground hover:text-foreground">
+                <Ellipsis className="size-5" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onSelect={() => setNewDefOpen(true)}>
@@ -196,8 +192,11 @@ export function Sidebar() {
         })}
       </SidebarSection>
       {!!isAuthorizedQuery.data && (
-        <SidebarSection className="sticky bottom-0 bg-card">
-          <div className="px-3 pb-3">
+        <SidebarSection className="sticky bottom-0 bg-card p-0">
+          <div className="flex flex-col gap-3 p-3">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              Project
+            </h2>
             <Link
               href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
             >

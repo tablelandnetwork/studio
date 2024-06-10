@@ -7,7 +7,7 @@ export function SidebarContainer({
   ...props
 }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("space-y-8", className)} {...props}>
+    <div className={cn(className)} {...props}>
       {children}
     </div>
   );
@@ -19,7 +19,7 @@ export function SidebarSection({
   ...props
 }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex flex-col space-y-3", className)} {...props}>
+    <div className={cn("flex flex-col gap-3 p-3", className)} {...props}>
       {children}
     </div>
   );
