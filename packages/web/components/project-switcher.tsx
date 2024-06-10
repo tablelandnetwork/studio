@@ -50,7 +50,7 @@ export default function ProjectSwitcher({
       {variant === "navigation" && team && selectedProject && (
         <Link
           href={`/${team.slug}/${selectedProject.slug}`}
-          className="underline-offset-2 hover:underline"
+          className="text-sm underline-offset-2 hover:underline"
         >
           {selectedProject.name}
         </Link>

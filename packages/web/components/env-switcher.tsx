@@ -52,7 +52,7 @@ export default function EnvSwitcher({
       {variant === "navigation" && team && project && selectedEnv && (
         <Link
           href={`/${team.slug}/${project.slug}/${selectedEnv.slug}`}
-          className="underline-offset-2 hover:underline"
+          className="text-sm underline-offset-2 hover:underline"
         >
           {selectedEnv.name}
         </Link>
