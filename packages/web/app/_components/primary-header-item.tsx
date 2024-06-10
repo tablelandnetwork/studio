@@ -7,6 +7,7 @@ import { type schema } from "@tableland/studio-store";
 import { useState } from "react";
 import { skipToken } from "@tanstack/react-query";
 import Image from "next/image";
+import { Database, Folder, User, Users } from "lucide-react";
 import NewTeamForm from "./new-team-form";
 import NewEnvForm from "./new-env-form";
 import NewProjectForm from "@/components/new-project-form";
@@ -134,13 +135,20 @@ export default function PrimaryHeaderItem({
       <p className="text-lg text-slate-300" key="divider-1">
         /
       </p>,
-      <TeamSwitcher
-        selectedTeam={team}
-        teams={userTeams}
-        onTeamSelected={onTeamSelected}
-        onNewTeamSelected={onNewTeamSelected}
-        key="team-switcher"
-      />,
+      <div className="flex items-center gap-x-2">
+        {team.personal ? (
+          <User className="size-5" />
+        ) : (
+          <Users className="size-5" />
+        )}
+        <TeamSwitcher
+          selectedTeam={team}
+          teams={userTeams}
+          onTeamSelected={onTeamSelected}
+          onNewTeamSelected={onNewTeamSelected}
+          key="team-switcher"
+        />
+      </div>,
       <NewTeamForm
         onSuccess={onNewTeamSuccess}
         open={openNewTeamSheet}
@@ -153,14 +161,17 @@ export default function PrimaryHeaderItem({
         <p className="text-lg text-slate-300" key="divider-2">
           /
         </p>,
-        <ProjectSwitcher
-          team={team}
-          selectedProject={project}
-          projects={projects}
-          onProjectSelected={onProjectSelected}
-          onNewProjectSelected={foundTeam ? onNewProjectSelected : undefined}
-          key="project-switcher"
-        />,
+        <div className="flex items-center gap-x-2">
+          <Folder className="size-5" />
+          <ProjectSwitcher
+            team={team}
+            selectedProject={project}
+            projects={projects}
+            onProjectSelected={onProjectSelected}
+            onNewProjectSelected={foundTeam ? onNewProjectSelected : undefined}
+            key="project-switcher"
+          />
+        </div>,
         <NewProjectForm
           team={team}
           open={openNewProjectSheet}
@@ -175,15 +186,18 @@ export default function PrimaryHeaderItem({
         <p className="text-lg text-slate-300" key="divider-3">
           /
         </p>,
-        <EnvSwitcher
-          team={team}
-          project={project}
-          selectedEnv={env}
-          envs={envsQuery.data}
-          onEnvSelected={onEnvironmentSelected}
-          onNewEnvSelected={foundTeam ? onNewEnvironmentSelected : undefined}
-          key="environment-switcher"
-        />,
+        <div className="flex items-center gap-x-2">
+          <Database className="size-5" />
+          <EnvSwitcher
+            team={team}
+            project={project}
+            selectedEnv={env}
+            envs={envsQuery.data}
+            onEnvSelected={onEnvironmentSelected}
+            onNewEnvSelected={foundTeam ? onNewEnvironmentSelected : undefined}
+            key="environment-switcher"
+          />
+        </div>,
         <NewEnvForm
           projectId={project.id}
           open={openNewEnvSheet}
@@ -195,5 +209,5 @@ export default function PrimaryHeaderItem({
     }
   }
 
-  return <div className="flex flex-row items-center gap-x-3">{items}</div>;
+  return <div className="flex flex-row items-center gap-x-5">{items}</div>;
 }
