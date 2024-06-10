@@ -58,7 +58,7 @@ function supportedChains(isLocalDev = false) {
     { ...arbitrum, testnet: false },
     { ...arbitrumSepolia, testnet: true },
     { ...arbitrumNova, testnet: false },
-    { ...baseSepolia, testnet: false },
+    { ...baseSepolia, testnet: true },
     { ...filecoin, testnet: false },
     { ...filecoinCalibration, testnet: true },
     { ...mainnet, testnet: false },
