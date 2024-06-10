@@ -178,13 +178,8 @@ export function Sidebar() {
               >
                 <Table2 className="size-5 shrink-0" />
                 <span className={cn(!deployment && "mr-4")}>{def.name}</span>
-                {env && !deployment && (
-                  <div
-                    className={cn(
-                      "ml-auto size-2 rounded-full",
-                      isAuthorizedQuery.data ? "bg-primary" : "bg-foreground",
-                    )}
-                  />
+                {env && !deployment && isAuthorizedQuery.data && (
+                  <div className="ml-auto size-2 rounded-full bg-primary" />
                 )}
               </Button>
             </Link>
