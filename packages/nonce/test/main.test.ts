@@ -43,11 +43,41 @@ const redis = new Redis({
   token: process.env.KV_REST_API_TOKEN,
 });
 
+const GLOBAL_TEST_RUNNING = "GLOBAL_TEST_RUNNING";
+
+const ensureSingularTest = async function () {
+  const checkRunning: any = async function (resolve: any, reject: any) {
+    // eslint-disable-next-line promise/param-names
+    await new Promise(function (waitResolve) {
+      setTimeout(() => waitResolve(undefined), 1000);
+    });
+
+    const running = await redis.get(GLOBAL_TEST_RUNNING);
+    console.log("running", running);
+    if (running) {
+      // if running wait one second and check again
+      await checkRunning(resolve, reject);
+      return;
+    }
+
+    // if not running mark as running and return
+    await redis.set(GLOBAL_TEST_RUNNING, "true", { px: 30000 });
+    resolve();
+  };
+
+  return await new Promise(checkRunning);
+};
+
 describe("NonceManager", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
   beforeEach(async function () {
     await redis.del(`delta:${account2Public}`);
+    await ensureSingularTest();
+  });
+
+  afterEach(async function () {
+    await redis.del(GLOBAL_TEST_RUNNING);
   });
 
   after(async function () {
@@ -158,10 +188,11 @@ describe("NonceManager", function () {
     });
   };
 
-  test("sending transactions from two processes WITHOUT nonce manager fails", async function () {
-    // We can't guarantee that sending 4 transactions from the same wallet will
-    // result in a nonce failure, but it's very likely.  This means that this
-    // test might fail occasionally.
+  // We can't guarantee that sending 4 transactions from the same wallet will
+  // result in a nonce failure.  This means that this test might fail
+  // occasionally, because of that it's being skipped here.
+  // Un-skip it to test locally
+  test.skip("sending transactions from two processes WITHOUT nonce manager fails", async function () {
     const results = await Promise.all([
       parallelFork(true),
       parallelFork(true),

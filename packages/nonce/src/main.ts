@@ -60,7 +60,7 @@ export class NonceManager extends AbstractSigner<Provider> {
   }
 
   async getNonce(blockTag?: BlockTag): Promise<number> {
-    debugLogger("getNonce");
+    debugLogger("getNonce", process.pid);
     if (blockTag === "pending") {
       await this._acquireLock();
       const address = await this.signer.getAddress();
@@ -73,6 +73,10 @@ export class NonceManager extends AbstractSigner<Provider> {
       const nonce =
         currentCount + (typeof deltaCount === "number" ? deltaCount : 0);
 
+      // Need to make sure we increment before returning the nonce value.
+      // Otherwise there is a race condition between other processes getting a
+      // nonce after the lock release and this call to increment.
+      await this.increment();
       const release = this._releaseLock.bind(this);
       setImmediate(function () {
         release().catch(function (err: any) {
@@ -80,50 +84,25 @@ export class NonceManager extends AbstractSigner<Provider> {
         });
       });
 
-      debugLogger("getNonce: nonce (pending):", nonce);
+      debugLogger("getNonce: nonce (pending):", nonce, process.pid);
       return nonce;
     }
 
     const nonce = await super.getNonce(blockTag);
-    debugLogger("getNonce: nonce (not pending):", nonce);
+    debugLogger("getNonce: nonce (not pending):", nonce, process.pid);
     return nonce;
-  }
-
-  async reset(): Promise<void> {
-    debugLogger("reset");
-    await this._acquireLock();
-    await this._resetDelta();
-    await this._releaseLock();
-  }
-
-  async increment(count?: number): Promise<number> {
-    debugLogger("increment");
-    return await this.memStore.incrby(
-      `delta:${await this.getAddress()}`,
-      count == null ? 1 : count,
-    );
-  }
-
-  async signMessage(message: string | Uint8Array): Promise<string> {
-    return await this.signer.signMessage(message);
-  }
-
-  async signTransaction(transaction: TransactionRequest): Promise<string> {
-    debugLogger("signTransaction");
-    return await this.signer.signTransaction(transaction);
   }
 
   async sendTransaction(
     transaction: TransactionRequest,
   ): Promise<TransactionResponse> {
-    debugLogger("sendTransaction");
+    debugLogger("sendTransaction: (start)", process.pid);
     if (transaction.nonce == null) {
       transaction = { ...transaction };
       transaction.nonce = await this.getNonce("pending");
-      await this.increment();
     } else {
       await this.reset();
-      await this.memStore.incr(`delta:${await this.getAddress()}`);
+      await this.increment();
     }
 
     transaction = await this.signer.populateTransaction(transaction);
@@ -132,11 +111,40 @@ export class NonceManager extends AbstractSigner<Provider> {
     this.provider
       .getTransactionReceipt(tx.hash)
       .then(async () => {
+        debugLogger("sendTransaction: (provider response)", process.pid);
         await this._resetDelta();
       })
       .catch((err) => console.log("Error resetting delta:", err));
 
+    debugLogger("sendTransaction: (end)", process.pid);
+
     return tx;
+  }
+
+  async reset(): Promise<void> {
+    debugLogger("reset", process.pid);
+    await this._acquireLock();
+    await this._resetDelta();
+    await this._releaseLock();
+  }
+
+  async increment(count?: number): Promise<number> {
+    debugLogger("increment (start)", process.pid);
+    const res = await this.memStore.incrby(
+      `delta:${await this.getAddress()}`,
+      count == null ? 1 : count,
+    );
+    debugLogger("increment (end)", process.pid);
+    return res;
+  }
+
+  async signMessage(message: string | Uint8Array): Promise<string> {
+    return await this.signer.signMessage(message);
+  }
+
+  async signTransaction(transaction: TransactionRequest): Promise<string> {
+    debugLogger("signTransaction", process.pid);
+    return await this.signer.signTransaction(transaction);
   }
 
   async signTypedData(
@@ -199,6 +207,8 @@ export class NonceManager extends AbstractSigner<Provider> {
             // returns null or "OK"
             const res = await acquire();
 
+            // The _setLock method will only return a value if the lock didn't
+            // perviously exist. This is because the nx option is used.
             if (res === null) {
               this._lock = undefined;
               return resolve(await doTry());
@@ -217,7 +227,7 @@ export class NonceManager extends AbstractSigner<Provider> {
   async _releaseLock() {
     if (!this._lock) return;
 
-    debugLogger("_releaseLock", process.pid);
+    debugLogger("_releaseLock (start)", process.pid);
 
     // we are using a Lua script to atomically make sure we only delete the
     // lock if this process created it. This covers the case where the lock ttl
@@ -233,11 +243,13 @@ export class NonceManager extends AbstractSigner<Provider> {
       [this._lock],
     );
     this._lock = undefined;
+
+    debugLogger("_releaseLock (end)", process.pid);
   }
 
   // NOTE: The delta key expires in 30 seconds. This should be fine for Nova.
   async _resetDelta() {
-    debugLogger("_resetDelta", process.pid);
+    debugLogger("_resetDelta (start)", process.pid);
 
     await this.memStore.eval(
       `if redis.call("get",KEYS[1]) ~= ARGV[1] then
@@ -248,5 +260,7 @@ export class NonceManager extends AbstractSigner<Provider> {
       [`delta:${await this.getAddress()}`],
       [0],
     );
+
+    debugLogger("_resetDelta (end)", process.pid);
   }
 }
