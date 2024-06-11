@@ -29,7 +29,7 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
-import { objectToTableData } from "@/lib/utils";
+import { cn, objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
@@ -231,12 +231,23 @@ export default async function Table({
         )}
       </div>
       <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
-        <TabsList>
+        <TabsList
+          className={cn(
+            !data || (!(formattedData && columns) && "bg-transparent"),
+          )}
+        >
           {formattedData && columns && (
             <TabsTrigger value="data">Table Data</TabsTrigger>
           )}
           {data && <TabsTrigger value="logs">SQL Logs</TabsTrigger>}
-          <TabsTrigger value="definition">Definition</TabsTrigger>
+          <TabsTrigger
+            value="definition"
+            className={cn(
+              !data || (!(formattedData && columns) && "bg-transparent"),
+            )}
+          >
+            Definition
+          </TabsTrigger>
         </TabsList>
         {formattedData && columns && (
           <TabsContent value="data">
