@@ -132,7 +132,7 @@ export default function PrimaryHeaderItem({
 
   if (team) {
     items.push(
-      <p className="text-lg text-slate-300" key="divider-1">
+      <p className="text-base text-muted-foreground" key="divider-1">
         /
       </p>,
       <div key="team-switcher" className="flex items-center gap-x-2">
@@ -157,7 +157,7 @@ export default function PrimaryHeaderItem({
     );
     if (project) {
       items.push(
-        <p className="text-lg text-slate-300" key="divider-2">
+        <p className="text-base text-muted-foreground" key="divider-2">
           /
         </p>,
         <div key="project-switcher" className="flex items-center gap-x-2">
@@ -181,7 +181,7 @@ export default function PrimaryHeaderItem({
     }
     if (project && env) {
       items.push(
-        <p className="text-lg text-slate-300" key="divider-3">
+        <p className="text-base text-muted-foreground" key="divider-3">
           /
         </p>,
         <div key="environment-switcher" className="flex items-center gap-x-2">
