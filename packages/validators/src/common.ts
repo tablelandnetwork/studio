@@ -29,3 +29,5 @@ export const defNameSchema = z
     },
     { message: "Definition name is invalid." },
   );
+
+export const envNameSchema = z.object({ name: z.string().trim().min(1) });

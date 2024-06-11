@@ -1,4 +1,3 @@
-export { defNameSchema } from "./common.js";
 export * from "./validators/defs.js";
 export * from "./validators/envs.js";
 export * from "./validators/teams.js";

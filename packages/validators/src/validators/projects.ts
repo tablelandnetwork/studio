@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { slugify } from "@tableland/studio-store";
 import { restrictedProjectSlugs } from "../restricted-slugs.js";
+import { envNameSchema } from "../common.js";
 
 const projectNameSchema = z
   .string()
@@ -22,7 +23,7 @@ export const newProjectSchema = z.object({
   name: projectNameSchema,
   description: projectDescriptionSchema,
   envNames: z
-    .array(z.object({ name: z.string().trim().min(1) }))
+    .array(envNameSchema)
     .min(1)
     .refine((names) => {
       return new Set(names.map((val) => val.name)).size === names.length;

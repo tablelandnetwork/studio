@@ -1,3 +1,3 @@
-import { z } from "zod";
+import { envNameSchema } from "../common.js";
 
-export const envNameSchema = z.object({ name: z.string().trim().min(1) });
+export { envNameSchema };
