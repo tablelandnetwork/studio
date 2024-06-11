@@ -2,7 +2,6 @@
 
 import { type schema } from "@tableland/studio-store";
 import { Ellipsis, LayoutDashboard, Settings, Table2 } from "lucide-react";
-import Link from "next/link";
 import {
   useParams,
   useRouter,
@@ -16,12 +15,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { SidebarContainer, SidebarSection } from "@/components/sidebar";
 import ImportTableForm from "@/components/import-table-form";
 import NewDefForm from "@/components/new-def-form";
+import SidebarLink from "@/components/sidebar-link";
 
 export function Sidebar() {
   const {
@@ -124,25 +122,18 @@ export function Sidebar() {
   return (
     <SidebarContainer>
       <SidebarSection>
-        <Link
+        <SidebarLink
+          Icon={LayoutDashboard}
+          title="Overview"
           href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}`}
-        >
-          <Button
-            variant={
-              !defSlug && !!envSlug && envSlug === env?.slug
-                ? "secondary"
-                : "ghost"
-            }
-            className="w-full justify-start gap-x-2 pl-1"
-          >
-            <LayoutDashboard className="size-5" />
-            Overview
-          </Button>
-        </Link>
+          selected={!defSlug && !!envSlug && envSlug === env?.slug}
+        />
       </SidebarSection>
       <SidebarSection>
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-medium text-muted-foreground">Tables</h2>
+          <h3 className="text-xl font-semibold text-muted-foreground">
+            Tables
+          </h3>
           {!!isAuthorizedQuery.data && (
             <DropdownMenu>
               <DropdownMenuTrigger className="ml-auto text-muted-foreground hover:text-foreground">
@@ -167,44 +158,29 @@ export function Sidebar() {
         {defsQuery.data?.map((def) => {
           const deployment = deploymentsMapQuery.data?.get(def.id);
           return (
-            <Link
+            <SidebarLink
               key={def.id}
+              Icon={Table2}
+              title={def.name}
               href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}/${def.slug}`}
-            >
-              <Button
-                key={def.id}
-                variant={def.id === defQuery.data?.id ? "secondary" : "ghost"}
-                className="w-full justify-start gap-x-2 pl-1"
-              >
-                <Table2 className="size-5 shrink-0" />
-                <span className={cn(!deployment && "mr-4")}>{def.name}</span>
-                {env && !deployment && isAuthorizedQuery.data && (
-                  <div className="ml-auto size-2 rounded-full bg-primary" />
-                )}
-              </Button>
-            </Link>
+              selected={def.id === defQuery.data?.id}
+              showIndicator={!!env && !deployment && !!isAuthorizedQuery.data}
+            />
           );
         })}
       </SidebarSection>
       {!!isAuthorizedQuery.data && (
         <SidebarSection className="sticky bottom-0 bg-card p-0">
           <div className="flex flex-col gap-3 p-3">
-            <h2 className="text-sm font-medium text-muted-foreground">
+            <h3 className="text-xl font-semibold text-muted-foreground">
               Project
-            </h2>
-            <Link
+            </h3>
+            <SidebarLink
+              Icon={Settings}
+              title="Settings"
               href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
-            >
-              <Button
-                variant={
-                  selectedLayoutSegment === "settings" ? "secondary" : "ghost"
-                }
-                className="w-full justify-start gap-x-2 pl-1"
-              >
-                <Settings className="size-5" />
-                Settings
-              </Button>
-            </Link>
+              selected={selectedLayoutSegment === "settings"}
+            />
           </div>
         </SidebarSection>
       )}
