@@ -4,13 +4,13 @@ import { Button } from "./ui/button";
 
 export default function SidebarLink({
   title,
-  Icon,
+  icon: Icon,
   href,
   selected,
   showIndicator = false,
 }: {
   title: string;
-  Icon: LucideIcon;
+  icon: LucideIcon;
   href: string;
   selected: boolean;
   showIndicator?: boolean;

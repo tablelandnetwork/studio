@@ -123,7 +123,7 @@ export function Sidebar() {
     <SidebarContainer>
       <SidebarSection>
         <SidebarLink
-          Icon={LayoutDashboard}
+          icon={LayoutDashboard}
           title="Overview"
           href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}`}
           selected={!defSlug && !!envSlug && envSlug === env?.slug}
@@ -160,7 +160,7 @@ export function Sidebar() {
           return (
             <SidebarLink
               key={def.id}
-              Icon={Table2}
+              icon={Table2}
               title={def.name}
               href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}/${def.slug}`}
               selected={def.id === defQuery.data?.id}
@@ -176,7 +176,7 @@ export function Sidebar() {
               Project
             </h3>
             <SidebarLink
-              Icon={Settings}
+              icon={Settings}
               title="Settings"
               href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
               selected={selectedLayoutSegment === "settings"}

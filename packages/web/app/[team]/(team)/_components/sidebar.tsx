@@ -29,14 +29,14 @@ export function Sidebar() {
         <SidebarLink
           href={`/${teamQuery.data.slug}`}
           title="Projects"
-          Icon={Folders}
+          icon={Folders}
           selected={!selectedLayoutSegment}
         />
         {!teamQuery.data.personal && (
           <SidebarLink
             href={`/${teamQuery.data.slug}/people`}
             title="People"
-            Icon={Users}
+            icon={Users}
             selected={selectedLayoutSegment === "people"}
           />
         )}
@@ -44,7 +44,7 @@ export function Sidebar() {
           <SidebarLink
             href={`/${teamQuery.data.slug}/settings`}
             title="Settings"
-            Icon={Settings}
+            icon={Settings}
             selected={selectedLayoutSegment === "settings"}
           />
         )}
