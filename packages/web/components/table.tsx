@@ -231,23 +231,18 @@ export default async function Table({
         )}
       </div>
       <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
-        <TabsList
-          className={cn(
-            !data || (!(formattedData && columns) && "bg-transparent"),
+        <TabsList className={cn(!data && "bg-transparent")}>
+          {data && formattedData && columns ? (
+            <>
+              <TabsTrigger value="data">Table Data</TabsTrigger>
+              <TabsTrigger value="logs">SQL Logs</TabsTrigger>
+              <TabsTrigger value="definition">Definition</TabsTrigger>
+            </>
+          ) : (
+            <h2 className="text-base font-medium text-foreground">
+              Definition
+            </h2>
           )}
-        >
-          {formattedData && columns && (
-            <TabsTrigger value="data">Table Data</TabsTrigger>
-          )}
-          {data && <TabsTrigger value="logs">SQL Logs</TabsTrigger>}
-          <TabsTrigger
-            value="definition"
-            className={cn(
-              !data || (!(formattedData && columns) && "bg-transparent"),
-            )}
-          >
-            Definition
-          </TabsTrigger>
         </TabsList>
         {formattedData && columns && (
           <TabsContent value="data">
