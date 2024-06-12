@@ -85,6 +85,7 @@ export default function TableMenu({
     setDeleteTableOpen(false);
     void defsQuery.refetch();
     if (!team || !project || !env) return;
+    router.refresh();
     router.replace(`/${team.slug}/${project.slug}/${env.slug}`);
   };
 
