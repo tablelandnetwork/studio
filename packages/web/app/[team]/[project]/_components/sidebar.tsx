@@ -131,7 +131,7 @@ export function Sidebar() {
       </SidebarSection>
       <SidebarSection>
         <div className="flex items-center gap-2">
-          <h3 className="text-xl font-semibold text-muted-foreground">
+          <h3 className="text-base font-medium text-muted-foreground">
             Tables
           </h3>
           {!!isAuthorizedQuery.data && (
@@ -172,7 +172,7 @@ export function Sidebar() {
       {!!isAuthorizedQuery.data && (
         <SidebarSection className="sticky bottom-0 bg-card p-0">
           <div className="flex flex-col gap-3 p-3">
-            <h3 className="text-xl font-semibold text-muted-foreground">
+            <h3 className="text-base font-medium text-muted-foreground">
               Project
             </h3>
             <SidebarLink
