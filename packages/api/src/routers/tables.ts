@@ -1,5 +1,9 @@
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
-import { type Store, unescapeSchema } from "@tableland/studio-store";
+import {
+  type Store,
+  unescapeSchema,
+  type schema,
+} from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { importTableSchema } from "@tableland/studio-validators";
 import { projectProcedure, createTRPCRouter } from "../trpc";
@@ -43,12 +47,23 @@ export function tablesRouter(store: Store) {
 
         try {
           // TODO: Execute different table inserts in a batch txn.
-          const def = await store.defs.createDef(
-            input.projectId,
-            input.defName,
-            input.defDescription,
-            schema,
-          );
+          let def: schema.Def | undefined;
+          if (typeof input.def === "string") {
+            def = await store.defs.defById(input.def);
+            if (!def) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: `Definition not found.`,
+              });
+            }
+          } else {
+            def = await store.defs.createDef(
+              input.projectId,
+              input.def.name,
+              input.def.description,
+              schema,
+            );
+          }
           const deployment = await store.deployments.recordDeployment({
             defId: def.id,
             environmentId: input.environmentId,

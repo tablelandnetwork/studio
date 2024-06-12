@@ -41,6 +41,7 @@ export interface ImportTableFormProps {
   envPreset?: schema.Environment;
   chainIdPreset?: number;
   tableIdPreset?: string;
+  defId?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
@@ -59,6 +60,7 @@ export default function ImportTableForm({
   envPreset,
   chainIdPreset,
   tableIdPreset,
+  defId,
   open,
   onOpenChange,
   trigger,
@@ -87,24 +89,21 @@ export default function ImportTableForm({
     defaultValues: {
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
-      defName: "",
-      defDescription: "",
+      def: defId ?? { name: "", description: "" },
       environmentId: envPreset?.id ?? "",
     },
   });
 
-  const { handleSubmit, control, register, setValue, setError, watch, reset } =
-    form;
+  const { handleSubmit, control, setValue, setError, watch, reset } = form;
 
   useEffect(() => {
     reset({
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
-      defName: "",
-      defDescription: "",
+      def: defId ?? { name: "", description: "" },
       environmentId: envPreset?.id ?? "",
     });
-  }, [chainIdPreset, tableIdPreset, envPreset, reset]);
+  }, [chainIdPreset, tableIdPreset, defId, envPreset, reset]);
 
   const chainId = watch("chainId");
   const tableId = watch("tableId");
@@ -124,8 +123,9 @@ export default function ImportTableForm({
   }, [open]);
 
   useEffect(() => {
+    if (defId) return;
     if (!(!!chainId && !!tableId)) {
-      setValue("defName", "");
+      setValue("def", { name: "", description: "" });
       return;
     }
     const validator = new Validator({ baseUrl: helpers.getBaseUrl(chainId) });
@@ -133,13 +133,13 @@ export default function ImportTableForm({
       .getTableById({ chainId, tableId })
       .then((table) => {
         const prefix = tablePrefix(table.name);
-        setValue("defName", prefix);
+        setValue("def.name", prefix);
         setDefName(prefix);
       })
       .catch((_) => {
-        setValue("defName", "");
+        setValue("def.name", "");
       });
-  }, [chainId, tableId, setValue]);
+  }, [chainId, tableId, defId, setValue]);
 
   const nameAvailableQuery = api.defs.nameAvailable.useQuery(
     project && defName
@@ -240,7 +240,10 @@ export default function ImportTableForm({
                   project={project}
                   envs={envs}
                   selectedEnv={env}
-                  onEnvSelected={setEnv}
+                  onEnvSelected={(env) => {
+                    setValue("environmentId", env.id);
+                    setEnv(env);
+                  }}
                   disabled={!project}
                 />
               </div>
@@ -305,84 +308,59 @@ export default function ImportTableForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={control}
-              name="defName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Definition name</FormLabel>
-                  <FormControl>
-                    <InputWithCheck
-                      disabled={!project}
-                      placeholder="eg. users"
-                      updateQuery={setDefName}
-                      queryStatus={nameAvailableQuery}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    The name of the definition to create in your Studio project.
-                    This name must be unique within your project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="defDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Definition description" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Provide a description for the imported table so others can
-                    understand the role it plays in your project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="environmentId"
-              render={({ field }) => (
-                <Input
-                  type="hidden"
-                  {...field}
-                  {...register("environmentId")}
+            {!defId && (
+              <>
+                <FormField
+                  control={control}
+                  name="def.name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Definition name</FormLabel>
+                      <FormControl>
+                        <InputWithCheck
+                          disabled={!project}
+                          placeholder="eg. users"
+                          updateQuery={setDefName}
+                          queryStatus={nameAvailableQuery}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The name of the definition to create in your Studio
+                        project. This name must be unique within your project.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                // <FormItem>
-                //   <FormLabel>Environment</FormLabel>
-                //   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                //     <FormControl>
-                //       <SelectTrigger className="w-auto gap-x-2">
-                //         <SelectValue placeholder="Select Environment" />
-                //       </SelectTrigger>
-                //     </FormControl>
-                //     <SelectContent>
-                //       {envs.map((env) => (
-                //         <SelectItem key={env.id} value={env.id}>
-                //           {env.name}
-                //         </SelectItem>
-                //       ))}
-                //     </SelectContent>
-                //   </Select>
-                //   <FormDescription>
-                //     You must choose an Environment to import the Table to. You can
-                //     deploy the resulting Project Table to other Environments at a
-                //     later time on the Deployments screen.
-                //   </FormDescription>
-                //   <FormMessage />
-                // </FormItem>
-              )}
-            />
+                <FormField
+                  control={control}
+                  name="def.description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Definition description"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Provide a description for the imported table so others
+                        can understand the role it plays in your project.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={importTable.isPending || !nameAvailableQuery.data}
+              disabled={
+                importTable.isPending || (!defId && !nameAvailableQuery.data)
+              }
             >
               {importTable.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
