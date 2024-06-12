@@ -88,12 +88,23 @@ export default function ImportTableForm({
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
       defName: "",
-      defDescription: undefined,
+      defDescription: "",
       environmentId: envPreset?.id ?? "",
     },
   });
 
-  const { handleSubmit, control, register, setValue, setError, watch } = form;
+  const { handleSubmit, control, register, setValue, setError, watch, reset } =
+    form;
+
+  useEffect(() => {
+    reset({
+      chainId: chainIdPreset ?? 0,
+      tableId: tableIdPreset ?? "",
+      defName: "",
+      defDescription: "",
+      environmentId: envPreset?.id ?? "",
+    });
+  }, [chainIdPreset, tableIdPreset, envPreset, reset]);
 
   const chainId = watch("chainId");
   const tableId = watch("tableId");

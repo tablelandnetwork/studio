@@ -5,7 +5,7 @@ import { type schema } from "@tableland/studio-store";
 import { updateProjectSchema } from "@tableland/studio-validators";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { skipToken } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -41,6 +41,10 @@ export default function EditProject({
       description: project.description,
     },
   });
+
+  useEffect(() => {
+    form.reset({ name: project.name, description: project.description });
+  }, [project, form]);
 
   const nameAvailable = api.projects.nameAvailable.useQuery(
     query !== project.name

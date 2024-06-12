@@ -97,6 +97,25 @@ export default function NewDefForm({
   });
 
   useEffect(() => {
+    form.reset({
+      name: "",
+      description: "",
+      columns: schemaPreset
+        ? [
+            {
+              id: "dummy",
+              name: "dummy",
+              type: "int",
+              notNull: false,
+              primaryKey: false,
+              unique: false,
+            },
+          ]
+        : [],
+    });
+  }, [schemaPreset, form]);
+
+  useEffect(() => {
     if (!openSheet) {
       setTeam(teamPreset);
       setProject(projectPreset);

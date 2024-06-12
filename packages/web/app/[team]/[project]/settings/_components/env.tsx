@@ -59,6 +59,10 @@ export default function Env({
     },
   });
 
+  useEffect(() => {
+    form.reset({ name: env.name });
+  }, [env, form]);
+
   function onEdit() {
     setShowForm(true);
   }
