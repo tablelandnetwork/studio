@@ -54,20 +54,22 @@ export default async function Deployments({
   }, new Set<boolean | undefined>());
 
   return (
-    <main className="m-4 flex flex-1 flex-col justify-center">
-      <h1 className="text-3xl font-medium">{project.name}</h1>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <p className="line-clamp-1 max-w-md text-muted-foreground">
-              {project.description}
-            </p>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="max-w-xs">{project.description}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+    <main className="m-4 flex flex-1 flex-col justify-center gap-y-4">
+      <div>
+        <h1 className="text-3xl font-medium">{project.name}</h1>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="line-clamp-1 max-w-md text-muted-foreground">
+                {project.description}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs">{project.description}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
       <div className="m-auto grid max-w-4xl items-start justify-center gap-4 md:grid-cols-2">
         {chainTypes.size > 1 && (
           <div className="col-span-2 grid gap-4">
