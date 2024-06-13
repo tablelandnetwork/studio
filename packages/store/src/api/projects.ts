@@ -218,7 +218,7 @@ export function initProjects(
         .where(
           and(eq(teamProjects.teamId, teamId), eq(teamProjects.isOwner, 1)),
         )
-        .orderBy(projects.name)
+        .orderBy(projects.slug)
         .all();
       const mapped = res.map((r) => r.project);
       return mapped;
