@@ -10,7 +10,7 @@ export default async function LayoutTeam({
       <div className="sticky top-[3.55rem] h-[calc(100vh-3.55rem)] min-w-40 flex-shrink-0 overflow-y-auto overflow-x-hidden border-r border-[#080A1E] bg-card">
         <Sidebar />
       </div>
-      <div className="w-full">{children}</div>
+      <div className="flex w-full">{children}</div>
     </div>
   );
 }

@@ -6,15 +6,18 @@ import { useRouter } from "next/navigation";
 import NewProjectForm from "@/components/new-project-form";
 import { Button } from "@/components/ui/button";
 
-export default function NewProjectButton({ team }: { team: schema.Team }) {
+export default function NewProjectButton({
+  team,
+  ...props
+}: { team: schema.Team } & React.ComponentProps<typeof Button>) {
   const router = useRouter();
 
   return (
     <NewProjectForm
       team={team}
       trigger={
-        <Button variant="ghost" className="ml-auto">
-          <Plus className=" mr-2" />
+        <Button variant="secondary" {...props}>
+          <Plus className="mr-1 size-5" />
           New Project
         </Button>
       }

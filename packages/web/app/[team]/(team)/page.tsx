@@ -1,17 +1,16 @@
-import { AlertCircle, Boxes, Folders, Table2 } from "lucide-react";
+import { Folder, Folders } from "lucide-react";
 import Link from "next/link";
 import { cache } from "react";
 import NewProjectButton from "./_components/new-project-button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { api } from "@/trpc/server";
 import { teamBySlug } from "@/lib/api-helpers";
+import { TimeSince } from "@/components/time";
 
 export default async function Projects({
   params,
@@ -26,7 +25,6 @@ export default async function Projects({
   const authorized = await cache(api.teams.isAuthorized)({
     teamId: team.id,
   });
-  const authenticated = await api.auth.authenticated();
 
   const defs = await Promise.all(
     projects.map(
@@ -34,78 +32,58 @@ export default async function Projects({
         await cache(api.defs.projectDefs)({ projectId: project.id }),
     ),
   );
-  const deployments = await Promise.all(
-    projects.map(
-      async (project) =>
-        await cache(api.deployments.projectDeployments)({
-          projectId: project.id,
-        }),
-    ),
-  );
 
   return (
-    <main className="container flex flex-1 flex-col p-4">
-      {!authorized && authenticated && (
-        <Alert className="mb-4 flex flex-1 items-center">
-          <span className="mr-2">
-            <AlertCircle />
-          </span>
-          <AlertDescription>
-            You don&apos;t currently have access to work in this team. If you
-            think this is a mistake contact the owner and ask them to invite you
-            to the team.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {authorized && <NewProjectButton team={team} />}
+    <main className="container flex max-w-5xl flex-1 flex-col items-stretch gap-4 p-4">
+      <div className="flex items-center">
+        <h1 className="text-3xl font-medium">{team.name} projects</h1>
+        {authorized && <NewProjectButton team={team} className="ml-auto" />}
+      </div>
 
       {!projects.length && (
-        <div className="m-auto flex max-w-xl flex-1 flex-col justify-center space-y-4 py-16">
-          <div className="flex items-center space-x-4">
-            <Folders className="flex-shrink-0" />
-            <h1 className="text-2xl font-medium">
-              Team <b>{team.name}</b> doesn&apos;t have any projects yet.
-            </h1>
-          </div>
+        <div className="flex flex-1 items-center justify-center gap-x-4 text-muted-foreground">
+          <Folders className="size-8 flex-shrink-0" />
+          <h1 className="text-2xl">
+            Team <b>{team.name}</b> doesn&apos;t have any projects yet.
+          </h1>
         </div>
       )}
 
       {!!projects.length && (
-        <div className="grid grid-flow-row grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-4 gap-4">
           {projects.map((project, i) => {
             const defCount = defs[i].length;
-            const deploymentsCount = deployments[i].length;
             return (
-              <Link key={project.id} href={`/${team.slug}/${project.slug}`}>
-                <Card className="">
-                  <CardHeader>
-                    <CardTitle>{project.name}</CardTitle>
-                    <CardDescription className="truncate">
-                      {project.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex items-center justify-center space-x-6">
-                    <div className="flex items-center gap-1">
-                      <Boxes className="h-6 w-6" />
-                      <div className="flex flex-col items-center">
-                        <p className="text-4xl">{defCount}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Definition{defCount !== 1 && "s"}
+              <Link
+                key={project.id}
+                href={`/${team.slug}/${project.slug}`}
+                className="col-span-4 grid grid-cols-subgrid items-center rounded-md border bg-card p-4 hover:bg-accent"
+              >
+                <div className="flex items-center gap-x-4">
+                  <Folder className="shrink-0" />
+                  <h3 className="text-xl font-medium">{project.name}</h3>
+                </div>
+                <div className="flex">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                          {project.description}
                         </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Table2 className="h-6 w-6" />
-                      <div className="flex flex-col items-center">
-                        <p className="text-4xl">{deploymentsCount}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Table{deploymentsCount !== 1 && "s"}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">{project.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {defCount} definitions
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Created{" "}
+                  {project.createdAt && <TimeSince time={project.createdAt} />}
+                </p>
               </Link>
             );
           })}
