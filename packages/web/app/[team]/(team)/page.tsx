@@ -35,7 +35,7 @@ export default async function Projects({
 
   return (
     <main className="container flex max-w-5xl flex-1 flex-col items-stretch gap-4 p-4">
-      <div className="flex items-center">
+      <div className="flex items-end">
         <h1 className="text-3xl font-medium">{team.name} projects</h1>
         {authorized && <NewProjectButton team={team} className="ml-auto" />}
       </div>
