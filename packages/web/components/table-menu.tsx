@@ -197,12 +197,12 @@ export default function TableMenu({
           )}
           {displayImportToStudio && (
             <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
-              Import table as definition
+              Import table to project definition
             </DropdownMenuItem>
           )}
           {displayImportFromTableland && (
             <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
-              Attach existing table to definition
+              Attach existing table to this definition
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onSelect={() => setNewDefFormOpen(true)}>
