@@ -1,3 +1,4 @@
+import assert, { AssertionError } from "assert";
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
 import {
   type Store,
@@ -45,9 +46,9 @@ export function tablesRouter(store: Store) {
           });
         }
 
+        let def: schema.Def | undefined;
         try {
           // TODO: Execute different table inserts in a batch txn.
-          let def: schema.Def | undefined;
           if (typeof input.def === "string") {
             def = await store.defs.defById(input.def);
             if (!def) {
@@ -56,6 +57,7 @@ export function tablesRouter(store: Store) {
                 message: `Definition not found.`,
               });
             }
+            assert.deepStrictEqual(def.schema, schema);
           } else {
             def = await store.defs.createDef(
               input.projectId,
@@ -74,10 +76,17 @@ export function tablesRouter(store: Store) {
           });
           return { def, deployment };
         } catch (err) {
-          throw internalError(
-            "Error saving definition and deployment records.",
-            err,
-          );
+          if (err instanceof AssertionError) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: `Schema of table ${input.tableId} on chain ${input.chainId} does not match the ${def?.name ?? "<unknown>"} definition.`,
+            });
+          } else {
+            throw internalError(
+              "Error saving definition and deployment records.",
+              err,
+            );
+          }
         }
       }),
   });
