@@ -19,7 +19,7 @@ export default function SidebarLink({
     <Link href={href}>
       <Button
         variant={selected ? "secondary" : "ghost"}
-        className="w-full justify-start gap-x-2 px-3"
+        className="h-auto w-full justify-start gap-x-2 px-3 py-2"
       >
         <Icon className="size-5" />
         {title}
