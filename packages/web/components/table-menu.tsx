@@ -187,26 +187,26 @@ export default function TableMenu({
         <DropdownMenuContent>
           {displaySettings && (
             <DropdownMenuItem onSelect={() => setTableSettingsOpen(true)}>
-              Table settings
+              Settings
             </DropdownMenuItem>
           )}
           {displayDeploy && (
             <DropdownMenuItem onSelect={() => setExecDeploymentOpen(true)}>
-              Deploy table definition to Tableland
+              Deploy to Tableland
             </DropdownMenuItem>
           )}
           {displayImportToStudio && (
             <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
-              Import table into Studio project
+              Import table as definition
             </DropdownMenuItem>
           )}
           {displayImportFromTableland && (
             <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
-              Import table from Tableland
+              Attach existing table to definition
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onSelect={() => setNewDefFormOpen(true)}>
-            Use table definition in Studio project
+            Use schema in new definition
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

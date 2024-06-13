@@ -132,7 +132,7 @@ export function Sidebar() {
       <SidebarSection>
         <div className="flex items-center gap-2">
           <h3 className="text-base font-medium text-muted-foreground">
-            Tables
+            Definitions
           </h3>
           {!!isAuthorizedQuery.data && (
             <DropdownMenu>
@@ -141,7 +141,7 @@ export function Sidebar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onSelect={() => setNewDefOpen(true)}>
-                  New table
+                  New definition
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setImportTableOpen(true)}>
                   Import table

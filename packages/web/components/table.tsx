@@ -140,7 +140,7 @@ export default async function Table({
             tooltipText="Click to copy table name"
           >
             <Table2 className="h-4 w-4 text-muted-foreground" />
-            <MetricCardTitle>Tableland Table</MetricCardTitle>
+            <MetricCardTitle>Table</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent tooltipText={tableName}>
             {tableName}
@@ -217,9 +217,7 @@ export default async function Table({
           <MetricCard>
             <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
               <Workflow className="h-4 w-4 text-muted-foreground" />
-              <MetricCardTitle>
-                Studio projects using this table
-              </MetricCardTitle>
+              <MetricCardTitle>Referenced by projects</MetricCardTitle>
             </MetricCardHeader>
             <CardContent>
               <ProjectsReferencingTable
@@ -236,7 +234,7 @@ export default async function Table({
             <>
               <TabsTrigger value="data">Table Data</TabsTrigger>
               <TabsTrigger value="logs">SQL Logs</TabsTrigger>
-              <TabsTrigger value="definition">Definition</TabsTrigger>
+              <TabsTrigger value="definition">Schema</TabsTrigger>
             </>
           ) : (
             <h2 className="text-base font-medium text-foreground">

@@ -97,7 +97,7 @@ export default async function Deployments({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Table2 className="text-muted-foreground" />
-                <CardTitle>Tables</CardTitle>
+                <CardTitle>Definitions</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-center">
@@ -106,7 +106,7 @@ export default async function Deployments({
               </p>
             </CardContent>
             <CardFooter className="justify-center text-sm text-muted-foreground">
-              Tables deployed
+              Deployed to Tableland
             </CardFooter>
           </Card>
           <Card>
@@ -175,8 +175,7 @@ export default async function Deployments({
                 <CardTitle>SQL Logs</CardTitle>
               </div>
               <CardDescription>
-                Logs for all write operations to all deployed tables in your
-                project.
+                Logs for all write operations to all tables in your project.
               </CardDescription>
             </CardHeader>
             <CardContent>
