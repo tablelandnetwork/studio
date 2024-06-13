@@ -1,6 +1,6 @@
 {
   "name": "@tableland/studio-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tableland command line tools",
   "repository": "https://github.com/tablelandnetwork/studio/cli",
   "publishConfig": {

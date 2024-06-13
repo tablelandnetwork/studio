@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { helpers } from "@tableland/sdk";
 import { slugify } from "@tableland/studio-store";
-import { restrictedTeamSlugs, restrictedDefSlugs } from "./restricted-slugs";
+import { restrictedTeamSlugs, restrictedDefSlugs } from "./restricted-slugs.js";
 
 export const teamNameSchema = z
   .string()

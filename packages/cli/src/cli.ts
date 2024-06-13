@@ -33,7 +33,12 @@ const explorer = cosmiconfigSync(moduleName, {
     "package.json", // For the ts/js devs in the house
   ],
 });
-const config = explorer.search();
+
+const conf = explorer.search();
+// The aliases config is used by @tableland/cli but not here. We want to allow
+// people to use the same rc config for both, so we have to remove it here.
+// @ts-expect-error the config type doesn't expect aliases
+const { aliases: _, ...config } = conf.config;
 
 // If a dotenv file (or exported env vars) are provided, these override any config values
 dotenv.config();
