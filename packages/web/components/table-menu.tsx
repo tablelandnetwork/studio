@@ -8,7 +8,9 @@ import { skipToken } from "@tanstack/react-query";
 import { type RouterOutputs } from "@tableland/studio-api";
 import { Button } from "./ui/button";
 import NewDefForm from "./new-def-form";
-import ImportTableForm from "./import-table-form";
+import ImportTableForm, {
+  type ImportTableFormProps,
+} from "./import-table-form";
 import TableSettings from "./table-settings";
 import { DeleteTableDialog } from "./delete-table-dialog";
 import { UndeployTableDialog } from "./undeploy-table-dialog";
@@ -46,7 +48,9 @@ export default function TableMenu({
   const [tableSettingsOpen, setTableSettingsOpen] = useState(false);
   const [execDeploymentOpen, setExecDeploymentOpen] = useState(false);
   const [newDefFormOpen, setNewDefFormOpen] = useState(false);
-  const [importTableFormOpen, setImportTableFormOpen] = useState(false);
+  const [importTableFormProps, setImportTableFormProps] = useState<
+    Partial<ImportTableFormProps> | undefined
+  >(undefined);
   const [deleteTableOpen, setDeleteTableOpen] = useState(false);
   const [undeployTableOpen, setUndeployTableOpen] = useState(false);
   const router = useRouter();
@@ -146,14 +150,9 @@ export default function TableMenu({
         />
       )}
       <ImportTableForm
-        teamPreset={team}
-        projectPreset={project}
-        envPreset={env}
-        chainIdPreset={chainId}
-        tableIdPreset={tableId}
-        defId={def?.id}
-        open={importTableFormOpen}
-        onOpenChange={setImportTableFormOpen}
+        {...importTableFormProps}
+        open={!!importTableFormProps}
+        onOpenChange={(open) => !open && setImportTableFormProps(undefined)}
         onSuccess={(team, project, def, env) => {
           router.refresh();
           const newPathname = `/${team.slug}/${project.slug}/${env.slug}/${def.slug}`;
@@ -196,12 +195,29 @@ export default function TableMenu({
             </DropdownMenuItem>
           )}
           {displayImportToStudio && (
-            <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
-              Import table to project definition
+            <DropdownMenuItem
+              onSelect={() =>
+                setImportTableFormProps({
+                  chainIdPreset: chainId,
+                  tableIdPreset: tableId,
+                  descriptionPreset: def?.description,
+                })
+              }
+            >
+              Import table as definition
             </DropdownMenuItem>
           )}
           {displayImportFromTableland && (
-            <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
+            <DropdownMenuItem
+              onSelect={() =>
+                setImportTableFormProps({
+                  teamPreset: team,
+                  projectPreset: project,
+                  envPreset: env,
+                  defId: def?.id,
+                })
+              }
+            >
               Attach existing table to this definition
             </DropdownMenuItem>
           )}

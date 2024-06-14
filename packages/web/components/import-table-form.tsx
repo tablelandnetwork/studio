@@ -41,6 +41,7 @@ export interface ImportTableFormProps {
   envPreset?: schema.Environment;
   chainIdPreset?: number;
   tableIdPreset?: string;
+  descriptionPreset?: string;
   defId?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -60,13 +61,13 @@ export default function ImportTableForm({
   envPreset,
   chainIdPreset,
   tableIdPreset,
+  descriptionPreset,
   defId,
   open,
   onOpenChange,
   trigger,
   onSuccess,
 }: ImportTableFormProps) {
-  const [openSheet, setOpenSheet] = useState(open ?? false);
   const [team, setTeam] = useState<schema.Team | undefined>(teamPreset);
   const [project, setProject] = useState<schema.Project | undefined>(
     projectPreset,
@@ -89,7 +90,7 @@ export default function ImportTableForm({
     defaultValues: {
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
-      def: defId ?? { name: "", description: "" },
+      def: defId ?? { name: "", description: descriptionPreset ?? "" },
       environmentId: envPreset?.id ?? "",
     },
   });
@@ -100,32 +101,40 @@ export default function ImportTableForm({
     reset({
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
-      def: defId ?? { name: "", description: "" },
+      def: defId ?? { name: "", description: descriptionPreset ?? "" },
       environmentId: envPreset?.id ?? "",
     });
-  }, [chainIdPreset, tableIdPreset, defId, envPreset, reset]);
+  }, [
+    chainIdPreset,
+    tableIdPreset,
+    descriptionPreset,
+    defId,
+    envPreset,
+    reset,
+  ]);
+
+  useEffect(() => {
+    setTeam(teamPreset);
+    setProject(projectPreset);
+    setEnv(envPreset);
+  }, [envPreset, projectPreset, teamPreset]);
 
   const chainId = watch("chainId");
   const tableId = watch("tableId");
 
   useEffect(() => {
-    if (!openSheet) {
+    if (!open) {
       setTeam(teamPreset);
       setProject(projectPreset);
       setEnv(envPreset);
       form.reset();
     }
-    onOpenChange?.(openSheet);
-  }, [openSheet, teamPreset, projectPreset, envPreset, onOpenChange, form]);
-
-  useEffect(() => {
-    setOpenSheet(open ?? false);
-  }, [open]);
+  }, [open, teamPreset, projectPreset, envPreset, form]);
 
   useEffect(() => {
     if (defId) return;
     if (!(!!chainId && !!tableId)) {
-      setValue("def", { name: "", description: "" });
+      setValue("def", { name: "", description: descriptionPreset ?? "" });
       return;
     }
     const validator = new Validator({ baseUrl: helpers.getBaseUrl(chainId) });
@@ -139,7 +148,7 @@ export default function ImportTableForm({
       .catch((_) => {
         setValue("def.name", "");
       });
-  }, [chainId, tableId, defId, setValue]);
+  }, [chainId, tableId, descriptionPreset, defId, setValue]);
 
   const nameAvailableQuery = api.defs.nameAvailable.useQuery(
     project && defName
@@ -155,7 +164,7 @@ export default function ImportTableForm({
     onSuccess: ({ def, deployment }) => {
       if (!team || !project || !env) return;
       onSuccess(team, project, def, env, deployment);
-      setOpenSheet(false);
+      onOpenChange?.(false);
     },
   });
 
@@ -180,7 +189,7 @@ export default function ImportTableForm({
   }
 
   return (
-    <Sheet open={openSheet} onOpenChange={setOpenSheet}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
       <SheetContent
         className="overflow-scroll sm:max-w-xl"
