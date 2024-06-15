@@ -16,15 +16,15 @@ export default function SidebarLink({
   showIndicator?: boolean;
 }) {
   return (
-    <Link href={href}>
+    <Link href={href} title={title}>
       <Button
         variant={selected ? "secondary" : "ghost"}
-        className="h-auto w-full justify-start gap-x-2 px-3 py-2"
+        className="flex h-auto w-full justify-start gap-x-2 px-3 py-2 font-normal"
       >
-        <Icon className="size-5" />
-        {title}
+        <Icon className="size-5 shrink-0" />
+        <div className="shrink truncate">{title}</div>
         {showIndicator && (
-          <div className="ml-auto size-2 rounded-full bg-primary" />
+          <div className="ml-auto size-2 shrink-0 rounded-full bg-primary" />
         )}
       </Button>
     </Link>
