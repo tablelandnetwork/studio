@@ -1,6 +1,6 @@
 import { type Schema as SDKSchema } from "@tableland/sdk";
 import { customType } from "drizzle-orm/sqlite-core";
-import { unescapeSchema } from "../helpers";
+import { unescapeSchema } from "../helpers.js";
 
 export type Schema = SDKSchema;
 

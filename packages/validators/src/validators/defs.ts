@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { type Schema } from "@tableland/studio-store";
-import { defNameSchema } from "../common";
+import { defNameSchema } from "../common.js";
 
 const defDescriptionSchema = z.string().trim().min(1).max(1024);
 
