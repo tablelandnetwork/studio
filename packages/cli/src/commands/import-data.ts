@@ -3,7 +3,7 @@ import type { Arguments } from "yargs";
 import chalk from "chalk";
 import { type Wallet } from "ethers";
 import { studioAliases } from "@tableland/studio-client";
-import { Database } from "@tableland/sdk";
+import { Database, Validator, helpers as SdkHelpers } from "@tableland/sdk";
 import { type GlobalOptions } from "../cli.js";
 import {
   ERROR_INVALID_STORE_PATH,
@@ -12,12 +12,14 @@ import {
   logger,
   normalizePrivateKey,
   parseCsvFile,
+  wrapText,
   FileStore,
 } from "../utils.js";
 
-// note: abnormal spacing is needed to ensure help message is formatted correctly
-export const command = "import-data <definition> <file>";
-export const desc = "write the content of a csv into an  existing table";
+export const command = wrapText("import-data <definition> <file>");
+export const desc = wrapText(
+  "write the content of a csv into an existing table",
+);
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
@@ -46,6 +48,7 @@ export const handler = async (
       (await aliases.read())[definition],
       "could not find definition in project",
     );
+    const { chainId, tableId } = await SdkHelpers.validateTableName(tableName);
 
     // need to reverse lookup tableName from definition and projectId so
     // that the wallet can be connected to the right provider
@@ -61,6 +64,13 @@ export const handler = async (
       signer,
       aliases,
     });
+    const baseUrl = SdkHelpers.getBaseUrl(31337);
+    const val = new Validator({ baseUrl });
+    // get the table schema to help map values to their type
+    const { schema } = await val.getTableById({
+      chainId,
+      tableId: tableId.toString(),
+    });
 
     const fileString = readFileSync(file).toString();
     const dataObject = await parseCsvFile(fileString);
@@ -71,7 +81,7 @@ export const handler = async (
     // need to capture row length now since `batchRows` will mutate the
     // rows Array to reduce memory overhead
     const rowCount = Number(rows.length);
-    const statements = csvHelp.batchRows(rows, headers, definition);
+    const statements = csvHelp.batchRows(rows, headers, schema, definition);
 
     const doImport = await confirmImport({
       statements,
@@ -82,21 +92,26 @@ export const handler = async (
 
     if (!doImport) return logger.log("aborting");
 
-    const results = await db.batch(statements.map((stmt) => db.prepare(stmt)));
+    const stmts = statements.map((stmt) => db.prepare(stmt));
+    const results = await db.batch(stmts);
     // the batch method returns an array of results for reads, but in this case
     // its an Array of length 1 with a single Object containing txn data
     const result = results[0];
-
-    logger.log(
-      `successfully inserted ${rowCount} row${
-        rowCount === 1 ? "" : "s"
-      } into ${definition}
+    const rec = await result.meta.txn?.wait();
+    if (rec?.errorEventIdx !== undefined) {
+      logger.error(rec);
+    } else {
+      logger.log(
+        `successfully inserted ${rowCount} row${
+          rowCount === 1 ? "" : "s"
+        } into ${definition}
   transaction receipt: ${chalk.gray.bold(
     JSON.stringify(result.meta?.txn, null, 4),
   )}
   project id: ${projectId}
   environment id: ${environmentId}`,
-    );
+      );
+    }
   } catch (err: any) {
     logger.error(err);
   }
@@ -129,10 +144,10 @@ async function confirmImport(info: {
     )} to insert ${chalk.yellow(info.rowCount)} row${
       info.rowCount === 1 ? "" : "s"
     } into table ${chalk.yellow(info.tableName)}
-This can be done with a total of ${chalk.yellow(statementCount)} statment${
+This can be done with a total of ${chalk.yellow(statementCount)} statement${
       statementCount === 1 ? "" : "s"
     }
-The total size of the statment${
+The total size of the statement${
       statementCount === 1 ? "" : "s"
     } is: ${chalk.yellow(statementLength)}
 The estimated cost is ${cost}

@@ -11,7 +11,7 @@ import {
 } from "ethers";
 import { z } from "zod";
 import createKeccakHash from "keccak";
-import { helpers as sdkHelpers } from "@tableland/sdk";
+import { helpers as sdkHelpers, type Schema } from "@tableland/sdk";
 import { init } from "@tableland/sqlparser";
 import { type API, type ClientConfig, api } from "@tableland/studio-client";
 
@@ -158,16 +158,31 @@ export const csvHelp = {
   batchRows: function (
     rows: Array<Array<string | number>>,
     headers: string[],
+    schema: Schema,
     table: string,
   ) {
     let rowCount = 0;
     const batches = [];
     while (rows.length) {
       let statement = `INSERT INTO ${table}(${headers.join(",")})VALUES`;
+      // map headers to schema columns to add in the header index
+      const schemaWithIdx = headers.map((header, idx) => {
+        const colInfo = schema.columns.find((col) => {
+          // we cannot guarantee that an imported table will have backticks
+          // around the column name, so we need to check for both
+          return col.name === header || col.name === header.replace(/`/g, "");
+        });
+        return {
+          idx,
+          name: colInfo?.name,
+          type: colInfo?.type,
+        };
+      });
 
       while (
         rows.length &&
-        byteSize(statement + getNextValues(rows[0])) < MAX_STATEMENT_SIZE
+        byteSize(statement + getNextValues(rows[0], schemaWithIdx)) <
+          MAX_STATEMENT_SIZE
       ) {
         const row = rows.shift();
         if (!row) continue;
@@ -178,7 +193,7 @@ export const csvHelp = {
           );
         }
         // include comma between
-        statement += getNextValues(row);
+        statement += getNextValues(row, schemaWithIdx);
       }
 
       // remove last comma and add semicolon
@@ -209,8 +224,22 @@ const byteSize = function (str: string) {
   return new Blob([str]).size;
 };
 
-const getNextValues = function (row: Array<string | number>) {
-  return `(${row.join(",")}),`;
+const getNextValues = function (
+  row: Array<string | number>,
+  schemaWithIdx: Array<Record<string, any>>,
+) {
+  // wrap values in single quotes if the `type` is not `int` nor `integer`
+  const rowFormatted = row.map((val, idx) => {
+    const colInfo = schemaWithIdx.find((col) => {
+      return col.idx === idx;
+    });
+    const type = colInfo?.type;
+    // empty csv values must be treated as `NULL` to avoid SQL string errors
+    if (typeof val === "string" && val.length === 0) return "NULL";
+    if (type === "int" || type === "integer") return val;
+    return `'${val}'`;
+  });
+  return `(${rowFormatted.join(",")}),`;
 };
 
 function getIdFromTableName(tableName: string, revIndx: number) {
