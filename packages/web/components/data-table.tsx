@@ -1,12 +1,7 @@
-"use client";
-
 import {
   type ColumnDef,
-  type VisibilityState,
   flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
+  type Table as TSTable,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 import React from "react";
@@ -29,31 +24,14 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: Array<ColumnDef<TData, TValue>>;
   data: TData[];
+  table: TSTable<TData>;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  table,
 }: DataTableProps<TData, TValue>) {
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    initialState: {
-      pagination: {
-        pageSize: 15,
-      },
-    },
-    state: {
-      columnVisibility,
-    },
-  });
-
   return (
     <div>
       <div className="flex items-center">

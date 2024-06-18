@@ -1,6 +1,12 @@
-import { Database, type Schema, helpers, type Result } from "@tableland/sdk";
+import {
+  Database,
+  type Schema,
+  helpers,
+  type Result,
+  Validator,
+  type Table as TblTable,
+} from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import { type ColumnDef } from "@tanstack/react-table";
 import {
   Blocks,
   Coins,
@@ -12,7 +18,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { type RouterOutputs } from "@tableland/studio-api";
-import { DataTable } from "./data-table";
 import {
   MetricCard,
   MetricCardContent,
@@ -26,10 +31,11 @@ import HashDisplay from "./hash-display";
 import { CardContent } from "./ui/card";
 import ProjectsReferencingTable from "./projects-referencing-table";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { TableData } from "./table-data";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
-import { cn, objectToTableData } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
@@ -76,25 +82,19 @@ export default async function Table({
   const blockExplorer = blockExplorers.get(chainId);
   const openSeaLink = openSeaLinks.get(chainId);
 
+  let table: TblTable | undefined;
   let data: Result<Record<string, unknown>> | undefined;
   let error: Error | undefined;
   try {
     const baseUrl = helpers.getBaseUrl(chainId);
+    const validator = new Validator({ baseUrl });
+    table = await validator.getTableById({ chainId, tableId });
     const tbl = new Database({ baseUrl });
     data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   } catch (err) {
     error = ensureError(err);
   }
 
-  const formattedData = data ? objectToTableData(data.results) : undefined;
-  const columns: Array<ColumnDef<unknown>> | undefined = data
-    ? data.results.length
-      ? Object.keys(data.results[0] as object).map((col) => ({
-          accessorKey: col,
-          header: col,
-        }))
-      : []
-    : undefined;
   const deploymentReferences = (
     await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);
@@ -231,7 +231,7 @@ export default async function Table({
 
       <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
         <TabsList className={cn(!data && "bg-transparent")}>
-          {data && formattedData && columns ? (
+          {data && table ? (
             <>
               <TabsTrigger value="data">Table Data</TabsTrigger>
               <TabsTrigger value="logs">SQL Logs</TabsTrigger>
@@ -243,9 +243,12 @@ export default async function Table({
             </h2>
           )}
         </TabsList>
-        {formattedData && columns && (
+        {data && table && (
           <TabsContent value="data">
-            <DataTable columns={columns} data={formattedData} />
+            <TableData
+              columns={table.schema.columns}
+              initialData={data.results}
+            />
           </TabsContent>
         )}
         {data && (

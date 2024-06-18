@@ -14,8 +14,8 @@ const arrSchema = z.array(z.any());
 // accepts an Array with any entries that are any kind of Object and goes
 // through each Object's keys to ensure that values containing an Object or
 // Array are `stringify`ed.  This enables showing nested data in an html table
-// without the dreded "[object Object]"
-export function objectToTableData<TData>(data: any[]) {
+// without the dreaded "[object Object]"
+export function objectToTableData(data: Array<Record<string, unknown>>) {
   data = arrSchema.parse(data);
 
   return data.map(function (d) {
@@ -32,7 +32,7 @@ export function objectToTableData<TData>(data: any[]) {
 
         return [key, val];
       }),
-    ) as TData;
+    );
   });
 }
 
