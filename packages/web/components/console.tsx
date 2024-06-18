@@ -5,25 +5,79 @@ import * as React from "react";
 import {
   Database,
   Validator,
+  chainsMap,
   type Schema,
   helpers,
   type Result,
 } from "@tableland/sdk";
+import { studioAliases, getBaseUrl } from "@tableland/studio-client";
+import { init } from "@tableland/sqlparser";
+import { api } from "@/trpc/react";
+import { cn, objectToTableData } from "@/lib/utils";
 import { CodeEditor } from "./code-editor";
-import { cn } from "@/lib/utils";
+import { DataTable } from "./data-table";
 import { Table } from "./ui/table";
 
-export function Console({}: Props) {
-  const runQuery = async function (queryText) {
-    const chain = chainsMap.get(chainId);
-    const blockExplorer = blockExplorers.get(chainId);
-    const openSeaLink = openSeaLinks.get(chainId);
+init().catch((err: any) => {
+  console.log("could not init sqlparser:", err);
+  throw err;
+});
 
-    const baseUrl = helpers.getBaseUrl(chainId);
-    const db = new Database({ baseUrl });
-    const data = await db.prepare(`SELECT * FROM ${tableName};`).all();
+export function Console({ environmentId }: Props) {
+  const [loading, setLoading] = React.useState(false);
 
-    const formattedData = data ? objectToTableData(data.results) : undefined;
+  const runQuery = async function ({ tabId, query: queryText }) {
+    setLoading(true);
+
+    try {
+      const { statements, type, tables } = await sqlparser.normalize(queryText);
+      if (statements.length > 1) {
+        throw new Error("you may only run one statement at a time");
+      }
+      if (statements.length < 1) {
+        throw new Error("you must provide a query statement");
+      }
+
+      const statement = statements[0];
+      const aliases = studioAliases({
+        environmentId,
+        apiUrl: getBaseUrl(),
+      });
+      const aliasMap = await aliases.read();
+
+      const uuTableName = aliasMap[tables[0]];
+      if (!uuTableName) throw new Error("invalid table name");
+
+      const chainId = parseInt(uuTableName.split("_").reverse()[1], 10);
+      const chain = helpers.getChainInfo(chainId);
+      const baseUrl = helpers.getBaseUrl(chainId);
+      const db = new Database({ baseUrl, aliases });
+      const data = await db.prepare(statement).all();
+      const columns: Array<ColumnDef<unknown>> | undefined = data
+        ? data.results.length
+          ? Object.keys(data.results[0] as object).map((col) => ({
+              accessorKey: col,
+              header: col,
+            }))
+          : []
+        : undefined;
+
+      setTabs(
+        tabs.map((tab) => {
+          if (tab.tabId !== tabId) return tab;
+
+          tab.columns = columns;
+          tab.results = data.results;
+
+          return tab;
+        }),
+      );
+    } catch (err: any) {
+      // TODO: show the error
+      setLoading(false);
+    }
+
+    setLoading(false);
   };
 
   let tabCount = 0;
@@ -35,7 +89,7 @@ export function Console({}: Props) {
       name: "Tab " + tabCount,
       query: "",
       columns: [],
-      rows: [],
+      results: [],
       queryType: "",
       committing: false,
     };
@@ -54,7 +108,6 @@ export function Console({}: Props) {
   const [currentTab, setCurrentTab] = React.useState(tabs[0].tabId);
 
   const openQueryTab = function (id?: number | string) {
-    console.log("openQueryTab", id);
     if (id) return setCurrentTab(parseInt(id, 10));
 
     const tab = newQueryTab();
@@ -97,9 +150,18 @@ export function Console({}: Props) {
           const className = currentTab === tab.tabId ? "open" : "hidden";
           return (
             <div key={tab.tabId} className={`${className} single-tab-pane`}>
-              <QueryPane tabId={tab.tabId} query={tab.query} />
+              <QueryPane
+                tabId={tab.tabId}
+                query={tab.query}
+                runQuery={runQuery}
+                loading={loading}
+              />
 
-              <ResultSetPane tabId={tab.tabId} />
+              <ResultSetPane
+                tab={tab}
+                results={tab.results}
+                loading={loading}
+              />
             </div>
           );
         })}
@@ -109,16 +171,17 @@ export function Console({}: Props) {
 }
 
 function QueryPane(props: any): React.JSX.Element {
-  const { tab, query: initialQuery, queryType } = props;
+  const { tabId, query: initialQuery, runQuery } = props;
 
   const [query, setQuery] = React.useState(initialQuery);
   const updateQuery = function (payload) {
     setQuery(payload.query);
   };
 
-  const sendQuery = function (event): void {
+  const sendQuery = function (event: Event): void {
     event.preventDefault();
-    runQuery({ tabId: tab.tabId, query });
+    event.stopPropagation();
+    runQuery({ tabId, query });
   };
 
   return (
@@ -185,13 +248,11 @@ function TabLabel(props: {
   const { currentTab, tab, openTab, closeTab } = props;
 
   function closeThisTab(e: any): void {
-    console.log("closeThisTab");
     e.preventDefault();
     e.stopPropagation();
     closeTab();
   }
 
-  console.log("TabLabel", tab, currentTab);
   return (
     <li onClick={() => openTab()} className="flex border">
       <i className="fa-solid fa-terminal"></i>
@@ -222,7 +283,10 @@ function TabLabel(props: {
 }
 
 function ResultSetPane(props: any): React.JSX.Element {
-  const { tabId, error, status, message } = props;
+  const { error, loading, message, tab } = props;
+
+  const formattedData = objectToTableData(tab.results);
+  console.log("results", formattedData);
 
   return (
     <div className="table-results">
@@ -233,7 +297,11 @@ function ResultSetPane(props: any): React.JSX.Element {
         </div>
       )}
       {message && <div className="message">{message}</div>}
-      {status === "loading" ? <Loading /> : <Table tabid={tabId} />}
+      {loading ? (
+        <Loading />
+      ) : (
+        <DataTable columns={tab.columns} data={formattedData} />
+      )}
     </div>
   );
 }

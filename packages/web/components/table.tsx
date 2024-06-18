@@ -230,7 +230,7 @@ export default async function Table({
         )}
       </div>
 
-      <Console />
+      {environment && <Console environmentId={environment.id} />}
 
       <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
         <TabsList className={cn(!data && "bg-transparent")}>
