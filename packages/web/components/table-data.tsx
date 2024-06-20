@@ -13,6 +13,7 @@ import { type Schema } from "@tableland/sdk";
 import { DataTable } from "./data-table";
 import TableCell from "./table-cell";
 import { EditCell } from "./edit-cell";
+import { Button } from "./ui/button";
 import { objectToTableData } from "@/lib/utils";
 
 interface TableDataProps {
@@ -95,12 +96,22 @@ export function TableData({
           }),
         );
       },
+      addRow: () => {
+        const newRow: Record<string, unknown> = {};
+        const setFunc = (old: Array<Record<string, unknown>>) => [
+          ...old,
+          newRow,
+        ];
+        setData(setFunc);
+        setOriginalData(setFunc);
+      },
     },
   });
 
   return (
     <>
       <DataTable columns={columns} data={data} table={table} />
+      <Button onClick={() => table.options.meta?.addRow()}>Add Row</Button>
       <pre>{JSON.stringify(data, null, "\t")}</pre>
     </>
   );
