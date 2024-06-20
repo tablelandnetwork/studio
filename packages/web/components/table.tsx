@@ -6,7 +6,7 @@ import {
   Validator,
   type Table as TblTable,
 } from "@tableland/sdk";
-import { type schema } from "@tableland/studio-store";
+import { unescapeSchema, type schema } from "@tableland/studio-store";
 import {
   Blocks,
   Coins,
@@ -89,6 +89,7 @@ export default async function Table({
     const baseUrl = helpers.getBaseUrl(chainId);
     const validator = new Validator({ baseUrl });
     table = await validator.getTableById({ chainId, tableId });
+    table.schema = unescapeSchema(table.schema);
     const tbl = new Database({ baseUrl });
     data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   } catch (err) {

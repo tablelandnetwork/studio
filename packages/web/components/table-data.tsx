@@ -53,6 +53,7 @@ export function TableData({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    enableRowSelection: true,
     initialState: {
       pagination: {
         pageSize: 15,
@@ -105,13 +106,40 @@ export function TableData({
         setData(setFunc);
         setOriginalData(setFunc);
       },
+      removeRow: (rowIndex: number) => {
+        const setFilterFunc = (old: Array<Record<string, unknown>>) =>
+          old.filter(
+            (_row: Record<string, unknown>, index: number) =>
+              index !== rowIndex,
+          );
+        setData(setFilterFunc);
+        setOriginalData(setFilterFunc);
+      },
+      removeSelectedRows: (selectedRows: number[]) => {
+        const setFilterFunc = (old: Array<Record<string, unknown>>) =>
+          old.filter((_row, index) => !selectedRows.includes(index));
+        setData(setFilterFunc);
+        setOriginalData(setFilterFunc);
+      },
     },
   });
+
+  const removeRows = () => {
+    table.options.meta?.removeSelectedRows(
+      table.getSelectedRowModel().rows.map((row) => row.index),
+    );
+    table.resetRowSelection();
+  };
+
+  const selectedRows = table.getSelectedRowModel().rows;
 
   return (
     <>
       <DataTable columns={columns} data={data} table={table} />
       <Button onClick={() => table.options.meta?.addRow()}>Add Row</Button>
+      {selectedRows.length > 0 && (
+        <Button onClick={removeRows}>Remove Selected Rows</Button>
+      )}
       <pre>{JSON.stringify(data, null, "\t")}</pre>
     </>
   );

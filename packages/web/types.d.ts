@@ -9,6 +9,8 @@ declare module "@tanstack/table-core" {
       value: string | number,
     ) => void;
     addRow: () => void;
+    removeRow: (rowIndex: number) => void;
+    removeSelectedRows: (selectedRows: number[]) => void;
     editedRows: Record<string, boolean>;
     setEditedRows: React.Dispatch<
       React.SetStateAction<Record<string, boolean>>
