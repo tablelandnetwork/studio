@@ -6,11 +6,11 @@ export default async function LayoutTeam({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-1 items-stretch">
+    <div className="flex flex-1">
       <div className="sticky top-[3.55rem] h-[calc(100vh-3.55rem)] w-52 flex-shrink-0 overflow-y-auto overflow-x-hidden border-r border-[#080A1E] bg-card">
         <Sidebar />
       </div>
-      <div className="flex w-full">{children}</div>
+      <div className="mx-auto w-full min-w-0">{children}</div>
     </div>
   );
 }

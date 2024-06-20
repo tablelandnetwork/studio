@@ -40,7 +40,7 @@ export default async function Deployments({
   const isAuthorized = await cache(api.teams.isAuthorized)({ teamId: team.id });
 
   return (
-    <main className="flex-1 p-4">
+    <main className="p-4">
       <TableWrapper
         team={team}
         project={project}
