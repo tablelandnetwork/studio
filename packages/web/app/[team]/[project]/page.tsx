@@ -1,6 +1,8 @@
 import { RedirectType, redirect } from "next/navigation";
+import { projectBySlug, teamBySlug } from "@/lib/api-helpers";
+import { api } from "@/trpc/server";
 
-export default function Page({
+export default async function Page({
   params,
   searchParams,
 }: {
@@ -9,11 +11,14 @@ export default function Page({
 }) {
   const table =
     typeof searchParams.table === "string" ? searchParams.table : undefined;
-  // TODO: Look up correct env in user session.
-  const env = "default";
+  const team = await teamBySlug(params.team);
+  const project = await projectBySlug(params.project, team.id);
+  const env = await api.environments.environmentPreferenceForProject({
+    projectId: project.id,
+  });
   const path = table
-    ? `/${params.team}/${params.project}/${env}/${table}`
-    : `/${params.team}/${params.project}/${env}`;
+    ? `/${params.team}/${params.project}/${env.slug}/${table}`
+    : `/${params.team}/${params.project}/${env.slug}`;
 
   redirect(path, RedirectType.replace);
 }

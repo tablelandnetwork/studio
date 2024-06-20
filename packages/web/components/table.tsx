@@ -29,7 +29,7 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
-import { objectToTableData } from "@/lib/utils";
+import { cn, objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
@@ -140,7 +140,7 @@ export default async function Table({
             tooltipText="Click to copy table name"
           >
             <Table2 className="h-4 w-4 text-muted-foreground" />
-            <MetricCardTitle>Tableland Table</MetricCardTitle>
+            <MetricCardTitle>Table</MetricCardTitle>
           </MetricCardHeader>
           <MetricCardContent tooltipText={tableName}>
             {tableName}
@@ -217,9 +217,7 @@ export default async function Table({
           <MetricCard>
             <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
               <Workflow className="h-4 w-4 text-muted-foreground" />
-              <MetricCardTitle>
-                Studio projects using this table
-              </MetricCardTitle>
+              <MetricCardTitle>Referenced by projects</MetricCardTitle>
             </MetricCardHeader>
             <CardContent>
               <ProjectsReferencingTable
@@ -231,12 +229,18 @@ export default async function Table({
         )}
       </div>
       <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
-        <TabsList>
-          {formattedData && columns && (
-            <TabsTrigger value="data">Table Data</TabsTrigger>
+        <TabsList className={cn(!data && "bg-transparent")}>
+          {data && formattedData && columns ? (
+            <>
+              <TabsTrigger value="data">Table Data</TabsTrigger>
+              <TabsTrigger value="logs">SQL Logs</TabsTrigger>
+              <TabsTrigger value="definition">Schema</TabsTrigger>
+            </>
+          ) : (
+            <h2 className="text-base font-medium text-foreground">
+              Definition
+            </h2>
           )}
-          {data && <TabsTrigger value="logs">SQL Logs</TabsTrigger>}
-          <TabsTrigger value="definition">Definition</TabsTrigger>
         </TabsList>
         {formattedData && columns && (
           <TabsContent value="data">

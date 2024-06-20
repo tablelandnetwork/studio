@@ -24,35 +24,37 @@ type PopoverTriggerProps = React.ComponentPropsWithoutRef<
   typeof PopoverTrigger
 >;
 
-interface ProjectSwitcherProps extends PopoverTriggerProps {
+interface EnvSwitcherProps extends PopoverTriggerProps {
   variant?: "navigation" | "select";
   team?: schema.Team;
-  selectedProject?: schema.Project;
-  projects?: schema.Project[];
-  onProjectSelected?: (project: schema.Project) => void;
-  onNewProjectSelected?: () => void;
+  project?: schema.Project;
+  selectedEnv?: schema.Environment;
+  envs?: schema.Environment[];
+  onEnvSelected?: (env: schema.Environment) => void;
+  onNewEnvSelected?: () => void;
 }
 
-export default function ProjectSwitcher({
+export default function EnvSwitcher({
   className,
   variant = "navigation",
   team,
-  selectedProject,
-  projects,
-  onProjectSelected,
-  onNewProjectSelected,
+  project,
+  selectedEnv,
+  envs,
+  onEnvSelected,
+  onNewEnvSelected,
   disabled,
-}: ProjectSwitcherProps) {
+}: EnvSwitcherProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
     <div className="flex items-center gap-1">
-      {variant === "navigation" && team && selectedProject && (
+      {variant === "navigation" && team && project && selectedEnv && (
         <Link
-          href={`/${team.slug}/${selectedProject.slug}`}
+          href={`/${team.slug}/${project.slug}/${selectedEnv.slug}`}
           className="text-sm underline-offset-2 hover:underline"
         >
-          {selectedProject.name}
+          {selectedEnv.name}
         </Link>
       )}
       <Popover open={open} onOpenChange={setOpen}>
@@ -62,7 +64,7 @@ export default function ProjectSwitcher({
             size={variant === "navigation" ? "sm" : "default"}
             role="combobox"
             aria-expanded={open}
-            aria-label="Select a project"
+            aria-label="Select an environment"
             className={cn(
               "justify-between",
               variant === "navigation" && "px-0",
@@ -70,32 +72,32 @@ export default function ProjectSwitcher({
             )}
           >
             {variant === "select" &&
-              (selectedProject?.name ?? "Select a project...")}
+              (selectedEnv?.name ?? "Select an environment...")}
             <ChevronsUpDown className="m-1 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
           <Command>
             <CommandList>
-              <CommandEmpty>No project found.</CommandEmpty>
-              <CommandGroup heading="Projects">
-                {!projects?.length && (
-                  <p className="text-center text-sm">No projects found</p>
+              <CommandEmpty>No environments found.</CommandEmpty>
+              <CommandGroup heading="Environments">
+                {!envs?.length && (
+                  <p className="text-center text-sm">No environments found</p>
                 )}
-                {projects?.map((project) => (
+                {envs?.map((env) => (
                   <CommandItem
-                    key={project.id}
+                    key={env.id}
                     onSelect={() => {
-                      onProjectSelected?.(project);
+                      onEnvSelected?.(env);
                       setOpen(false);
                     }}
                     className="text-sm"
                   >
-                    {project.name}
+                    {env.name}
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",
-                        project.id === selectedProject?.id
+                        env.id === selectedEnv?.id
                           ? "opacity-100"
                           : "opacity-0",
                       )}
@@ -104,14 +106,14 @@ export default function ProjectSwitcher({
                 ))}
               </CommandGroup>
             </CommandList>
-            {onNewProjectSelected && (
+            {onNewEnvSelected && (
               <>
                 <CommandSeparator />
                 <CommandList>
                   <CommandGroup>
-                    <CommandItem onSelect={onNewProjectSelected}>
+                    <CommandItem onSelect={onNewEnvSelected}>
                       <PlusCircle className="mr-2 h-5 w-5" />
-                      New Project
+                      New Environment
                     </CommandItem>
                   </CommandGroup>
                 </CommandList>

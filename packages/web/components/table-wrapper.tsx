@@ -20,7 +20,7 @@ export default async function TableWrapper({
 }) {
   return (
     <div className="flex-1 space-y-4">
-      <div className="space-y-2">
+      <div>
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-medium">{displayName}</h1>
           {isAuthenticated && <TableMenu {...props} />}

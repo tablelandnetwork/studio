@@ -16,6 +16,7 @@ import {
 } from "./ui/sheet";
 import TeamSwitcher from "./team-switcher";
 import ProjectSwitcher from "./project-switcher";
+import EnvSwitcher from "./env-switcher";
 import ChainSelector from "@/components/chain-selector";
 import { FormRootMessage } from "@/components/form-root";
 import InputWithCheck from "@/components/input-with-check";
@@ -38,9 +39,10 @@ export interface ImportTableFormProps {
   teamPreset?: schema.Team;
   projectPreset?: schema.Project;
   envPreset?: schema.Environment;
-  showSelectors?: boolean;
   chainIdPreset?: number;
   tableIdPreset?: string;
+  descriptionPreset?: string;
+  defId?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
@@ -57,15 +59,15 @@ export default function ImportTableForm({
   teamPreset,
   projectPreset,
   envPreset,
-  showSelectors,
   chainIdPreset,
   tableIdPreset,
+  descriptionPreset,
+  defId,
   open,
   onOpenChange,
   trigger,
   onSuccess,
 }: ImportTableFormProps) {
-  const [openSheet, setOpenSheet] = useState(open ?? false);
   const [team, setTeam] = useState<schema.Team | undefined>(teamPreset);
   const [project, setProject] = useState<schema.Project | undefined>(
     projectPreset,
@@ -88,40 +90,51 @@ export default function ImportTableForm({
     defaultValues: {
       chainId: chainIdPreset ?? 0,
       tableId: tableIdPreset ?? "",
-      defName: "",
-      defDescription: undefined,
+      def: defId ?? { name: "", description: descriptionPreset ?? "" },
       environmentId: envPreset?.id ?? "",
     },
   });
 
-  const { handleSubmit, control, register, setValue, setError, watch } = form;
+  const { handleSubmit, control, setValue, setError, watch, reset } = form;
+
+  useEffect(() => {
+    reset({
+      chainId: chainIdPreset ?? 0,
+      tableId: tableIdPreset ?? "",
+      def: defId ?? { name: "", description: descriptionPreset ?? "" },
+      environmentId: envPreset?.id ?? "",
+    });
+  }, [
+    chainIdPreset,
+    tableIdPreset,
+    descriptionPreset,
+    defId,
+    envPreset,
+    reset,
+  ]);
+
+  useEffect(() => {
+    setTeam(teamPreset);
+    setProject(projectPreset);
+    setEnv(envPreset);
+  }, [envPreset, projectPreset, teamPreset]);
 
   const chainId = watch("chainId");
   const tableId = watch("tableId");
 
   useEffect(() => {
-    if (!openSheet) {
+    if (!open) {
       setTeam(teamPreset);
       setProject(projectPreset);
+      setEnv(envPreset);
       form.reset();
     }
-    onOpenChange?.(openSheet);
-  }, [openSheet, teamPreset, projectPreset, onOpenChange, form]);
+  }, [open, teamPreset, projectPreset, envPreset, form]);
 
   useEffect(() => {
-    setOpenSheet(open ?? false);
-  }, [open]);
-
-  useEffect(() => {
-    const env = envs?.[0];
-    if (!env) return;
-    setValue("environmentId", env.id);
-    setEnv(env);
-  }, [envs, setValue]);
-
-  useEffect(() => {
+    if (defId) return;
     if (!(!!chainId && !!tableId)) {
-      setValue("defName", "");
+      setValue("def", { name: "", description: descriptionPreset ?? "" });
       return;
     }
     const validator = new Validator({ baseUrl: helpers.getBaseUrl(chainId) });
@@ -129,13 +142,13 @@ export default function ImportTableForm({
       .getTableById({ chainId, tableId })
       .then((table) => {
         const prefix = tablePrefix(table.name);
-        setValue("defName", prefix);
+        setValue("def.name", prefix);
         setDefName(prefix);
       })
       .catch((_) => {
-        setValue("defName", "");
+        setValue("def.name", "");
       });
-  }, [chainId, tableId, setValue]);
+  }, [chainId, tableId, descriptionPreset, defId, setValue]);
 
   const nameAvailableQuery = api.defs.nameAvailable.useQuery(
     project && defName
@@ -151,7 +164,7 @@ export default function ImportTableForm({
     onSuccess: ({ def, deployment }) => {
       if (!team || !project || !env) return;
       onSuccess(team, project, def, env, deployment);
-      setOpenSheet(false);
+      onOpenChange?.(false);
     },
   });
 
@@ -176,7 +189,7 @@ export default function ImportTableForm({
   }
 
   return (
-    <Sheet open={openSheet} onOpenChange={setOpenSheet}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
       <SheetContent
         className="overflow-scroll sm:max-w-xl"
@@ -203,29 +216,46 @@ export default function ImportTableForm({
                 account and remove your data from our servers.
               </SheetDescription> */}
             </SheetHeader>
-            {(showSelectors ?? !teamPreset ?? !projectPreset) && (
-              <>
-                <div className="space-y-2">
-                  <FormLabel>Team</FormLabel>
-                  <TeamSwitcher
-                    variant="select"
-                    teams={teams}
-                    selectedTeam={team}
-                    onTeamSelected={handleTeamSelected}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <FormLabel>Project</FormLabel>
-                  <ProjectSwitcher
-                    variant="select"
-                    team={team}
-                    projects={projects}
-                    selectedProject={project}
-                    onProjectSelected={setProject}
-                    disabled={!team}
-                  />
-                </div>
-              </>
+            {!teamPreset && (
+              <div className="space-y-2">
+                <FormLabel>Team</FormLabel>
+                <TeamSwitcher
+                  variant="select"
+                  teams={teams}
+                  selectedTeam={team}
+                  onTeamSelected={handleTeamSelected}
+                />
+              </div>
+            )}
+            {!projectPreset && (
+              <div className="space-y-2">
+                <FormLabel>Project</FormLabel>
+                <ProjectSwitcher
+                  variant="select"
+                  team={team}
+                  projects={projects}
+                  selectedProject={project}
+                  onProjectSelected={setProject}
+                  disabled={!team}
+                />
+              </div>
+            )}
+            {!envPreset && (
+              <div className="space-y-2">
+                <FormLabel>Environment</FormLabel>
+                <EnvSwitcher
+                  variant="select"
+                  team={team}
+                  project={project}
+                  envs={envs}
+                  selectedEnv={env}
+                  onEnvSelected={(env) => {
+                    setValue("environmentId", env.id);
+                    setEnv(env);
+                  }}
+                  disabled={!project}
+                />
+              </div>
             )}
             <FormField
               control={control}
@@ -287,84 +317,59 @@ export default function ImportTableForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={control}
-              name="defName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Definition name</FormLabel>
-                  <FormControl>
-                    <InputWithCheck
-                      disabled={!project}
-                      placeholder="eg. users"
-                      updateQuery={setDefName}
-                      queryStatus={nameAvailableQuery}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    The name of the definition to create in your Studio project.
-                    This name must be unique within your project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="defDescription"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Definition description" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Provide a description for the imported table so others can
-                    understand the role it plays in your project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="environmentId"
-              render={({ field }) => (
-                <Input
-                  type="hidden"
-                  {...field}
-                  {...register("environmentId")}
+            {!defId && (
+              <>
+                <FormField
+                  control={control}
+                  name="def.name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Definition name</FormLabel>
+                      <FormControl>
+                        <InputWithCheck
+                          disabled={!project}
+                          placeholder="eg. users"
+                          updateQuery={setDefName}
+                          queryStatus={nameAvailableQuery}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The name of the definition to create in your Studio
+                        project. This name must be unique within your project.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                // <FormItem>
-                //   <FormLabel>Environment</FormLabel>
-                //   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                //     <FormControl>
-                //       <SelectTrigger className="w-auto gap-x-2">
-                //         <SelectValue placeholder="Select Environment" />
-                //       </SelectTrigger>
-                //     </FormControl>
-                //     <SelectContent>
-                //       {envs.map((env) => (
-                //         <SelectItem key={env.id} value={env.id}>
-                //           {env.name}
-                //         </SelectItem>
-                //       ))}
-                //     </SelectContent>
-                //   </Select>
-                //   <FormDescription>
-                //     You must choose an Environment to import the Table to. You can
-                //     deploy the resulting Project Table to other Environments at a
-                //     later time on the Deployments screen.
-                //   </FormDescription>
-                //   <FormMessage />
-                // </FormItem>
-              )}
-            />
+                <FormField
+                  control={control}
+                  name="def.description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Definition description"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Provide a description for the imported table so others
+                        can understand the role it plays in your project.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             <FormRootMessage />
             <Button
               type="submit"
-              disabled={importTable.isPending || !nameAvailableQuery.data}
+              disabled={
+                importTable.isPending || (!defId && !nameAvailableQuery.data)
+              }
             >
               {importTable.isPending && (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />

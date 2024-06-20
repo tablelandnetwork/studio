@@ -1,5 +1,10 @@
+import assert, { AssertionError } from "assert";
 import { ApiError, type Table, Validator, helpers } from "@tableland/sdk";
-import { type Store, unescapeSchema } from "@tableland/studio-store";
+import {
+  type Store,
+  unescapeSchema,
+  type schema,
+} from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { importTableSchema } from "@tableland/studio-validators";
 import { projectProcedure, createTRPCRouter } from "../trpc";
@@ -41,14 +46,26 @@ export function tablesRouter(store: Store) {
           });
         }
 
+        let def: schema.Def | undefined;
         try {
           // TODO: Execute different table inserts in a batch txn.
-          const def = await store.defs.createDef(
-            input.projectId,
-            input.defName,
-            input.defDescription,
-            schema,
-          );
+          if (typeof input.def === "string") {
+            def = await store.defs.defById(input.def);
+            if (!def) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: `Definition not found.`,
+              });
+            }
+            assert.deepStrictEqual(def.schema, schema);
+          } else {
+            def = await store.defs.createDef(
+              input.projectId,
+              input.def.name,
+              input.def.description,
+              schema,
+            );
+          }
           const deployment = await store.deployments.recordDeployment({
             defId: def.id,
             environmentId: input.environmentId,
@@ -59,10 +76,17 @@ export function tablesRouter(store: Store) {
           });
           return { def, deployment };
         } catch (err) {
-          throw internalError(
-            "Error saving definition and deployment records.",
-            err,
-          );
+          if (err instanceof AssertionError) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: `Schema of table ${input.tableId} on chain ${input.chainId} does not match the ${def?.name ?? "<unknown>"} definition.`,
+            });
+          } else {
+            throw internalError(
+              "Error saving definition and deployment records.",
+              err,
+            );
+          }
         }
       }),
   });

@@ -5,7 +5,7 @@ import { type schema } from "@tableland/studio-store";
 import { updateTeamSchema } from "@tableland/studio-validators";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { skipToken } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -37,6 +37,10 @@ export default function EditTeam({
       name: team.name,
     },
   });
+
+  useEffect(() => {
+    form.reset({ name: team.name });
+  }, [team, form]);
 
   const nameAvailable = api.teams.nameAvailable.useQuery(
     query !== team.name ? { teamId: team.id, name: query } : skipToken,

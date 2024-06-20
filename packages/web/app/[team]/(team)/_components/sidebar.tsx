@@ -1,12 +1,11 @@
 "use client";
 
 import { Folders, Settings, Users } from "lucide-react";
-import Link from "next/link";
 import { useParams, useSelectedLayoutSegment } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { SidebarContainer, SidebarSection } from "@/components/sidebar";
+import SidebarLink from "@/components/sidebar-link";
 
 export function Sidebar() {
   const { team: teamSlug } = useParams<{
@@ -27,40 +26,27 @@ export function Sidebar() {
   return (
     <SidebarContainer>
       <SidebarSection>
-        <Link href={`/${teamQuery.data.slug}`}>
-          <Button
-            variant={!selectedLayoutSegment ? "secondary" : "ghost"}
-            className="w-full justify-start gap-x-2 pl-1"
-          >
-            <Folders />
-            Projects
-          </Button>
-        </Link>
+        <SidebarLink
+          href={`/${teamQuery.data.slug}`}
+          title="Projects"
+          icon={Folders}
+          selected={!selectedLayoutSegment}
+        />
         {!teamQuery.data.personal && (
-          <Link href={`/${teamQuery.data.slug}/people`}>
-            <Button
-              variant={
-                selectedLayoutSegment === "people" ? "secondary" : "ghost"
-              }
-              className="w-full justify-start gap-x-2 pl-1"
-            >
-              <Users />
-              People
-            </Button>
-          </Link>
+          <SidebarLink
+            href={`/${teamQuery.data.slug}/people`}
+            title="People"
+            icon={Users}
+            selected={selectedLayoutSegment === "people"}
+          />
         )}
         {isAuthorizedQuery.data && (
-          <Link href={`/${teamQuery.data.slug}/settings`}>
-            <Button
-              variant={
-                selectedLayoutSegment === "settings" ? "secondary" : "ghost"
-              }
-              className="w-full justify-start gap-x-2 pl-1"
-            >
-              <Settings />
-              Settings
-            </Button>
-          </Link>
+          <SidebarLink
+            href={`/${teamQuery.data.slug}/settings`}
+            title="Settings"
+            icon={Settings}
+            selected={selectedLayoutSegment === "settings"}
+          />
         )}
       </SidebarSection>
     </SidebarContainer>

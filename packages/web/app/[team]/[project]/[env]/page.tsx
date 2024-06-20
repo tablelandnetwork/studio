@@ -54,20 +54,22 @@ export default async function Deployments({
   }, new Set<boolean | undefined>());
 
   return (
-    <main className="m-4 flex flex-1 flex-col justify-center">
-      <h1 className="text-3xl font-medium">{project.name}</h1>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <p className="line-clamp-1 max-w-md text-muted-foreground">
-              {project.description}
-            </p>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="max-w-xs">{project.description}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+    <main className="m-4 flex flex-1 flex-col justify-center gap-y-4">
+      <div>
+        <h1 className="text-3xl font-medium">{project.name}</h1>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="line-clamp-1 max-w-md text-muted-foreground">
+                {project.description}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs">{project.description}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
       <div className="m-auto grid max-w-4xl items-start justify-center gap-4 md:grid-cols-2">
         {chainTypes.size > 1 && (
           <div className="col-span-2 grid gap-4">
@@ -95,7 +97,7 @@ export default async function Deployments({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Table2 className="text-muted-foreground" />
-                <CardTitle>Tables</CardTitle>
+                <CardTitle>Definitions</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-center">
@@ -104,7 +106,7 @@ export default async function Deployments({
               </p>
             </CardContent>
             <CardFooter className="justify-center text-sm text-muted-foreground">
-              Tables deployed
+              Deployed to Tableland
             </CardFooter>
           </Card>
           <Card>
@@ -173,8 +175,7 @@ export default async function Deployments({
                 <CardTitle>SQL Logs</CardTitle>
               </div>
               <CardDescription>
-                Logs for all write operations to all deployed tables in your
-                project.
+                Logs for all write operations to all tables in your project.
               </CardDescription>
             </CardHeader>
             <CardContent>

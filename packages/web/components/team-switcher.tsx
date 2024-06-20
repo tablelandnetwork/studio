@@ -66,7 +66,7 @@ export default function TeamSwitcher({
       {variant === "navigation" && selectedTeam && (
         <Link
           href={`/${selectedTeam.slug}`}
-          className="underline-offset-2 hover:underline"
+          className="text-sm underline-offset-2 hover:underline"
         >
           {selectedTeam.name}
         </Link>

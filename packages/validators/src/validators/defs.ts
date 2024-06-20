@@ -68,3 +68,5 @@ export const updateDefApiSchema = z.object({
   name: defNameSchema.optional(),
   description: defDescriptionSchema.optional(),
 });
+
+export { defNameSchema };

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { slugify } from "@tableland/studio-store";
 import { restrictedProjectSlugs } from "../restricted-slugs.js";
+import { envNameSchema } from "../common.js";
 
 const projectNameSchema = z
   .string()
@@ -21,6 +22,12 @@ export const projectNameAvailableSchema = z.object({
 export const newProjectSchema = z.object({
   name: projectNameSchema,
   description: projectDescriptionSchema,
+  envNames: z
+    .array(envNameSchema)
+    .min(1)
+    .refine((names) => {
+      return new Set(names.map((val) => val.name)).size === names.length;
+    }, "Environment names must be unique."),
 });
 
 export const updateProjectSchema = z.object({

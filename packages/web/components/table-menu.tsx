@@ -1,14 +1,16 @@
 "use client";
 
-import { EllipsisVertical } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Ellipsis } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { type Schema, type schema } from "@tableland/studio-store";
 import { skipToken } from "@tanstack/react-query";
 import { type RouterOutputs } from "@tableland/studio-api";
 import { Button } from "./ui/button";
 import NewDefForm from "./new-def-form";
-import ImportTableForm from "./import-table-form";
+import ImportTableForm, {
+  type ImportTableFormProps,
+} from "./import-table-form";
 import TableSettings from "./table-settings";
 import { DeleteTableDialog } from "./delete-table-dialog";
 import { UndeployTableDialog } from "./undeploy-table-dialog";
@@ -46,10 +48,13 @@ export default function TableMenu({
   const [tableSettingsOpen, setTableSettingsOpen] = useState(false);
   const [execDeploymentOpen, setExecDeploymentOpen] = useState(false);
   const [newDefFormOpen, setNewDefFormOpen] = useState(false);
-  const [importTableFormOpen, setImportTableFormOpen] = useState(false);
+  const [importTableFormProps, setImportTableFormProps] = useState<
+    Partial<ImportTableFormProps> | undefined
+  >(undefined);
   const [deleteTableOpen, setDeleteTableOpen] = useState(false);
   const [undeployTableOpen, setUndeployTableOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const deploymentsQuery = api.deployments.deploymentsByEnvironmentId.useQuery(
     env ? { environmentId: env.id } : skipToken,
@@ -84,6 +89,7 @@ export default function TableMenu({
     setDeleteTableOpen(false);
     void defsQuery.refetch();
     if (!team || !project || !env) return;
+    router.refresh();
     router.replace(`/${team.slug}/${project.slug}/${env.slug}`);
   };
 
@@ -97,7 +103,9 @@ export default function TableMenu({
     !!isAuthorized && !!def && !!team && !!project && !!env;
   const displayDeploy =
     !!isAuthorized && !chainId && !tableId && !!def && !!env;
-  const displayImport = !!chainId && !!tableId && chainsMap.get(chainId);
+  const displayImportToStudio =
+    !!chainId && !!tableId && chainsMap.get(chainId);
+  const displayImportFromTableland = !chainId && !tableId && !!def;
 
   return (
     <>
@@ -141,20 +149,20 @@ export default function TableMenu({
           }}
         />
       )}
-      {displayImport && (
-        <ImportTableForm
-          chainIdPreset={chainId}
-          tableIdPreset={tableId}
-          open={importTableFormOpen}
-          onOpenChange={setImportTableFormOpen}
-          onSuccess={(team, project, def, env) => {
-            router.refresh();
-            router.push(
-              `/${team.slug}/${project.slug}/${env.slug}/${def.slug}`,
-            );
-          }}
-        />
-      )}
+      <ImportTableForm
+        {...importTableFormProps}
+        open={!!importTableFormProps}
+        onOpenChange={(open) => !open && setImportTableFormProps(undefined)}
+        onSuccess={(team, project, def, env) => {
+          router.refresh();
+          const newPathname = `/${team.slug}/${project.slug}/${env.slug}/${def.slug}`;
+          if (pathname !== newPathname) {
+            router.push(newPathname);
+          } else {
+            void deploymentsQuery.refetch();
+          }
+        }}
+      />
       <NewDefForm
         schemaPreset={schema}
         open={newDefFormOpen}
@@ -172,27 +180,49 @@ export default function TableMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
-            <EllipsisVertical />
+            <Ellipsis />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {displaySettings && (
             <DropdownMenuItem onSelect={() => setTableSettingsOpen(true)}>
-              Table settings
+              Settings
             </DropdownMenuItem>
           )}
           {displayDeploy && (
             <DropdownMenuItem onSelect={() => setExecDeploymentOpen(true)}>
-              Deploy table definition to Tableland
+              Deploy to Tableland
             </DropdownMenuItem>
           )}
-          {displayImport && (
-            <DropdownMenuItem onSelect={() => setImportTableFormOpen(true)}>
-              Import table into Studio project
+          {displayImportToStudio && (
+            <DropdownMenuItem
+              onSelect={() =>
+                setImportTableFormProps({
+                  chainIdPreset: chainId,
+                  tableIdPreset: tableId,
+                  descriptionPreset: def?.description,
+                })
+              }
+            >
+              Import table as definition
+            </DropdownMenuItem>
+          )}
+          {displayImportFromTableland && (
+            <DropdownMenuItem
+              onSelect={() =>
+                setImportTableFormProps({
+                  teamPreset: team,
+                  projectPreset: project,
+                  envPreset: env,
+                  defId: def?.id,
+                })
+              }
+            >
+              Attach existing table to this definition
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onSelect={() => setNewDefFormOpen(true)}>
-            Use table definition in Studio project
+            Use schema in new definition
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

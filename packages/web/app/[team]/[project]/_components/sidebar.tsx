@@ -1,8 +1,7 @@
 "use client";
 
 import { type schema } from "@tableland/studio-store";
-import { Import, LayoutDashboard, Plus, Settings, Table2 } from "lucide-react";
-import Link from "next/link";
+import { Ellipsis, LayoutDashboard, Settings, Table2 } from "lucide-react";
 import {
   useParams,
   useRouter,
@@ -10,18 +9,17 @@ import {
 } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { api } from "@/trpc/react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { api } from "@/trpc/react";
 import { SidebarContainer, SidebarSection } from "@/components/sidebar";
 import ImportTableForm from "@/components/import-table-form";
 import NewDefForm from "@/components/new-def-form";
+import SidebarLink from "@/components/sidebar-link";
 
 export function Sidebar() {
   const {
@@ -48,23 +46,18 @@ export function Sidebar() {
       : skipToken,
   );
 
-  const environmentQuery = api.environments.environmentBySlug.useQuery(
+  const { data: env } = api.environments.environmentBySlug.useQuery(
     projectQuery.data && envSlug
       ? { projectId: projectQuery.data.id, slug: envSlug }
       : skipToken,
   );
 
-  const environmentsQuery = api.environments.projectEnvironments.useQuery(
-    !envSlug && projectQuery.data
-      ? { projectId: projectQuery.data.id }
-      : skipToken,
-  );
+  const envPreference =
+    api.environments.environmentPreferenceForProject.useQuery(
+      projectQuery.data ? { projectId: projectQuery.data.id } : skipToken,
+    );
 
-  const env =
-    environmentQuery.data ??
-    (environmentsQuery.data && environmentsQuery.data.length > 0
-      ? environmentsQuery.data?.[0]
-      : undefined);
+  const linkEnv = env ?? envPreference.data;
 
   const defQuery = api.defs.defByProjectIdAndSlug.useQuery(
     projectQuery.data && defSlug
@@ -101,10 +94,8 @@ export function Sidebar() {
     defsQuery
       .refetch()
       .then(() => {
-        if (environmentQuery.data) {
-          router.push(
-            `/${team.slug}/${project.slug}/${environmentQuery.data.slug}/${def.slug}`,
-          );
+        if (env) {
+          router.push(`/${team.slug}/${project.slug}/${env.slug}/${def.slug}`);
         }
       })
       .catch(() => {});
@@ -124,114 +115,75 @@ export function Sidebar() {
       .catch(() => {});
   };
 
-  if (!teamQuery.data || !projectQuery.data || !env) {
+  if (!teamQuery.data || !projectQuery.data || !linkEnv) {
     return null;
   }
 
   return (
     <SidebarContainer>
       <SidebarSection>
-        <Link
-          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${env.slug}`}
-        >
-          <Button
-            variant={
-              !defSlug && !!envSlug && envSlug === environmentQuery.data?.slug
-                ? "secondary"
-                : "ghost"
-            }
-            className="w-full justify-start gap-x-2 pl-1"
-          >
-            <LayoutDashboard />
-            Overview
-          </Button>
-        </Link>
-        {!!isAuthorizedQuery.data && (
-          <Link
-            href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
-          >
-            <Button
-              variant={
-                selectedLayoutSegment === "settings" ? "secondary" : "ghost"
-              }
-              className="w-full justify-start gap-x-2 pl-1"
-            >
-              <Settings />
-              Settings
-            </Button>
-          </Link>
-        )}
-        <div className="flex items-center gap-2 pl-1">
-          <Table2 className="shrink-0" />
-          <h2 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
-            Tables
-          </h2>
+        <SidebarLink
+          icon={LayoutDashboard}
+          title="Overview"
+          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}`}
+          selected={!defSlug && !!envSlug && envSlug === env?.slug}
+        />
+      </SidebarSection>
+      <SidebarSection>
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-medium tracking-wide text-muted-foreground">
+            Definitions
+          </h3>
           {!!isAuthorizedQuery.data && (
-            <>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="ml-auto"
-                      onClick={() => setNewDefOpen(true)}
-                    >
-                      <Plus className="size-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>New table</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setImportTableOpen(true)}
-                    >
-                      <Import className="size-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Import table</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="ml-auto text-muted-foreground hover:text-foreground">
+                <Ellipsis className="size-5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => setNewDefOpen(true)}>
+                  New definition
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setImportTableOpen(true)}>
+                  Import table
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
+        {!defsQuery.data?.length && (
+          <span className="text-center text-sm italic opacity-50">
+            No tables
+          </span>
+        )}
         {defsQuery.data?.map((def) => {
           const deployment = deploymentsMapQuery.data?.get(def.id);
           return (
-            <Link
+            <SidebarLink
               key={def.id}
-              href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${env.slug}/${def.slug}`}
-            >
-              <Button
-                key={def.id}
-                variant={def.id === defQuery.data?.id ? "secondary" : "ghost"}
-                className="w-full justify-start"
-              >
-                <span className={cn(!deployment && "mr-4")}>{def.name}</span>
-                {!deployment && (
-                  <div
-                    className={cn(
-                      "ml-auto size-2 rounded-full",
-                      isAuthorizedQuery.data
-                        ? "bg-destructive"
-                        : "bg-foreground",
-                    )}
-                  />
-                )}
-              </Button>
-            </Link>
+              icon={Table2}
+              title={def.name}
+              href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}/${def.slug}`}
+              selected={def.id === defQuery.data?.id}
+              showIndicator={!!env && !deployment && !!isAuthorizedQuery.data}
+            />
           );
         })}
       </SidebarSection>
+      {!!isAuthorizedQuery.data && (
+        <SidebarSection className="sticky bottom-0 bg-card p-0">
+          <div className="flex flex-col gap-3 p-3">
+            <h3 className="text-base font-medium tracking-wide text-muted-foreground">
+              Project
+            </h3>
+            <SidebarLink
+              icon={Settings}
+              title="Settings"
+              href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/settings`}
+              selected={selectedLayoutSegment === "settings"}
+            />
+          </div>
+        </SidebarSection>
+      )}
       <NewDefForm
         open={newDefOpen}
         onOpenChange={setNewDefOpen}

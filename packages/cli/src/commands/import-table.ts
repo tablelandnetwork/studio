@@ -90,9 +90,8 @@ export const builder = function (args: Yargs) {
             chainId,
             tableId,
             projectId,
-            defName,
+            def: { name: defName, description: defDescription },
             environmentId,
-            defDescription,
           });
 
           logger.log(
@@ -210,9 +209,8 @@ export const builder = function (args: Yargs) {
               chainId,
               tableId,
               projectId,
-              defName,
+              def: { name: defName, description: defDescription },
               environmentId,
-              defDescription,
             });
           }
 

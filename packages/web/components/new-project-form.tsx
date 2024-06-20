@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type schema } from "@tableland/studio-store";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
 import { newProjectSchema } from "@tableland/studio-validators";
+import { Input } from "./ui/input";
 import { api } from "@/trpc/react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -27,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import InputWithCheck from "@/components/input-with-check";
 import { FormRootMessage } from "@/components/form-root";
+import { cn } from "@/lib/utils";
 
 export interface NewProjectFormProps {
   team: schema.Team;
@@ -66,7 +68,21 @@ export default function NewProjectForm({
     defaultValues: {
       name: "",
       description: "",
+      envNames: [{ name: "default" }],
     },
+  });
+
+  const { setError, control, register, watch } = form;
+
+  const envsCount = watch("envNames").length;
+
+  const {
+    fields: envNamesFields,
+    append: appendEnvName,
+    remove: removeEnvName,
+  } = useFieldArray({
+    control,
+    name: "envNames",
   });
 
   useEffect(() => {
@@ -80,8 +96,6 @@ export default function NewProjectForm({
   useEffect(() => {
     setOpenSheet(open ?? false);
   }, [open]);
-
-  const { setError } = form;
 
   function onSubmit(values: z.infer<typeof newProjectSchema>) {
     newProject.mutate({
@@ -157,6 +171,61 @@ export default function NewProjectForm({
                 </FormItem>
               )}
             />
+            <div>
+              {envNamesFields.map((envName, index) => (
+                <FormField
+                  key={envName.id}
+                  control={control}
+                  name={`envNames.${index}.name`}
+                  render={({ field, formState }) => (
+                    <FormItem>
+                      <FormLabel className={cn(index !== 0 && "sr-only")}>
+                        Environments
+                      </FormLabel>
+                      <FormDescription className={cn(index !== 0 && "sr-only")}>
+                        Environments are logical groups of definitions. You
+                        could, for example, use them to create
+                        &quot;staging&quot; and &quot;production&quot; groups of
+                        definitions. All of your project&apos;s definitions are
+                        available in each environment, but you can deploy those
+                        definitions to Tableland separately per environment.
+                        Your project must have at least one environment.
+                      </FormDescription>
+                      <FormControl>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            placeholder="Environment name"
+                            {...register(`envNames.${index}.name`)}
+                            {...field}
+                          />
+                          {envsCount > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeEnvName(index)}
+                            >
+                              <X />
+                            </Button>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => appendEnvName({ name: "" })}
+              >
+                <Plus className="mr-2 size-5" />
+                Add Environment
+              </Button>
+            </div>
             <FormRootMessage />
             <Button
               type="submit"

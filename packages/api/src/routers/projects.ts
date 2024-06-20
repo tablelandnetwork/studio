@@ -85,12 +85,8 @@ export function projectsRouter(store: Store) {
             ctx.teamId,
             input.name,
             input.description,
+            input.envNames.map((env) => env.name),
           );
-          // TODO: This is temporary to make sure all projects have a default environment.
-          await store.environments.createEnvironment({
-            projectId: project.id,
-            name: "default",
-          });
           return project;
         } catch (err) {
           throw internalError("Error creating project", err);

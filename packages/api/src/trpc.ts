@@ -283,6 +283,56 @@ export const projectAdminProcedure = (store: Store) =>
     return await next({ ctx });
   });
 
+export const environmentProcedure = (store: Store) =>
+  protectedProcedure
+    .input(z.object({ envId: z.string().uuid() }))
+    .use(async ({ ctx, input, next }) => {
+      const { team, project } =
+        (await store.environments.environmentTeamAndProject(input.envId)) ?? {};
+      if (!team) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "no team for env id found",
+        });
+      }
+      if (!project) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "no project for env id found",
+        });
+      }
+      const membership = await store.teams.isAuthorizedForTeam(
+        ctx.session.auth.user.teamId,
+        team.id,
+      );
+      if (!membership) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "not authorized for team",
+        });
+      }
+      return await next({
+        ctx: {
+          ...ctx,
+          session: ctx.session,
+          team,
+          project,
+          teamAuthorization: membership,
+        },
+      });
+    });
+
+export const environmentAdminProcedure = (store: Store) =>
+  environmentProcedure(store).use(async ({ ctx, next }) => {
+    if (!ctx.teamAuthorization.isOwner) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "not authorized as environment admin",
+      });
+    }
+    return await next({ ctx });
+  });
+
 export const defProcedure = (store: Store) =>
   protectedProcedure
     .input(z.object({ defId: z.string().trim().uuid() }))

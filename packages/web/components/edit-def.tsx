@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Schema, type schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
@@ -51,6 +51,10 @@ export default function EditDef({
       description: def.description,
     },
   });
+
+  useEffect(() => {
+    form.reset({ name: def.name, description: def.description });
+  }, [def, form]);
 
   const { handleSubmit, control, setError } = form;
 

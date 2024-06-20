@@ -117,6 +117,15 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
       await tbl.batch(batch);
     },
 
+    defById: async function (defId: string) {
+      const res = await db
+        .select({ defs })
+        .from(defs)
+        .where(eq(defs.id, defId))
+        .get();
+      return res?.defs;
+    },
+
     defsByProjectId: async function (projectId: string) {
       const res = await db
         .select({ defs })
