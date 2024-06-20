@@ -25,6 +25,8 @@ init().catch((err: any) => {
 
 export function Console({ environmentId }: Props) {
   const [loading, setLoading] = React.useState(false);
+  const [tabs, setTabs] = React.useState([]);
+  const [currentTab, setCurrentTab] = React.useState();
 
   const runQuery = async function ({ tabId, query: queryText }) {
     setLoading(true);
@@ -72,24 +74,44 @@ export function Console({ environmentId }: Props) {
           return tab;
         }),
       );
+
+      setLoading(false);
     } catch (err: any) {
       // TODO: show the error
+      setTabs(
+        tabs.map((tab) => {
+          if (tab.tabId !== tabId) return tab;
+
+          tab.error = err;
+
+          return tab;
+        }),
+      );
+
       setLoading(false);
     }
-
-    setLoading(false);
   };
 
-  let tabCount = 0;
   const getNewTab = function () {
-    tabCount += 1;
+    const largestDefaultNum = tabs.reduce(function (max, tab) {
+      if (tab.name?.trim().match(/Tab [0-9]+$/)) {
+        const num = parseInt(tab.name?.trim().slice(4), 10);
+        if (num > max) return num;
+      }
 
+      return max;
+    }, 0);
+
+    // TODO: this is the only way I can find to get an incrementing default tab
+    //   name with a number that lives across re-renders.
+    const name = "Tab " + (largestDefaultNum + 1);
     const tab = {
-      tabId: tabCount,
-      name: "Tab " + tabCount,
+      tabId: tabs.length === 0 ? 1 : tabs[tabs.length - 1].tabId + 1,
+      name,
       query: "",
       columns: [],
       results: [],
+      error: null,
       queryType: "",
       committing: false,
     };
@@ -103,9 +125,6 @@ export function Console({ environmentId }: Props) {
 
     return tab;
   };
-
-  const [tabs, setTabs] = React.useState([getNewTab()]);
-  const [currentTab, setCurrentTab] = React.useState(tabs[0].tabId);
 
   const openQueryTab = function (id?: number | string) {
     if (id) return setCurrentTab(parseInt(id, 10));
@@ -121,6 +140,12 @@ export function Console({ environmentId }: Props) {
     setTabs(tabs.filter((t) => t.tabId !== tabId));
     if (isCurrent) setCurrentTab(tabs[0].tabId);
   };
+
+  React.useEffect(() => {
+    const firstTab = getNewTab();
+    setTabs([firstTab]);
+    setCurrentTab(firstTab.tabId);
+  }, []);
 
   return (
     <div className="flex-1 space-y-4">
@@ -206,7 +231,7 @@ function QueryPane(props: any): React.JSX.Element {
             Run Query
           </button>
 
-          <button
+          {/*<button
             className="my-4 mr-4 inline-flex h-8 items-center justify-center rounded-md border border-input bg-transparent px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
             onClick={() => {
               let savedQueries = JSON.parse(
@@ -224,7 +249,7 @@ function QueryPane(props: any): React.JSX.Element {
             }}
           >
             Save
-          </button>
+          </button>*/}
         </li>
       </ul>
     </div>
@@ -254,28 +279,19 @@ function TabLabel(props: {
   }
 
   return (
-    <li onClick={() => openTab()} className="flex border">
+    <li
+      onClick={() => openTab()}
+      className={cn(
+        "flex border",
+        tab.tabId === currentTab ? "bg-accent" : "bg-card",
+      )}
+    >
       <i className="fa-solid fa-terminal"></i>
+      <span className="min-w-20 cursor-pointer px-2">{tab.name}</span>
       <span
-        className={cn(
-          "min-w-20 cursor-pointer px-2",
-          tab.tabId === currentTab ? "bg-card" : "bg-accent",
-        )}
+        className="cursor-pointer pr-2"
+        onClick={(eve) => closeThisTab(eve)}
       >
-        {tab.name}
-      </span>
-      {/*<input
-        className="bg-accent"
-        type="name"
-        style={{
-          pointerEvents: tab.tabId !== currentTab ? "none" : "initial",
-        }}
-        value={tab.name}
-        onChange={(e) => {
-          renameTab({ tab: tab.tabId, name: e.target.value });
-        }}
-      />*/}
-      <span className="pr-2" onClick={() => closeThisTab()}>
         <i className="fa-solid fa-circle-xmark">x</i>
       </span>
     </li>
@@ -284,24 +300,17 @@ function TabLabel(props: {
 
 function ResultSetPane(props: any): React.JSX.Element {
   const { error, loading, message, tab } = props;
-
   const formattedData = objectToTableData(tab.results);
-  console.log("results", formattedData);
 
   return (
     <div className="table-results">
-      {error && (
-        <div className="error">
+      {tab.error && (
+        <div className="error mt-4 rounded-md border p-4">
           Error<br></br>
-          {error}
+          {tab.error.message}
         </div>
       )}
-      {message && <div className="message">{message}</div>}
-      {loading ? (
-        <Loading />
-      ) : (
-        <DataTable columns={tab.columns} data={formattedData} />
-      )}
+      {!tab.error && <DataTable columns={tab.columns} data={formattedData} />}
     </div>
   );
 }
