@@ -8,6 +8,7 @@ declare module "@tanstack/table-core" {
       columnId: string,
       value: string | number,
     ) => void;
+    addRow: () => void;
     editedRows: Record<string, boolean>;
     setEditedRows: React.Dispatch<
       React.SetStateAction<Record<string, boolean>>
