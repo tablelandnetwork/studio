@@ -30,6 +30,7 @@ export function CodeEditor(props: any): React.JSX.Element {
       placeholder="SELECT * FROM YourTable;"
       textareaId={props.hideLineNumbers ? "codeViewer" : "codeEditor"}
       className="editor language-sql"
+      disabled={props.loading}
       style={{
         fontFamily: '"Fira code", "Fira Mono", monospace',
         fontSize: 18,

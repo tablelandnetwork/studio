@@ -1,7 +1,13 @@
 "use client";
 
 import { type schema } from "@tableland/studio-store";
-import { Ellipsis, LayoutDashboard, Settings, Table2, Terminal } from "lucide-react";
+import {
+  Ellipsis,
+  LayoutDashboard,
+  Settings,
+  Table2,
+  Terminal,
+} from "lucide-react";
 import {
   useParams,
   useRouter,
@@ -136,7 +142,17 @@ export function Sidebar() {
           icon={LayoutDashboard}
           title="Overview"
           href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}`}
-          selected={!defSlug && !!envSlug && !isConsole && envSlug === env?.slug}
+          selected={
+            !defSlug && !!envSlug && !isConsole && envSlug === env?.slug
+          }
+        />
+      </SidebarSection>
+      <SidebarSection>
+        <SidebarLink
+          icon={Terminal}
+          title="Console"
+          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}/console`}
+          selected={isConsole}
         />
       </SidebarSection>
       <SidebarSection>
@@ -179,14 +195,6 @@ export function Sidebar() {
             />
           );
         })}
-      </SidebarSection>
-      <SidebarSection>
-        <SidebarLink
-          icon={Terminal}
-          title="Console"
-          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${env.slug}/console`}
-          selected={isConsole}
-        />
       </SidebarSection>
       {!!isAuthorizedQuery.data && (
         <SidebarSection className="sticky bottom-0 bg-card p-0">

@@ -29,6 +29,7 @@ export function Console({ environmentId }: Props) {
   const [currentTab, setCurrentTab] = React.useState();
 
   const runQuery = async function ({ tabId, query: queryText }) {
+    if (loading) return;
     setLoading(true);
 
     try {
@@ -55,6 +56,7 @@ export function Console({ environmentId }: Props) {
       const baseUrl = helpers.getBaseUrl(chainId);
       const db = new Database({ baseUrl, aliases });
       const data = await db.prepare(statement).all();
+      console.log(data);
       const columns: Array<ColumnDef<unknown>> | undefined = data
         ? data.results.length
           ? Object.keys(data.results[0] as object).map((col) => ({
@@ -68,8 +70,24 @@ export function Console({ environmentId }: Props) {
         tabs.map((tab) => {
           if (tab.tabId !== tabId) return tab;
 
+          tab.error = null;
+          tab.messages = [];
+
           tab.columns = columns;
           tab.results = data.results;
+
+          if (!columns.length && data.success) {
+            tab.messages = [
+              "success: true",
+              `duration: ${data.meta.duration}`,
+              `tableIds: ${data.meta.txn.tableIds.join(", ")}`,
+              `transactionHash: ${data.meta.txn.transactionHash}`,
+              `blockNumber: ${data.meta.txn.blockNumber}`,
+              `chainId: ${data.meta.txn.chainId}`,
+              `universalTableNames": ${data.meta.txn.names.join(", ")}`,
+              `definitionNames: ${data.meta.txn.prefixes.join(", ")}`,
+            ];
+          }
 
           return tab;
         }),
@@ -111,6 +129,7 @@ export function Console({ environmentId }: Props) {
       query: "",
       columns: [],
       results: [],
+      messages: [],
       error: null,
       queryType: "",
       committing: false,
@@ -149,7 +168,7 @@ export function Console({ environmentId }: Props) {
 
   return (
     <div className="flex-1 space-y-4">
-      <div className="tabs-pane">
+      <div className={cn("tabs-pane", loading ? "text-muted" : "")}>
         <div>
           <ul className="flex">
             {tabs.map((tab, key) => {
@@ -158,6 +177,7 @@ export function Console({ environmentId }: Props) {
                   key={tab.tabId}
                   tab={tab}
                   currentTab={currentTab}
+                  loading={loading}
                   openTab={() => openQueryTab(tab.tabId)}
                   closeTab={() => closeQueryTab(tab.tabId)}
                 />
@@ -196,7 +216,7 @@ export function Console({ environmentId }: Props) {
 }
 
 function QueryPane(props: any): React.JSX.Element {
-  const { tabId, query: initialQuery, runQuery } = props;
+  const { tabId, query: initialQuery, runQuery, loading } = props;
 
   const [query, setQuery] = React.useState(initialQuery);
   const updateQuery = function (payload) {
@@ -210,7 +230,7 @@ function QueryPane(props: any): React.JSX.Element {
   };
 
   return (
-    <div className="executer">
+    <div className={cn("executer", loading ? "cursor-wait" : "")}>
       <div className="border bg-card">
         <CodeEditor
           hideLineNumbers={true}
@@ -218,6 +238,7 @@ function QueryPane(props: any): React.JSX.Element {
             updateQuery({ query: code });
           }}
           code={query}
+          loading={loading}
         />
       </div>
       <Loading show={props.loading} />
@@ -267,29 +288,45 @@ function Loading(props: any): React.JSX.Element {
 function TabLabel(props: {
   tab: any;
   currentTab: number;
+  loading: boolean;
   closeTab: () => void;
   openTab: () => void;
 }): React.JSX.Element {
-  const { currentTab, tab, openTab, closeTab } = props;
+  const { currentTab, tab, openTab, closeTab, loading } = props;
 
   function closeThisTab(e: any): void {
     e.preventDefault();
     e.stopPropagation();
+    if (loading) return;
     closeTab();
+  }
+
+  function openThisTab(e: any): void {
+    e.preventDefault();
+    e.stopPropagation();
+    if (loading) return;
+    openTab();
   }
 
   return (
     <li
-      onClick={() => openTab()}
+      onClick={(eve) => openThisTab(eve)}
       className={cn(
         "flex border",
         tab.tabId === currentTab ? "bg-accent" : "bg-card",
       )}
     >
       <i className="fa-solid fa-terminal"></i>
-      <span className="min-w-20 cursor-pointer px-2">{tab.name}</span>
       <span
-        className="cursor-pointer pr-2"
+        className={cn(
+          "min-w-20 px-2",
+          loading ? "cursor-wait" : "cursor-pointer",
+        )}
+      >
+        {tab.name}
+      </span>
+      <span
+        className={cn("pr-2", loading ? "cursor-wait" : "cursor-pointer")}
         onClick={(eve) => closeThisTab(eve)}
       >
         <i className="fa-solid fa-circle-xmark">x</i>
@@ -310,7 +347,16 @@ function ResultSetPane(props: any): React.JSX.Element {
           {tab.error.message}
         </div>
       )}
-      {!tab.error && <DataTable columns={tab.columns} data={formattedData} />}
+      {!!tab.messages?.length && (
+        <div className="mt-4 rounded-md border p-4">
+          {tab.messages.map((message, i) => {
+            return <p key={i}>{message}</p>;
+          })}
+        </div>
+      )}
+      {!tab.error && !tab.messages?.length && (
+        <DataTable columns={tab.columns} data={formattedData} />
+      )}
     </div>
   );
 }
