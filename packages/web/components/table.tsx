@@ -32,7 +32,6 @@ import { chainsMap } from "@/lib/chains-map";
 import { cn, objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
-import { Console } from "@/components/console";
 import DefDetails from "@/components/def-details";
 import { ensureError } from "@/lib/ensure-error";
 

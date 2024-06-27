@@ -1,39 +1,47 @@
 "use client";
 
-import { v4 as uuidv4 } from "uuid";
 import * as React from "react";
-import {
-  Database,
-  Validator,
-  chainsMap,
-  type Schema,
-  helpers,
-  type Result,
-} from "@tableland/sdk";
+import { Database, helpers } from "@tableland/sdk";
 import { studioAliases, getBaseUrl } from "@tableland/studio-client";
 import { init } from "@tableland/sqlparser";
-import { api } from "@/trpc/react";
-import { cn, objectToTableData } from "@/lib/utils";
 import { CodeEditor } from "./code-editor";
 import { DataTable } from "./data-table";
-import { Table } from "./ui/table";
+import { cn, objectToTableData } from "@/lib/utils";
 
 init().catch((err: any) => {
   console.log("could not init sqlparser:", err);
   throw err;
 });
 
-export function Console({ environmentId }: Props) {
-  const [loading, setLoading] = React.useState(false);
-  const [tabs, setTabs] = React.useState([]);
-  const [currentTab, setCurrentTab] = React.useState();
+interface Tab {
+  tabId: number;
+  name: string;
+  query: string;
+  columns?: any[];
+  results: any[];
+  messages: string[];
+  error: any;
+  queryType: string;
+  committing: boolean;
+}
 
-  const runQuery = async function ({ tabId, query: queryText }) {
+export function Console({ environmentId }: { environmentId: string }) {
+  const [loading, setLoading] = React.useState(false);
+  const [tabs, setTabs] = React.useState<Tab[]>([]);
+  const [currentTab, setCurrentTab] = React.useState<number | undefined>();
+
+  const runQuery = async function ({
+    tabId,
+    query: queryText,
+  }: {
+    tabId: number;
+    query: string;
+  }) {
     if (loading) return;
     setLoading(true);
 
     try {
-      const { statements, type, tables } = await sqlparser.normalize(queryText);
+      const { statements, tables } = await sqlparser.normalize(queryText);
       if (statements.length > 1) {
         throw new Error("you may only run one statement at a time");
       }
@@ -52,12 +60,11 @@ export function Console({ environmentId }: Props) {
       if (!uuTableName) throw new Error("invalid table name");
 
       const chainId = parseInt(uuTableName.split("_").reverse()[1], 10);
-      const chain = helpers.getChainInfo(chainId);
       const baseUrl = helpers.getBaseUrl(chainId);
       const db = new Database({ baseUrl, aliases });
       const data = await db.prepare(statement).all();
       console.log(data);
-      const columns: Array<ColumnDef<unknown>> | undefined = data
+      const columns = data
         ? data.results.length
           ? Object.keys(data.results[0] as object).map((col) => ({
               accessorKey: col,
@@ -67,7 +74,7 @@ export function Console({ environmentId }: Props) {
         : undefined;
 
       setTabs(
-        tabs.map((tab) => {
+        tabs.map((tab: Tab) => {
           if (tab.tabId !== tabId) return tab;
 
           tab.error = null;
@@ -76,16 +83,16 @@ export function Console({ environmentId }: Props) {
           tab.columns = columns;
           tab.results = data.results;
 
-          if (!columns.length && data.success) {
+          if (!columns?.length && data.success) {
             tab.messages = [
               "success: true",
               `duration: ${data.meta.duration}`,
-              `tableIds: ${data.meta.txn.tableIds.join(", ")}`,
-              `transactionHash: ${data.meta.txn.transactionHash}`,
-              `blockNumber: ${data.meta.txn.blockNumber}`,
-              `chainId: ${data.meta.txn.chainId}`,
-              `universalTableNames": ${data.meta.txn.names.join(", ")}`,
-              `definitionNames: ${data.meta.txn.prefixes.join(", ")}`,
+              `tableIds: ${data.meta.txn?.tableIds.join(", ") ?? ""}`,
+              `transactionHash: ${data.meta.txn?.transactionHash ?? ""}`,
+              `blockNumber: ${data.meta.txn?.blockNumber ?? ""}`,
+              `chainId: ${data.meta.txn?.chainId ?? ""}`,
+              `universalTableNames": ${data.meta.txn?.names.join(", ") ?? ""}`,
+              `definitionNames: ${data.meta.txn?.prefixes.join(", ") ?? ""}`,
             ];
           }
 
@@ -122,8 +129,10 @@ export function Console({ environmentId }: Props) {
 
     // TODO: this is the only way I can find to get an incrementing default tab
     //   name with a number that lives across re-renders.
+    // eslint-disable-next-line
     const name = "Tab " + (largestDefaultNum + 1);
     const tab = {
+      // eslint-disable-next-line
       tabId: tabs.length === 0 ? 1 : tabs[tabs.length - 1].tabId + 1,
       name,
       query: "",
@@ -146,14 +155,14 @@ export function Console({ environmentId }: Props) {
   };
 
   const openQueryTab = function (id?: number | string) {
-    if (id) return setCurrentTab(parseInt(id, 10));
+    if (id) return setCurrentTab(parseInt(id?.toString() || "0", 10));
 
     const tab = newQueryTab();
     setCurrentTab(tab.tabId);
   };
 
   const closeQueryTab = function (id?: number | string) {
-    const tabId = parseInt(id, 10);
+    const tabId = parseInt(id?.toString() ?? "0", 10);
     const isCurrent = currentTab === tabId;
 
     setTabs(tabs.filter((t) => t.tabId !== tabId));
@@ -164,6 +173,7 @@ export function Console({ environmentId }: Props) {
     const firstTab = getNewTab();
     setTabs([firstTab]);
     setCurrentTab(firstTab.tabId);
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -176,7 +186,7 @@ export function Console({ environmentId }: Props) {
                 <TabLabel
                   key={tab.tabId}
                   tab={tab}
-                  currentTab={currentTab}
+                  currentTab={currentTab ?? 0}
                   loading={loading}
                   openTab={() => openQueryTab(tab.tabId)}
                   closeTab={() => closeQueryTab(tab.tabId)}
@@ -219,7 +229,7 @@ function QueryPane(props: any): React.JSX.Element {
   const { tabId, query: initialQuery, runQuery, loading } = props;
 
   const [query, setQuery] = React.useState(initialQuery);
-  const updateQuery = function (payload) {
+  const updateQuery = function (payload: any) {
     setQuery(payload.query);
   };
 
@@ -247,12 +257,15 @@ function QueryPane(props: any): React.JSX.Element {
           <button
             disabled={props.loading}
             className="my-4 mr-4 inline-flex h-8 items-center justify-center rounded-md border border-input bg-transparent px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            // TODO: typescript errors out with "Types of parameters 'event' and 'event' are incompatible"
+            //   I haven't tried to dig into the cause.
+            // @ts-expect-error see the above TODO
             onClick={sendQuery}
           >
             Run Query
           </button>
 
-          {/*<button
+          {/* <button
             className="my-4 mr-4 inline-flex h-8 items-center justify-center rounded-md border border-input bg-transparent px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
             onClick={() => {
               let savedQueries = JSON.parse(
@@ -270,7 +283,7 @@ function QueryPane(props: any): React.JSX.Element {
             }}
           >
             Save
-          </button>*/}
+          </button> */}
         </li>
       </ul>
     </div>
@@ -336,7 +349,7 @@ function TabLabel(props: {
 }
 
 function ResultSetPane(props: any): React.JSX.Element {
-  const { error, loading, message, tab } = props;
+  const { tab } = props;
   const formattedData = objectToTableData(tab.results);
 
   return (
@@ -349,7 +362,7 @@ function ResultSetPane(props: any): React.JSX.Element {
       )}
       {!!tab.messages?.length && (
         <div className="mt-4 rounded-md border p-4">
-          {tab.messages.map((message, i) => {
+          {tab.messages.map((message: string, i: number) => {
             return <p key={i}>{message}</p>;
           })}
         </div>

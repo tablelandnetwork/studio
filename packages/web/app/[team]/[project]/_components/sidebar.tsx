@@ -12,6 +12,7 @@ import {
   useParams,
   useRouter,
   useSelectedLayoutSegment,
+  usePathname,
 } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
 import { useState } from "react";
@@ -23,7 +24,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { api } from "@/trpc/react";
 import { SidebarContainer, SidebarSection } from "@/components/sidebar";
-import { usePathname } from "next/navigation";
 import ImportTableForm from "@/components/import-table-form";
 import NewDefForm from "@/components/new-def-form";
 import SidebarLink from "@/components/sidebar-link";
