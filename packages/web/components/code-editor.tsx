@@ -1,9 +1,7 @@
 import React from "react";
 import Editor from "react-simple-code-editor";
-// @ts-expect-error this came from the o.g. console and there's no types for this afaik
-import { highlight, languages } from "prismjs/components/prism-core";
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-sql";
+import { highlight, languages } from "@/app/prism.js";
+import "@/app/prism.css";
 
 const hightlightWithLineNumbers = (
   input: any,
@@ -17,7 +15,7 @@ const hightlightWithLineNumbers = (
         `${
           hideLineNumbers
             ? ""
-            : `<span class='editorLineNumber'>${i + 1}</span>`
+            : `<span class="absolute left-0 text-right w-4 font-thin">${i + 1}</span>`
         }${line}`,
     )
     .join("\n");
@@ -29,11 +27,16 @@ export function CodeEditor(props: any): React.JSX.Element {
       value={props.code}
       onValueChange={props.onChange}
       highlight={(code) =>
-        hightlightWithLineNumbers(code, languages.sql, props.hideLineNumbers)
+        hightlightWithLineNumbers(
+          code,
+          (languages as any).sql,
+          props.hideLineNumbers,
+        )
       }
       padding={10}
       placeholder="SELECT * FROM YourTable;"
       textareaId={props.hideLineNumbers ? "codeViewer" : "codeEditor"}
+      textareaClassName="ml-8"
       className="editor language-sql"
       disabled={props.loading}
       style={{

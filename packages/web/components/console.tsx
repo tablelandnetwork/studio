@@ -29,6 +29,8 @@ export function Console({ environmentId }: { environmentId: string }) {
   const [loading, setLoading] = React.useState(false);
   const [tabs, setTabs] = React.useState<Tab[]>([]);
   const [currentTab, setCurrentTab] = React.useState<number | undefined>();
+  // TODO: We will have to import more of the css for the old console to enable line numbers
+  const [hideLineNumbers] = React.useState(true);
 
   const runQuery = async function ({
     tabId,
@@ -61,9 +63,9 @@ export function Console({ environmentId }: { environmentId: string }) {
 
       const chainId = parseInt(uuTableName.split("_").reverse()[1], 10);
       const baseUrl = helpers.getBaseUrl(chainId);
-      const db = new Database({ baseUrl, aliases });
+      const db = new Database({ baseUrl, aliases, autoWait: true });
       const data = await db.prepare(statement).all();
-      console.log(data);
+
       const columns = data
         ? data.results.length
           ? Object.keys(data.results[0] as object).map((col) => ({
@@ -79,16 +81,21 @@ export function Console({ environmentId }: { environmentId: string }) {
 
           tab.error = null;
           tab.messages = [];
-
           tab.columns = columns;
           tab.results = data.results;
 
-          if (!columns?.length && data.success) {
+          // if there is a transactionHash it means that this is the response from a mutation
+          // the template rendering logic will key off the existence of messages
+          if (
+            !columns?.length &&
+            data.success &&
+            data.meta.txn?.transactionHash
+          ) {
             tab.messages = [
-              "success: true",
+              `success: ${data.success?.toString()}`,
               `duration: ${data.meta.duration}`,
               `tableIds: ${data.meta.txn?.tableIds.join(", ") ?? ""}`,
-              `transactionHash: ${data.meta.txn?.transactionHash ?? ""}`,
+              `transactionHash: ${data.meta.txn.transactionHash}`,
               `blockNumber: ${data.meta.txn?.blockNumber ?? ""}`,
               `chainId: ${data.meta.txn?.chainId ?? ""}`,
               `universalTableNames": ${data.meta.txn?.names.join(", ") ?? ""}`,
@@ -102,13 +109,11 @@ export function Console({ environmentId }: { environmentId: string }) {
 
       setLoading(false);
     } catch (err: any) {
-      // TODO: show the error
       setTabs(
         tabs.map((tab) => {
           if (tab.tabId !== tabId) return tab;
 
           tab.error = err;
-
           return tab;
         }),
       );
@@ -194,7 +199,7 @@ export function Console({ environmentId }: { environmentId: string }) {
               );
             })}
             <li
-              className="cursor-pointer border hover:bg-accent"
+              className="cursor-pointer rounded-tr-md border hover:bg-accent"
               onClick={() => openQueryTab()}
             >
               <i className="px-2">+</i>
@@ -209,6 +214,7 @@ export function Console({ environmentId }: { environmentId: string }) {
                 tabId={tab.tabId}
                 query={tab.query}
                 runQuery={runQuery}
+                hideLineNumbers={hideLineNumbers}
                 loading={loading}
               />
 
@@ -226,7 +232,13 @@ export function Console({ environmentId }: { environmentId: string }) {
 }
 
 function QueryPane(props: any): React.JSX.Element {
-  const { tabId, query: initialQuery, runQuery, loading } = props;
+  const {
+    tabId,
+    query: initialQuery,
+    runQuery,
+    loading,
+    hideLineNumbers,
+  } = props;
 
   const [query, setQuery] = React.useState(initialQuery);
   const updateQuery = function (payload: any) {
@@ -241,9 +253,9 @@ function QueryPane(props: any): React.JSX.Element {
 
   return (
     <div className={cn("executer", loading ? "cursor-wait" : "")}>
-      <div className="border bg-card">
+      <div className="rounded-b-md rounded-tr-md border bg-card">
         <CodeEditor
-          hideLineNumbers={true}
+          hideLineNumbers={hideLineNumbers}
           onChange={(code: any) => {
             updateQuery({ query: code });
           }}
@@ -325,7 +337,7 @@ function TabLabel(props: {
     <li
       onClick={(eve) => openThisTab(eve)}
       className={cn(
-        "flex border",
+        "flex border first:rounded-tl-md",
         tab.tabId === currentTab ? "bg-accent" : "bg-card",
       )}
     >
