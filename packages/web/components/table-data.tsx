@@ -7,17 +7,45 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
+  type Row,
 } from "@tanstack/react-table";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { type Schema } from "@tableland/sdk";
+// import {
+//   diff,
+//   addedDiff,
+//   deletedDiff,
+//   updatedDiff,
+//   detailedDiff,
+// } from "deep-object-diff";
+import { hasConstraint } from "@tableland/studio-store";
+import { ChevronDown } from "lucide-react";
 import { DataTable } from "./data-table";
 import TableCell from "./table-cell";
 import { EditCell } from "./edit-cell";
 import { Button } from "./ui/button";
+import {
+  type TableRow,
+  type ExistingRow,
+  type NewRow,
+  type EditedRow,
+  type DeletedRow,
+} from "./table-data-types";
 import { objectToTableData } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+interface Updates {
+  new: NewRow[];
+  edited: EditedRow[];
+  deleted: DeletedRow[];
+}
 
 interface TableDataProps {
-  // columns: Array<ColumnDef<Record<string, unknown>>>;
   columns: Schema["columns"];
   initialData: Array<Record<string, unknown>>;
 }
@@ -26,17 +54,49 @@ export function TableData({
   columns: sdkColumns,
   initialData,
 }: TableDataProps) {
-  const [data, setData] = useState(objectToTableData(initialData));
-  const [originalData, setOriginalData] = useState(() => [...initialData]);
-  const [editedRows, setEditedRows] = useState<Record<string, boolean>>({});
+  initialData = objectToTableData(initialData);
+
+  const initialRows: ExistingRow[] = initialData.map((row) => ({
+    type: "existing",
+    ...row,
+  }));
+
+  const [data, setData] = useState<TableRow[]>(() => [...initialRows]);
+
+  const updates = useMemo(() => {
+    const res = data.reduce<Updates>(
+      (acc, row) => {
+        if (row.type === "new") {
+          acc.new.push(row);
+        } else if (row.type === "edited") {
+          acc.edited.push(row);
+        } else if (row.type === "deleted") {
+          acc.deleted.push(row);
+        }
+        return acc;
+      },
+      {
+        new: [],
+        edited: [],
+        deleted: [],
+      },
+    );
+    return res;
+  }, [data]);
+
+  const pkName = sdkColumns.find(
+    (col) =>
+      hasConstraint(col, "primary key") ||
+      hasConstraint(col, "primary key autoincrement"),
+  )?.name;
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
+  const editing =
+    !!updates.new.length || !!updates.edited.length || !!updates.deleted.length;
+
   const columns:
-    | Array<
-        | ColumnDef<Record<string, unknown>>
-        | DisplayColumnDef<Record<string, unknown>>
-      >
+    | Array<ColumnDef<TableRow> | DisplayColumnDef<TableRow>>
     | undefined = sdkColumns.map((col) => ({
     accessorKey: col.name,
     header: col.name,
@@ -45,7 +105,9 @@ export function TableData({
       type: col.type === "integer" || col.type === "int" ? "number" : "string",
     },
   }));
-  columns.push({ id: "edit", cell: EditCell });
+  if (pkName) {
+    columns.push({ id: "edit", cell: EditCell });
+  }
 
   const table = useReactTable({
     data,
@@ -53,7 +115,6 @@ export function TableData({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    enableRowSelection: true,
     initialState: {
       pagination: {
         pageSize: 15,
@@ -63,84 +124,160 @@ export function TableData({
       columnVisibility,
     },
     meta: {
-      editedRows,
-      setEditedRows,
-      revertData: (rowIndex: number, revert: boolean) => {
-        if (revert) {
-          setData((old) =>
-            old.map((row, index) =>
-              index === rowIndex ? originalData[rowIndex] : row,
-            ),
-          );
-        } else {
-          setOriginalData((old) =>
-            old.map((row, index) =>
-              index === rowIndex ? data[rowIndex] : row,
-            ),
-          );
+      pkName,
+      editRow: (rowToEdit: Row<TableRow>) => {
+        const tableRow = rowToEdit.original;
+        switch (tableRow.type) {
+          case "existing":
+            setData((old) =>
+              old.map((row, index) =>
+                index === rowToEdit.index
+                  ? {
+                      ...row,
+                      type: "edited",
+                      originalData: tableRow,
+                    }
+                  : row,
+              ),
+            );
+            break;
+        }
+      },
+      revertAll: () => {
+        setData(() => [...initialRows]);
+      },
+      revertRow: (rowToRevert: Row<TableRow>) => {
+        const tableRow = rowToRevert.original;
+        switch (tableRow.type) {
+          case "edited":
+            setData((old) =>
+              old.map((row, index) =>
+                index === rowToRevert.index ? tableRow.originalData : row,
+              ),
+            );
+            break;
+          case "new":
+            setData((old) =>
+              old.filter((_, index) => index !== rowToRevert.index),
+            );
+            break;
+          case "deleted":
+            setData((old) =>
+              old.map((row, index) =>
+                index === rowToRevert.index ? tableRow.originalData : row,
+              ),
+            );
+            break;
         }
       },
       updateData: (
-        rowIndex: number,
+        rowToUpdate: Row<TableRow>,
         columnId: string,
         value: string | number,
       ) => {
-        setData((old) =>
-          old.map((row, index) => {
-            if (index === rowIndex) {
-              return {
-                ...old[rowIndex],
-                [columnId]: value,
-              };
-            }
-            return row;
-          }),
-        );
+        const tableRow = rowToUpdate.original;
+        switch (tableRow.type) {
+          case "edited":
+          case "new":
+            setData((old) =>
+              old.map((row, index) => {
+                if (rowToUpdate.index === index) {
+                  return {
+                    ...old[index],
+                    [columnId]: value,
+                  };
+                }
+                return row;
+              }),
+            );
+            break;
+        }
       },
       addRow: () => {
-        const newRow: Record<string, unknown> = {};
-        const setFunc = (old: Array<Record<string, unknown>>) => [
-          ...old,
-          newRow,
-        ];
-        setData(setFunc);
-        setOriginalData(setFunc);
+        setData((old) => [{ type: "new" }, ...old]);
       },
-      removeRow: (rowIndex: number) => {
-        const setFilterFunc = (old: Array<Record<string, unknown>>) =>
-          old.filter(
-            (_row: Record<string, unknown>, index: number) =>
-              index !== rowIndex,
-          );
-        setData(setFilterFunc);
-        setOriginalData(setFilterFunc);
+      deleteRow: (rowToDelete: Row<TableRow>) => {
+        const tableRow = rowToDelete.original;
+        switch (tableRow.type) {
+          case "existing":
+          case "edited":
+            setData((old) =>
+              old.map((row, index) =>
+                index === rowToDelete.index
+                  ? { ...row, type: "deleted", originalData: tableRow }
+                  : row,
+              ),
+            );
+            break;
+          case "new":
+            setData((old) =>
+              old.filter((_, index) => index !== rowToDelete.index),
+            );
+            break;
+        }
       },
-      removeSelectedRows: (selectedRows: number[]) => {
-        const setFilterFunc = (old: Array<Record<string, unknown>>) =>
-          old.filter((_row, index) => !selectedRows.includes(index));
-        setData(setFilterFunc);
-        setOriginalData(setFilterFunc);
+      getRowClassName: (row) => {
+        return row.original.type === "deleted"
+          ? "bg-destructive text-destructive-foreground"
+          : "";
       },
     },
   });
 
-  const removeRows = () => {
-    table.options.meta?.removeSelectedRows(
-      table.getSelectedRowModel().rows.map((row) => row.index),
-    );
-    table.resetRowSelection();
-  };
-
-  const selectedRows = table.getSelectedRowModel().rows;
-
   return (
     <>
+      <div className="flex items-center gap-x-4">
+        <div className="ml-auto flex items-center gap-x-2">
+          {editing && (
+            <>
+              <Button>Save</Button>
+              <Button
+                variant="secondary"
+                onClick={() => table.options.meta?.revertAll()}
+              >
+                Revert all
+              </Button>
+            </>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => table.options.meta?.addRow()}
+          >
+            Add row
+          </Button>
+        </div>
+        {!!columns.length && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Columns
+                <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
       <DataTable columns={columns} data={data} table={table} />
       <Button onClick={() => table.options.meta?.addRow()}>Add Row</Button>
-      {selectedRows.length > 0 && (
-        <Button onClick={removeRows}>Remove Selected Rows</Button>
-      )}
-      <pre>{JSON.stringify(data, null, "\t")}</pre>
+      <pre>{JSON.stringify(updates, null, "\t")}</pre>
     </>
   );
 }

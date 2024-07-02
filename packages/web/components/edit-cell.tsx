@@ -1,53 +1,58 @@
 import { type Cell } from "@tanstack/react-table";
-import { type MouseEvent } from "react";
-import { Checkbox } from "./ui/checkbox";
+import { Undo2, Trash2, Pencil } from "lucide-react";
+import { type TableRow } from "./table-data-types";
+import { Button } from "./ui/button";
 
 export function EditCell({
   row,
   table,
-}: ReturnType<Cell<Record<string, unknown>, unknown>["getContext"]>) {
+}: ReturnType<Cell<TableRow, unknown>["getContext"]>) {
   const meta = table.options.meta;
 
-  const setEditedRows = (e: MouseEvent<HTMLButtonElement>) => {
-    const elName = e.currentTarget.name;
-    meta?.setEditedRows((old) => ({
-      ...old,
-      [row.id]: !old[row.id],
-    }));
-    if (elName !== "edit") {
-      meta?.revertData(row.index, e.currentTarget.name === "cancel");
-    }
+  const editRow = () => {
+    meta?.editRow(row);
   };
 
-  const removeRow = () => {
-    meta?.removeRow(row.index);
+  const revertRow = () => {
+    meta?.revertRow(row);
   };
+
+  const deleteRow = () => {
+    meta?.deleteRow(row);
+  };
+
+  const type = row.original.type;
 
   return (
-    <div>
-      {meta?.editedRows[row.id] ? (
-        <>
-          <button name="cancel" onClick={setEditedRows}>
-            X
-          </button>{" "}
-          <button name="done" onClick={setEditedRows}>
-            ✔
-          </button>
-        </>
-      ) : (
-        <>
-          <button name="edit" onClick={setEditedRows}>
-            ✐
-          </button>
-          <button onClick={removeRow} name="remove">
-            🗑
-          </button>
-        </>
+    <div className="flex items-center justify-end gap-x-1">
+      {/* Edit */}
+      {type === "existing" && (
+        <Button variant="ghost" size="icon" title="Edit row" onClick={editRow}>
+          <Pencil className="size-5" />
+        </Button>
       )}
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={row.getToggleSelectedHandler()}
-      />
+      {/* Revert */}
+      {(type === "edited" || type === "deleted") && (
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Revert row changes"
+          onClick={revertRow}
+        >
+          <Undo2 className="size-5" />
+        </Button>
+      )}
+      {/* Delete */}
+      {(type === "existing" || type === "edited" || type === "new") && (
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Delete row"
+          onClick={deleteRow}
+        >
+          <Trash2 className="size-5" />
+        </Button>
+      )}
     </div>
   );
 }

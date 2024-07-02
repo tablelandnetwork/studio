@@ -1,20 +1,20 @@
 import "@tanstack/table-core";
+import { Row, RowData } from "@tanstack/react-table";
 
 declare module "@tanstack/table-core" {
   interface TableMeta<TData extends RowData> {
-    revertData: (rowIndex: number, revert: boolean) => void;
+    getRowClassName: (row: Row<TData>) => string;
+    pkName: string | undefined;
+    editRow: (row: Row<TData>) => void;
+    revertAll: () => void;
+    revertRow: (row: Row<TData>) => void;
     updateData: (
-      rowIndex: number,
+      row: Row<TData>,
       columnId: string,
       value: string | number,
     ) => void;
     addRow: () => void;
-    removeRow: (rowIndex: number) => void;
-    removeSelectedRows: (selectedRows: number[]) => void;
-    editedRows: Record<string, boolean>;
-    setEditedRows: React.Dispatch<
-      React.SetStateAction<Record<string, boolean>>
-    >;
+    deleteRow: (row: Row<TData>) => void;
   }
   interface ColumnMeta {
     type: "number" | "string";
