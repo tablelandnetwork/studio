@@ -10,10 +10,13 @@ export const restrictedTeamSlugs = [
 
 export const restrictedProjectSlugs = ["people", "settings"];
 
-export const restrictedDefSlugs = ["settings", "tables"];
+export const restrictedDefSlugs = ["settings", "tables", "console"];
+
+export const restrictedEnvSlugs = ["settings"];
 
 export const allRestrictedSlugs = [
   ...restrictedTeamSlugs,
   ...restrictedProjectSlugs,
   ...restrictedDefSlugs,
+  ...restrictedEnvSlugs,
 ];

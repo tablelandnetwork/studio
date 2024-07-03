@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import { Console } from "@/components/console";
 import {
   environmentBySlug,
@@ -14,12 +13,6 @@ export default async function ConsolePage({
   const team = await teamBySlug(params.team);
   const project = await projectBySlug(params.project, team.id);
   const environment = await environmentBySlug(project.id, params.env);
-
-  if (!environment) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-    });
-  }
 
   return (
     <main className="flex-1 p-4">

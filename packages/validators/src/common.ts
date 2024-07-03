@@ -30,4 +30,12 @@ export const defNameSchema = z
     { message: "Definition name is invalid." },
   );
 
-export const envNameSchema = z.object({ name: z.string().trim().min(1) });
+export const envNameSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1)
+    .refine((val) => !restrictedDefSlugs.includes(slugify(val)), {
+      message: "You can't use a restricted word as an environment name.",
+    }),
+});
