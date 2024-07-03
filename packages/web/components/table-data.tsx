@@ -200,11 +200,23 @@ export function TableData({
         const tableRow = rowToDelete.original;
         switch (tableRow.type) {
           case "existing":
-          case "edited":
             setData((old) =>
               old.map((row, index) =>
                 index === rowToDelete.index
                   ? { ...row, type: "deleted", originalData: tableRow }
+                  : row,
+              ),
+            );
+            break;
+          case "edited":
+            setData((old) =>
+              old.map((row, index) =>
+                index === rowToDelete.index
+                  ? {
+                      ...row,
+                      type: "deleted",
+                      originalData: tableRow.originalData,
+                    }
                   : row,
               ),
             );
