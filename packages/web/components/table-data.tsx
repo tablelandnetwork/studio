@@ -230,7 +230,7 @@ export function TableData({
       },
       getRowClassName: (row) => {
         return row.original.type === "deleted"
-          ? "bg-destructive text-destructive-foreground"
+          ? "bg-destructive/50 text-destructive-foreground hover:bg-destructive/70"
           : "";
       },
     },
