@@ -1,12 +1,12 @@
 import { type Cell } from "@tanstack/react-table";
 import { Undo2, Trash2, Pencil } from "lucide-react";
-import { type TableRow } from "./table-data-types";
+import { type TableRowData } from "./table-data-types";
 import { Button } from "./ui/button";
 
 export function EditCell({
   row,
   table,
-}: ReturnType<Cell<TableRow, unknown>["getContext"]>) {
+}: ReturnType<Cell<TableRowData, unknown>["getContext"]>) {
   const meta = table.options.meta;
 
   const editRow = () => {

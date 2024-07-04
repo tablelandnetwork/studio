@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { type Cell } from "@tanstack/react-table";
 import { Input } from "./ui/input";
-import { type TableRow } from "./table-data-types";
+import { type TableRowData } from "./table-data-types";
 
 export default function TableCell({
   getValue,
   row,
   column,
   table,
-}: ReturnType<Cell<TableRow, unknown>["getContext"]>) {
+}: ReturnType<Cell<TableRowData, unknown>["getContext"]>) {
   const initialValue = getValue();
   const columnMeta = column.columnDef.meta;
 
@@ -19,7 +19,8 @@ export default function TableCell({
   }, [initialValue]);
 
   const onBlur = () => {
-    table.options.meta?.updateData(row, column.id, value);
+    if (!columnMeta) return;
+    table.options.meta?.updateRowColumn(row, columnMeta.columnName, value);
   };
 
   if (row.original.type === "edited" || row.original.type === "new") {
@@ -27,7 +28,13 @@ export default function TableCell({
       <Input
         type={columnMeta?.type ?? "text"}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) =>
+          setValue(
+            columnMeta?.type === "number"
+              ? e.target.valueAsNumber
+              : e.target.value,
+          )
+        }
         onBlur={onBlur}
       />
     );

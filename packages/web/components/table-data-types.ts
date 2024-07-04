@@ -1,19 +1,28 @@
-export type NewRow = {
+export interface NewRowData {
   type: "new";
-} & Record<string, unknown>;
+  data: Record<string, unknown>;
+}
 
-export type ExistingRow = {
+export interface ExistingRowData {
   type: "existing";
-} & Record<string, unknown>;
+  data: Record<string, unknown>;
+}
 
-export type EditedRow = {
+export interface EditedRowData {
   type: "edited";
-  originalData: ExistingRow;
-} & Record<string, unknown>;
+  data: Record<string, unknown>;
+  originalData: ExistingRowData;
+  diff?: object;
+}
 
-export type DeletedRow = {
+export interface DeletedRowData {
   type: "deleted";
-  originalData: ExistingRow | EditedRow;
-} & Record<string, unknown>;
+  data: Record<string, unknown>;
+  originalData: ExistingRowData | EditedRowData;
+}
 
-export type TableRow = NewRow | ExistingRow | EditedRow | DeletedRow;
+export type TableRowData =
+  | NewRowData
+  | ExistingRowData
+  | EditedRowData
+  | DeletedRowData;

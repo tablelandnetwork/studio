@@ -1,5 +1,9 @@
 "use client";
 
+import { Database, type Table } from "@tableland/sdk";
+import { drizzle } from "drizzle-orm/d1";
+import { integer, int, sqliteTable, text, blob } from "drizzle-orm/sqlite-core";
+import { eq } from "drizzle-orm/expressions";
 import {
   type ColumnDef,
   type DisplayColumnDef,
@@ -10,26 +14,20 @@ import {
   type Row,
 } from "@tanstack/react-table";
 import React, { useMemo, useState } from "react";
-import { type Schema } from "@tableland/sdk";
-// import {
-//   diff,
-//   addedDiff,
-//   deletedDiff,
-//   updatedDiff,
-//   detailedDiff,
-// } from "deep-object-diff";
+import { updatedDiff } from "deep-object-diff";
 import { hasConstraint } from "@tableland/studio-store";
 import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { DataTable } from "./data-table";
 import TableCell from "./table-cell";
 import { EditCell } from "./edit-cell";
 import { Button } from "./ui/button";
 import {
-  type TableRow,
-  type ExistingRow,
-  type NewRow,
-  type EditedRow,
-  type DeletedRow,
+  type TableRowData,
+  type ExistingRowData,
+  type NewRowData,
+  type EditedRowData,
+  type DeletedRowData,
 } from "./table-data-types";
 import { objectToTableData } from "@/lib/utils";
 import {
@@ -39,29 +37,75 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+type NonEmptyArray<T> = [T, ...T[]];
+
 interface Updates {
-  new: NewRow[];
-  edited: EditedRow[];
-  deleted: DeletedRow[];
+  new: NewRowData[];
+  edited: EditedRowData[];
+  deleted: DeletedRowData[];
 }
 
 interface TableDataProps {
-  columns: Schema["columns"];
+  table: Table;
   initialData: Array<Record<string, unknown>>;
 }
 
-export function TableData({
-  columns: sdkColumns,
-  initialData,
-}: TableDataProps) {
+const tbl = new Database({
+  autoWait: true,
+});
+
+export function TableData({ table: tblTable, initialData }: TableDataProps) {
+  const router = useRouter();
+
+  const pkName = tblTable.schema.columns.find(
+    (col) =>
+      hasConstraint(col, "primary key") ||
+      hasConstraint(col, "primary key autoincrement"),
+  )?.name;
+
+  const tableSchema = useMemo(
+    () =>
+      tblTable.schema.columns.reduce<Record<string, any>>((acc, col) => {
+        if (col.type === "text") {
+          acc[col.name] = text(col.name);
+        } else if (col.type === "integer") {
+          acc[col.name] = integer(col.name);
+        } else if (col.type === "int") {
+          acc[col.name] = int(col.name);
+        } else if (col.type === "blob") {
+          acc[col.name] = blob(col.name);
+        }
+        return acc;
+      }, {}),
+    [tblTable],
+  );
+  const drizzleTable = useMemo(
+    () => sqliteTable(tblTable.name, tableSchema),
+    [tblTable, tableSchema],
+  );
+  const db = useMemo(
+    () => drizzle(tbl, { schema: drizzleTable, logger: false }),
+    [drizzleTable],
+  );
+
+  // const { params: ps, sql } = db
+  //   .update(drizzleTable)
+  //   .set({ table_name: "foo", chain_id: "1" })
+  //   .where(eq(drizzleTable.table_id, "abcdef"))
+  //   .toSQL();
+
+  // console.log("SQL HERE:", sql);
+
+  // console.log("bound:", tbl.prepare(sql).bind(ps).toString());
+
   initialData = objectToTableData(initialData);
 
-  const initialRows: ExistingRow[] = initialData.map((row) => ({
+  const initialRows: ExistingRowData[] = initialData.map((row) => ({
     type: "existing",
-    ...row,
+    data: { ...row },
   }));
 
-  const [data, setData] = useState<TableRow[]>(() => [...initialRows]);
+  const [data, setData] = useState<TableRowData[]>(() => [...initialRows]);
 
   const updates = useMemo(() => {
     const res = data.reduce<Updates>(
@@ -84,24 +128,19 @@ export function TableData({
     return res;
   }, [data]);
 
-  const pkName = sdkColumns.find(
-    (col) =>
-      hasConstraint(col, "primary key") ||
-      hasConstraint(col, "primary key autoincrement"),
-  )?.name;
-
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const editing =
     !!updates.new.length || !!updates.edited.length || !!updates.deleted.length;
 
   const columns:
-    | Array<ColumnDef<TableRow> | DisplayColumnDef<TableRow>>
-    | undefined = sdkColumns.map((col) => ({
-    accessorKey: col.name,
+    | Array<ColumnDef<TableRowData> | DisplayColumnDef<TableRowData>>
+    | undefined = tblTable.schema.columns.map((col) => ({
+    accessorKey: `data.${col.name}`,
     header: col.name,
     cell: TableCell,
     meta: {
+      columnName: col.name,
       type: col.type === "integer" || col.type === "int" ? "number" : "string",
     },
   }));
@@ -125,17 +164,17 @@ export function TableData({
     },
     meta: {
       pkName,
-      editRow: (rowToEdit: Row<TableRow>) => {
-        const tableRow = rowToEdit.original;
-        switch (tableRow.type) {
+      editRow: (rowToEdit: Row<TableRowData>) => {
+        const tableRowData = rowToEdit.original;
+        switch (tableRowData.type) {
           case "existing":
             setData((old) =>
               old.map((row, index) =>
                 index === rowToEdit.index
                   ? {
-                      ...row,
                       type: "edited",
-                      originalData: tableRow,
+                      data: { ...row.data },
+                      originalData: tableRowData,
                     }
                   : row,
               ),
@@ -143,48 +182,46 @@ export function TableData({
             break;
         }
       },
-      revertAll: () => {
-        setData(() => [...initialRows]);
-      },
-      revertRow: (rowToRevert: Row<TableRow>) => {
-        const tableRow = rowToRevert.original;
-        switch (tableRow.type) {
-          case "edited":
-            setData((old) =>
-              old.map((row, index) =>
-                index === rowToRevert.index ? tableRow.originalData : row,
-              ),
-            );
-            break;
-          case "new":
-            setData((old) =>
-              old.filter((_, index) => index !== rowToRevert.index),
-            );
-            break;
-          case "deleted":
-            setData((old) =>
-              old.map((row, index) =>
-                index === rowToRevert.index ? tableRow.originalData : row,
-              ),
-            );
-            break;
-        }
-      },
-      updateData: (
-        rowToUpdate: Row<TableRow>,
-        columnId: string,
+      updateRowColumn: (
+        rowToUpdate: Row<TableRowData>,
+        columnName: string,
         value: string | number,
       ) => {
-        const tableRow = rowToUpdate.original;
-        switch (tableRow.type) {
+        const tableRowData = rowToUpdate.original;
+        switch (tableRowData.type) {
           case "edited":
+            setData((old) =>
+              old.map((row, index) => {
+                if (rowToUpdate.index === index) {
+                  const data = {
+                    ...tableRowData.data,
+                    [columnName]: value,
+                  };
+                  const diff = updatedDiff(
+                    tableRowData.originalData.data,
+                    data,
+                  );
+                  console.log("DIFF", diff);
+                  return {
+                    ...tableRowData,
+                    data,
+                    diff: Object.keys(diff).length ? diff : undefined,
+                  };
+                }
+                return row;
+              }),
+            );
+            break;
           case "new":
             setData((old) =>
               old.map((row, index) => {
                 if (rowToUpdate.index === index) {
                   return {
-                    ...old[index],
-                    [columnId]: value,
+                    ...tableRowData,
+                    data: {
+                      ...tableRowData.data,
+                      [columnName]: value,
+                    },
                   };
                 }
                 return row;
@@ -194,16 +231,20 @@ export function TableData({
         }
       },
       addRow: () => {
-        setData((old) => [{ type: "new" }, ...old]);
+        setData((old) => [{ type: "new", data: {} }, ...old]);
       },
-      deleteRow: (rowToDelete: Row<TableRow>) => {
-        const tableRow = rowToDelete.original;
-        switch (tableRow.type) {
+      deleteRow: (rowToDelete: Row<TableRowData>) => {
+        const tableRowData = rowToDelete.original;
+        switch (tableRowData.type) {
           case "existing":
             setData((old) =>
               old.map((row, index) =>
                 index === rowToDelete.index
-                  ? { ...row, type: "deleted", originalData: tableRow }
+                  ? {
+                      data: { ...row.data },
+                      type: "deleted",
+                      originalData: tableRowData,
+                    }
                   : row,
               ),
             );
@@ -213,9 +254,9 @@ export function TableData({
               old.map((row, index) =>
                 index === rowToDelete.index
                   ? {
-                      ...row,
+                      data: { ...row.data },
                       type: "deleted",
-                      originalData: tableRow.originalData,
+                      originalData: tableRowData.originalData,
                     }
                   : row,
               ),
@@ -228,6 +269,33 @@ export function TableData({
             break;
         }
       },
+      revertRow: (rowToRevert: Row<TableRowData>) => {
+        const tableRowData = rowToRevert.original;
+        switch (tableRowData.type) {
+          case "edited":
+            setData((old) =>
+              old.map((row, index) =>
+                index === rowToRevert.index ? tableRowData.originalData : row,
+              ),
+            );
+            break;
+          case "new":
+            setData((old) =>
+              old.filter((_, index) => index !== rowToRevert.index),
+            );
+            break;
+          case "deleted":
+            setData((old) =>
+              old.map((row, index) =>
+                index === rowToRevert.index ? tableRowData.originalData : row,
+              ),
+            );
+            break;
+        }
+      },
+      revertAll: () => {
+        setData(() => [...initialRows]);
+      },
       getRowClassName: (row) => {
         return row.original.type === "deleted"
           ? "bg-destructive/50 text-destructive-foreground hover:bg-destructive/70"
@@ -236,13 +304,48 @@ export function TableData({
     },
   });
 
+  const executeStatements = () => {
+    const sqlInsertItems = updates.new.map((row) => {
+      return db.insert(drizzleTable).values(row.data);
+    });
+    const sqlUpdateItems = updates.edited
+      .filter((update) => update.diff)
+      .map((row) => {
+        return db
+          .update(drizzleTable)
+          .set(row.diff!)
+          .where(eq(drizzleTable[pkName!], row.originalData.data[pkName!]));
+      });
+    const sqlDeleteItems = updates.deleted.map((row) => {
+      return db
+        .delete(drizzleTable)
+        .where(eq(drizzleTable[pkName!], row.originalData.data[pkName!]));
+    });
+    type Hmm =
+      | (typeof sqlInsertItems)[number]
+      | (typeof sqlUpdateItems)[number]
+      | (typeof sqlDeleteItems)[number];
+    const ugh = [
+      ...sqlInsertItems,
+      ...sqlUpdateItems,
+      ...sqlDeleteItems,
+    ] as NonEmptyArray<Hmm>;
+    db.batch(ugh)
+      .then((res) => {
+        router.refresh();
+      })
+      .catch((err) => {
+        console.log("ERR", err);
+      });
+  };
+
   return (
     <>
       <div className="flex items-center gap-x-4">
         <div className="ml-auto flex items-center gap-x-2">
           {editing && (
             <>
-              <Button>Save</Button>
+              <Button onClick={executeStatements}>Save</Button>
               <Button
                 variant="secondary"
                 onClick={() => table.options.meta?.revertAll()}
@@ -288,7 +391,6 @@ export function TableData({
         )}
       </div>
       <DataTable columns={columns} data={data} table={table} />
-      <Button onClick={() => table.options.meta?.addRow()}>Add Row</Button>
       <pre>{JSON.stringify(updates, null, "\t")}</pre>
     </>
   );

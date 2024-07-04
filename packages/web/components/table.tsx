@@ -246,10 +246,7 @@ export default async function Table({
         </TabsList>
         {data && table && (
           <TabsContent value="data">
-            <TableData
-              columns={table.schema.columns}
-              initialData={data.results}
-            />
+            <TableData table={table} initialData={data.results} />
           </TabsContent>
         )}
         {data && (
