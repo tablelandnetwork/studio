@@ -15,6 +15,7 @@ import {
   Rocket,
   Table2,
   Workflow,
+  UserCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { type RouterOutputs } from "@tableland/studio-api";
@@ -171,7 +172,7 @@ export default async function Table({
         {owner && (
           <MetricCard>
             <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
-              <Coins className="h-4 w-4 text-muted-foreground" />
+              <UserCircle className="h-4 w-4 text-muted-foreground" />
               <MetricCardTitle>Owner</MetricCardTitle>
             </MetricCardHeader>
             <MetricCardContent>
