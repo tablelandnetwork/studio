@@ -1,13 +1,22 @@
-import { helpers } from "@tableland/sdk";
+import { Validator, helpers } from "@tableland/sdk";
 import { chainsMap } from "./chains-map";
 
-export interface Table {
+export interface RegistryRecord {
   chain_id: number;
   controller: string;
   created_at: number;
   id: number;
   prefix: string;
   structure: string;
+}
+
+export async function getRegistryRecord(chainId: number, id: string) {
+  const baseUrl = baseUrlForChain(chainId);
+  const validator = new Validator({ baseUrl });
+  const [res] = await validator.queryByStatement<RegistryRecord>({
+    statement: `select * from registry where chain_id = ${chainId} and id = ${id} limit 1`,
+  });
+  return res;
 }
 
 export async function getLatestTables(chain: number | "mainnets" | "testnets") {
@@ -25,7 +34,7 @@ export async function getLatestTables(chain: number | "mainnets" | "testnets") {
     throw new Error("Failed to fetch data");
   }
 
-  return res.json() as unknown as Table[];
+  return res.json() as unknown as RegistryRecord[];
 }
 
 export interface PopularTable {
@@ -79,7 +88,7 @@ export interface SqlLog {
 }
 
 // Tables should all be on mainnets or all be on testnets,
-// othwerwise the results will not be as expected.
+// otherwise the results will not be as expected.
 export async function getSqlLogs(
   tables: Array<{ chainId: number; tableId: string }>,
   limit: number,

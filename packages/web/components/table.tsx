@@ -41,18 +41,6 @@ import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
 import { ensureError } from "@/lib/ensure-error";
 
-interface Props {
-  tableName: string;
-  chainId: number;
-  tableId: string;
-  createdAt: Date;
-  schema: Schema;
-  environment?: schema.Environment;
-  defData?: DefData;
-  deploymentData?: DeploymentData;
-  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
-}
-
 interface DefData {
   id: string;
   name: string;
@@ -67,10 +55,24 @@ interface DeploymentData {
   txnHash: string | null;
 }
 
+interface Props {
+  tableName: string;
+  chainId: number;
+  tableId: string;
+  owner?: string;
+  createdAt: Date;
+  schema: Schema;
+  environment?: schema.Environment;
+  defData?: DefData;
+  deploymentData?: DeploymentData;
+  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
+}
+
 export default async function Table({
   tableName,
   chainId,
   tableId,
+  owner,
   createdAt,
   schema,
   environment,
@@ -166,6 +168,21 @@ export default async function Table({
             </MetricCardFooter>
           )}
         </MetricCard>
+        {owner && (
+          <MetricCard>
+            <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
+              <Coins className="h-4 w-4 text-muted-foreground" />
+              <MetricCardTitle>Owner</MetricCardTitle>
+            </MetricCardHeader>
+            <MetricCardContent>
+              <HashDisplay
+                className="text-3xl text-foreground"
+                hash={owner}
+                copy
+              />
+            </MetricCardContent>
+          </MetricCard>
+        )}
         {deploymentData?.txnHash && (
           <MetricCard>
             <MetricCardHeader

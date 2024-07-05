@@ -2,9 +2,11 @@ import { type Table as TblTable, Validator, helpers } from "@tableland/sdk";
 import { getSession } from "@tableland/studio-api";
 import { cookies, headers } from "next/headers";
 import { unescapeSchema } from "@tableland/studio-store";
+import { cache } from "react";
 import Table from "@/components/table";
 import TableWrapper from "@/components/table-wrapper";
 import { ensureError } from "@/lib/ensure-error";
+import { getRegistryRecord } from "@/lib/validator-queries";
 
 export default async function TablePage({
   params,
@@ -51,6 +53,8 @@ export default async function TablePage({
     );
   }
 
+  const registryRecord = await cache(getRegistryRecord)(chainId, tableId);
+
   const schema = unescapeSchema(tablelandTable.schema);
 
   const createdAttr = tablelandTable.attributes?.find(
@@ -80,6 +84,7 @@ export default async function TablePage({
           schema={schema}
           tableName={params.name}
           tableId={tableId}
+          owner={registryRecord.controller}
         />
       </TableWrapper>
     </main>
