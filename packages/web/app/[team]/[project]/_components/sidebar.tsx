@@ -1,11 +1,18 @@
 "use client";
 
 import { type schema } from "@tableland/studio-store";
-import { Ellipsis, LayoutDashboard, Settings, Table2 } from "lucide-react";
+import {
+  Ellipsis,
+  LayoutDashboard,
+  Settings,
+  Table2,
+  Terminal,
+} from "lucide-react";
 import {
   useParams,
   useRouter,
   useSelectedLayoutSegment,
+  useSelectedLayoutSegments,
 } from "next/navigation";
 import { skipToken } from "@tanstack/react-query";
 import { useState } from "react";
@@ -33,8 +40,16 @@ export function Sidebar() {
     env?: string;
     table?: string;
   }>();
+
   const router = useRouter();
+
   const selectedLayoutSegment = useSelectedLayoutSegment();
+  const selectedLayoutSegments = useSelectedLayoutSegments();
+  const isConsole =
+    !!envSlug &&
+    !defSlug &&
+    selectedLayoutSegments.slice(-1).pop() === "console";
+
   const [newDefOpen, setNewDefOpen] = useState(false);
   const [importTableOpen, setImportTableOpen] = useState(false);
 
@@ -126,7 +141,15 @@ export function Sidebar() {
           icon={LayoutDashboard}
           title="Overview"
           href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}`}
-          selected={!defSlug && !!envSlug && envSlug === env?.slug}
+          selected={
+            !defSlug && !!envSlug && !isConsole && envSlug === env?.slug
+          }
+        />
+        <SidebarLink
+          icon={Terminal}
+          title="Console"
+          href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}/console`}
+          selected={isConsole}
         />
       </SidebarSection>
       <SidebarSection>
@@ -134,6 +157,7 @@ export function Sidebar() {
           <h3 className="text-base font-medium tracking-wide text-muted-foreground">
             Definitions
           </h3>
+
           {!!isAuthorizedQuery.data && (
             <DropdownMenu>
               <DropdownMenuTrigger className="ml-auto text-muted-foreground hover:text-foreground">

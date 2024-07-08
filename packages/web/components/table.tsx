@@ -228,6 +228,7 @@ export default async function Table({
           </MetricCard>
         )}
       </div>
+
       <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
         <TabsList className={cn(!data && "bg-transparent")}>
           {data && formattedData && columns ? (
