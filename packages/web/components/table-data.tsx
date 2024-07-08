@@ -13,11 +13,12 @@ import {
   useReactTable,
   type Row,
 } from "@tanstack/react-table";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { updatedDiff } from "deep-object-diff";
 import { hasConstraint } from "@tableland/studio-store";
 import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAccount } from "wagmi";
 import { DataTable } from "./data-table";
 import TableCell from "./table-cell";
 import { EditCell } from "./edit-cell";
@@ -36,6 +37,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { type ACLItem, type TablePermissions } from "@/lib/validator-queries";
 
 type NonEmptyArray<T> = [T, ...T[]];
 
@@ -46,16 +48,39 @@ interface Updates {
 }
 
 interface TableDataProps {
+  chainId: number;
+  tableId: string;
   table: Table;
   initialData: Array<Record<string, unknown>>;
+  tablePermissions?: TablePermissions;
 }
 
 const tbl = new Database({
   autoWait: true,
 });
 
-export function TableData({ table: tblTable, initialData }: TableDataProps) {
+export function TableData({
+  chainId,
+  tableId,
+  table: tblTable,
+  initialData,
+  tablePermissions,
+}: TableDataProps) {
   const router = useRouter();
+
+  const { address } = useAccount();
+
+  const [accountPermissions, setAccountPermissions] = useState<
+    ACLItem | undefined
+  >();
+
+  useEffect(
+    () =>
+      setAccountPermissions(
+        address && tablePermissions ? tablePermissions[address] : undefined,
+      ),
+    [address, tablePermissions],
+  );
 
   const pkName = tblTable.schema.columns.find(
     (col) =>
@@ -87,16 +112,6 @@ export function TableData({ table: tblTable, initialData }: TableDataProps) {
     () => drizzle(tbl, { schema: drizzleTable, logger: false }),
     [drizzleTable],
   );
-
-  // const { params: ps, sql } = db
-  //   .update(drizzleTable)
-  //   .set({ table_name: "foo", chain_id: "1" })
-  //   .where(eq(drizzleTable.table_id, "abcdef"))
-  //   .toSQL();
-
-  // console.log("SQL HERE:", sql);
-
-  // console.log("bound:", tbl.prepare(sql).bind(ps).toString());
 
   initialData = objectToTableData(initialData);
 
@@ -342,6 +357,7 @@ export function TableData({ table: tblTable, initialData }: TableDataProps) {
   return (
     <>
       <div className="flex items-center gap-x-4">
+        {address && <p>Connected as: {address}</p>}
         <div className="ml-auto flex items-center gap-x-2">
           {editing && (
             <>
@@ -391,6 +407,7 @@ export function TableData({ table: tblTable, initialData }: TableDataProps) {
         )}
       </div>
       <DataTable columns={columns} data={data} table={table} />
+      <pre>{JSON.stringify(accountPermissions, null, "\t")}</pre>
       <pre>{JSON.stringify(updates, null, "\t")}</pre>
     </>
   );

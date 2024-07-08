@@ -15,7 +15,7 @@ import {
   Rocket,
   Table2,
   Workflow,
-  UserCircle,
+  Crown,
 } from "lucide-react";
 import Link from "next/link";
 import { type RouterOutputs } from "@tableland/studio-api";
@@ -41,6 +41,10 @@ import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
 import DefDetails from "@/components/def-details";
 import { ensureError } from "@/lib/ensure-error";
+import {
+  type TablePermissions,
+  getTablePermissions,
+} from "@/lib/validator-queries";
 
 interface DefData {
   id: string;
@@ -86,6 +90,7 @@ export default async function Table({
   const openSeaLink = openSeaLinks.get(chainId);
 
   let table: TblTable | undefined;
+  let tablePermissions: TablePermissions | undefined;
   let data: Result<Record<string, unknown>> | undefined;
   let error: Error | undefined;
   try {
@@ -93,6 +98,7 @@ export default async function Table({
     const validator = new Validator({ baseUrl });
     table = await validator.getTableById({ chainId, tableId });
     table.schema = unescapeSchema(table.schema);
+    tablePermissions = await getTablePermissions(chainId, tableId);
     const tbl = new Database({ baseUrl });
     data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   } catch (err) {
@@ -172,7 +178,7 @@ export default async function Table({
         {owner && (
           <MetricCard>
             <MetricCardHeader className="flex flex-row items-center gap-2 space-y-0">
-              <UserCircle className="h-4 w-4 text-muted-foreground" />
+              <Crown className="h-4 w-4 text-muted-foreground" />
               <MetricCardTitle>Owner</MetricCardTitle>
             </MetricCardHeader>
             <MetricCardContent>
@@ -255,6 +261,7 @@ export default async function Table({
               <TabsTrigger value="data">Table Data</TabsTrigger>
               <TabsTrigger value="logs">SQL Logs</TabsTrigger>
               <TabsTrigger value="definition">Schema</TabsTrigger>
+              <TabsTrigger value="permissions">Permissions</TabsTrigger>
             </>
           ) : (
             <h2 className="text-base font-medium text-foreground">
@@ -264,7 +271,13 @@ export default async function Table({
         </TabsList>
         {data && table && (
           <TabsContent value="data">
-            <TableData table={table} initialData={data.results} />
+            <TableData
+              chainId={chainId}
+              tableId={tableId}
+              table={table}
+              initialData={data.results}
+              tablePermissions={tablePermissions}
+            />
           </TabsContent>
         )}
         {data && (
@@ -274,6 +287,9 @@ export default async function Table({
         )}
         <TabsContent value="definition" className="space-y-4">
           <DefDetails name={defData?.name ?? tableName} schema={schema} />
+        </TabsContent>
+        <TabsContent value="permissions" className="space-y-4">
+          <pre>{JSON.stringify(tablePermissions, null, 2)}</pre>
         </TabsContent>
       </Tabs>
     </div>

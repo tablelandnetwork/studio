@@ -10,6 +10,21 @@ export interface RegistryRecord {
   structure: string;
 }
 
+export interface TablePermission {
+  insert: boolean;
+  update: boolean;
+  delete: boolean;
+}
+
+export interface ACLItem {
+  chainId: number;
+  tableId: number;
+  controller: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  privileges: TablePermission;
+}
+
 export async function getRegistryRecord(chainId: number, id: string) {
   const baseUrl = baseUrlForChain(chainId);
   const validator = new Validator({ baseUrl });
@@ -181,6 +196,70 @@ export async function getSqlLog(
     throw new Error("Log not found");
   }
   return array[0];
+}
+
+export type TablePermissions = Record<string, ACLItem>;
+
+export async function getTablePermissions(chainId: number, tableId: string) {
+  const baseUrl = baseUrlForChain(chainId);
+  const validator = new Validator({ baseUrl });
+  const res = await validator.queryByStatement<{
+    chain_id: number;
+    controller: string;
+    created_at: number;
+    privileges: number;
+    table_id: number;
+    updated_at: number | null;
+  }>({
+    statement: `select * from system_acl
+      where chain_id = ${chainId}
+        and table_id = ${tableId}`,
+  });
+  const permissions = res.reduce<TablePermissions>((acc, row) => {
+    acc[row.controller] = {
+      chainId: row.chain_id,
+      tableId: row.table_id,
+      controller: row.controller,
+      createdAt: new Date(row.created_at * 1000),
+      updatedAt: row.updated_at ? new Date(row.updated_at * 1000) : undefined,
+      privileges: {
+        insert: (row.privileges & 1) > 0,
+        update: (row.privileges & 2) > 0,
+        delete: (row.privileges & 4) > 0,
+      },
+    };
+    return acc;
+  }, {});
+  return permissions;
+}
+
+export async function getTablePermissionsForAddress(
+  chainId: number,
+  tableId: string,
+  address: string,
+) {
+  const baseUrl = baseUrlForChain(chainId);
+  const validator = new Validator({ baseUrl });
+  const [res] = await validator.queryByStatement<{
+    chain_id: number;
+    controller: string;
+    created_at: number;
+    privileges: number;
+    table_id: number;
+    updated_at: number | null;
+  }>({
+    statement: `select * from system_acl
+      where chain_id = ${chainId}
+        and table_id = ${tableId}
+        and controller = '${address}'
+        limit 1`,
+  });
+  const permission: TablePermission = {
+    insert: (res.privileges & 1) > 0,
+    update: (res.privileges & 2) > 0,
+    delete: (res.privileges & 4) > 0,
+  };
+  return permission;
 }
 
 function baseUrlForChain(chainId: number | "mainnets" | "testnets") {
