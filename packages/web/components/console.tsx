@@ -4,6 +4,7 @@ import * as React from "react";
 import { Database, helpers } from "@tableland/sdk";
 import { studioAliases, getBaseUrl } from "@tableland/studio-client";
 import { init } from "@tableland/sqlparser";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { CodeEditor } from "./code-editor";
 import { DataTable } from "./data-table";
 import { cn, objectToTableData } from "@/lib/utils";
@@ -362,7 +363,13 @@ function TabLabel(props: {
 
 function ResultSetPane(props: any): React.JSX.Element {
   const { tab } = props;
-  const formattedData = objectToTableData(tab.results);
+  const data = objectToTableData(tab.results);
+
+  const table = useReactTable({
+    data,
+    columns: tab.columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <div className="table-results">
@@ -380,7 +387,7 @@ function ResultSetPane(props: any): React.JSX.Element {
         </div>
       )}
       {!tab.error && !tab.messages?.length && (
-        <DataTable columns={tab.columns} data={formattedData} />
+        <DataTable columns={tab.columns} data={data} table={table} />
       )}
     </div>
   );
