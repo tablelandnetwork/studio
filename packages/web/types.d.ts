@@ -1,10 +1,12 @@
 import "@tanstack/table-core";
 import { Row, RowData } from "@tanstack/react-table";
+import { ACLItem } from "./lib/validator-queries";
 
 declare module "@tanstack/table-core" {
   interface TableMeta<TData extends RowData> {
     getRowClassName: (row: Row<TData>) => string;
-    pkName: string | undefined;
+    pkName?: string;
+    accountPermissions?: ACLItem;
     editRow: (row: Row<TData>) => void;
     updateRowColumn: (
       row: Row<TData>,

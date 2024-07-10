@@ -1,6 +1,6 @@
 "use client";
 
-import { Database, type Table } from "@tableland/sdk";
+import { Database } from "@tableland/sdk";
 import { drizzle } from "drizzle-orm/d1";
 import { integer, int, sqliteTable, text, blob } from "drizzle-orm/sqlite-core";
 import { eq } from "drizzle-orm/expressions";
@@ -13,12 +13,11 @@ import {
   useReactTable,
   type Row,
 } from "@tanstack/react-table";
-import React, { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { updatedDiff } from "deep-object-diff";
-import { hasConstraint } from "@tableland/studio-store";
+import { type Schema, hasConstraint } from "@tableland/studio-store";
 import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
 import { DataTable } from "./data-table";
 import TableCell from "./table-cell";
 import { EditCell } from "./edit-cell";
@@ -37,7 +36,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { type ACLItem, type TablePermissions } from "@/lib/validator-queries";
+import { type ACLItem } from "@/lib/validator-queries";
 
 type NonEmptyArray<T> = [T, ...T[]];
 
@@ -48,11 +47,10 @@ interface Updates {
 }
 
 interface TableDataProps {
-  chainId: number;
-  tableId: string;
-  table: Table;
+  tableName: string;
+  schema: Schema;
   initialData: Array<Record<string, unknown>>;
-  tablePermissions?: TablePermissions;
+  accountPermissions?: ACLItem;
 }
 
 const tbl = new Database({
@@ -60,29 +58,14 @@ const tbl = new Database({
 });
 
 export function TableData({
-  chainId,
-  tableId,
-  table: tblTable,
+  tableName,
+  schema,
   initialData,
-  tablePermissions,
+  accountPermissions,
 }: TableDataProps) {
   const router = useRouter();
 
-  const { address } = useAccount();
-
-  const [accountPermissions, setAccountPermissions] = useState<
-    ACLItem | undefined
-  >();
-
-  useEffect(
-    () =>
-      setAccountPermissions(
-        address && tablePermissions ? tablePermissions[address] : undefined,
-      ),
-    [address, tablePermissions],
-  );
-
-  const pkName = tblTable.schema.columns.find(
+  const pkName = schema.columns.find(
     (col) =>
       hasConstraint(col, "primary key") ||
       hasConstraint(col, "primary key autoincrement"),
@@ -90,7 +73,7 @@ export function TableData({
 
   const tableSchema = useMemo(
     () =>
-      tblTable.schema.columns.reduce<Record<string, any>>((acc, col) => {
+      schema.columns.reduce<Record<string, any>>((acc, col) => {
         if (col.type === "text") {
           acc[col.name] = text(col.name);
         } else if (col.type === "integer") {
@@ -102,12 +85,14 @@ export function TableData({
         }
         return acc;
       }, {}),
-    [tblTable],
+    [schema],
   );
+
   const drizzleTable = useMemo(
-    () => sqliteTable(tblTable.name, tableSchema),
-    [tblTable, tableSchema],
+    () => sqliteTable(tableName, tableSchema),
+    [tableName, tableSchema],
   );
+
   const db = useMemo(
     () => drizzle(tbl, { schema: drizzleTable, logger: false }),
     [drizzleTable],
@@ -150,7 +135,7 @@ export function TableData({
 
   const columns:
     | Array<ColumnDef<TableRowData> | DisplayColumnDef<TableRowData>>
-    | undefined = tblTable.schema.columns.map((col) => ({
+    | undefined = schema.columns.map((col) => ({
     accessorKey: `data.${col.name}`,
     header: col.name,
     cell: TableCell,
@@ -179,6 +164,7 @@ export function TableData({
     },
     meta: {
       pkName,
+      accountPermissions,
       editRow: (rowToEdit: Row<TableRowData>) => {
         const tableRowData = rowToEdit.original;
         switch (tableRowData.type) {
@@ -357,7 +343,6 @@ export function TableData({
   return (
     <>
       <div className="flex items-center gap-x-4">
-        {address && <p>Connected as: {address}</p>}
         <div className="ml-auto flex items-center gap-x-2">
           {editing && (
             <>
@@ -370,12 +355,14 @@ export function TableData({
               </Button>
             </>
           )}
-          <Button
-            variant="outline"
-            onClick={() => table.options.meta?.addRow()}
-          >
-            Add row
-          </Button>
+          {accountPermissions?.privileges.insert && (
+            <Button
+              variant="outline"
+              onClick={() => table.options.meta?.addRow()}
+            >
+              Add row
+            </Button>
+          )}
         </div>
         {!!columns.length && (
           <DropdownMenu>
@@ -407,7 +394,6 @@ export function TableData({
         )}
       </div>
       <DataTable columns={columns} data={data} table={table} />
-      <pre>{JSON.stringify(accountPermissions, null, "\t")}</pre>
       <pre>{JSON.stringify(updates, null, "\t")}</pre>
     </>
   );

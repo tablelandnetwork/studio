@@ -26,7 +26,7 @@ export function EditCell({
   return (
     <div className="flex items-center justify-end gap-x-1">
       {/* Edit */}
-      {type === "existing" && (
+      {meta?.accountPermissions?.privileges.update && type === "existing" && (
         <Button variant="ghost" size="icon" title="Edit row" onClick={editRow}>
           <Pencil className="size-5" />
         </Button>
@@ -43,16 +43,17 @@ export function EditCell({
         </Button>
       )}
       {/* Delete */}
-      {(type === "existing" || type === "edited" || type === "new") && (
-        <Button
-          variant="ghost"
-          size="icon"
-          title="Delete row"
-          onClick={deleteRow}
-        >
-          <Trash2 className="size-5" />
-        </Button>
-      )}
+      {meta?.accountPermissions?.privileges.delete &&
+        (type === "existing" || type === "edited" || type === "new") && (
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Delete row"
+            onClick={deleteRow}
+          >
+            <Trash2 className="size-5" />
+          </Button>
+        )}
     </div>
   );
 }

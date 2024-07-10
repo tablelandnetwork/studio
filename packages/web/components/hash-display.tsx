@@ -54,7 +54,7 @@ export default function HashDisplay({
                 className="ml-1 h-auto p-1"
                 onClick={() => handleCopy(hash, hashDesc, toast)}
               >
-                <Copy className="h-4 w-4 opacity-50" />
+                <Copy className="size-4 opacity-50" />
                 <span className="sr-only">Copy {hashDesc}</span>
               </Button>
             </TooltipTrigger>

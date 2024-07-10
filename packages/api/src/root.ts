@@ -11,6 +11,7 @@ import { providersRouter } from "./routers/providers";
 import { defsRouter } from "./routers/defs";
 import { teamsRouter } from "./routers/teams";
 import { tablesRouter } from "./routers/tables";
+import { usersRouter } from "./routers/users";
 
 export function appRouter(
   store: Store,
@@ -43,6 +44,7 @@ export function appRouter(
       infura: infuraKey,
       quickNode: quickNodeKey,
     }),
+    users: usersRouter(store),
   });
 }
 
