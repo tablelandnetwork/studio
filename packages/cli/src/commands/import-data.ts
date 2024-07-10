@@ -64,7 +64,7 @@ export const handler = async (
       signer,
       aliases,
     });
-    const baseUrl = SdkHelpers.getBaseUrl(31337);
+    const baseUrl = SdkHelpers.getBaseUrl(chainId);
     const val = new Validator({ baseUrl });
     // get the table schema to help map values to their type
     const { schema } = await val.getTableById({
