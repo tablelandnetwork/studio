@@ -7,6 +7,7 @@ declare module "@tanstack/table-core" {
     getRowClassName: (row: Row<TData>) => string;
     pkName?: string;
     accountPermissions?: ACLItem;
+    pendingTxn?: boolean;
     editRow: (row: Row<TData>) => void;
     updateRowColumn: (
       row: Row<TData>,

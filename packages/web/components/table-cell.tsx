@@ -36,6 +36,7 @@ export default function TableCell({
           )
         }
         onBlur={onBlur}
+        disabled={table.options.meta?.pendingTxn}
       />
     );
   }

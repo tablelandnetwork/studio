@@ -27,7 +27,13 @@ export function EditCell({
     <div className="flex items-center justify-end gap-x-1">
       {/* Edit */}
       {meta?.accountPermissions?.privileges.update && type === "existing" && (
-        <Button variant="ghost" size="icon" title="Edit row" onClick={editRow}>
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Edit row"
+          onClick={editRow}
+          disabled={meta?.pendingTxn}
+        >
           <Pencil className="size-5" />
         </Button>
       )}
@@ -38,6 +44,7 @@ export function EditCell({
           size="icon"
           title="Revert row changes"
           onClick={revertRow}
+          disabled={meta?.pendingTxn}
         >
           <Undo2 className="size-5" />
         </Button>
@@ -50,6 +57,7 @@ export function EditCell({
             size="icon"
             title="Delete row"
             onClick={deleteRow}
+            disabled={meta?.pendingTxn}
           >
             <Trash2 className="size-5" />
           </Button>

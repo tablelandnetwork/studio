@@ -13,10 +13,10 @@ import {
   useReactTable,
   type Row,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { updatedDiff } from "deep-object-diff";
 import { type Schema, hasConstraint } from "@tableland/studio-store";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DataTable } from "./data-table";
 import TableCell from "./table-cell";
@@ -29,6 +29,7 @@ import {
   type EditedRowData,
   type DeletedRowData,
 } from "./table-data-types";
+import { useToast } from "./ui/use-toast";
 import { objectToTableData } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -37,6 +38,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { type ACLItem } from "@/lib/validator-queries";
+import { ensureError } from "@/lib/ensure-error";
 
 type NonEmptyArray<T> = [T, ...T[]];
 
@@ -64,15 +66,9 @@ export function TableData({
   accountPermissions,
 }: TableDataProps) {
   const router = useRouter();
+  const { toast } = useToast();
 
-  // TODO: support composite primary keys
-  const pkName = schema.columns.find(
-    (col) =>
-      hasConstraint(col, "primary key") ||
-      hasConstraint(col, "primary key autoincrement"),
-  )?.name;
-
-  const tableSchema = useMemo(
+  const drizzleSchema = useMemo(
     () =>
       schema.columns.reduce<Record<string, any>>((acc, col) => {
         if (col.type === "text") {
@@ -90,8 +86,8 @@ export function TableData({
   );
 
   const drizzleTable = useMemo(
-    () => sqliteTable(tableName, tableSchema),
-    [tableName, tableSchema],
+    () => sqliteTable(tableName, drizzleSchema),
+    [tableName, drizzleSchema],
   );
 
   const db = useMemo(
@@ -99,14 +95,20 @@ export function TableData({
     [drizzleTable],
   );
 
-  initialData = objectToTableData(initialData);
+  const initialRows: ExistingRowData[] = useMemo(
+    () =>
+      objectToTableData(initialData).map((row) => ({
+        type: "existing",
+        data: { ...row },
+      })),
+    [initialData],
+  );
 
-  const initialRows: ExistingRowData[] = initialData.map((row) => ({
-    type: "existing",
-    data: { ...row },
-  }));
+  const [data, setData] = useState<TableRowData[]>([]);
 
-  const [data, setData] = useState<TableRowData[]>(() => [...initialRows]);
+  useEffect(() => {
+    setData(() => [...initialRows]);
+  }, [initialRows]);
 
   const updates = useMemo(() => {
     const res = data.reduce<Updates>(
@@ -147,6 +149,15 @@ export function TableData({
   }));
   columns.push({ id: "edit", cell: EditCell });
 
+  // TODO: support composite primary keys
+  const pkName = schema.columns.find(
+    (col) =>
+      hasConstraint(col, "primary key") ||
+      hasConstraint(col, "primary key autoincrement"),
+  )?.name;
+
+  const [pendingTxn, setPendingTxn] = useState(false);
+
   const table = useReactTable({
     data,
     columns,
@@ -164,6 +175,7 @@ export function TableData({
     meta: {
       pkName,
       accountPermissions,
+      pendingTxn,
       editRow: (rowToEdit: Row<TableRowData>) => {
         const tableRowData = rowToEdit.original;
         switch (tableRowData.type) {
@@ -338,13 +350,17 @@ export function TableData({
       ...sqlUpdateItems,
       ...sqlDeleteItems,
     ] as NonEmptyArray<SQLItems>;
+    setPendingTxn(true);
     db.batch(batch)
-      .then((res) => {
-        router.refresh();
-      })
+      .then(() => router.refresh())
       .catch((err) => {
-        console.log("ERR", err);
-      });
+        toast({
+          title: "Error executing SQL statements",
+          description: ensureError(err).message,
+          variant: "destructive",
+        });
+      })
+      .finally(() => setPendingTxn(false));
   };
 
   return (
@@ -353,10 +369,14 @@ export function TableData({
         <div className="ml-auto flex items-center gap-x-2">
           {editing && (
             <>
-              <Button onClick={executeStatements}>Save</Button>
+              <Button onClick={executeStatements} disabled={pendingTxn}>
+                {pendingTxn && <Loader2 className="mr-2 size-5 animate-spin" />}
+                Save
+              </Button>
               <Button
                 variant="secondary"
                 onClick={() => table.options.meta?.revertAll()}
+                disabled={pendingTxn}
               >
                 Revert all
               </Button>
@@ -366,6 +386,7 @@ export function TableData({
             <Button
               variant="outline"
               onClick={() => table.options.meta?.addRow()}
+              disabled={pendingTxn}
             >
               Add row
             </Button>
