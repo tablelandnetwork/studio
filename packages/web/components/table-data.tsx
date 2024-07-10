@@ -3,7 +3,7 @@
 import { Database } from "@tableland/sdk";
 import { drizzle } from "drizzle-orm/d1";
 import { integer, int, sqliteTable, text, blob } from "drizzle-orm/sqlite-core";
-import { eq } from "drizzle-orm/expressions";
+import { eq, and } from "drizzle-orm/expressions";
 import {
   type ColumnDef,
   type DisplayColumnDef,
@@ -65,6 +65,7 @@ export function TableData({
 }: TableDataProps) {
   const router = useRouter();
 
+  // TODO: support composite primary keys
   const pkName = schema.columns.find(
     (col) =>
       hasConstraint(col, "primary key") ||
@@ -144,9 +145,7 @@ export function TableData({
       type: col.type === "integer" || col.type === "int" ? "number" : "string",
     },
   }));
-  if (pkName) {
-    columns.push({ id: "edit", cell: EditCell });
-  }
+  columns.push({ id: "edit", cell: EditCell });
 
   const table = useReactTable({
     data,
@@ -306,6 +305,16 @@ export function TableData({
   });
 
   const executeStatements = () => {
+    const genWhereConstraints = (row: EditedRowData | DeletedRowData) => {
+      if (pkName) {
+        return eq(drizzleTable[pkName], row.originalData.data[pkName]);
+      }
+      const eqs = Object.entries(row.originalData.data).map(([key, value]) => {
+        return eq(drizzleTable[key], value);
+      });
+      return and(...eqs);
+    };
+
     const sqlInsertItems = updates.new.map((row) => {
       return db.insert(drizzleTable).values(row.data);
     });
@@ -315,23 +324,21 @@ export function TableData({
         return db
           .update(drizzleTable)
           .set(row.diff!)
-          .where(eq(drizzleTable[pkName!], row.originalData.data[pkName!]));
+          .where(genWhereConstraints(row));
       });
     const sqlDeleteItems = updates.deleted.map((row) => {
-      return db
-        .delete(drizzleTable)
-        .where(eq(drizzleTable[pkName!], row.originalData.data[pkName!]));
+      return db.delete(drizzleTable).where(genWhereConstraints(row));
     });
-    type Hmm =
+    type SQLItems =
       | (typeof sqlInsertItems)[number]
       | (typeof sqlUpdateItems)[number]
       | (typeof sqlDeleteItems)[number];
-    const ugh = [
+    const batch = [
       ...sqlInsertItems,
       ...sqlUpdateItems,
       ...sqlDeleteItems,
-    ] as NonEmptyArray<Hmm>;
-    db.batch(ugh)
+    ] as NonEmptyArray<SQLItems>;
+    db.batch(batch)
       .then((res) => {
         router.refresh();
       })
