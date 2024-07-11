@@ -421,8 +421,7 @@ export function TableData({
           </DropdownMenu>
         )}
       </div>
-      <DataTable columns={columns} data={data} table={table} />
-      <pre>{JSON.stringify(updates, null, "\t")}</pre>
+      <DataTable table={table} />
     </>
   );
 }

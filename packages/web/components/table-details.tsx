@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SQLLogs from "./sql-logs";
 import { TableData } from "./table-data";
 import HashDisplay from "./hash-display";
+import ACL from "./acl";
 import { cn } from "@/lib/utils";
 import DefDetails from "@/components/def-details";
 import { type TablePermissions } from "@/lib/validator-queries";
@@ -55,9 +56,7 @@ export default function TableDetails({
 
   const authorizedStudioUser = useMemo(
     () =>
-      authorizedStudioUsers?.find(
-        (item) => item.user.address === addressPostMount,
-      ),
+      addressPostMount ? authorizedStudioUsers[addressPostMount] : undefined,
     [addressPostMount, authorizedStudioUsers],
   );
 
@@ -168,7 +167,11 @@ export default function TableDetails({
         <DefDetails name={displayName} schema={schema} />
       </TabsContent>
       <TabsContent value="permissions" className="space-y-4">
-        <pre>{JSON.stringify(tablePermissions, null, 2)}</pre>
+        <ACL
+          acl={Object.values(tablePermissions)}
+          authorizedStudioUsers={authorizedStudioUsers}
+          owner={owner}
+        />
       </TabsContent>
     </Tabs>
   );

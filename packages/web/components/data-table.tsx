@@ -1,8 +1,4 @@
-import {
-  type ColumnDef,
-  flexRender,
-  type Table as TSTable,
-} from "@tanstack/react-table";
+import { flexRender, type Table as TSTable } from "@tanstack/react-table";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,17 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface DataTableProps<TData, TValue> {
-  columns: Array<ColumnDef<TData, TValue>>;
-  data: TData[];
+interface DataTableProps<TData> {
   table: TSTable<TData>;
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-  table,
-}: DataTableProps<TData, TValue>) {
+export function DataTable<TData>({ table }: DataTableProps<TData>) {
   return (
     <div>
       <div className="mt-4 rounded-md border">
@@ -68,7 +58,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
                   No results.

@@ -87,9 +87,7 @@ export default async function Table({
   const openSeaLink = openSeaLinks.get(chainId);
 
   let tablePermissions: TablePermissions | undefined;
-  let authorizedStudioUsers:
-    | RouterOutputs["users"]["usersForAddresses"]
-    | undefined;
+  let authorizedStudioUsers: RouterOutputs["users"]["usersForAddresses"] = {};
   let data: Result<Record<string, unknown>> | undefined;
   let error: Error | undefined;
   try {
@@ -100,7 +98,7 @@ export default async function Table({
       ? await api.users.usersForAddresses({
           addresses: authorizedAddresses,
         })
-      : [];
+      : {};
     const tbl = new Database({ baseUrl });
     data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   } catch (err) {
@@ -111,9 +109,7 @@ export default async function Table({
     await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);
 
-  const authorizedStudioUser = authorizedStudioUsers?.find(
-    (item) => item.user.address === owner,
-  );
+  const ownerStudioUser = owner ? authorizedStudioUsers[owner] : undefined;
 
   const displayName = defData?.name ?? tableName;
 
@@ -197,10 +193,10 @@ export default async function Table({
             <MetricCardContent>
               <HashDisplay className="text-3xl text-foreground" hash={owner} />
             </MetricCardContent>
-            {authorizedStudioUser && (
+            {ownerStudioUser && (
               <MetricCardFooter>
-                Studio user {authorizedStudioUser.team.name}
-                {authorizedStudioUser.user.teamId === session.auth?.user.teamId
+                Studio user {ownerStudioUser.team.name}
+                {ownerStudioUser.user.teamId === session.auth?.user.teamId
                   ? " (you)"
                   : ""}
               </MetricCardFooter>

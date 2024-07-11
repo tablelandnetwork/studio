@@ -8,7 +8,14 @@ export function usersRouter(store: Store) {
       .input(z.object({ addresses: z.array(z.string().trim()).min(1) }))
       .query(async ({ input }) => {
         const users = await store.users.usersForAddresses(input.addresses);
-        return users;
+        const res = users.reduce<Record<string, (typeof users)[number]>>(
+          (acc, item) => {
+            acc[item.user.address] = item;
+            return acc;
+          },
+          {},
+        );
+        return res;
       }),
   });
 }

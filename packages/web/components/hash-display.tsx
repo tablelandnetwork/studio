@@ -19,7 +19,7 @@ export default function HashDisplay({
   hashDesc = "address",
   className,
   ...rest
-}: HTMLProps<HTMLSpanElement> & {
+}: HTMLProps<HTMLDivElement> & {
   hash: string;
   numCharacters?: number;
   copy?: boolean;
@@ -32,7 +32,13 @@ export default function HashDisplay({
       : hash;
 
   return (
-    <div className="flex items-center justify-center">
+    <div
+      className={cn(
+        "flex items-center justify-center text-sm text-muted-foreground",
+        className,
+      )}
+      {...rest}
+    >
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>

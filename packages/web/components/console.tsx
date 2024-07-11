@@ -386,9 +386,7 @@ function ResultSetPane(props: any): React.JSX.Element {
           })}
         </div>
       )}
-      {!tab.error && !tab.messages?.length && (
-        <DataTable columns={tab.columns} data={data} table={table} />
-      )}
+      {!tab.error && !tab.messages?.length && <DataTable table={table} />}
     </div>
   );
 }
