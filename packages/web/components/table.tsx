@@ -87,7 +87,9 @@ export default async function Table({
   const openSeaLink = openSeaLinks.get(chainId);
 
   let tablePermissions: TablePermissions | undefined;
-  let authorizedStudioUsers: RouterOutputs["users"]["usersForAddresses"] = {};
+  let authorizedStudioUsers:
+    | RouterOutputs["users"]["usersForAddresses"]
+    | undefined;
   let data: Result<Record<string, unknown>> | undefined;
   let error: Error | undefined;
   try {
@@ -98,7 +100,7 @@ export default async function Table({
       ? await api.users.usersForAddresses({
           addresses: authorizedAddresses,
         })
-      : {};
+      : undefined;
     const tbl = new Database({ baseUrl });
     data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   } catch (err) {
@@ -109,7 +111,7 @@ export default async function Table({
     await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);
 
-  const ownerStudioUser = owner ? authorizedStudioUsers[owner] : undefined;
+  const ownerStudioUser = owner ? authorizedStudioUsers?.get(owner) : undefined;
 
   const displayName = defData?.name ?? tableName;
 

@@ -12,9 +12,15 @@ import { DataTable } from "./data-table";
 import HashDisplay from "./hash-display";
 import { type ACLItem } from "@/lib/validator-queries";
 
-type TableRowData = ACLItem & {
-  isOwner: boolean;
-} & RouterOutputs["users"]["usersForAddresses"][string];
+type UserValue =
+  RouterOutputs["users"]["usersForAddresses"] extends Map<any, infer I>
+    ? I
+    : never;
+
+type TableRowData = ACLItem &
+  Partial<UserValue> & {
+    isOwner: boolean;
+  };
 
 interface Props {
   acl: ACLItem[];
@@ -24,7 +30,7 @@ interface Props {
 
 export default function ACL({ acl, authorizedStudioUsers, owner }: Props) {
   const data: TableRowData[] = acl.map((item) => {
-    const studioUser = authorizedStudioUsers[item.controller];
+    const studioUser = authorizedStudioUsers.get(item.controller);
     const isOwner = item.controller === owner;
     return {
       ...item,
@@ -116,5 +122,9 @@ function UserCell({
     setValue(initialValue);
   }, [initialValue]);
 
-  return <Link href={`/${row.original.team.slug}`}>{value}</Link>;
+  return row.original.team ? (
+    <Link href={`/${row.original.team.slug}`}>{value}</Link>
+  ) : (
+    <span>{value}</span>
+  );
 }

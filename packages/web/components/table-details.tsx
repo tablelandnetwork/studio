@@ -56,7 +56,9 @@ export default function TableDetails({
 
   const authorizedStudioUser = useMemo(
     () =>
-      addressPostMount ? authorizedStudioUsers[addressPostMount] : undefined,
+      addressPostMount
+        ? authorizedStudioUsers.get(addressPostMount)
+        : undefined,
     [addressPostMount, authorizedStudioUsers],
   );
 
