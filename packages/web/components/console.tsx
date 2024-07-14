@@ -83,7 +83,7 @@ export function Console({ environmentId }: { environmentId: string }) {
           tab.error = null;
           tab.messages = [];
           tab.columns = columns;
-          tab.results = data.results;
+          tab.results = objectToTableData(data.results);
 
           // if there is a transactionHash it means that this is the response from a mutation
           // the template rendering logic will key off the existence of messages
@@ -219,11 +219,7 @@ export function Console({ environmentId }: { environmentId: string }) {
                 loading={loading}
               />
 
-              <ResultSetPane
-                tab={tab}
-                results={tab.results}
-                loading={loading}
-              />
+              <ResultSetPane tab={tab} loading={loading} />
             </div>
           );
         })}
@@ -363,10 +359,9 @@ function TabLabel(props: {
 
 function ResultSetPane(props: any): React.JSX.Element {
   const { tab } = props;
-  const data = objectToTableData(tab.results);
 
   const table = useReactTable({
-    data,
+    data: tab.results,
     columns: tab.columns,
     getCoreRowModel: getCoreRowModel(),
   });
