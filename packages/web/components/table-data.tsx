@@ -104,10 +104,10 @@ export function TableData({
     return res;
   }, [data]);
 
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-
   const editing =
     !!updates.new.length || !!updates.edited.length || !!updates.deleted.length;
+
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const columns:
     | Array<ColumnDef<TableRowData> | DisplayColumnDef<TableRowData>>
@@ -186,7 +186,6 @@ export function TableData({
                     tableRowData.originalData.data,
                     data,
                   );
-                  console.log("DIFF", diff);
                   return {
                     ...tableRowData,
                     data,
