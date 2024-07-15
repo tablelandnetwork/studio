@@ -1,6 +1,6 @@
 "use client";
 
-import { Database } from "@tableland/sdk";
+import { Database, helpers } from "@tableland/sdk";
 import { drizzle } from "drizzle-orm/d1";
 import { integer, int, sqliteTable, text, blob } from "drizzle-orm/sqlite-core";
 import { eq, and } from "drizzle-orm/expressions";
@@ -18,6 +18,7 @@ import { updatedDiff } from "deep-object-diff";
 import { type Schema, hasConstraint } from "@tableland/studio-store";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getNetwork, getWalletClient, switchNetwork } from "wagmi/actions";
 import { DataTable } from "./data-table";
 import TableCell from "./table-cell";
 import { EditCell } from "./edit-cell";
@@ -39,6 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { type ACLItem } from "@/lib/validator-queries";
 import { ensureError } from "@/lib/ensure-error";
+import { walletClientToSigner } from "@/lib/wagmi-ethers";
 
 type NonEmptyArray<T> = [T, ...T[]];
 
@@ -49,17 +51,15 @@ interface Updates {
 }
 
 interface TableDataProps {
+  chainId: number;
   tableName: string;
   schema: Schema;
   initialData: Array<Record<string, unknown>>;
   accountPermissions?: ACLItem;
 }
 
-const tbl = new Database({
-  autoWait: true,
-});
-
 export function TableData({
+  chainId,
   tableName,
   schema,
   initialData,
@@ -67,33 +67,6 @@ export function TableData({
 }: TableDataProps) {
   const router = useRouter();
   const { toast } = useToast();
-
-  const drizzleSchema = useMemo(
-    () =>
-      schema.columns.reduce<Record<string, any>>((acc, col) => {
-        if (col.type === "text") {
-          acc[col.name] = text(col.name);
-        } else if (col.type === "integer") {
-          acc[col.name] = integer(col.name);
-        } else if (col.type === "int") {
-          acc[col.name] = int(col.name);
-        } else if (col.type === "blob") {
-          acc[col.name] = blob(col.name);
-        }
-        return acc;
-      }, {}),
-    [schema],
-  );
-
-  const drizzleTable = useMemo(
-    () => sqliteTable(tableName, drizzleSchema),
-    [tableName, drizzleSchema],
-  );
-
-  const db = useMemo(
-    () => drizzle(tbl, { schema: drizzleTable, logger: false }),
-    [drizzleTable],
-  );
 
   const initialRows: ExistingRowData[] = useMemo(
     () =>
@@ -139,7 +112,7 @@ export function TableData({
   const columns:
     | Array<ColumnDef<TableRowData> | DisplayColumnDef<TableRowData>>
     | undefined = schema.columns.map((col) => ({
-    accessorKey: `data.${col.name}`,
+    accessorFn: (row) => row.data[col.name] ?? "",
     header: col.name,
     cell: TableCell,
     meta: {
@@ -316,7 +289,43 @@ export function TableData({
     },
   });
 
-  const executeStatements = () => {
+  const executeStatements = async () => {
+    const drizzleSchema = schema.columns.reduce<Record<string, any>>(
+      (acc, col) => {
+        if (col.type === "text") {
+          acc[col.name] = text(col.name);
+        } else if (col.type === "integer") {
+          acc[col.name] = integer(col.name);
+        } else if (col.type === "int") {
+          acc[col.name] = int(col.name);
+        } else if (col.type === "blob") {
+          acc[col.name] = blob(col.name);
+        }
+        return acc;
+      },
+      {},
+    );
+    const drizzleTable = sqliteTable(tableName, drizzleSchema);
+
+    const currentNetwork = getNetwork();
+    if (currentNetwork.chain?.id !== chainId) {
+      await switchNetwork({ chainId });
+    }
+
+    const walletClient = await getWalletClient({
+      chainId,
+    });
+    if (!walletClient) {
+      throw new Error("Unable to get wallet client");
+    }
+    const signer = walletClientToSigner(walletClient);
+    const tbl = new Database({
+      signer,
+      baseUrl: helpers.getBaseUrl(chainId),
+      autoWait: true,
+    });
+    const db = drizzle(tbl, { schema: drizzleTable, logger: false });
+
     const genWhereConstraints = (row: EditedRowData | DeletedRowData) => {
       if (pkName) {
         return eq(drizzleTable[pkName], row.originalData.data[pkName]);
@@ -350,8 +359,12 @@ export function TableData({
       ...sqlUpdateItems,
       ...sqlDeleteItems,
     ] as NonEmptyArray<SQLItems>;
+    await db.batch(batch);
+  };
+
+  const handleSave = () => {
     setPendingTxn(true);
-    db.batch(batch)
+    executeStatements()
       .then(() => router.refresh())
       .catch((err) => {
         toast({
@@ -369,7 +382,7 @@ export function TableData({
         <div className="ml-auto flex items-center gap-x-2">
           {editing && (
             <>
-              <Button onClick={executeStatements} disabled={pendingTxn}>
+              <Button onClick={handleSave} disabled={pendingTxn}>
                 {pendingTxn && <Loader2 className="mr-2 size-5 animate-spin" />}
                 Save
               </Button>

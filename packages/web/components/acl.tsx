@@ -46,7 +46,7 @@ export default function ACL({ acl, authorizedStudioUsers, owner }: Props) {
       cell: AddressCell,
     },
     {
-      accessorKey: "team.name",
+      accessorFn: (row) => row.team?.name ?? "",
       header: "Studio User",
       cell: UserCell,
     },

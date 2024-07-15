@@ -156,6 +156,7 @@ export default function TableDetails({
       </div>
       <TabsContent value="data">
         <TableData
+          chainId={chainId}
           tableName={tableName}
           schema={schema}
           initialData={data}
