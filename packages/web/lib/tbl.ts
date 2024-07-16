@@ -1,5 +1,5 @@
 import { Database, helpers } from "@tableland/sdk";
-import { databaseAliases } from "./aliases";
+import { databaseAliases } from "./aliases-readonly";
 import { signer } from "./wallet";
 
 export const tbl = new Database({

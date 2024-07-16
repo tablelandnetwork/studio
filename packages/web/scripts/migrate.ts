@@ -5,7 +5,7 @@ import { readFile, readdir, stat } from "fs/promises";
 import path from "path";
 import { Database } from "@tableland/sdk";
 import { signer } from "@/lib/wallet";
-import { databaseAliases } from "@/lib/aliases";
+import { databaseAliases } from "@/lib/aliases-writable";
 
 const migrationsFolder = "drizzle";
 
