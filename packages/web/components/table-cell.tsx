@@ -30,7 +30,7 @@ export default function TableCell({
         value={value}
         onChange={(e) =>
           setValue(
-            columnMeta?.type === "number"
+            columnMeta?.type === "number" && !isNaN(e.target.valueAsNumber)
               ? e.target.valueAsNumber
               : e.target.value,
           )

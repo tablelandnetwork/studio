@@ -9,7 +9,6 @@ import {
   type DisplayColumnDef,
   type VisibilityState,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
   type Row,
 } from "@tanstack/react-table";
@@ -135,13 +134,7 @@ export function TableData({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    initialState: {
-      pagination: {
-        pageSize: 15,
-      },
-    },
     state: {
       columnVisibility,
     },
