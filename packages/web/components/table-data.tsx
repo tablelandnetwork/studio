@@ -15,7 +15,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { updatedDiff } from "deep-object-diff";
 import { type Schema, hasConstraint } from "@tableland/studio-store";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { AlertTriangle, ChevronDown, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getNetwork, getWalletClient, switchNetwork } from "wagmi/actions";
 import { DataTable } from "./data-table";
@@ -40,6 +40,12 @@ import {
 import { type ACLItem } from "@/lib/validator-queries";
 import { ensureError } from "@/lib/ensure-error";
 import { walletClientToSigner } from "@/lib/wagmi-ethers";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type NonEmptyArray<T> = [T, ...T[]];
 
@@ -376,6 +382,26 @@ export function TableData({
     <>
       <div className="flex items-center gap-x-4">
         <div className="ml-auto flex items-center gap-x-2">
+          {!uniqueColumnName && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <AlertTriangle className="shrink-0" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-60">
+                  Studio was unable to identify a unique column for this table.
+                  This is due to the lack of a primary key or unique constraint,
+                  or because the primary key or unique constraint is a composite
+                  constraint (Studio will support composite constraints soon!).
+                  <br />
+                  <br />
+                  If your table contains rows with completely duplicate data,
+                  and you edit or delete one of those rows, all duplicate rows
+                  will be edited or deleted. Proceed with caution.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           {editing && (
             <>
               <Button onClick={handleSave} disabled={pendingTxn}>
