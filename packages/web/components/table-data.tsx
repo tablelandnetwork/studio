@@ -121,12 +121,13 @@ export function TableData({
   }));
   columns.push({ id: "edit", cell: EditCell });
 
-  // TODO: support composite primary keys
-  const pkName = schema.columns.find(
-    (col) =>
-      hasConstraint(col, "primary key") ||
-      hasConstraint(col, "primary key autoincrement"),
-  )?.name;
+  // TODO: support composite constraints
+  const uniqueColumnName =
+    schema.columns.find(
+      (col) =>
+        hasConstraint(col, "primary key") ||
+        hasConstraint(col, "primary key autoincrement"),
+    )?.name ?? schema.columns.find((col) => hasConstraint(col, "unique"))?.name;
 
   const [pendingTxn, setPendingTxn] = useState(false);
 
@@ -139,7 +140,7 @@ export function TableData({
       columnVisibility,
     },
     meta: {
-      pkName,
+      pkName: uniqueColumnName,
       accountPermissions,
       pendingTxn,
       editRow: (rowToEdit: Row<TableRowData>) => {
@@ -319,8 +320,11 @@ export function TableData({
     const db = drizzle(tbl, { schema: drizzleTable, logger: false });
 
     const genWhereConstraints = (row: EditedRowData | DeletedRowData) => {
-      if (pkName) {
-        return eq(drizzleTable[pkName], row.originalData.data[pkName]);
+      if (uniqueColumnName) {
+        return eq(
+          drizzleTable[uniqueColumnName],
+          row.originalData.data[uniqueColumnName],
+        );
       }
       const eqs = Object.entries(row.originalData.data).map(([key, value]) => {
         return eq(drizzleTable[key], value);
