@@ -70,7 +70,7 @@ export default async function RootLayout({
             <body className="flex min-h-screen flex-col">
               <Hotjar></Hotjar>
               <TRPCReactProvider headers={headers()}>
-                <header className="sticky top-0 z-50 flex items-center justify-between gap-x-10 border-b border-[#080A1E] bg-[#202132] px-4 py-3">
+                <header className="sticky top-0 z-50 flex items-center justify-between gap-x-10 bg-[#75b6b5] px-4 py-3 text-primary">
                   <PrimaryHeaderItem userTeams={teams} />
                   <NavPrimary className="ml-auto" />
                   <Profile />

@@ -71,7 +71,7 @@ export default function DeleteButton({
           <DialogClose asChild>
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               disabled={deleteTeam.isPending}
             >
               Cancel

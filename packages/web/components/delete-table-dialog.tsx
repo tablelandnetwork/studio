@@ -54,7 +54,7 @@ export function DeleteTableDialog({
           <DialogClose asChild>
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               disabled={deleteTable.isPending}
             >
               Cancel

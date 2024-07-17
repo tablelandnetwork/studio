@@ -126,13 +126,18 @@ export default function PrimaryHeaderItem({
 
   const items: React.ReactNode[] = [
     <Link href="/" key="logo" className="shrink-0">
-      <Image src={logo} alt="Tableland Studio" priority={true} />
+      <Image
+        src={logo}
+        alt="Tableland Studio"
+        priority={true}
+        className="fill-primary stroke-primary"
+      />
     </Link>,
   ];
 
   if (team) {
     items.push(
-      <p className="text-base text-muted-foreground" key="divider-1">
+      <p className="text-base" key="divider-1">
         /
       </p>,
       <div key="team-switcher" className="flex items-center gap-x-2">
@@ -157,7 +162,7 @@ export default function PrimaryHeaderItem({
     );
     if (project) {
       items.push(
-        <p className="text-base text-muted-foreground" key="divider-2">
+        <p className="text-base" key="divider-2">
           /
         </p>,
         <div key="project-switcher" className="flex items-center gap-x-2">
@@ -181,7 +186,7 @@ export default function PrimaryHeaderItem({
     }
     if (project && env) {
       items.push(
-        <p className="text-base text-muted-foreground" key="divider-3">
+        <p className="text-base" key="divider-3">
           /
         </p>,
         <div key="environment-switcher" className="flex items-center gap-x-2">
