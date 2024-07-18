@@ -151,6 +151,7 @@ export default function PrimaryHeaderItem({
           teams={userTeams}
           onTeamSelected={onTeamSelected}
           onNewTeamSelected={onNewTeamSelected}
+          className="font-medium"
         />
       </div>,
       <NewTeamForm
@@ -173,6 +174,7 @@ export default function PrimaryHeaderItem({
             projects={projects}
             onProjectSelected={onProjectSelected}
             onNewProjectSelected={foundTeam ? onNewProjectSelected : undefined}
+            className="font-medium"
           />
         </div>,
         <NewProjectForm
@@ -198,6 +200,7 @@ export default function PrimaryHeaderItem({
             envs={envsQuery.data}
             onEnvSelected={onEnvironmentSelected}
             onNewEnvSelected={foundTeam ? onNewEnvironmentSelected : undefined}
+            className="font-medium"
           />
         </div>,
         <NewEnvForm

@@ -20,18 +20,15 @@ import {
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 
-type PopoverTriggerProps = React.ComponentPropsWithoutRef<
-  typeof PopoverTrigger
->;
-
-interface ProjectSwitcherProps extends PopoverTriggerProps {
+type ProjectSwitcherProps = {
   variant?: "navigation" | "select";
   team?: schema.Team;
   selectedProject?: schema.Project;
   projects?: schema.Project[];
   onProjectSelected?: (project: schema.Project) => void;
   onNewProjectSelected?: () => void;
-}
+  disabled?: boolean;
+} & React.HTMLAttributes<HTMLDivElement>;
 
 export default function ProjectSwitcher({
   className,
@@ -42,11 +39,12 @@ export default function ProjectSwitcher({
   onProjectSelected,
   onNewProjectSelected,
   disabled,
+  ...rest
 }: ProjectSwitcherProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="flex items-center gap-1">
+    <div className={cn("flex items-center gap-1", className)} {...rest}>
       {variant === "navigation" && team && selectedProject && (
         <Link
           href={`/${team.slug}/${selectedProject.slug}`}
@@ -66,7 +64,6 @@ export default function ProjectSwitcher({
             className={cn(
               "justify-between",
               variant === "navigation" && "px-0",
-              className,
             )}
           >
             {variant === "select" &&

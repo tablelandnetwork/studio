@@ -20,11 +20,7 @@ import {
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 
-type PopoverTriggerProps = React.ComponentPropsWithoutRef<
-  typeof PopoverTrigger
->;
-
-interface EnvSwitcherProps extends PopoverTriggerProps {
+type EnvSwitcherProps = {
   variant?: "navigation" | "select";
   team?: schema.Team;
   project?: schema.Project;
@@ -32,7 +28,8 @@ interface EnvSwitcherProps extends PopoverTriggerProps {
   envs?: schema.Environment[];
   onEnvSelected?: (env: schema.Environment) => void;
   onNewEnvSelected?: () => void;
-}
+  disabled?: boolean;
+} & React.HTMLAttributes<HTMLDivElement>;
 
 export default function EnvSwitcher({
   className,
@@ -44,11 +41,12 @@ export default function EnvSwitcher({
   onEnvSelected,
   onNewEnvSelected,
   disabled,
+  ...rest
 }: EnvSwitcherProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="flex items-center gap-1">
+    <div className={cn("flex items-center gap-1", className)} {...rest}>
       {variant === "navigation" && team && project && selectedEnv && (
         <Link
           href={`/${team.slug}/${project.slug}/${selectedEnv.slug}`}
@@ -68,7 +66,6 @@ export default function EnvSwitcher({
             className={cn(
               "justify-between",
               variant === "navigation" && "px-0",
-              className,
             )}
           >
             {variant === "select" &&
