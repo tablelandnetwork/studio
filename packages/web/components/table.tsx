@@ -1,6 +1,5 @@
 import { Database, type Schema, helpers, type Result } from "@tableland/sdk";
 import { type schema } from "@tableland/studio-store";
-import { type ColumnDef } from "@tanstack/react-table";
 import {
   Blocks,
   Coins,
@@ -9,10 +8,12 @@ import {
   Rocket,
   Table2,
   Workflow,
+  Crown,
 } from "lucide-react";
 import Link from "next/link";
-import { type RouterOutputs } from "@tableland/studio-api";
-import { DataTable } from "./data-table";
+import { getSession, type RouterOutputs } from "@tableland/studio-api";
+import { cookies, headers } from "next/headers";
+import { cache } from "react";
 import {
   MetricCard,
   MetricCardContent,
@@ -20,32 +21,22 @@ import {
   MetricCardHeader,
   MetricCardTitle,
 } from "./metric-card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import SQLLogs from "./sql-logs";
 import HashDisplay from "./hash-display";
 import { CardContent } from "./ui/card";
 import ProjectsReferencingTable from "./projects-referencing-table";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import TableDetails from "./table-details";
+import DefDetails from "./def-details";
 import { blockExplorers } from "@/lib/block-explorers";
 import { openSeaLinks } from "@/lib/open-sea";
 import { chainsMap } from "@/lib/chains-map";
-import { cn, objectToTableData } from "@/lib/utils";
 import { TimeSince } from "@/components/time";
 import { api } from "@/trpc/server";
-import DefDetails from "@/components/def-details";
 import { ensureError } from "@/lib/ensure-error";
-
-interface Props {
-  tableName: string;
-  chainId: number;
-  tableId: string;
-  createdAt: Date;
-  schema: Schema;
-  environment?: schema.Environment;
-  defData?: DefData;
-  deploymentData?: DeploymentData;
-  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
-}
+import {
+  type TablePermissions,
+  getTablePermissions,
+} from "@/lib/validator-queries";
 
 interface DefData {
   id: string;
@@ -61,10 +52,24 @@ interface DeploymentData {
   txnHash: string | null;
 }
 
+interface Props {
+  tableName: string;
+  chainId: number;
+  tableId: string;
+  owner?: string;
+  createdAt: Date;
+  schema: Schema;
+  environment?: schema.Environment;
+  defData?: DefData;
+  deploymentData?: DeploymentData;
+  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
+}
+
 export default async function Table({
   tableName,
   chainId,
   tableId,
+  owner,
   createdAt,
   schema,
   environment,
@@ -72,32 +77,43 @@ export default async function Table({
   deploymentData,
   isAuthorized,
 }: Props) {
+  const session = await cache(getSession)({
+    headers: headers(),
+    cookies: cookies(),
+  });
+
   const chain = chainsMap.get(chainId);
   const blockExplorer = blockExplorers.get(chainId);
   const openSeaLink = openSeaLinks.get(chainId);
 
+  let tablePermissions: TablePermissions | undefined;
+  let authorizedStudioUsers:
+    | RouterOutputs["users"]["usersForAddresses"]
+    | undefined;
   let data: Result<Record<string, unknown>> | undefined;
   let error: Error | undefined;
   try {
     const baseUrl = helpers.getBaseUrl(chainId);
+    tablePermissions = await getTablePermissions(chainId, tableId);
+    const authorizedAddresses = Object.keys(tablePermissions);
+    authorizedStudioUsers = authorizedAddresses.length
+      ? await api.users.usersForAddresses({
+          addresses: authorizedAddresses,
+        })
+      : undefined;
     const tbl = new Database({ baseUrl });
     data = await tbl.prepare(`SELECT * FROM ${tableName};`).all();
   } catch (err) {
     error = ensureError(err);
   }
 
-  const formattedData = data ? objectToTableData(data.results) : undefined;
-  const columns: Array<ColumnDef<unknown>> | undefined = data
-    ? data.results.length
-      ? Object.keys(data.results[0] as object).map((col) => ({
-          accessorKey: col,
-          header: col,
-        }))
-      : []
-    : undefined;
   const deploymentReferences = (
     await api.deployments.deploymentReferences({ chainId, tableId })
   ).filter((p) => p.environment.id !== environment?.id);
+
+  const ownerStudioUser = owner ? authorizedStudioUsers?.get(owner) : undefined;
+
+  const displayName = defData?.name ?? tableName;
 
   return (
     <div className="flex-1 space-y-4">
@@ -165,6 +181,30 @@ export default async function Table({
             </MetricCardFooter>
           )}
         </MetricCard>
+        {owner && (
+          <MetricCard>
+            <MetricCardHeader
+              className="flex flex-row items-center gap-2 space-y-0"
+              copyValue={owner}
+              valueDesc="Owner address"
+              tooltipText="Click to copy owner address"
+            >
+              <Crown className="h-4 w-4 text-muted-foreground" />
+              <MetricCardTitle>Owner</MetricCardTitle>
+            </MetricCardHeader>
+            <MetricCardContent>
+              <HashDisplay className="text-3xl text-foreground" hash={owner} />
+            </MetricCardContent>
+            {ownerStudioUser && (
+              <MetricCardFooter>
+                Studio user {ownerStudioUser.team.name}
+                {ownerStudioUser.user.teamId === session.auth?.user.teamId
+                  ? " (you)"
+                  : ""}
+              </MetricCardFooter>
+            )}
+          </MetricCard>
+        )}
         {deploymentData?.txnHash && (
           <MetricCard>
             <MetricCardHeader
@@ -228,35 +268,22 @@ export default async function Table({
           </MetricCard>
         )}
       </div>
-
-      <Tabs defaultValue={data ? "data" : "definition"} className="py-4">
-        <TabsList className={cn(!data && "bg-transparent")}>
-          {data && formattedData && columns ? (
-            <>
-              <TabsTrigger value="data">Table Data</TabsTrigger>
-              <TabsTrigger value="logs">SQL Logs</TabsTrigger>
-              <TabsTrigger value="definition">Schema</TabsTrigger>
-            </>
-          ) : (
-            <h2 className="text-base font-medium text-foreground">
-              Definition
-            </h2>
-          )}
-        </TabsList>
-        {formattedData && columns && (
-          <TabsContent value="data">
-            <DataTable columns={columns} data={formattedData} />
-          </TabsContent>
-        )}
-        {data && (
-          <TabsContent value="logs">
-            <SQLLogs tables={[{ chainId, tableId }]} />
-          </TabsContent>
-        )}
-        <TabsContent value="definition" className="space-y-4">
-          <DefDetails name={defData?.name ?? tableName} schema={schema} />
-        </TabsContent>
-      </Tabs>
+      {owner && authorizedStudioUsers && tablePermissions && data ? (
+        <TableDetails
+          displayName={displayName}
+          tableName={tableName}
+          schema={schema}
+          chainId={chainId}
+          tableId={tableId}
+          owner={owner}
+          authorizedStudioUsers={authorizedStudioUsers}
+          tablePermissions={tablePermissions}
+          data={data.results}
+          auth={session.auth}
+        />
+      ) : (
+        <DefDetails name={displayName} schema={schema} />
+      )}
     </div>
   );
 }

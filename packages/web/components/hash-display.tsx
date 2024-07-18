@@ -19,7 +19,7 @@ export default function HashDisplay({
   hashDesc = "address",
   className,
   ...rest
-}: HTMLProps<HTMLSpanElement> & {
+}: HTMLProps<HTMLDivElement> & {
   hash: string;
   numCharacters?: number;
   copy?: boolean;
@@ -32,13 +32,11 @@ export default function HashDisplay({
       : hash;
 
   return (
-    <div className="flex items-center justify-center">
+    <div className={cn("flex items-center", className)} {...rest}>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className={cn("text-sm", className)} {...rest}>
-              {slicedHash}
-            </span>
+            <span>{slicedHash}</span>
           </TooltipTrigger>
           <TooltipContent>
             <p>{hash}</p>
@@ -54,7 +52,7 @@ export default function HashDisplay({
                 className="ml-1 h-auto p-1"
                 onClick={() => handleCopy(hash, hashDesc, toast)}
               >
-                <Copy className="h-4 w-4 opacity-50" />
+                <Copy className="size-4 opacity-50" />
                 <span className="sr-only">Copy {hashDesc}</span>
               </Button>
             </TooltipTrigger>

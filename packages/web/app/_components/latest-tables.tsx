@@ -9,10 +9,15 @@ import ChainSelector from "@/components/chain-selector";
 import { TimeSince } from "@/components/time";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { type Table, getLatestTables } from "@/lib/validator-queries";
+import { type RegistryRecord, getLatestTables } from "@/lib/validator-queries";
 
-export function LatestTables({ initialData }: { initialData: Table[] }) {
-  const [latestTables, setLatestTables] = useState<Table[]>(initialData);
+export function LatestTables({
+  initialData,
+}: {
+  initialData: RegistryRecord[];
+}) {
+  const [latestTables, setLatestTables] =
+    useState<RegistryRecord[]>(initialData);
   const [selectedChain, setSelectedChain] = useState<
     number | "mainnets" | "testnets"
   >("testnets");

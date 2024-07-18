@@ -51,6 +51,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
+    "deep-object-diff": "^1.1.9",
     "ethers": "^6.12.1",
     "javascript-time-ago": "^2.5.9",
     "jotai": "^2.1.1",

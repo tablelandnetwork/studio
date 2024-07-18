@@ -1,13 +1,37 @@
-import { helpers } from "@tableland/sdk";
+import { Validator, helpers } from "@tableland/sdk";
 import { chainsMap } from "./chains-map";
 
-export interface Table {
+export interface RegistryRecord {
   chain_id: number;
   controller: string;
   created_at: number;
   id: number;
   prefix: string;
   structure: string;
+}
+
+export interface TablePermission {
+  insert: boolean;
+  update: boolean;
+  delete: boolean;
+}
+
+export interface ACLItem {
+  chainId: number;
+  tableId: number;
+  controller: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  privileges: TablePermission;
+}
+
+export async function getRegistryRecord(chainId: number, id: string) {
+  const baseUrl = baseUrlForChain(chainId);
+  const validator = new Validator({ baseUrl });
+  const [res] = await validator.queryByStatement<RegistryRecord>({
+    statement: `select * from registry where chain_id = ${chainId} and id = ${id} limit 1`,
+  });
+  return res;
 }
 
 export async function getLatestTables(chain: number | "mainnets" | "testnets") {
@@ -25,7 +49,7 @@ export async function getLatestTables(chain: number | "mainnets" | "testnets") {
     throw new Error("Failed to fetch data");
   }
 
-  return res.json() as unknown as Table[];
+  return res.json() as unknown as RegistryRecord[];
 }
 
 export interface PopularTable {
@@ -79,7 +103,7 @@ export interface SqlLog {
 }
 
 // Tables should all be on mainnets or all be on testnets,
-// othwerwise the results will not be as expected.
+// otherwise the results will not be as expected.
 export async function getSqlLogs(
   tables: Array<{ chainId: number; tableId: string }>,
   limit: number,
@@ -172,6 +196,70 @@ export async function getSqlLog(
     throw new Error("Log not found");
   }
   return array[0];
+}
+
+export type TablePermissions = Record<string, ACLItem>;
+
+export async function getTablePermissions(chainId: number, tableId: string) {
+  const baseUrl = baseUrlForChain(chainId);
+  const validator = new Validator({ baseUrl });
+  const res = await validator.queryByStatement<{
+    chain_id: number;
+    controller: string;
+    created_at: number;
+    privileges: number;
+    table_id: number;
+    updated_at: number | null;
+  }>({
+    statement: `select * from system_acl
+      where chain_id = ${chainId}
+        and table_id = ${tableId}`,
+  });
+  const permissions = res.reduce<TablePermissions>((acc, row) => {
+    acc[row.controller] = {
+      chainId: row.chain_id,
+      tableId: row.table_id,
+      controller: row.controller,
+      createdAt: new Date(row.created_at * 1000),
+      updatedAt: row.updated_at ? new Date(row.updated_at * 1000) : undefined,
+      privileges: {
+        insert: (row.privileges & 1) > 0,
+        update: (row.privileges & 2) > 0,
+        delete: (row.privileges & 4) > 0,
+      },
+    };
+    return acc;
+  }, {});
+  return permissions;
+}
+
+export async function getTablePermissionsForAddress(
+  chainId: number,
+  tableId: string,
+  address: string,
+) {
+  const baseUrl = baseUrlForChain(chainId);
+  const validator = new Validator({ baseUrl });
+  const [res] = await validator.queryByStatement<{
+    chain_id: number;
+    controller: string;
+    created_at: number;
+    privileges: number;
+    table_id: number;
+    updated_at: number | null;
+  }>({
+    statement: `select * from system_acl
+      where chain_id = ${chainId}
+        and table_id = ${tableId}
+        and controller = '${address}'
+        limit 1`,
+  });
+  const permission: TablePermission = {
+    insert: (res.privileges & 1) > 0,
+    update: (res.privileges & 2) > 0,
+    delete: (res.privileges & 4) > 0,
+  };
+  return permission;
 }
 
 function baseUrlForChain(chainId: number | "mainnets" | "testnets") {

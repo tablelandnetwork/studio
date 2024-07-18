@@ -9,11 +9,10 @@ import {
   generateCreateTableStatement,
   type schema,
 } from "@tableland/studio-store";
-import { JsonRpcSigner, BrowserProvider } from "ethers";
+import { type JsonRpcSigner } from "ethers";
 import { AlertCircle, CheckCircle2, CircleDashed, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
-import { useWalletClient, type WalletClient } from "wagmi";
+import { useState, useTransition } from "react";
 import {
   getNetwork,
   getWalletClient,
@@ -33,6 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import ChainSelector from "@/components/chain-selector";
+import { walletClientToSigner } from "@/lib/wagmi-ethers";
 
 export default function ExecDeployment({
   open,
@@ -304,29 +304,4 @@ function DeployStep({
         return state.message;
     }
   }
-}
-
-export function walletClientToSigner(
-  walletClient: WalletClient,
-): JsonRpcSigner {
-  const { account, chain, transport } = walletClient;
-  const network = {
-    chainId: chain.id,
-    name: chain.name,
-    ensAddress: chain.contracts?.ensRegistry?.address,
-  };
-  const provider = new BrowserProvider(transport, network);
-  const signer = new JsonRpcSigner(provider, account.address);
-  return signer;
-}
-
-/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
-export function useEthersSigner({ chainId }: { chainId?: number } = {}):
-  | JsonRpcSigner
-  | undefined {
-  const { data: walletClient } = useWalletClient({ chainId });
-  return useMemo(
-    () => (walletClient ? walletClientToSigner(walletClient) : undefined),
-    [walletClient],
-  );
 }

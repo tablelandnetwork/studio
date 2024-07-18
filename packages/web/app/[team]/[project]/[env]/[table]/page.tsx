@@ -14,6 +14,10 @@ import {
 } from "@/lib/api-helpers";
 import DefDetails from "@/components/def-details";
 import TableWrapper from "@/components/table-wrapper";
+import {
+  getRegistryRecord,
+  type RegistryRecord,
+} from "@/lib/validator-queries";
 
 export default async function Deployments({
   params,
@@ -35,6 +39,14 @@ export default async function Deployments({
     if (!(e instanceof TRPCError && e.code === "NOT_FOUND")) {
       throw e;
     }
+  }
+
+  let registryRecord: RegistryRecord | undefined;
+  if (deployment) {
+    registryRecord = await cache(getRegistryRecord)(
+      deployment.chainId,
+      deployment.tableId,
+    );
   }
 
   const isAuthorized = await cache(api.teams.isAuthorized)({ teamId: team.id });
@@ -59,6 +71,7 @@ export default async function Deployments({
             tableName={deployment.tableName}
             chainId={deployment.chainId}
             tableId={deployment.tableId}
+            owner={registryRecord?.controller}
             createdAt={new Date(deployment.createdAt)}
             schema={def.schema}
             environment={env}

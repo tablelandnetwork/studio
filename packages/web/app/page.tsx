@@ -24,7 +24,10 @@ import { getLatestTables, getPopularTables } from "@/lib/validator-queries";
 import { api } from "@/trpc/server";
 
 export default async function Page() {
-  const session = await getSession({ headers: headers(), cookies: cookies() });
+  const session = await cache(getSession)({
+    headers: headers(),
+    cookies: cookies(),
+  });
 
   let teams: RouterOutputs["teams"]["userTeams"] = [];
   if (session.auth) {

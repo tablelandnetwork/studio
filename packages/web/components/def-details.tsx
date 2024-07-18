@@ -9,7 +9,7 @@ import {
 import DefColumns from "@/components/def-columns";
 import DefConstraints from "@/components/def-constraints";
 
-export default async function DefDetails({
+export default function DefDetails({
   name,
   schema,
 }: {
