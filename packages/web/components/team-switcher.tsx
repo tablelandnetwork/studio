@@ -20,17 +20,14 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-type PopoverTriggerProps = React.ComponentPropsWithoutRef<
-  typeof PopoverTrigger
->;
-
-interface TeamSwitcherProps extends PopoverTriggerProps {
+type TeamSwitcherProps = {
   variant?: "navigation" | "select";
   selectedTeam?: schema.Team;
   teams?: schema.Team[];
   onTeamSelected?: (team: schema.Team) => void;
   onNewTeamSelected?: () => void;
-}
+  disabled?: boolean;
+} & React.HTMLAttributes<HTMLDivElement>;
 
 export default function TeamSwitcher({
   className,
@@ -40,6 +37,7 @@ export default function TeamSwitcher({
   onTeamSelected,
   onNewTeamSelected,
   disabled,
+  ...rest
 }: TeamSwitcherProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -62,7 +60,7 @@ export default function TeamSwitcher({
   });
 
   return (
-    <div className="flex items-center gap-1">
+    <div className={cn("flex items-center gap-1", className)} {...rest}>
       {variant === "navigation" && selectedTeam && (
         <Link
           href={`/${selectedTeam.slug}`}
@@ -83,7 +81,6 @@ export default function TeamSwitcher({
               className={cn(
                 "justify-between",
                 variant === "navigation" && "px-0",
-                className,
               )}
             >
               {variant === "select" &&
