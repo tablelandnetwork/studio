@@ -56,11 +56,11 @@ export default function SQLLogs({
     <div className={cn("flex flex-col gap-4", loading && "opacity-30")}>
       <Button
         variant="outline"
-        className="ml-auto"
+        className="ml-auto gap-2"
         onClick={refresh}
         disabled={loading}
       >
-        <RefreshCw className="mr-2" />
+        <RefreshCw className="size-5" />
         Refresh
       </Button>
       {error && <div className="text-red-500">{error}</div>}

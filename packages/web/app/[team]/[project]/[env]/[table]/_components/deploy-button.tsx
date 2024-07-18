@@ -45,7 +45,8 @@ export default function DeployButton({
         onSuccess={onSuccessfulDeploy}
       />
       <Button className="gap-2" onClick={handleDeploy}>
-        <Rocket /> Deploy table
+        <Rocket className="size-5" />
+        Deploy table
       </Button>
     </>
   );
