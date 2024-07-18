@@ -18,6 +18,7 @@ import { type Schema, hasConstraint } from "@tableland/studio-store";
 import { AlertTriangle, ChevronDown, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getNetwork, getWalletClient, switchNetwork } from "wagmi/actions";
+import { decodeBase64 } from "ethers";
 import { DataTable } from "./data-table";
 import TableCell from "./table-cell";
 import { EditCell } from "./edit-cell";
@@ -298,7 +299,7 @@ export function TableData({
         } else if (col.type === "int") {
           acc[col.name] = int(col.name);
         } else if (col.type === "blob") {
-          acc[col.name] = blob(col.name);
+          acc[col.name] = blob(col.name, { mode: "buffer" });
         }
         return acc;
       },
@@ -323,7 +324,10 @@ export function TableData({
       baseUrl: helpers.getBaseUrl(chainId),
       autoWait: true,
     });
-    const db = drizzle(tbl, { schema: drizzleTable, logger: false });
+    const db = drizzle(tbl, {
+      schema: { [tableName]: drizzleTable },
+      logger: false,
+    });
 
     const genWhereConstraints = (row: EditedRowData | DeletedRowData) => {
       if (uniqueColumnName) {
@@ -338,12 +342,24 @@ export function TableData({
       return and(...eqs);
     };
 
+    const convertBlobFields = function (obj: Record<string, unknown>) {
+      for (const [key, val] of Object.entries(obj)) {
+        if (typeof val !== "string") continue;
+        const column = schema.columns.find((c) => c.name === key);
+        if (column?.type === "blob") {
+          obj[key] = decodeBase64(val);
+        }
+      }
+    };
+
     const sqlInsertItems = updates.new.map((row) => {
+      convertBlobFields(row.data);
       return db.insert(drizzleTable).values(row.data);
     });
     const sqlUpdateItems = updates.edited
       .filter((update) => update.diff)
       .map((row) => {
+        convertBlobFields(row.diff! as Record<string, unknown>);
         return db
           .update(drizzleTable)
           .set(row.diff!)
