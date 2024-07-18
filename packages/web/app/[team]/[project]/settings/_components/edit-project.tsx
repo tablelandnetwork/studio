@@ -126,7 +126,7 @@ export default function EditProject({
         />
         <div className="flex gap-4">
           <Button
-            variant="outline"
+            variant="secondary"
             type="reset"
             onClick={onReset}
             disabled={

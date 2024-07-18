@@ -94,7 +94,7 @@ export default function Envs({
             <DialogClose asChild>
               <Button
                 type="button"
-                variant="secondary"
+                variant="outline"
                 disabled={deleteEnv.isPending}
               >
                 Cancel

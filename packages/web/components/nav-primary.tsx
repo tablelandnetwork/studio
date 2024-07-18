@@ -51,8 +51,8 @@ export function NavPrimary({
           key={link.href}
           href={link.href}
           className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            !link.isActive(pathname) && "text-muted-foreground",
+            "text-sm font-medium transition-colors hover:opacity-50",
+            link.isActive(pathname) && "underline underline-offset-2",
           )}
         >
           {link.label}

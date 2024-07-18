@@ -36,10 +36,7 @@ export default function HashDisplay({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span
-              className={cn("text-sm text-muted-foreground", className)}
-              {...rest}
-            >
+            <span className={cn("text-sm", className)} {...rest}>
               {slicedHash}
             </span>
           </TooltipTrigger>
@@ -57,7 +54,7 @@ export default function HashDisplay({
                 className="ml-1 h-auto p-1"
                 onClick={() => handleCopy(hash, hashDesc, toast)}
               >
-                <Copy className="h-4 w-4 stroke-slate-300" />
+                <Copy className="h-4 w-4 opacity-50" />
                 <span className="sr-only">Copy {hashDesc}</span>
               </Button>
             </TooltipTrigger>
