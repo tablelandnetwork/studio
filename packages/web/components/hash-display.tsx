@@ -32,13 +32,7 @@ export default function HashDisplay({
       : hash;
 
   return (
-    <div
-      className={cn(
-        "flex items-center justify-center text-sm text-muted-foreground",
-        className,
-      )}
-      {...rest}
-    >
+    <div className="flex items-center justify-center">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
