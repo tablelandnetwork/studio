@@ -84,7 +84,7 @@ export default function TableDetails({
                 <HashDisplay
                   hash={addressPostMount}
                   copy
-                  className="inline-block text-foreground"
+                  className="text-foreground"
                 />
               </div>
             </span>

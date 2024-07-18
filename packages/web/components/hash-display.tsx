@@ -32,13 +32,11 @@ export default function HashDisplay({
       : hash;
 
   return (
-    <div className="flex items-center justify-center">
+    <div className={cn("flex items-center", className)} {...rest}>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className={cn("text-sm", className)} {...rest}>
-              {slicedHash}
-            </span>
+            <span>{slicedHash}</span>
           </TooltipTrigger>
           <TooltipContent>
             <p>{hash}</p>
