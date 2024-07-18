@@ -1,9 +1,11 @@
-import { Console } from "@/components/console";
+import { cache } from "react";
+import { Console } from "@/components/new-console";
 import {
   environmentBySlug,
   projectBySlug,
   teamBySlug,
 } from "@/lib/api-helpers";
+import { api } from "@/trpc/server";
 
 export default async function ConsolePage({
   params,
@@ -13,10 +15,16 @@ export default async function ConsolePage({
   const team = await teamBySlug(params.team);
   const project = await projectBySlug(params.project, team.id);
   const environment = await environmentBySlug(project.id, params.env);
+  const deployments = await cache(api.deployments.deploymentsByEnvironmentId)({
+    environmentId: environment.id,
+  });
 
   return (
     <main className="flex-1 p-4">
-      <Console environmentId={environment.id} />
+      <Console
+        environmentId={environment.id}
+        defs={deployments.map((d) => d.def)}
+      />
     </main>
   );
 }
