@@ -24,7 +24,7 @@ export default function SidebarLink({
         <Icon className="size-5 shrink-0" />
         <div className="shrink truncate">{title}</div>
         {showIndicator && (
-          <div className="ml-auto size-2 shrink-0 rounded-full bg-primary" />
+          <div className="ml-auto size-2 shrink-0 rounded-full bg-foreground" />
         )}
       </Button>
     </Link>
