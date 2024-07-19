@@ -65,7 +65,6 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.46.2",
     "react-share": "^5.1.0",
-    "react-simple-code-editor": "0.13.1",
     "siwe": "^2.3.2",
     "superjson": "^2.2.1",
     "tailwind-merge": "^1.14.0",
