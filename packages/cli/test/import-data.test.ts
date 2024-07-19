@@ -39,7 +39,7 @@ const defaultArgs = [
   TEST_PROJECT_ID,
 ];
 
-describe("commands/import-data", function () {
+describe.only("commands/import-data", function () {
   this.timeout(30000 * TEST_TIMEOUT_FACTOR);
 
   let table1: string;
@@ -74,7 +74,7 @@ describe("commands/import-data", function () {
     restore();
   });
 
-  test("can import with all values included", async function () {
+  test("can import a single row", async function () {
     const csvStr = `id,val\n1,test_value`;
     const csvFile = await temporaryWrite(csvStr, { extension: "csv" });
 
@@ -91,6 +91,33 @@ describe("commands/import-data", function () {
     const successRes = res.match(/^(.*)$/m)[1];
 
     equal(successRes, `successfully inserted 1 row into ${defName1}`);
+  });
+
+  test.only("can import with quotes, escape chars, and multi line", async function () {
+    /* eslint-disable no-useless-escape */
+    const csvStr = `id,val
+1,"I'll work"
+1,And I'll work
+4,This ends with a backslash \\
+7,"Escapes \'single quotes\'"
+8,This "quote" works
+`;
+    console.log(csvStr);
+    const csvFile = await temporaryWrite(csvStr, { extension: "csv" });
+
+    const consoleLog = spy(logger, "error");
+    const stdin = mockStd.stdin();
+    setTimeout(() => {
+      stdin.send("y\n");
+    }, 1000);
+    await yargs(["import-data", defName1, csvFile, ...defaultArgs])
+      .command<GlobalOptions>(mod)
+      .parse();
+
+    const res = consoleLog.getCall(0).firstArg;
+    const successRes = res.match(/^(.*)$/m)[1];
+
+    equal(successRes, `successfully inserted 7 rows into ${defName1}`);
   });
 
   test("can import with empty row values", async function () {

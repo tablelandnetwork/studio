@@ -630,7 +630,13 @@ export const logger = {
 
 export const parseCsvFile = async function (file: string): Promise<string[][]> {
   return await new Promise(function (resolve, reject) {
-    const parser = parse();
+    // custom parsing
+    const parserOptions = {
+      skipEmptyLines: true,
+      trim: true,
+    };
+
+    const parser = parse(parserOptions);
     const rows: any[] = [];
 
     parser.on("readable", function () {
