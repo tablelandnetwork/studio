@@ -126,7 +126,7 @@ export function Console({
   };
 
   return (
-    <div>
+    <div className="flex min-h-full flex-1 flex-col justify-stretch">
       <CodeMirror
         value={query}
         extensions={[
@@ -139,7 +139,7 @@ export function Console({
         onChange={setQuery}
         minHeight="200px"
       />
-      <Button onClick={handleRunQuery} className="mt-2">
+      <Button onClick={handleRunQuery} className="mt-2 self-start">
         Run Query
       </Button>
       {!!messages.length && (
@@ -149,7 +149,7 @@ export function Console({
           })}
         </div>
       )}
-      <DataTable table={table} />
+      <DataTable table={table} className="flex-grow" />
     </div>
   );
 }
