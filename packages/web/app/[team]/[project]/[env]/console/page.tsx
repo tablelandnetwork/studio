@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { Console } from "@/components/new-console";
+import { Console } from "@/components/console";
 import {
   environmentBySlug,
   projectBySlug,
