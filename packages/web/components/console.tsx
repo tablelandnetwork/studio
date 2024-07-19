@@ -158,7 +158,7 @@ export function Console({
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-stretch">
+    <div className="flex min-h-full w-full min-w-0 flex-col justify-stretch">
       <CodeMirror
         value={query}
         extensions={[

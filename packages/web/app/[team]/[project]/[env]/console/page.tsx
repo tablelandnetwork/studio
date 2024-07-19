@@ -20,7 +20,7 @@ export default async function ConsolePage({
   });
 
   return (
-    <main className="flex min-h-[calc(100vh-3.507rem)] flex-1 p-4">
+    <main className="flex min-h-[calc(100vh-3.507rem)] p-4">
       <Console
         environmentId={environment.id}
         defs={deployments.map((d) => d.def)}
