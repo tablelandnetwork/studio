@@ -10,7 +10,6 @@ import SQLLogs from "./sql-logs";
 import { TableData } from "./table-data";
 import HashDisplay from "./hash-display";
 import ACL from "./acl";
-import { cn } from "@/lib/utils";
 import DefDetails from "@/components/def-details";
 import { type TablePermissions } from "@/lib/validator-queries";
 import {
@@ -70,7 +69,7 @@ export default function TableDetails({
   return (
     <Tabs defaultValue="data" className="py-4">
       <div className="flex items-end">
-        <TabsList className={cn(!data && "bg-transparent")}>
+        <TabsList>
           <TabsTrigger value="data">Table Data</TabsTrigger>
           <TabsTrigger value="logs">SQL Logs</TabsTrigger>
           <TabsTrigger value="definition">Schema</TabsTrigger>

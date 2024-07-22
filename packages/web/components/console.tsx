@@ -1,5 +1,3 @@
-"use client";
-
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -14,6 +12,7 @@ import { SQLite, sql } from "@codemirror/lang-sql";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import { type schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
+import { getNetwork, switchNetwork } from "wagmi/actions";
 import { DataTable } from "./data-table";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
@@ -30,14 +29,20 @@ init().catch((err: any) => {
 export function Console({
   environmentId,
   defs,
+  query,
+  setQuery,
+  res,
+  setRes,
 }: {
   environmentId: string;
   defs: schema.Def[];
+  query: string;
+  setQuery: (query: string) => void;
+  res: Result<Record<string, unknown>> | undefined;
+  setRes: (res: Result<Record<string, unknown>> | undefined) => void;
 }) {
   const { toast, dismiss } = useToast();
 
-  const [query, setQuery] = useState("");
-  const [res, setRes] = useState<Result<Record<string, unknown>> | undefined>();
   const [pending, setPending] = useState(false);
 
   const schema = defs.reduce<Record<string, string[]>>((acc, def) => {
@@ -73,9 +78,10 @@ export function Console({
             </span>
           ),
         });
+        setRes(undefined);
       }
     }
-  }, [res, toast]);
+  }, [res, setRes, toast]);
 
   const table = useReactTable({
     data,
@@ -103,6 +109,7 @@ export function Console({
     const chainIds = uuTableNames
       .map((name) => parseTableName(name).chainId)
       .filter((item, i, ar) => ar.indexOf(item) === i);
+    const chainId = chainIds[0];
 
     if (statements.length < 1) {
       throw new Error("You must provide a query statement.");
@@ -118,20 +125,25 @@ export function Console({
       throw new Error("You may only run one read statement at a time.");
     }
 
-    if ((type === "acl" || type === "write") && chainIds.length > 1) {
-      throw new Error(
-        "Multiple mutating statements must be for tables on the same chain.",
-      );
+    if (type === "acl" || type === "write") {
+      if (chainIds.length > 1) {
+        throw new Error(
+          "Multiple mutating statements must be for tables on the same chain.",
+        );
+      }
+      const currentNetwork = getNetwork();
+      if (currentNetwork.chain?.id !== chainId) {
+        await switchNetwork({ chainId });
+      }
     }
 
-    const baseUrl = helpers.getBaseUrl(chainIds[0]);
+    const baseUrl = helpers.getBaseUrl(chainId);
     const db = new Database({ baseUrl, aliases, autoWait: true });
 
     if (statements.length === 1) {
       const res = await db.prepare(statements[0]).all();
       return res;
     }
-
     const res = await db.batch(statements.map((stmt) => db.prepare(stmt)));
     return res[0] as Result<Record<string, unknown>>;
   };
@@ -159,18 +171,20 @@ export function Console({
 
   return (
     <div className="flex min-h-full w-full min-w-0 flex-col justify-stretch">
-      <CodeMirror
-        value={query}
-        extensions={[
-          sql({
-            dialect: SQLite,
-            schema,
-          }),
-        ]}
-        theme={vscodeDark}
-        onChange={setQuery}
-        minHeight="200px"
-      />
+      <div className="min-h-[200px]">
+        <CodeMirror
+          value={query}
+          extensions={[
+            sql({
+              dialect: SQLite,
+              schema,
+            }),
+          ]}
+          theme={vscodeDark}
+          onChange={setQuery}
+          minHeight="200px"
+        />
+      </div>
       <Button
         onClick={handleRunQuery}
         className="mt-2 gap-x-2 self-start"
