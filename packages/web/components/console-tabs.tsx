@@ -98,6 +98,14 @@ export default function ConsoleTabs({
     );
   };
 
+  const revertEditedTabName = (tab: Tab) => {
+    setTabs((tabs) =>
+      tabs.map((t) =>
+        t.id === tab.id ? { ...t, newName: "", editingName: false } : t,
+      ),
+    );
+  };
+
   const commitEditedTabName = (tab: Tab) => {
     setTabs((tabs) =>
       tabs.map((t) =>
@@ -139,7 +147,6 @@ export default function ConsoleTabs({
 
   const handleTabClick = (tab: Tab) => {
     if (tab.selected) {
-      console.log("click to renamezz");
       editTabName(tab);
     }
   };
@@ -171,6 +178,8 @@ export default function ConsoleTabs({
                   onKeyUp={(e) => {
                     if (e.key === "Enter") {
                       commitEditedTabName(tab);
+                    } else if (e.key === "Escape") {
+                      revertEditedTabName(tab);
                     }
                   }}
                 />
