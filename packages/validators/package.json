@@ -38,7 +38,7 @@
   },
   "homepage": "https://github.com/tablelandnetwork/studio#readme",
   "dependencies": {
-    "@tableland/sdk": "^7.2.0",
+    "@tableland/sdk": "^7.2.1",
     "@tableland/studio-store": "^0.0.3",
     "zod": "^3.23.4"
   }
