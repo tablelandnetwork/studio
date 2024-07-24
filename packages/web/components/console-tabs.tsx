@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 import { type schema } from "@tableland/studio-store";
 import { Plus, X } from "lucide-react";
 import { type Result } from "@tableland/sdk";
+import { useAtom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import HashDisplay from "./hash-display";
 import { Console } from "./console";
@@ -28,20 +30,28 @@ export default function ConsoleTabs({
   environmentId: string;
   defs: schema.Def[];
 }) {
-  const [tabs, setTabs] = useState<Tab[]>([]);
-  useEffect(() => {
-    setTabs([
+  const tabsAtom = useRef(
+    atomWithStorage<Tab[]>(
+      `env_tabs_${environmentId}`,
+      [
+        {
+          id: window.self.crypto.randomUUID(),
+          name: "New Query",
+          selected: true,
+          query: "",
+          result: undefined,
+          editingName: false,
+          newName: "",
+        },
+      ],
+      undefined,
       {
-        id: window.self.crypto.randomUUID(),
-        name: "New Query",
-        selected: true,
-        query: "",
-        result: undefined,
-        editingName: false,
-        newName: "",
+        getOnInit: true,
       },
-    ]);
-  }, []);
+    ),
+  );
+  const [tabs, setTabs] = useAtom(tabsAtom.current);
+
   const [addressPostMount, setAddressPostMount] = useState<
     `0x${string}` | undefined
   >();
@@ -290,6 +300,7 @@ export default function ConsoleTabs({
       {tabs.map((tab) => (
         <TabsContent key={tab.id} value={tab.id} className="flex-1">
           <Console
+            key={tab.id}
             environmentId={environmentId}
             defs={defs}
             query={tab.query}

@@ -1,11 +1,18 @@
 import { cache } from "react";
+import dynamic from "next/dynamic";
 import {
   environmentBySlug,
   projectBySlug,
   teamBySlug,
 } from "@/lib/api-helpers";
 import { api } from "@/trpc/server";
-import ConsoleTabs from "@/components/console-tabs";
+
+const ConsoleTabs = dynamic(
+  async () => await import("@/components/console-tabs"),
+  {
+    ssr: false,
+  },
+);
 
 export default async function ConsolePage({
   params,
