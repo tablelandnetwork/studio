@@ -8,6 +8,8 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { CodeEditor } from "./code-editor";
 import { DataTable } from "./data-table";
 import { cn, objectToTableData } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 init().catch((err: any) => {
   console.log("could not init sqlparser:", err);
@@ -26,12 +28,40 @@ interface Tab {
   committing: boolean;
 }
 
+async function getDatabase(options) {
+  const { useAliases, environmentId, tables } = options;
+
+  if (useAliases) {
+    const aliases = studioAliases({
+      environmentId,
+      apiUrl: getBaseUrl(),
+    });
+    const aliasMap = await aliases.read();
+
+    const uuTableName = aliasMap[tables[0]];
+    if (!uuTableName) throw new Error("invalid table name");
+
+    const chainId = parseInt(uuTableName.split("_").reverse()[1], 10);
+    const baseUrl = helpers.getBaseUrl(chainId);
+    return new Database({ baseUrl, aliases, autoWait: true });
+  }
+
+  const tableNameParts = tables[0].split("_");
+  if (tableNameParts.length < 3) {
+    throw new Error("must provide global table name or switch to use aliases");
+  }
+  const chainId = parseInt(tableNameParts.reverse()[1], 10);
+  const baseUrl = helpers.getBaseUrl(chainId);
+  return new Database({ baseUrl, autoWait: true });
+}
+
 export function Console({ environmentId }: { environmentId: string }) {
   const [loading, setLoading] = React.useState(false);
   const [tabs, setTabs] = React.useState<Tab[]>([]);
   const [currentTab, setCurrentTab] = React.useState<number | undefined>();
   // TODO: We will have to import more of the css for the old console to enable line numbers
   const [hideLineNumbers] = React.useState(true);
+  const [useAliases, setUseAliases] = React.useState(true);
 
   const runQuery = async function ({
     tabId,
@@ -53,18 +83,7 @@ export function Console({ environmentId }: { environmentId: string }) {
       }
 
       const statement = statements[0];
-      const aliases = studioAliases({
-        environmentId,
-        apiUrl: getBaseUrl(),
-      });
-      const aliasMap = await aliases.read();
-
-      const uuTableName = aliasMap[tables[0]];
-      if (!uuTableName) throw new Error("invalid table name");
-
-      const chainId = parseInt(uuTableName.split("_").reverse()[1], 10);
-      const baseUrl = helpers.getBaseUrl(chainId);
-      const db = new Database({ baseUrl, aliases, autoWait: true });
+      const db = await getDatabase({ useAliases, environmentId, tables });
       const data = await db.prepare(statement).all();
 
       const columns = data
@@ -185,7 +204,7 @@ export function Console({ environmentId }: { environmentId: string }) {
   return (
     <div className="flex-1 space-y-4">
       <div className={cn("tabs-pane", loading ? "text-muted" : "")}>
-        <div>
+        <div className="flex">
           <ul className="flex">
             {tabs.map((tab, key) => {
               return (
@@ -206,6 +225,14 @@ export function Console({ environmentId }: { environmentId: string }) {
               <i className="px-2">+</i>
             </li>
           </ul>
+          <span className="flex">
+            <Switch
+              className="ml-2 mt-1"
+              checked={useAliases}
+              onCheckedChange={() => setUseAliases(!useAliases)}
+            />
+            <Label className="ml-2 mt-2">Use Definition Aliases</Label>
+          </span>
         </div>
         {tabs.map((tab, key) => {
           const className = currentTab === tab.tabId ? "open" : "hidden";
