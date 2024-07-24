@@ -28,8 +28,12 @@ interface Tab {
   committing: boolean;
 }
 
-async function getDatabase(options) {
-  const { useAliases, environmentId, tables } = options;
+async function getDatabase(options: {
+  useAliases: boolean;
+  environmentId: string;
+  table: string;
+}) {
+  const { useAliases, environmentId, table } = options;
 
   if (useAliases) {
     const aliases = studioAliases({
@@ -38,7 +42,7 @@ async function getDatabase(options) {
     });
     const aliasMap = await aliases.read();
 
-    const uuTableName = aliasMap[tables[0]];
+    const uuTableName = aliasMap[table];
     if (!uuTableName) throw new Error("invalid table name");
 
     const chainId = parseInt(uuTableName.split("_").reverse()[1], 10);
@@ -46,7 +50,7 @@ async function getDatabase(options) {
     return new Database({ baseUrl, aliases, autoWait: true });
   }
 
-  const tableNameParts = tables[0].split("_");
+  const tableNameParts = table.split("_");
   if (tableNameParts.length < 3) {
     throw new Error("must provide global table name or switch to use aliases");
   }
@@ -83,7 +87,11 @@ export function Console({ environmentId }: { environmentId: string }) {
       }
 
       const statement = statements[0];
-      const db = await getDatabase({ useAliases, environmentId, tables });
+      const db = await getDatabase({
+        useAliases,
+        environmentId,
+        table: tables[0],
+      });
       const data = await db.prepare(statement).all();
 
       const columns = data
