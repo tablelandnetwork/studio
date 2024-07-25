@@ -185,7 +185,10 @@ export function Sidebar() {
             <SidebarLink
               key={def.id}
               icon={Table2}
-              title={def.name}
+              title={
+                def.name +
+                (deployment?.tableName ? ` (${deployment?.tableName})` : "")
+              }
               href={`/${teamQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}/${def.slug}`}
               selected={def.id === defQuery.data?.id}
               showIndicator={!!env && !deployment && !!isAuthorizedQuery.data}
