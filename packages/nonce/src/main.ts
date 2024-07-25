@@ -130,10 +130,9 @@ export class NonceManager extends AbstractSigner<Provider> {
 
   async increment(count?: number): Promise<number> {
     debugLogger("increment (start)", process.pid);
-    const res = await this.memStore.incrby(
-      `delta:${await this.getAddress()}`,
-      count == null ? 1 : count,
-    );
+    const key = `delta:${await this.getAddress()}`;
+    const res = await this.memStore.incrby(key, count == null ? 1 : count);
+    await this.memStore.expire(key, 30);
     debugLogger("increment (end)", process.pid);
     return res;
   }
