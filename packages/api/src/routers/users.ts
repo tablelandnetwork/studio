@@ -17,5 +17,12 @@ export function usersRouter(store: Store) {
         );
         return res;
       }),
+
+    userForAddress: publicProcedure
+      .input(z.object({ address: z.string().trim().min(1) }))
+      .query(async ({ input }) => {
+        const res = await store.users.userForAddress(input.address);
+        return res;
+      }),
   });
 }

@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useAccount } from "wagmi";
 import { type schema } from "@tableland/studio-store";
 import { Plus, X } from "lucide-react";
 import { type Result } from "@tableland/sdk";
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+import { type Auth } from "@tableland/studio-api";
+import { useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import HashDisplay from "./hash-display";
 import { Console } from "./console";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import WalletStatus from "./wallet-status";
+import { useAccount } from "@/lib/use-account";
 
 interface Tab {
   id: string;
@@ -24,12 +25,16 @@ interface Tab {
 }
 
 export default function ConsoleTabs({
+  auth,
   environmentId,
   defs,
 }: {
+  auth?: Auth;
   environmentId: string;
   defs: schema.Def[];
 }) {
+  const address = useAccount();
+
   const tabsAtom = useRef(
     atomWithStorage<Tab[]>(
       `env_tabs_${environmentId}`,
@@ -51,15 +56,6 @@ export default function ConsoleTabs({
     ),
   );
   const [tabs, setTabs] = useAtom(tabsAtom.current);
-
-  const [addressPostMount, setAddressPostMount] = useState<
-    `0x${string}` | undefined
-  >();
-  const { address } = useAccount();
-
-  useEffect(() => {
-    setAddressPostMount(address);
-  }, [address]);
 
   const addTab = () => {
     setTabs((tabs) => [
@@ -163,7 +159,6 @@ export default function ConsoleTabs({
 
   return (
     <Tabs
-      // defaultValue={tabs[0].id}
       className="flex min-h-full w-full min-w-0 flex-col justify-stretch"
       value={selectedTab}
       onValueChange={setSelectedTab}
@@ -219,83 +214,7 @@ export default function ConsoleTabs({
             <Plus />
           </Button>
         </TabsList>
-        {addressPostMount && (
-          <div className="ml-auto flex items-center gap-x-4 text-sm text-foreground">
-            <span>
-              Connected as{" "}
-              <div className="inline-block">
-                <HashDisplay
-                  hash={addressPostMount}
-                  copy
-                  className="text-foreground"
-                />
-              </div>
-            </span>
-            {/* <div className="flex items-center gap-x-2">
-            {authorizedStudioUser && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <User className="size-4 shrink-0 stroke-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Studio user {authorizedStudioUser.team.name}
-                    {authorizedStudioUser.user.teamId === auth?.user.teamId
-                      ? " (you)"
-                      : ""}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-            {auth && auth.user.address !== addressPostMount && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <AlertTriangle className="size-4 shrink-0 stroke-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    This address is different than the one associated with
-                    your Studio account.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-            {owner === addressPostMount && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Crown className="size-4 shrink-0 stroke-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>Table owner</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-            {accountPermissions && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <KeyRound className="size-4 shrink-0 stroke-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Permissions:
-                    <ul className="list-disc px-3">
-                      {accountPermissions.privileges.insert && (
-                        <li>Insert</li>
-                      )}
-                      {accountPermissions.privileges.update && (
-                        <li>Update</li>
-                      )}
-                      {accountPermissions.privileges.delete && (
-                        <li>Delete</li>
-                      )}
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div> */}
-          </div>
-        )}
+        <WalletStatus auth={auth} address={address} />
       </div>
       {tabs.map((tab) => (
         <TabsContent key={tab.id} value={tab.id} className="flex-1">

@@ -1,5 +1,7 @@
 import { cache } from "react";
 import dynamic from "next/dynamic";
+import { getSession } from "@tableland/studio-api";
+import { cookies, headers } from "next/headers";
 import {
   environmentBySlug,
   projectBySlug,
@@ -19,6 +21,7 @@ export default async function ConsolePage({
 }: {
   params: { team: string; project: string; env: string };
 }) {
+  const session = await getSession({ headers: headers(), cookies: cookies() });
   const team = await teamBySlug(params.team);
   const project = await projectBySlug(params.project, team.id);
   const environment = await environmentBySlug(project.id, params.env);
@@ -29,6 +32,7 @@ export default async function ConsolePage({
   return (
     <main className="flex min-h-[calc(100vh-3.507rem)] p-4">
       <ConsoleTabs
+        auth={session.auth}
         environmentId={environment.id}
         defs={deployments.map((d) => d.def)}
       />
