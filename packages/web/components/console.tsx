@@ -170,7 +170,7 @@ export function Console({
   };
 
   return (
-    <div className="flex min-h-full w-full min-w-0 flex-col justify-stretch">
+    <div className="flex h-full flex-col justify-stretch">
       <div className="min-h-[200px]">
         <CodeMirror
           value={query}
