@@ -1,5 +1,5 @@
 import { flexRender, type Table as TSTable } from "@tanstack/react-table";
-import React from "react";
+import React, { type HTMLAttributes } from "react";
 import {
   Table,
   TableBody,
@@ -8,14 +8,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
-interface DataTableProps<TData> {
+type DataTableProps<TData> = {
   table: TSTable<TData>;
-}
+} & HTMLAttributes<HTMLDivElement>;
 
-export function DataTable<TData>({ table }: DataTableProps<TData>) {
+export function DataTable<TData>({
+  table,
+  className,
+  ...rest
+}: DataTableProps<TData>) {
+  const hasResults = !!table.getRowModel().rows.length;
+
   return (
-    <div className="mt-4 rounded-md border">
+    <div
+      className={cn(
+        "mt-4 rounded-md border",
+        !hasResults && "flex flex-col items-center justify-center",
+        className,
+      )}
+      {...rest}
+    >
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -35,9 +49,9 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+        {hasResults && (
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
@@ -49,19 +63,15 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
                   </TableCell>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={table.getAllColumns().length}
-                className="h-24 text-center"
-              >
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
+            ))}
+          </TableBody>
+        )}
       </Table>
+      {!hasResults && (
+        <span className="h-24 content-center text-sm opacity-40">
+          No results
+        </span>
+      )}
     </div>
   );
 }

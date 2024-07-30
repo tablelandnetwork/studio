@@ -7,7 +7,7 @@ export default async function LayoutTeam({
 }) {
   return (
     <div className="flex flex-1">
-      <div className="sticky top-[3.5rem] h-[calc(100vh-3.55rem)] w-52 flex-shrink-0 overflow-y-auto overflow-x-hidden bg-card">
+      <div className="sticky top-[3.507rem] h-[calc(100vh-3.507rem)] w-52 flex-shrink-0 overflow-y-auto overflow-x-hidden bg-card">
         <Sidebar />
       </div>
       <div className="mx-auto w-full min-w-0">{children}</div>
