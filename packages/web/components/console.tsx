@@ -65,21 +65,19 @@ export function Console({
   }, [res]);
 
   useEffect(() => {
-    if (res && !res.results.length) {
-      if (res.meta.txn) {
-        toast({
-          title: "Success!",
-          description: (
-            <span>
-              Txn hash:{" "}
-              <div className="inline-block">
-                <HashDisplay hash={res.meta.txn.transactionHash} copy />
-              </div>
-            </span>
-          ),
-        });
-        setRes(undefined);
-      }
+    if (res && !res.results.length && res.meta.txn) {
+      toast({
+        title: "Success!",
+        description: (
+          <span>
+            Txn hash:{" "}
+            <div className="inline-block">
+              <HashDisplay hash={res.meta.txn.transactionHash} copy />
+            </div>
+          </span>
+        ),
+      });
+      setRes(undefined);
     }
   }, [res, setRes, toast]);
 
