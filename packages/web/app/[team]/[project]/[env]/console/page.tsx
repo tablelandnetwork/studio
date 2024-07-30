@@ -33,6 +33,7 @@ export default async function ConsolePage({
     <main className="flex min-h-[calc(100vh-3.507rem)] p-4">
       <ConsoleTabs
         auth={session.auth}
+        projectId={project.id}
         environmentId={environment.id}
         defs={deployments.map((d) => d.def)}
       />

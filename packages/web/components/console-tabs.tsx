@@ -26,10 +26,12 @@ interface Tab {
 
 export default function ConsoleTabs({
   auth,
+  projectId,
   environmentId,
   defs,
 }: {
   auth?: Auth;
+  projectId: string;
   environmentId: string;
   defs: schema.Def[];
 }) {
@@ -37,7 +39,7 @@ export default function ConsoleTabs({
 
   const tabsAtom = useRef(
     atomWithStorage<Tab[]>(
-      `env_tabs_${environmentId}`,
+      `env_tabs_${projectId}`,
       [
         {
           id: window.self.crypto.randomUUID(),
