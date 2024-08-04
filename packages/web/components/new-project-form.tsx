@@ -31,7 +31,7 @@ import { FormRootMessage } from "@/components/form-root";
 import { cn } from "@/lib/utils";
 
 export interface NewProjectFormProps {
-  team: schema.Team;
+  org: schema.Org;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
@@ -39,7 +39,7 @@ export interface NewProjectFormProps {
 }
 
 export default function NewProjectForm({
-  team,
+  org,
   open,
   onOpenChange,
   trigger,
@@ -49,7 +49,7 @@ export default function NewProjectForm({
   const [projectName, setProjectName] = useState("");
 
   const nameAvailableQuery = api.projects.nameAvailable.useQuery(
-    projectName ? { teamId: team.id, name: projectName } : skipToken,
+    projectName ? { orgId: org.id, name: projectName } : skipToken,
     { retry: false },
   );
 
@@ -99,7 +99,7 @@ export default function NewProjectForm({
 
   function onSubmit(values: z.infer<typeof newProjectSchema>) {
     newProject.mutate({
-      teamId: team.id,
+      orgId: org.id,
       ...values,
     });
   }
@@ -147,7 +147,7 @@ export default function NewProjectForm({
                     />
                   </FormControl>
                   <FormDescription>
-                    Project name must be unique within your team and at least
+                    Project name must be unique within your org and at least
                     three characters long.
                   </FormDescription>
                   <FormMessage />

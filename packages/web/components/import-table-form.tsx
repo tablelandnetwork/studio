@@ -14,7 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
-import TeamSwitcher from "./team-switcher";
+import OrgSwitcher from "./org-switcher";
 import ProjectSwitcher from "./project-switcher";
 import EnvSwitcher from "./env-switcher";
 import ChainSelector from "@/components/chain-selector";
@@ -36,7 +36,7 @@ import { api } from "@/trpc/react";
 import { tablePrefix } from "@/lib/table-prefix";
 
 export interface ImportTableFormProps {
-  teamPreset?: schema.Team;
+  orgPreset?: schema.Org;
   projectPreset?: schema.Project;
   envPreset?: schema.Environment;
   chainIdPreset?: number;
@@ -47,7 +47,7 @@ export interface ImportTableFormProps {
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
   onSuccess: (
-    team: schema.Team,
+    org: schema.Org,
     project: schema.Project,
     def: schema.Def,
     environment: schema.Environment,
@@ -56,7 +56,7 @@ export interface ImportTableFormProps {
 }
 
 export default function ImportTableForm({
-  teamPreset,
+  orgPreset,
   projectPreset,
   envPreset,
   chainIdPreset,
@@ -68,18 +68,18 @@ export default function ImportTableForm({
   trigger,
   onSuccess,
 }: ImportTableFormProps) {
-  const [team, setTeam] = useState<schema.Team | undefined>(teamPreset);
+  const [org, setOrg] = useState<schema.Org | undefined>(orgPreset);
   const [project, setProject] = useState<schema.Project | undefined>(
     projectPreset,
   );
   const [env, setEnv] = useState<schema.Environment | undefined>(envPreset);
   const [defName, setDefName] = useState("");
 
-  const { data: teams } = api.teams.userTeams.useQuery(
-    !teamPreset ? undefined : skipToken,
+  const { data: orgs } = api.orgs.userOrgs.useQuery(
+    !orgPreset ? undefined : skipToken,
   );
-  const { data: projects } = api.projects.teamProjects.useQuery(
-    !projectPreset && team ? { teamId: team.id } : skipToken,
+  const { data: projects } = api.projects.orgProjects.useQuery(
+    !projectPreset && org ? { orgId: org.id } : skipToken,
   );
   const { data: envs } = api.environments.projectEnvironments.useQuery(
     !envPreset && project ? { projectId: project.id } : skipToken,
@@ -114,22 +114,22 @@ export default function ImportTableForm({
   ]);
 
   useEffect(() => {
-    setTeam(teamPreset);
+    setOrg(orgPreset);
     setProject(projectPreset);
     setEnv(envPreset);
-  }, [envPreset, projectPreset, teamPreset]);
+  }, [envPreset, projectPreset, orgPreset]);
 
   const chainId = watch("chainId");
   const tableId = watch("tableId");
 
   useEffect(() => {
     if (!open) {
-      setTeam(teamPreset);
+      setOrg(orgPreset);
       setProject(projectPreset);
       setEnv(envPreset);
       form.reset();
     }
-  }, [open, teamPreset, projectPreset, envPreset, form]);
+  }, [open, orgPreset, projectPreset, envPreset, form]);
 
   useEffect(() => {
     if (defId) return;
@@ -162,14 +162,14 @@ export default function ImportTableForm({
 
   const importTable = api.tables.importTable.useMutation({
     onSuccess: ({ def, deployment }) => {
-      if (!team || !project || !env) return;
-      onSuccess(team, project, def, env, deployment);
+      if (!org || !project || !env) return;
+      onSuccess(org, project, def, env, deployment);
       onOpenChange?.(false);
     },
   });
 
-  const handleTeamSelected = (team: schema.Team) => {
-    setTeam(team);
+  const handleOrgSelected = (org: schema.Org) => {
+    setOrg(org);
     setProject(undefined);
   };
 
@@ -216,14 +216,14 @@ export default function ImportTableForm({
                 account and remove your data from our servers.
               </SheetDescription> */}
             </SheetHeader>
-            {!teamPreset && (
+            {!orgPreset && (
               <div className="space-y-2">
-                <FormLabel>Team</FormLabel>
-                <TeamSwitcher
+                <FormLabel>Org</FormLabel>
+                <OrgSwitcher
                   variant="select"
-                  teams={teams}
-                  selectedTeam={team}
-                  onTeamSelected={handleTeamSelected}
+                  orgs={orgs}
+                  selectedOrg={org}
+                  onOrgSelected={handleOrgSelected}
                 />
               </div>
             )}
@@ -232,11 +232,11 @@ export default function ImportTableForm({
                 <FormLabel>Project</FormLabel>
                 <ProjectSwitcher
                   variant="select"
-                  team={team}
+                  org={org}
                   projects={projects}
                   selectedProject={project}
                   onProjectSelected={setProject}
-                  disabled={!team}
+                  disabled={!org}
                 />
               </div>
             )}
@@ -245,7 +245,7 @@ export default function ImportTableForm({
                 <FormLabel>Environment</FormLabel>
                 <EnvSwitcher
                   variant="select"
-                  team={team}
+                  org={org}
                   project={project}
                   envs={envs}
                   selectedEnv={env}

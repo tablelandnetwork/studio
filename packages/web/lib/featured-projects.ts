@@ -9,32 +9,32 @@ export async function featuredProjectSlugs() {
   } else if (baseUrl === "https://studio.tableland.xyz") {
     return [
       {
-        team: "partners",
+        org: "partners",
         project: "dimo", // Only a sample of non-active testnet tables (over 140 total)
       },
       {
-        team: "partners",
+        org: "partners",
         project: "hideout-labs", // Non-active testnets tables
       },
       // {
-      //   team: "partners",
+      //   org: "partners",
       //   project: "drvrs", // No tables
       // },
       {
-        team: "tableland",
+        org: "tableland",
         project: "studio", // Active Tableland Studio tables
       },
       {
-        team: "tableland",
+        org: "tableland",
         project: "rigs", // Active Tableland Rigs tables
       },
     ];
   } else {
     // It's a preview deployment.
     return [
-      { team: "aaron", project: "four-project" },
-      { team: "joe", project: "students" },
-      { team: "aaron", project: "with-timestamp" },
+      { org: "aaron", project: "four-project" },
+      { org: "joe", project: "students" },
+      { org: "aaron", project: "with-timestamp" },
     ];
   }
 }

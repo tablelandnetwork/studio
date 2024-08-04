@@ -39,7 +39,7 @@ export default function RegistrationDialog({
   onOpenChange: (open: boolean) => void;
   onSuccess: (auth: Auth) => void;
 }) {
-  const [teamName, setTeamName] = useState("");
+  const [orgName, setOrgName] = useState("");
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -51,8 +51,8 @@ export default function RegistrationDialog({
 
   const { setError } = form;
 
-  const nameAvailableQuery = api.teams.nameAvailable.useQuery(
-    teamName ? { name: teamName } : skipToken,
+  const nameAvailableQuery = api.orgs.nameAvailable.useQuery(
+    orgName ? { name: orgName } : skipToken,
     { retry: false },
   );
 
@@ -103,7 +103,7 @@ export default function RegistrationDialog({
                   <FormControl>
                     <InputWithCheck
                       placeholder="myusername"
-                      updateQuery={setTeamName}
+                      updateQuery={setOrgName}
                       queryStatus={nameAvailableQuery}
                       {...field}
                     />

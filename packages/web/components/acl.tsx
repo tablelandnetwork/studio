@@ -46,7 +46,7 @@ export default function ACL({ acl, authorizedStudioUsers, owner }: Props) {
       cell: AddressCell,
     },
     {
-      accessorFn: (row) => row.team?.name ?? "",
+      accessorFn: (row) => row.org?.name ?? "",
       header: "Studio User",
       cell: UserCell,
     },
@@ -122,8 +122,8 @@ function UserCell({
     setValue(initialValue);
   }, [initialValue]);
 
-  return row.original.team ? (
-    <Link href={`/${row.original.team.slug}`}>{value}</Link>
+  return row.original.org ? (
+    <Link href={`/${row.original.org.slug}`}>{value}</Link>
   ) : (
     <span>{value}</span>
   );

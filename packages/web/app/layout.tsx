@@ -47,14 +47,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getSession({ cookies: cookies(), headers: headers() });
-  let teams: RouterOutputs["teams"]["userTeams"] | undefined;
+  let orgs: RouterOutputs["orgs"]["userOrgs"] | undefined;
   if (session.auth) {
     try {
-      teams = await cache(api.teams.userTeams)({
-        userTeamId: session.auth.user.teamId,
+      orgs = await cache(api.orgs.userOrgs)({
+        userOrgId: session.auth.user.orgId,
       });
     } catch {
-      // This is fine, we just don't have any teams if the user
+      // This is fine, we just don't have any orgs if the user
       // is unauthorized or some other error happens.
     }
   }
@@ -71,7 +71,7 @@ export default async function RootLayout({
               <Hotjar></Hotjar>
               <TRPCReactProvider headers={headers()}>
                 <header className="sticky top-0 z-50 flex items-center justify-between gap-x-10 bg-[#75b6b5] px-4 py-3 text-primary">
-                  <PrimaryHeaderItem userTeams={teams} />
+                  <PrimaryHeaderItem userOrgs={orgs} />
                   <NavPrimary className="ml-auto" />
                   <Profile />
                 </header>

@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 
 type ProjectSwitcherProps = {
   variant?: "navigation" | "select";
-  team?: schema.Team;
+  org?: schema.Org;
   selectedProject?: schema.Project;
   projects?: schema.Project[];
   onProjectSelected?: (project: schema.Project) => void;
@@ -33,7 +33,7 @@ type ProjectSwitcherProps = {
 export default function ProjectSwitcher({
   className,
   variant = "navigation",
-  team,
+  org,
   selectedProject,
   projects,
   onProjectSelected,
@@ -45,9 +45,9 @@ export default function ProjectSwitcher({
 
   return (
     <div className={cn("flex items-center gap-1", className)} {...rest}>
-      {variant === "navigation" && team && selectedProject && (
+      {variant === "navigation" && org && selectedProject && (
         <Link
-          href={`/${team.slug}/${selectedProject.slug}`}
+          href={`/${org.slug}/${selectedProject.slug}`}
           className="text-sm underline-offset-2 hover:underline"
         >
           {selectedProject.name}

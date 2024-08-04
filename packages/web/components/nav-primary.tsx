@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { authAtom } from "@/store/auth";
 import { cn } from "@/lib/utils";
 
-function links(team?: schema.Team): Array<{
+function links(org?: schema.Org): Array<{
   label: string;
   href: string;
   isActive: (pathname: string) => boolean;
@@ -24,11 +24,11 @@ function links(team?: schema.Team): Array<{
       isActive: (_: string) => false,
     },
   ];
-  if (team) {
+  if (org) {
     links.unshift({
       label: "Home",
-      href: `/${team?.slug}`,
-      isActive: (pathname: string) => pathname === `/${team.slug}`,
+      href: `/${org?.slug}`,
+      isActive: (pathname: string) => pathname === `/${org.slug}`,
     });
   }
   return links;
@@ -46,7 +46,7 @@ export function NavPrimary({
       className={cn("flex items-center space-x-4 lg:space-x-6", className)}
       {...props}
     >
-      {links(auth?.personalTeam).map((link) => (
+      {links(auth?.personalOrg).map((link) => (
         <Link
           key={link.href}
           href={link.href}

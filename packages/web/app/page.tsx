@@ -19,7 +19,7 @@ import { TypographyH3 } from "@/components/typography-h3";
 import { TypographyP } from "@/components/typography-p";
 import { featuredProjectSlugs } from "@/lib/featured-projects";
 import { store } from "@/lib/store";
-import TeamAvatar from "@/components/team-avatar";
+import OrgAvatar from "@/components/org-avatar";
 import { getLatestTables, getPopularTables } from "@/lib/validator-queries";
 import { api } from "@/trpc/server";
 
@@ -29,14 +29,14 @@ export default async function Page() {
     cookies: cookies(),
   });
 
-  let teams: RouterOutputs["teams"]["userTeams"] = [];
+  let orgs: RouterOutputs["orgs"]["userOrgs"] = [];
   if (session.auth) {
     try {
-      teams = await cache(api.teams.userTeams)({
-        userTeamId: session.auth.user.teamId,
+      orgs = await cache(api.orgs.userOrgs)({
+        userOrgId: session.auth.user.orgId,
       });
     } catch (e) {
-      console.log("Failed to fetch user teams:", e);
+      console.log("Failed to fetch user orgs:", e);
     }
   }
 
@@ -45,15 +45,15 @@ export default async function Page() {
     await Promise.all(
       projectSlugs.map(
         async (slugs) =>
-          await store.projects.projectByTeamAndProjectSlugs(
-            slugs.team,
+          await store.projects.projectByOrgAndProjectSlugs(
+            slugs.org,
             slugs.project,
           ),
       ),
     )
   ).filter((p) => !!p) as Array<
     NonNullable<
-      Awaited<ReturnType<typeof store.projects.projectByTeamAndProjectSlugs>>
+      Awaited<ReturnType<typeof store.projects.projectByOrgAndProjectSlugs>>
     >
   >;
   const latestProjects = await store.projects.latestProjects(0, 1000);
@@ -76,7 +76,7 @@ export default async function Page() {
               <div className="flex items-center space-x-4">
                 <Play className="flex-shrink-0" />
                 <p>
-                  Get started by selecting one of your teams or by exploring
+                  Get started by selecting one of your orgs or by exploring
                   Studio Projects and Tableland tables below.
                 </p>
               </div>
@@ -87,9 +87,9 @@ export default async function Page() {
                 <Info className="flex-shrink-0" />
                 <p>
                   The Tableland Studio makes it easy to design and deploy tables
-                  on Tableland, collaborate with teammates on projects,
-                  integrate your project with the Studio CLI, and discover what
-                  other users are building on Tableland.
+                  on Tableland, collaborate with orgmates on projects, integrate
+                  your project with the Studio CLI, and discover what other
+                  users are building on Tableland.
                 </p>
               </div>
               <div className="flex items-center space-x-4">
@@ -114,7 +114,7 @@ export default async function Page() {
                   Then, log into the Studio using the button in the upper right
                   corner of the screen. You&apos;ll be prompted to choose a
                   Studio username, and then you&apos;ll be redirected to the
-                  Studio page for your personal Team.
+                  Studio page for your personal Org.
                 </p>
               </div>
             </>
@@ -123,19 +123,19 @@ export default async function Page() {
       </section>
       {session.auth && (
         <section>
-          <TypographyH2>Your Teams</TypographyH2>
+          <TypographyH2>Your Orgs</TypographyH2>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {teams.map((team) => (
+            {orgs.map((org) => (
               <Link
-                key={team.id}
-                href={`/${team.slug}`}
+                key={org.id}
+                href={`/${org.slug}`}
                 className="flex grow basis-1 flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
               >
                 <div className="flex w-full flex-col gap-4">
                   <div className="flex items-center gap-2">
-                    <TeamAvatar team={team} />
+                    <OrgAvatar org={org} />
                     <div className="flex items-center gap-2">
-                      <div className="text-sm font-semibold">{team.name}</div>
+                      <div className="text-sm font-semibold">{org.name}</div>
                     </div>
                   </div>
                 </div>
@@ -163,15 +163,15 @@ export default async function Page() {
                 {featuredProjects.map((item) => (
                   <Link
                     key={item.project.id}
-                    href={`/${item.team.slug}/${item.project.slug}`}
+                    href={`/${item.org.slug}/${item.project.slug}`}
                     className="flex grow basis-1 flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
                   >
                     <div className="flex w-full flex-col gap-4">
                       <div className="flex items-center gap-2">
-                        <TeamAvatar team={item.team} />
+                        <OrgAvatar org={item.org} />
                         <div className="flex items-center gap-2">
                           <div className="text-sm font-semibold">
-                            {item.team.name}/{item.project.name}
+                            {item.org.name}/{item.project.name}
                           </div>
                         </div>
                       </div>

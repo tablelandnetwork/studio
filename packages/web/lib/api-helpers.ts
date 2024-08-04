@@ -3,15 +3,13 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { api } from "@/trpc/server";
 
-export async function teamBySlug(slug: string) {
-  return await catch404(
-    async () => await cache(api.teams.teamBySlug)({ slug }),
-  );
+export async function orgBySlug(slug: string) {
+  return await catch404(async () => await cache(api.orgs.orgBySlug)({ slug }));
 }
 
-export async function projectBySlug(slug: string, teamId?: string) {
+export async function projectBySlug(slug: string, orgId?: string) {
   return await catch404(
-    async () => await cache(api.projects.projectBySlug)({ teamId, slug }),
+    async () => await cache(api.projects.projectBySlug)({ orgId, slug }),
   );
 }
 

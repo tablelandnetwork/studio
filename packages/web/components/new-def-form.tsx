@@ -34,27 +34,27 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import TeamSwitcher from "@/components/team-switcher";
+import OrgSwitcher from "@/components/org-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { ensureError } from "@/lib/ensure-error";
 import DefColumns from "@/components/def-columns";
 
 export interface NewDefFormProps {
-  teamPreset?: schema.Team;
+  orgPreset?: schema.Org;
   projectPreset?: schema.Project;
   schemaPreset?: Schema;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
   onSuccess: (
-    team: schema.Team,
+    org: schema.Org,
     project: schema.Project,
     def: schema.Def,
   ) => void;
 }
 
 export default function NewDefForm({
-  teamPreset,
+  orgPreset,
   projectPreset,
   schemaPreset,
   open,
@@ -63,17 +63,17 @@ export default function NewDefForm({
   onSuccess,
 }: NewDefFormProps) {
   const [openSheet, setOpenSheet] = useState(open ?? false);
-  const [team, setTeam] = useState<schema.Team | undefined>(teamPreset);
+  const [org, setOrg] = useState<schema.Org | undefined>(orgPreset);
   const [project, setProject] = useState<schema.Project | undefined>(
     projectPreset,
   );
   const [defName, setDefName] = useState("");
 
-  const { data: teams } = api.teams.userTeams.useQuery(
-    !teamPreset ? undefined : skipToken,
+  const { data: orgs } = api.orgs.userOrgs.useQuery(
+    !orgPreset ? undefined : skipToken,
   );
-  const { data: projects } = api.projects.teamProjects.useQuery(
-    !projectPreset && team ? { teamId: team.id } : skipToken,
+  const { data: projects } = api.projects.orgProjects.useQuery(
+    !projectPreset && org ? { orgId: org.id } : skipToken,
   );
 
   const form = useForm<z.infer<typeof newDefFormSchema>>({
@@ -117,12 +117,12 @@ export default function NewDefForm({
 
   useEffect(() => {
     if (!openSheet) {
-      setTeam(teamPreset);
+      setOrg(orgPreset);
       setProject(projectPreset);
       form.reset();
     }
     onOpenChange?.(openSheet);
-  }, [openSheet, teamPreset, projectPreset, onOpenChange, form]);
+  }, [openSheet, orgPreset, projectPreset, onOpenChange, form]);
 
   useEffect(() => {
     setOpenSheet(open ?? false);
@@ -135,8 +135,8 @@ export default function NewDefForm({
 
   const newDef = api.defs.newDef.useMutation({
     onSuccess: (def) => {
-      if (!team || !project) return;
-      onSuccess(team, project, def);
+      if (!org || !project) return;
+      onSuccess(org, project, def);
       setOpenSheet(false);
     },
     onError: (err: any) => {
@@ -152,8 +152,8 @@ export default function NewDefForm({
     name: "columns",
   });
 
-  const handleTeamSelected = (team: schema.Team) => {
-    setTeam(team);
+  const handleOrgSelected = (org: schema.Org) => {
+    setOrg(org);
     setProject(undefined);
   };
 
@@ -214,14 +214,14 @@ export default function NewDefForm({
                 account and remove your data from our servers.
               </SheetDescription> */}
             </SheetHeader>
-            {!teamPreset && (
+            {!orgPreset && (
               <div className="space-y-2">
-                <FormLabel>Team</FormLabel>
-                <TeamSwitcher
+                <FormLabel>Org</FormLabel>
+                <OrgSwitcher
                   variant="select"
-                  teams={teams}
-                  selectedTeam={team}
-                  onTeamSelected={handleTeamSelected}
+                  orgs={orgs}
+                  selectedOrg={org}
+                  onOrgSelected={handleOrgSelected}
                 />
               </div>
             )}
@@ -230,11 +230,11 @@ export default function NewDefForm({
                 <FormLabel>Project</FormLabel>
                 <ProjectSwitcher
                   variant="select"
-                  team={team}
+                  org={org}
                   projects={projects}
                   selectedProject={project}
                   onProjectSelected={setProject}
-                  disabled={!team}
+                  disabled={!org}
                 />
               </div>
             )}
