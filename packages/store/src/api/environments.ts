@@ -9,8 +9,8 @@ type Environment = schema.Environment;
 const environments = schema.environments;
 const deployments = schema.deployments;
 const projects = schema.projects;
-const teamProjects = schema.teamProjects;
-const teams = schema.teams;
+const orgProjects = schema.orgProjects;
+const orgs = schema.orgs;
 
 export function initEnvironments(
   db: DrizzleD1Database<typeof schema>,
@@ -93,13 +93,13 @@ export function initEnvironments(
       await tbl.batch(batch);
     },
 
-    environmentTeamAndProject: async function (id: string) {
+    environmentOrgAndProject: async function (id: string) {
       const res = await db
-        .select({ team: teams, project: projects })
+        .select({ org: orgs, project: projects })
         .from(environments)
         .innerJoin(projects, eq(environments.projectId, projects.id))
-        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
-        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .innerJoin(orgProjects, eq(projects.id, orgProjects.projectId))
+        .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
         .where(eq(environments.id, id))
         .get();
       return res;
