@@ -9,7 +9,7 @@ import { invitesRouter } from "./routers/invites";
 import { projectsRouter } from "./routers/projects";
 import { providersRouter } from "./routers/providers";
 import { defsRouter } from "./routers/defs";
-import { teamsRouter } from "./routers/teams";
+import { orgsRouter } from "./routers/orgs";
 import { tablesRouter } from "./routers/tables";
 import { usersRouter } from "./routers/users";
 
@@ -34,7 +34,7 @@ export function appRouter(
   return createTRPCRouter({
     auth: authRouter(store),
     projects: projectsRouter(store),
-    teams: teamsRouter(store, sendInvite),
+    orgs: orgsRouter(store, sendInvite),
     defs: defsRouter(store),
     tables: tablesRouter(store),
     invites: invitesRouter(store, sendInvite, dataSealPass),

@@ -207,40 +207,40 @@ export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   });
 });
 
-export const teamProcedure = (store: Store) =>
+export const orgProcedure = (store: Store) =>
   protectedProcedure
-    .input(z.object({ teamId: z.string().trim().min(1).optional() }))
+    .input(z.object({ orgId: z.string().trim().min(1).optional() }))
     .use(async ({ ctx, input, next }) => {
       // we want to check for null, undefined, and ""
       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-      const teamId = input.teamId || ctx.session.auth.user.teamId;
-      const membership = await store.teams.isAuthorizedForTeam(
-        ctx.session.auth.user.teamId,
-        teamId,
+      const orgId = input.orgId || ctx.session.auth.user.orgId;
+      const membership = await store.orgs.isAuthorizedForOrg(
+        ctx.session.auth.user.orgId,
+        orgId,
       );
       if (!membership) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "not authorized for team",
+          message: "not authorized for org",
         });
       }
-      input.teamId = teamId;
+      input.orgId = orgId;
       return await next({
         ctx: {
           ...ctx,
           session: ctx.session,
-          teamAuthorization: membership,
-          teamId,
+          orgAuthorization: membership,
+          orgId,
         },
       });
     });
 
-export const teamAdminProcedure = (store: Store) =>
-  teamProcedure(store).use(async ({ ctx, next }) => {
-    if (!ctx.teamAuthorization.isOwner) {
+export const orgAdminProcedure = (store: Store) =>
+  orgProcedure(store).use(async ({ ctx, next }) => {
+    if (!ctx.orgAuthorization.isOwner) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: "not authorized as team admin",
+        message: "not authorized as org admin",
       });
     }
     return await next({ ctx });
@@ -250,31 +250,31 @@ export const projectProcedure = (store: Store) =>
   protectedProcedure
     .input(z.object({ projectId: z.string().trim().min(1) }))
     .use(async ({ ctx, input, next }) => {
-      const team = await store.projects.projectTeamByProjectId(input.projectId);
-      if (!team) {
+      const org = await store.projects.projectOrgByProjectId(input.projectId);
+      if (!org) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "no team for project id found",
+          message: "no org for project id found",
         });
       }
-      const membership = await store.teams.isAuthorizedForTeam(
-        ctx.session.auth.user.teamId,
-        team.id,
+      const membership = await store.orgs.isAuthorizedForOrg(
+        ctx.session.auth.user.orgId,
+        org.id,
       );
       if (!membership) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "not authorized for team",
+          message: "not authorized for org",
         });
       }
       return await next({
-        ctx: { ...ctx, session: ctx.session, teamAuthorization: membership },
+        ctx: { ...ctx, session: ctx.session, orgAuthorization: membership },
       });
     });
 
 export const projectAdminProcedure = (store: Store) =>
   projectProcedure(store).use(async ({ ctx, next }) => {
-    if (!ctx.teamAuthorization.isOwner) {
+    if (!ctx.orgAuthorization.isOwner) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "not authorized as project admin",
@@ -287,12 +287,12 @@ export const environmentProcedure = (store: Store) =>
   protectedProcedure
     .input(z.object({ envId: z.string().uuid() }))
     .use(async ({ ctx, input, next }) => {
-      const { team, project } =
-        (await store.environments.environmentTeamAndProject(input.envId)) ?? {};
-      if (!team) {
+      const { org, project } =
+        (await store.environments.environmentOrgAndProject(input.envId)) ?? {};
+      if (!org) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "no team for env id found",
+          message: "no org for env id found",
         });
       }
       if (!project) {
@@ -301,30 +301,30 @@ export const environmentProcedure = (store: Store) =>
           message: "no project for env id found",
         });
       }
-      const membership = await store.teams.isAuthorizedForTeam(
-        ctx.session.auth.user.teamId,
-        team.id,
+      const membership = await store.orgs.isAuthorizedForOrg(
+        ctx.session.auth.user.orgId,
+        org.id,
       );
       if (!membership) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "not authorized for team",
+          message: "not authorized for org",
         });
       }
       return await next({
         ctx: {
           ...ctx,
           session: ctx.session,
-          team,
+          org,
           project,
-          teamAuthorization: membership,
+          orgAuthorization: membership,
         },
       });
     });
 
 export const environmentAdminProcedure = (store: Store) =>
   environmentProcedure(store).use(async ({ ctx, next }) => {
-    if (!ctx.teamAuthorization.isOwner) {
+    if (!ctx.orgAuthorization.isOwner) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "not authorized as environment admin",
@@ -337,31 +337,31 @@ export const defProcedure = (store: Store) =>
   protectedProcedure
     .input(z.object({ defId: z.string().trim().uuid() }))
     .use(async ({ ctx, input, next }) => {
-      const team = await store.defs.defTeam(input.defId);
-      if (!team) {
+      const org = await store.defs.defOrg(input.defId);
+      if (!org) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "no team for def id found",
+          message: "no org for def id found",
         });
       }
-      const membership = await store.teams.isAuthorizedForTeam(
-        ctx.session.auth.user.teamId,
-        team.id,
+      const membership = await store.orgs.isAuthorizedForOrg(
+        ctx.session.auth.user.orgId,
+        org.id,
       );
       if (!membership) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "not authorized for team",
+          message: "not authorized for org",
         });
       }
       return await next({
-        ctx: { ...ctx, session: ctx.session, teamAuthorization: membership },
+        ctx: { ...ctx, session: ctx.session, orgAuthorization: membership },
       });
     });
 
 export const defAdminProcedure = (store: Store) =>
   defProcedure(store).use(async ({ ctx, next }) => {
-    if (!ctx.teamAuthorization.isOwner) {
+    if (!ctx.orgAuthorization.isOwner) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "not authorized as def admin",

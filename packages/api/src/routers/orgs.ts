@@ -2,135 +2,135 @@ import { type Store, type schema } from "@tableland/studio-store";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
-  teamNameAvailableSchema,
-  newTeamSchema,
-  updateTeamSchema,
+  orgNameAvailableSchema,
+  newOrgSchema,
+  updateOrgSchema,
 } from "@tableland/studio-validators";
 import {
   protectedProcedure,
   publicProcedure,
   createTRPCRouter,
-  teamAdminProcedure,
+  orgAdminProcedure,
 } from "../trpc";
 import { type SendInviteFunc } from "../utils/sendInvite";
 import { internalError } from "../utils/internalError";
 import { zeroNine } from "../utils/fourHundredError";
 
-export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
+export function orgsRouter(store: Store, sendInvite: SendInviteFunc) {
   return createTRPCRouter({
     isAuthorized: publicProcedure
-      .input(z.object({ teamId: z.string().trim() }).or(z.void()))
+      .input(z.object({ orgId: z.string().trim() }).or(z.void()))
       .query(async ({ ctx, input }) => {
         if (!ctx.session.auth) {
           return false;
         }
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        const teamId = input?.teamId || ctx.session.auth.user.teamId;
-        if (!teamId) {
+        const orgId = input?.orgId || ctx.session.auth.user.orgId;
+        if (!orgId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Team ID must be provided as input or session context",
+            message: "Org ID must be provided as input or session context",
           });
         }
-        return await store.teams.isAuthorizedForTeam(
-          ctx.session.auth.user.teamId,
-          teamId,
+        return await store.orgs.isAuthorizedForOrg(
+          ctx.session.auth.user.orgId,
+          orgId,
         );
       }),
     nameAvailable: publicProcedure
-      .input(teamNameAvailableSchema)
+      .input(orgNameAvailableSchema)
       .query(async ({ input }) => {
-        return await store.teams.nameAvailable(input.name, input.teamId);
+        return await store.orgs.nameAvailable(input.name, input.orgId);
       }),
-    getTeam: publicProcedure
-      .input(z.object({ teamId: z.string().trim() }).or(z.void()))
+    getOrg: publicProcedure
+      .input(z.object({ orgId: z.string().trim() }).or(z.void()))
       .query(async ({ input, ctx }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
-        if (!teamId) {
+        const orgId = input?.orgId || ctx.session.auth?.user.orgId;
+        if (!orgId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Team ID must be provided as input or session context",
+            message: "Org ID must be provided as input or session context",
           });
         }
-        const team = await store.teams.teamById(teamId);
-        if (!team) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Team not found" });
+        const org = await store.orgs.orgById(orgId);
+        if (!org) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Org not found" });
         }
-        return team;
+        return org;
       }),
-    teamBySlug: publicProcedure
+    orgBySlug: publicProcedure
       .input(z.object({ slug: z.string().trim() }))
       .query(async ({ input }) => {
-        const team = await store.teams.teamBySlug(input.slug);
-        if (!team) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Team not found" });
+        const org = await store.orgs.orgBySlug(input.slug);
+        if (!org) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Org not found" });
         }
-        return team;
+        return org;
       }),
-    userTeams: publicProcedure
-      .input(z.object({ userTeamId: z.string().trim().min(1) }).or(z.void()))
+    userOrgs: publicProcedure
+      .input(z.object({ userOrgId: z.string().trim().min(1) }).or(z.void()))
       .query(async ({ input, ctx }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        const teamId = input?.userTeamId || ctx.session.auth?.user.teamId;
-        if (!teamId) {
+        const orgId = input?.userOrgId || ctx.session.auth?.user.orgId;
+        if (!orgId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Team ID must be provided as input or session context",
+            message: "Org ID must be provided as input or session context",
           });
         }
-        return await store.teams.teamsByMemberId(teamId);
+        return await store.orgs.orgsByMemberId(orgId);
       }),
-    userTeamsFromAddress: publicProcedure
+    userOrgsFromAddress: publicProcedure
       .input(z.object({ userAddress: z.string().trim().min(1) }))
       .query(async ({ input, ctx }) => {
-        const personalTeam = await store.users.userPersonalTeam(
+        const personalOrg = await store.users.userPersonalOrg(
           input?.userAddress,
         );
 
-        if (!personalTeam) {
+        if (!personalOrg) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: `No personal team found for ${input?.userAddress}`,
+            message: `No personal org found for ${input?.userAddress}`,
           });
         }
 
-        return await store.teams.teamsByMemberId(personalTeam);
+        return await store.orgs.orgsByMemberId(personalOrg);
       }),
-    newTeam: protectedProcedure
-      .input(newTeamSchema)
+    newOrg: protectedProcedure
+      .input(newOrgSchema)
       .mutation(async ({ ctx, input }) => {
-        let team: schema.Team;
-        let invites: schema.TeamInvite[];
+        let org: schema.Org;
+        let invites: schema.OrgInvite[];
         try {
-          const nameAvailable = await store.teams.nameAvailable(input.name);
+          const nameAvailable = await store.orgs.nameAvailable(input.name);
 
           if (!nameAvailable) {
-            throw zeroNine(`the team name ${input.name} is not available`);
+            throw zeroNine(`the org name ${input.name} is not available`);
           }
         } catch (err: any) {
           if (err.status !== 409) {
-            throw internalError("Error validating team name", err);
+            throw internalError("Error validating org name", err);
           }
           throw err;
         }
 
         try {
-          const res = await store.teams.createTeamByPersonalTeam(
+          const res = await store.orgs.createOrgByPersonalOrg(
             input.name,
-            ctx.session.auth.user.teamId,
+            ctx.session.auth.user.orgId,
             input.emailInvites,
           );
-          team = res.team;
+          org = res.org;
           invites = res.invites;
         } catch (err) {
-          throw internalError("Error creating team", err);
+          throw internalError("Error creating org", err);
         }
 
-        // Intentionally swallowing any error here since the team is still
+        // Intentionally swallowing any error here since the org is still
         // created and invites can be viewed and resent at any time.
         try {
           await Promise.all(
@@ -147,56 +147,56 @@ export function teamsRouter(store: Store, sendInvite: SendInviteFunc) {
           console.error(err);
         }
 
-        return team;
+        return org;
       }),
-    updateTeam: teamAdminProcedure(store)
-      .input(updateTeamSchema)
+    updateOrg: orgAdminProcedure(store)
+      .input(updateOrgSchema)
       .mutation(async ({ input: { name }, ctx }) => {
-        let team: schema.Team | undefined;
+        let org: schema.Org | undefined;
         try {
-          team = await store.teams.updateTeam(ctx.teamId, name);
+          org = await store.orgs.updateOrg(ctx.orgId, name);
         } catch (err) {
-          throw internalError("Error updating team", err);
+          throw internalError("Error updating org", err);
         }
-        if (!team) {
+        if (!org) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Team not found",
+            message: "Org not found",
           });
         }
-        return team;
+        return org;
       }),
-    deleteTeam: teamAdminProcedure(store).mutation(async ({ ctx }) => {
+    deleteOrg: orgAdminProcedure(store).mutation(async ({ ctx }) => {
       try {
-        await store.teams.deleteTeam(ctx.teamId);
+        await store.orgs.deleteOrg(ctx.orgId);
       } catch (err) {
-        throw internalError("Error deleting team", err);
+        throw internalError("Error deleting org", err);
       }
     }),
-    usersForTeam: publicProcedure
-      .input(z.object({ teamId: z.string().trim() }).or(z.void()))
+    usersForOrg: publicProcedure
+      .input(z.object({ orgId: z.string().trim() }).or(z.void()))
       .query(async ({ input, ctx }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
-        if (!teamId) {
+        const orgId = input?.orgId || ctx.session.auth?.user.orgId;
+        if (!orgId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Team ID must be provided as input or session context",
+            message: "Org ID must be provided as input or session context",
           });
         }
-        const people = await store.teams.userTeamsForTeamId(teamId);
+        const people = await store.orgs.userOrgsForOrgId(orgId);
         return people;
       }),
-    toggleAdmin: teamAdminProcedure(store)
+    toggleAdmin: orgAdminProcedure(store)
       .input(z.object({ userId: z.string().trim() }))
       .mutation(async ({ input, ctx }) => {
-        await store.teams.toggleAdmin(ctx.teamId, input.userId);
+        await store.orgs.toggleAdmin(ctx.orgId, input.userId);
       }),
-    removeTeamMember: teamAdminProcedure(store)
+    removeOrgMember: orgAdminProcedure(store)
       .input(z.object({ userId: z.string().trim() }))
       .mutation(async ({ input, ctx }) => {
-        await store.teams.removeTeamMember(ctx.teamId, input.userId);
+        await store.orgs.removeOrgMember(ctx.orgId, input.userId);
       }),
   });
 }
