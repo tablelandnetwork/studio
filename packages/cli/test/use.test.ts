@@ -11,7 +11,7 @@ import * as modUse from "../src/commands/use.js";
 import * as modUnuse from "../src/commands/unuse.js";
 import * as modLogin from "../src/commands/login.js";
 import * as modLogout from "../src/commands/logout.js";
-import * as modTeam from "../src/commands/team.js";
+import * as modOrg from "../src/commands/org.js";
 import { logger, wait } from "../src/utils.js";
 import {
   TEST_TIMEOUT_FACTOR,
@@ -77,13 +77,13 @@ describe("commands/use", function () {
     equal(err.message, "invalid project id");
   });
 
-  test("use command throws if team id is not valid", async function () {
+  test("use command throws if org id is not valid", async function () {
     const consoleError = spy(logger, "error");
 
     await yargs([
       "use",
-      "team",
-      "invalidteamid",
+      "org",
+      "invalidorgid",
       ...defaultArgs,
       "--privateKey",
       accounts[10].privateKey.slice(2),
@@ -92,10 +92,10 @@ describe("commands/use", function () {
       .parse();
 
     const err = consoleError.getCall(0).firstArg;
-    equal(err.message, "invalid team id");
+    equal(err.message, "invalid org id");
   });
 
-  test("use command sets teamId for project command", async function () {
+  test("use command sets orgId for project command", async function () {
     await yargs([
       "login",
       ...defaultArgs,
@@ -108,24 +108,24 @@ describe("commands/use", function () {
     const consoleLog = spy(logger, "log");
 
     await yargs([
-      "team",
+      "org",
       "ls",
       ...defaultArgs,
       "--privateKey",
       accounts[10].privateKey.slice(2),
     ])
-      .command<GlobalOptions>(modTeam)
+      .command<GlobalOptions>(modOrg)
       .parse();
 
-    const teamStr = consoleLog.getCall(0).firstArg;
-    const teamId = JSON.parse(teamStr)[0].id;
+    const orgStr = consoleLog.getCall(0).firstArg;
+    const orgId = JSON.parse(orgStr)[0].id;
 
-    equal(typeof teamId, "string");
+    equal(typeof orgId, "string");
 
     await yargs([
       "use",
-      "team",
-      teamId,
+      "org",
+      orgId,
       ...defaultArgs,
       "--privateKey",
       accounts[10].privateKey.slice(2),
@@ -136,11 +136,11 @@ describe("commands/use", function () {
     equal(
       consoleLog.getCall(1).firstArg,
       // typescript linting doesn't honor the assertion of the runtime type here, so we need to cast
-      `your team context has been set to: ${teamId as string}`,
+      `your org context has been set to: ${orgId as string}`,
     );
 
     const session = getSession();
-    equal(session.teamId, teamId);
+    equal(session.orgId, orgId);
   });
 
   test("use command can set chain", async function () {
@@ -197,11 +197,11 @@ describe("commands/use", function () {
       .command<GlobalOptions>(modLogin)
       .parse();
 
-    const teamId = "01a2d24d-3805-4a14-8059-7041f8b69aac";
+    const orgId = "01a2d24d-3805-4a14-8059-7041f8b69aac";
     await yargs([
       "use",
-      "team",
-      teamId,
+      "org",
+      orgId,
       ...defaultArgs,
       "--privateKey",
       accounts[10].privateKey.slice(2),
@@ -209,11 +209,11 @@ describe("commands/use", function () {
       .command<GlobalOptions>(modUse)
       .parse();
 
-    equal(getSession().teamId, teamId);
+    equal(getSession().orgId, orgId);
 
     await yargs([
       "unuse",
-      "team",
+      "org",
       ...defaultArgs,
       "--privateKey",
       accounts[10].privateKey.slice(2),
@@ -221,6 +221,6 @@ describe("commands/use", function () {
       .command<GlobalOptions>(modUnuse)
       .parse();
 
-    equal(getSession().teamId, undefined);
+    equal(getSession().orgId, undefined);
   });
 });

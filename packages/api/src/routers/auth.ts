@@ -31,7 +31,7 @@ export function authRouter(store: Store) {
             // TODO: do we want to verify domain and time here?
           });
           ctx.session.siweFields = fields.data;
-          const info = await store.auth.userAndPersonalTeamByAddress(
+          const info = await store.auth.userAndPersonalOrgByAddress(
             fields.data.address,
           );
           if (info) {
@@ -63,7 +63,7 @@ export function authRouter(store: Store) {
           });
         }
         try {
-          const auth = await store.auth.createUserAndPersonalTeam(
+          const auth = await store.auth.createUserAndPersonalOrg(
             ctx.session.siweFields.address,
             input.username,
             input.email,

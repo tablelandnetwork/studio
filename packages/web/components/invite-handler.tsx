@@ -18,17 +18,17 @@ const Profile = dynamic(
 
 export default function InviteHandler({
   seal,
-  targetTeam,
+  targetOrg,
 }: {
   seal: string;
-  targetTeam: schema.Team;
+  targetOrg: schema.Org;
 }) {
   const auth = useAtomValue(authAtom);
   const router = useRouter();
 
   const acceptInvite = api.invites.acceptInvite.useMutation({
     onSuccess: () => {
-      router.push(`/${targetTeam.slug}`);
+      router.push(`/${targetOrg.slug}`);
       router.refresh();
     },
   });

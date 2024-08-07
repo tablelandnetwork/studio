@@ -37,7 +37,7 @@ const studioRpc = api({
   url: "http://localhost:3000"
 }):
 
-const projects = await studioRpc.projects.teamProjects.query({ teamId: "123abc" });
+const projects = await studioRpc.projects.orgProjects.query({ orgId: "123abc" });
 
 ```
 

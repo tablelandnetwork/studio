@@ -19,29 +19,29 @@ export const command = "project <sub>";
 export const desc = "manage studio projects";
 
 export interface CommandOptions extends GlobalOptions {
-  teamId?: string;
+  orgId?: string;
   name?: string;
   description?: string;
-  team?: string;
+  org?: string;
   user?: string;
-  personalTeamId?: string;
+  personalOrgId?: string;
   invites?: string;
 }
 
 export const builder = function (args: Yargs) {
   return args
     .command(
-      "ls [teamId]",
-      "list the projects for the given team id, or if no id is given, for currently logged in user's personal team",
+      "ls [orgId]",
+      "list the projects for the given org id, or if no id is given, for currently logged in user's personal org",
       function (args) {
-        return args.positional("teamId", {
+        return args.positional("orgId", {
           type: "string",
-          description: "optional team id",
+          description: "optional org id",
         });
       },
       async function (argv) {
         try {
-          const { teamId } = argv;
+          const { orgId } = argv;
 
           const store = helpers.getStringValue(
             argv.store,
@@ -56,10 +56,10 @@ export const builder = function (args: Yargs) {
           const api = helpers.getApi(fileStore, apiUrl);
 
           const query =
-            typeof teamId === "string" && teamId.trim() !== ""
-              ? { teamId }
+            typeof orgId === "string" && orgId.trim() !== ""
+              ? { orgId }
               : undefined;
-          const projects = await api.projects.teamProjects.query(query);
+          const projects = await api.projects.orgProjects.query(query);
 
           const projectsWithDefs = [];
 
@@ -89,9 +89,9 @@ export const builder = function (args: Yargs) {
             type: "string",
             description: "the project description",
           })
-          .option("teamId", {
+          .option("orgId", {
             type: "string",
-            description: "the team id associated with the project",
+            description: "the org id associated with the project",
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
@@ -115,16 +115,16 @@ export const builder = function (args: Yargs) {
             store: fileStore,
           });
           const api = helpers.getApi(fileStore, apiUrl);
-          const teamId = helpers.getStringValue(
-            helpers.getTeam({
+          const orgId = helpers.getStringValue(
+            helpers.getOrg({
               store: fileStore,
-              teamId: argv.teamId,
+              orgId: argv.orgId,
             }),
-            "must provide team for project",
+            "must provide org for project",
           );
 
           const result = await api.projects.newProject.mutate({
-            teamId,
+            orgId,
             name,
             description,
             // TODO: Allow user to specify env names
@@ -143,6 +143,6 @@ export const builder = function (args: Yargs) {
 export const handler = async (
   argv: Arguments<CommandOptions>,
 ): Promise<void> => {
-  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
+  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalOrgId: string; } & { invites: string; } & { org: string | undefined; } & { user: string | undefined; }>) => void
   // noop
 };

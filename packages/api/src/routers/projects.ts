@@ -9,46 +9,46 @@ import {
 import {
   publicProcedure,
   createTRPCRouter,
-  teamProcedure,
+  orgProcedure,
   projectAdminProcedure,
 } from "../trpc";
 import { internalError } from "../utils/internalError";
 
 export function projectsRouter(store: Store) {
   return createTRPCRouter({
-    teamProjects: publicProcedure
-      .input(z.object({ teamId: z.string().trim().min(1) }).or(z.void()))
+    orgProjects: publicProcedure
+      .input(z.object({ orgId: z.string().trim().min(1) }).or(z.void()))
       .query(async ({ ctx, input }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
-        if (!teamId) {
+        const orgId = input?.orgId || ctx.session.auth?.user.orgId;
+        if (!orgId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Team ID must be provided as input or session context",
+            message: "Org ID must be provided as input or session context",
           });
         }
-        return await store.projects.projectsByTeamId(teamId);
+        return await store.projects.projectsByOrgId(orgId);
       }),
     projectBySlug: publicProcedure
       .input(
         z.object({
-          teamId: z.string().trim().optional(),
+          orgId: z.string().trim().optional(),
           slug: z.string().trim(),
         }),
       )
       .query(async ({ input, ctx }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
-        if (!teamId) {
+        const orgId = input?.orgId || ctx.session.auth?.user.orgId;
+        if (!orgId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Team ID must be provided as input or session context",
+            message: "Org ID must be provided as input or session context",
           });
         }
-        const project = await store.projects.projectByTeamIdAndSlug(
-          teamId,
+        const project = await store.projects.projectByOrgIdAndSlug(
+          orgId,
           input.slug,
         );
         if (!project) {
@@ -64,25 +64,25 @@ export function projectsRouter(store: Store) {
       .query(async ({ input, ctx }) => {
         // we want to check for null, undefined, and ""
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        const teamId = input?.teamId || ctx.session.auth?.user.teamId;
-        if (!teamId) {
+        const orgId = input?.orgId || ctx.session.auth?.user.orgId;
+        if (!orgId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Team ID must be provided as input or session context",
+            message: "Org ID must be provided as input or session context",
           });
         }
         return await store.projects.nameAvailable(
-          teamId,
+          orgId,
           input.name,
           input.projectId,
         );
       }),
-    newProject: teamProcedure(store)
+    newProject: orgProcedure(store)
       .input(newProjectSchema)
       .mutation(async ({ input, ctx }) => {
         try {
           const project = await store.projects.createProject(
-            ctx.teamId,
+            ctx.orgId,
             input.name,
             input.description,
             input.envNames.map((env) => env.name),

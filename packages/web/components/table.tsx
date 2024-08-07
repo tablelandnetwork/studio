@@ -62,7 +62,7 @@ interface Props {
   environment?: schema.Environment;
   defData?: DefData;
   deploymentData?: DeploymentData;
-  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
+  isAuthorized?: RouterOutputs["orgs"]["isAuthorized"];
 }
 
 export default async function Table({
@@ -197,8 +197,8 @@ export default async function Table({
             </MetricCardContent>
             {ownerStudioUser && (
               <MetricCardFooter>
-                Studio user {ownerStudioUser.team.name}
-                {ownerStudioUser.user.teamId === session.auth?.user.teamId
+                Studio user {ownerStudioUser.org.name}
+                {ownerStudioUser.user.orgId === session.auth?.user.orgId
                   ? " (you)"
                   : ""}
               </MetricCardFooter>

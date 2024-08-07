@@ -3,29 +3,29 @@ import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
 
 const users = schema.users;
-const teams = schema.teams;
+const orgs = schema.orgs;
 
 export function initUsers(db: DrizzleD1Database<typeof schema>) {
   return {
-    // NOTE: the users table only has the personal team, i.e. this won't return all teams for a user
-    userPersonalTeam: async function (userAddress: string) {
+    // NOTE: the users table only has the personal org, i.e. this won't return all orgs for a user
+    userPersonalOrg: async function (userAddress: string) {
       const user = await db
-        .select({ teamId: users.teamId })
+        .select({ orgId: users.orgId })
         .from(users)
         .where(eq(users.address, userAddress))
         .get();
 
-      return user?.teamId;
+      return user?.orgId;
     },
 
     usersForAddresses: async function (addresses: string[]) {
       const res = await db
         .select({
           user: users,
-          team: teams,
+          org: orgs,
         })
         .from(users)
-        .innerJoin(teams, eq(users.teamId, teams.id))
+        .innerJoin(orgs, eq(users.orgId, orgs.id))
         .where(inArray(users.address, addresses))
         .all();
       return res;
@@ -35,10 +35,10 @@ export function initUsers(db: DrizzleD1Database<typeof schema>) {
       const res = await db
         .select({
           user: users,
-          team: teams,
+          org: orgs,
         })
         .from(users)
-        .innerJoin(teams, eq(users.teamId, teams.id))
+        .innerJoin(orgs, eq(users.orgId, orgs.id))
         .where(eq(users.address, address))
         .get();
       return res;

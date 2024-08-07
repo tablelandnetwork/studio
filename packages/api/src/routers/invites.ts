@@ -6,7 +6,7 @@ import {
   protectedProcedure,
   publicProcedure,
   createTRPCRouter,
-  teamProcedure,
+  orgProcedure,
 } from "../trpc";
 import { type SendInviteFunc } from "../utils/sendInvite";
 
@@ -16,23 +16,23 @@ export function invitesRouter(
   dataSealPass: string,
 ) {
   return createTRPCRouter({
-    invitesForTeam: teamProcedure(store).query(async ({ ctx }) => {
-      const invites = await store.invites.invitesForTeam(ctx.teamId);
-      return { invites, teamAuthorization: ctx.teamAuthorization };
+    invitesForOrg: orgProcedure(store).query(async ({ ctx }) => {
+      const invites = await store.invites.invitesForOrg(ctx.orgId);
+      return { invites, orgAuthorization: ctx.orgAuthorization };
     }),
-    inviteEmails: teamProcedure(store)
+    inviteEmails: orgProcedure(store)
       .input(z.object({ emails: z.array(z.string().trim().email()) }))
       .mutation(async ({ ctx, input }) => {
-        const invites = await store.invites.inviteEmailsToTeam(
-          ctx.teamId,
-          ctx.session.auth.user.teamId,
+        const invites = await store.invites.inviteEmailsToOrg(
+          ctx.orgId,
+          ctx.session.auth.user.orgId,
           input.emails,
         );
         await Promise.all(
           invites.map(async (invite) => await sendInvite(invite)),
         );
       }),
-    resendInvite: teamProcedure(store)
+    resendInvite: orgProcedure(store)
       .input(z.object({ inviteId: z.string().trim() }))
       .mutation(async ({ input }) => {
         const invite = await store.invites.inviteById(input.inviteId);
@@ -80,13 +80,13 @@ export function invitesRouter(
         }
         // we want to make sure and check for "" since these columns are type text
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        if (invite.claimedAt || invite.claimedByTeamId) {
+        if (invite.claimedAt || invite.claimedByOrgId) {
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
             message: "Invite has already been claimed",
           });
         }
-        await store.invites.acceptInvite(invite, ctx.session.auth.personalTeam);
+        await store.invites.acceptInvite(invite, ctx.session.auth.personalOrg);
         return invite;
       }),
     ignoreInvite: publicProcedure
@@ -104,7 +104,7 @@ export function invitesRouter(
         }
         // we want to make sure and check for "" since these columns are type text
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        if (invite.claimedAt || invite.claimedByTeamId) {
+        if (invite.claimedAt || invite.claimedByOrgId) {
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
             message: "Invite has already been claimed",
@@ -113,7 +113,7 @@ export function invitesRouter(
         await store.invites.deleteInvite(inviteId);
         return invite;
       }),
-    deleteInvite: teamProcedure(store)
+    deleteInvite: orgProcedure(store)
       .input(z.object({ inviteId: z.string().trim() }))
       .mutation(async ({ input }) => {
         await store.invites.deleteInvite(input.inviteId);

@@ -7,7 +7,7 @@ import { initEnvironments } from "./environments.js";
 import { invites } from "./invites.js";
 import { initProjects } from "./projects.js";
 import { initDefs } from "./defs.js";
-import { initTeams } from "./teams.js";
+import { initOrgs } from "./orgs.js";
 import { initUsers } from "./users.js";
 
 export function init(tbl: Database, dataSealPass: string) {
@@ -17,7 +17,7 @@ export function init(tbl: Database, dataSealPass: string) {
     invites: invites(db, tbl, dataSealPass),
     projects: initProjects(db, tbl),
     defs: initDefs(db, tbl),
-    teams: initTeams(db, tbl, dataSealPass),
+    orgs: initOrgs(db, tbl, dataSealPass),
     environments: initEnvironments(db, tbl),
     deployments: initDeployments(db),
     users: initUsers(db),

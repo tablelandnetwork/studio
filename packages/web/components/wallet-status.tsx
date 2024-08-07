@@ -56,8 +56,8 @@ export default function WalletStatus({
                 <User className="size-4 shrink-0 stroke-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                Studio user {authorizedStudioUser.team.name}
-                {authorizedStudioUser.user.teamId === auth?.user.teamId
+                Studio user {authorizedStudioUser.org.name}
+                {authorizedStudioUser.user.orgId === auth?.user.orgId
                   ? " (you)"
                   : ""}
               </TooltipContent>

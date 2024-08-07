@@ -12,15 +12,15 @@ export const users = sqliteTable(
   "users",
   {
     address: text("address").primaryKey(),
-    teamId: text("team_id").notNull(),
+    orgId: text("team_id").notNull(),
     sealed: text("sealed").notNull(),
   },
   (users) => ({
-    teamIdIdx: uniqueIndex("teamIdIdx").on(users.teamId),
+    orgIdIdx: uniqueIndex("teamIdIdx").on(users.orgId),
   }),
 );
 
-export const teams = sqliteTable(
+export const orgs = sqliteTable(
   "teams",
   {
     id: text("id").primaryKey(),
@@ -30,25 +30,25 @@ export const teams = sqliteTable(
     createdAt: text("created_at"),
     updatedAt: text("updated_at"),
   },
-  (teams) => ({
-    nameIdx: uniqueIndex("nameIdx").on(teams.name),
-    slugIdx: uniqueIndex("slugIdx").on(teams.slug),
+  (orgs) => ({
+    nameIdx: uniqueIndex("nameIdx").on(orgs.name),
+    slugIdx: uniqueIndex("slugIdx").on(orgs.slug),
   }),
 );
 
-export const teamMemberships = sqliteTable(
+export const orgMemberships = sqliteTable(
   "team_memberships",
   {
-    memberTeamId: text("member_team_id").notNull(),
-    teamId: text("team_id").notNull(),
+    memberOrgId: text("member_team_id").notNull(),
+    orgId: text("team_id").notNull(),
     isOwner: integer("is_owner").notNull(),
     joinedAt: text("joined_at").notNull(),
   },
-  (userTeams) => {
+  (orgMemberships) => {
     return {
-      memberTeamIdx: uniqueIndex("memberTeamIdx").on(
-        userTeams.memberTeamId,
-        userTeams.teamId,
+      memberOrgIdx: uniqueIndex("memberTeamIdx").on(
+        orgMemberships.memberOrgId,
+        orgMemberships.orgId,
       ),
     };
   },
@@ -63,18 +63,18 @@ export const projects = sqliteTable("projects", {
   updatedAt: text("updated_at"),
 });
 
-export const teamProjects = sqliteTable(
+export const orgProjects = sqliteTable(
   "team_projects",
   {
-    teamId: text("team_id").notNull(),
+    orgId: text("team_id").notNull(),
     projectId: text("project_id").notNull(),
     isOwner: integer("is_owner").notNull(),
   },
-  (teamProjects) => {
+  (orgProjects) => {
     return {
-      teamProjectIdx: uniqueIndex("teamProjectIdx").on(
-        teamProjects.teamId,
-        teamProjects.projectId,
+      orgProjectIdx: uniqueIndex("teamProjectIdx").on(
+        orgProjects.orgId,
+        orgProjects.projectId,
       ),
     };
   },
@@ -161,13 +161,13 @@ export const deployments = sqliteTable(
 //   mutation: text("mutation").notNull()
 // });
 
-export const teamInvites = sqliteTable("team_invites", {
+export const orgInvites = sqliteTable("team_invites", {
   id: text("id").primaryKey(),
-  teamId: text("team_id").notNull(),
+  orgId: text("team_id").notNull(),
   sealed: text("sealed").notNull(),
-  inviterTeamId: text("inviter_team_id").notNull(),
+  inviterOrgId: text("inviter_team_id").notNull(),
   createdAt: text("created_at").notNull(),
-  claimedByTeamId: text("claimed_by_team_id"),
+  claimedByOrgId: text("claimed_by_team_id"),
   claimedAt: text("claimed_at"),
 });
 
@@ -182,11 +182,11 @@ export type NewUser = Omit<NewUserSealed, "sealed"> & {
   email?: string;
 };
 
-export type Team = InferSelectModel<typeof teams>;
-export type NewTeam = InferInsertModel<typeof teams>;
+export type Org = InferSelectModel<typeof orgs>;
+export type NewOrg = InferInsertModel<typeof orgs>;
 
-export type TeamMembership = InferSelectModel<typeof teamMemberships>;
-export type NewTeamMembership = InferInsertModel<typeof teamMemberships>;
+export type OrgMembership = InferSelectModel<typeof orgMemberships>;
+export type NewOrgMembership = InferInsertModel<typeof orgMemberships>;
 
 export type Project = InferSelectModel<typeof projects>;
 export type NewProject = InferInsertModel<typeof projects>;
@@ -203,12 +203,12 @@ export type NewDeployment = InferInsertModel<typeof deployments>;
 // export type MigrationLog = InferSelectModel<typeof migrationLog>;
 // export type NewMigrationLog = InferInsertModel<typeof migrationLog>;
 
-export type TeamProject = InferSelectModel<typeof teamProjects>;
-export type NewTeamProject = InferInsertModel<typeof teamProjects>;
+export type OrgProject = InferSelectModel<typeof orgProjects>;
+export type NewOrgProject = InferInsertModel<typeof orgProjects>;
 
-export type TeamInviteSealed = InferSelectModel<typeof teamInvites>;
-export type NewTeamInviteSealed = InferInsertModel<typeof teamInvites>;
-export type TeamInvite = Omit<TeamInviteSealed, "sealed"> & { email: string };
-export type NewTeamInvite = Omit<NewTeamInviteSealed, "sealed"> & {
+export type OrgInviteSealed = InferSelectModel<typeof orgInvites>;
+export type NewOrgInviteSealed = InferInsertModel<typeof orgInvites>;
+export type OrgInvite = Omit<OrgInviteSealed, "sealed"> & { email: string };
+export type NewOrgInvite = Omit<NewOrgInviteSealed, "sealed"> & {
   email: string;
 };

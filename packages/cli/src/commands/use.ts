@@ -10,7 +10,7 @@ import {
 // note: abnormal spacing is needed to ensure help message is formatted correctly
 export const command = "use [context] [id]";
 export const desc =
-  "use the given context id for all    ensuing commands. context can be one of (api, chain, team, project, or  provider). ";
+  "use the given context id for all    ensuing commands. context can be one of (api, chain, org, project, or  provider). ";
 
 export const handler = async (
   argv: Arguments<GlobalOptions>,
@@ -22,9 +22,9 @@ export const handler = async (
     const fileStore = new FileStore(store);
 
     switch (context) {
-      case "team":
-        if (!helpers.isUUID(id)) throw new Error("invalid team id");
-        fileStore.set("teamId", id);
+      case "org":
+        if (!helpers.isUUID(id)) throw new Error("invalid org id");
+        fileStore.set("orgId", id);
         fileStore.save();
         break;
       case "project":

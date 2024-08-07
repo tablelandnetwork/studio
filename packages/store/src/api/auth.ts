@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData, unsealData } from "iron-session";
 import type * as schema from "../schema/index.js";
-import { teamMemberships, teams, users } from "../schema/index.js";
+import { orgMemberships, orgs, users } from "../schema/index.js";
 import { slugify } from "../helpers.js";
 
 export function auth(
@@ -12,14 +12,14 @@ export function auth(
   tbl: Database,
   dataSealPass: string,
 ) {
-  async function userAndPersonalTeamByAddress(address: string) {
+  async function userAndPersonalOrgByAddress(address: string) {
     const res = await db
       .select({
         user: users,
-        personalTeam: teams,
+        personalOrg: orgs,
       })
       .from(users)
-      .innerJoin(teams, eq(users.teamId, teams.id))
+      .innerJoin(orgs, eq(users.orgId, orgs.id))
       .where(eq(users.address, address))
       .get();
     if (!res) {
@@ -34,58 +34,58 @@ export function auth(
         ...rest,
         email,
       },
-      personalTeam: res.personalTeam,
+      personalOrg: res.personalOrg,
     };
   }
 
   return {
-    createUserAndPersonalTeam: async function (
+    createUserAndPersonalOrg: async function (
       address: string,
-      teamName: string,
+      orgName: string,
       email?: string,
     ) {
       const now = new Date().toISOString();
-      const teamId = randomUUID();
+      const orgId = randomUUID();
       const sealed = await sealData(
         { email },
         { password: dataSealPass, ttl: 0 },
       );
       const { sql: usersSql, params: usersParams } = db
         .insert(users)
-        .values({ address, teamId, sealed })
+        .values({ address, orgId, sealed })
         .toSQL();
-      const { sql: teamsSql, params: teamsParams } = db
-        .insert(teams)
+      const { sql: orgsSql, params: orgsParams } = db
+        .insert(orgs)
         .values({
-          id: teamId,
+          id: orgId,
           personal: 1,
-          name: teamName,
-          slug: slugify(teamName),
+          name: orgName,
+          slug: slugify(orgName),
           createdAt: now,
           updatedAt: now,
         })
         .toSQL();
-      const { sql: teamMembershipsSql, params: teamMembershipsParams } = db
-        .insert(teamMemberships)
+      const { sql: orgMembershipsSql, params: orgMembershipsParams } = db
+        .insert(orgMemberships)
         .values({
-          memberTeamId: teamId,
-          teamId,
+          memberOrgId: orgId,
+          orgId,
           isOwner: 1,
-          joinedAt: new Date().toISOString(),
+          joinedAt: now,
         })
         .toSQL();
       await tbl.batch([
         tbl.prepare(usersSql).bind(usersParams),
-        tbl.prepare(teamsSql).bind(teamsParams),
-        tbl.prepare(teamMembershipsSql).bind(teamMembershipsParams),
+        tbl.prepare(orgsSql).bind(orgsParams),
+        tbl.prepare(orgMembershipsSql).bind(orgMembershipsParams),
       ]);
-      const info = await userAndPersonalTeamByAddress(address);
+      const info = await userAndPersonalOrgByAddress(address);
       if (!info) {
-        throw new Error("Failed to create user and personal team.");
+        throw new Error("Failed to create user and personal org.");
       }
       return info;
     },
 
-    userAndPersonalTeamByAddress,
+    userAndPersonalOrgByAddress,
   };
 }

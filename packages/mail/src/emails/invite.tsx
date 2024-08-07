@@ -19,17 +19,17 @@ const {
 export interface InviteProps {
   imageLink: string;
   inviterUsername: string;
-  teamName: string;
+  orgName: string;
   link: string;
 }
 
 export const InviteUserEmail = ({
   imageLink = "https://studio.tableland.xyz/mesa.jpg",
   inviterUsername = "user1",
-  teamName = "Team",
+  orgName = "Org",
   link = "https://example.com",
 }: InviteProps) => {
-  const previewText = `Join ${teamName} on Tableland Studio`;
+  const previewText = `Join ${orgName} on Tableland Studio`;
 
   return (
     <Html>
@@ -48,7 +48,7 @@ export const InviteUserEmail = ({
               />
             </Section>
             <Heading className="mx-0 my-[30px] p-0 text-center text-[24px] font-normal text-black">
-              Join <strong>{teamName}</strong> on{" "}
+              Join <strong>{orgName}</strong> on{" "}
               <strong>Tableland Studio</strong>
             </Heading>
             <Text className="text-[14px] leading-[24px] text-black">
@@ -56,7 +56,7 @@ export const InviteUserEmail = ({
             </Text>
             <Text className="text-[14px] leading-[24px] text-black">
               User <strong>{inviterUsername}</strong> has invited you to the{" "}
-              <strong>{teamName}</strong> team on{" "}
+              <strong>{orgName}</strong> org on{" "}
               <strong>Tableland Studio</strong>.
             </Text>
             <Section className="mb-[32px] mt-[32px] text-center">

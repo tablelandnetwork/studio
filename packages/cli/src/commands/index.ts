@@ -7,7 +7,7 @@ import * as logout from "./logout.js";
 import * as project from "./project.js";
 import * as query from "./query.js";
 import * as status from "./status.js";
-import * as team from "./team.js";
+import * as org from "./org.js";
 import * as use from "./use.js";
 import * as unuse from "./unuse.js";
 
@@ -21,7 +21,7 @@ export const commands = [
   project,
   query,
   status,
-  team,
+  org,
   use,
   unuse,
 ];

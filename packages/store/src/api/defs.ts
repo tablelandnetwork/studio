@@ -9,8 +9,8 @@ import { slugify } from "../helpers.js";
 type Def = schema.Def;
 const projectDefs = schema.projectDefs;
 const defs = schema.defs;
-const teamProjects = schema.teamProjects;
-const teams = schema.teams;
+const orgProjects = schema.orgProjects;
+const orgs = schema.orgs;
 const deployments = schema.deployments;
 
 export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
@@ -148,20 +148,20 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
       return res?.defs;
     },
 
-    defTeam: async function (defId: string) {
+    defOrg: async function (defId: string) {
       const res = await db
-        .select({ teams })
+        .select({ orgs })
         .from(defs)
         .innerJoin(projectDefs, eq(defs.id, projectDefs.defId))
         .innerJoin(
-          teamProjects,
-          eq(projectDefs.projectId, teamProjects.projectId),
+          orgProjects,
+          eq(projectDefs.projectId, orgProjects.projectId),
         )
-        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
         .where(eq(defs.id, defId))
         .orderBy(defs.name)
         .get();
-      return res?.teams;
+      return res?.orgs;
     },
   };
 }

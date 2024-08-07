@@ -1,4 +1,4 @@
-export const restrictedTeamSlugs = [
+export const restrictedOrgSlugs = [
   "api",
   "invite",
   "sql-log",
@@ -15,7 +15,7 @@ export const restrictedDefSlugs = ["settings", "tables", "console"];
 export const restrictedEnvSlugs = ["settings"];
 
 export const allRestrictedSlugs = [
-  ...restrictedTeamSlugs,
+  ...restrictedOrgSlugs,
   ...restrictedProjectSlugs,
   ...restrictedDefSlugs,
   ...restrictedEnvSlugs,

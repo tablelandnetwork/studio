@@ -92,7 +92,7 @@ export default function Profile({
 
   useEffect(() => {
     if (isConnected && authenticated.data) {
-      router.push(`/${authenticated.data.personalTeam.slug}`);
+      router.push(`/${authenticated.data.personalOrg.slug}`);
     }
     // Not incliding authenticated.data in deps because we only
     // want to trigger this when isConnected changes.
@@ -104,7 +104,7 @@ export default function Profile({
       router.refresh();
       setAuth(auth);
       if (!dontRedirect) {
-        router.push(`/${auth.personalTeam.slug}`);
+        router.push(`/${auth.personalOrg.slug}`);
       }
     } else {
       setShowRegisterDialog(true);
@@ -120,7 +120,7 @@ export default function Profile({
     setAuth(auth);
     setShowRegisterDialog(false);
     if (!dontRedirect) {
-      router.push(`/${auth.personalTeam.slug}`);
+      router.push(`/${auth.personalOrg.slug}`);
     }
   };
 
@@ -141,11 +141,11 @@ export default function Profile({
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={`https://avatar.vercel.sh/${auth.personalTeam.slug}.png`}
-                      alt={auth.personalTeam.name}
+                      src={`https://avatar.vercel.sh/${auth.personalOrg.slug}.png`}
+                      alt={auth.personalOrg.name}
                     />
                     <AvatarFallback>
-                      {auth.personalTeam.name.charAt(0)}
+                      {auth.personalOrg.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -154,7 +154,7 @@ export default function Profile({
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {auth.personalTeam.name}
+                      {auth.personalOrg.name}
                     </p>
                   </div>
                 </DropdownMenuLabel>

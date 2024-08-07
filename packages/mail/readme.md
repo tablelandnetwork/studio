@@ -30,7 +30,7 @@ await mailApi.sendInvite(
   "email@example.com", // User's email
   "https://example.com/image", // Link to invite image
   "inviter-username", // Username of who is inviting
-  "team-name", // Team name string
+  "org-name", // Org name string
   "https://example.com/accept", // Link to accept invite
 );
 ```

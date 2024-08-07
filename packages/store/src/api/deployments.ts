@@ -7,8 +7,8 @@ const environments = schema.environments;
 const projectDefs = schema.projectDefs;
 const projects = schema.projects;
 const defs = schema.defs;
-const teamProjects = schema.teamProjects;
-const teams = schema.teams;
+const orgProjects = schema.orgProjects;
+const orgs = schema.orgs;
 
 export function initDeployments(db: DrizzleD1Database<typeof schema>) {
   return {
@@ -107,7 +107,7 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
     deploymentReferences: async function (chainId: number, tableId: string) {
       const res = await db
         .select({
-          team: teams,
+          org: orgs,
           project: projects,
           def: defs,
           environment: environments,
@@ -118,8 +118,8 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
         .innerJoin(defs, eq(projectDefs.defId, defs.id))
         .innerJoin(projects, eq(projectDefs.projectId, projects.id))
         .innerJoin(environments, eq(deployments.environmentId, environments.id))
-        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
-        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .innerJoin(orgProjects, eq(projects.id, orgProjects.projectId))
+        .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
         .where(
           and(
             eq(deployments.chainId, chainId),

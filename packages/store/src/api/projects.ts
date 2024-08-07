@@ -8,8 +8,8 @@ import { slugify } from "../helpers.js";
 type Project = schema.Project;
 const environments = schema.environments;
 const projects = schema.projects;
-const teamProjects = schema.teamProjects;
-const teams = schema.teams;
+const orgProjects = schema.orgProjects;
+const orgs = schema.orgs;
 const defs = schema.defs;
 const deployments = schema.deployments;
 const projectDefs = schema.projectDefs;
@@ -20,17 +20,17 @@ export function initProjects(
 ) {
   return {
     nameAvailable: async function (
-      teamId: string,
+      orgId: string,
       name: string,
       projectId?: string,
     ) {
       const res = await db
         .select()
         .from(projects)
-        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
+        .innerJoin(orgProjects, eq(projects.id, orgProjects.projectId))
         .where(
           and(
-            eq(teamProjects.teamId, teamId),
+            eq(orgProjects.orgId, orgId),
             eq(projects.slug, slugify(name)),
             projectId ? ne(projects.id, projectId) : undefined,
           ),
@@ -40,7 +40,7 @@ export function initProjects(
     },
 
     createProject: async function (
-      teamId: string,
+      orgId: string,
       name: string,
       description: string,
       envNames: string[],
@@ -60,9 +60,9 @@ export function initProjects(
         .insert(projects)
         .values(project)
         .toSQL();
-      const { sql: teamProjectsSql, params: teamProjectsParams } = db
-        .insert(teamProjects)
-        .values({ projectId, teamId, isOwner: 1 })
+      const { sql: orgProjectsSql, params: orgProjectsParams } = db
+        .insert(orgProjects)
+        .values({ projectId, orgId, isOwner: 1 })
         .toSQL();
       const envs: schema.Environment[] = envNames.map((name) => ({
         id: randomUUID(),
@@ -78,7 +78,7 @@ export function initProjects(
         .toSQL();
       await tbl.batch([
         tbl.prepare(projectsSql).bind(projectsParams),
-        tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
+        tbl.prepare(orgProjectsSql).bind(orgProjectsParams),
         tbl.prepare(envsSql).bind(envsParams),
       ]);
       return project;
@@ -109,10 +109,10 @@ export function initProjects(
     },
 
     deleteProject: async function (projectId: string) {
-      // teamProjects
-      const { sql: teamProjectsSql, params: teamProjectsParams } = db
-        .delete(teamProjects)
-        .where(eq(teamProjects.projectId, projectId))
+      // orgProjects
+      const { sql: orgProjectsSql, params: orgProjectsParams } = db
+        .delete(orgProjects)
+        .where(eq(orgProjects.projectId, projectId))
         .toSQL();
 
       // projects
@@ -134,13 +134,13 @@ export function initProjects(
         .toSQL();
 
       const batch = [
-        tbl.prepare(teamProjectsSql).bind(teamProjectsParams),
+        tbl.prepare(orgProjectsSql).bind(orgProjectsParams),
         tbl.prepare(projectsSql).bind(projectsParams),
         tbl.prepare(environmentsSql).bind(environmentsParams),
         tbl.prepare(projectDefsSql).bind(projectDefsParams),
       ];
 
-      // Get an array of def IDs for all projects in the team
+      // Get an array of def IDs for all projects in the org
       const defIds = (
         await db
           .select({ defId: projectDefs.defId })
@@ -172,105 +172,103 @@ export function initProjects(
 
     firstNProjectSlugs: async function (n: number) {
       const res = await db
-        .select({ team: teams.slug, project: projects.slug })
+        .select({ org: orgs.slug, project: projects.slug })
         .from(projects)
-        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
-        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .innerJoin(orgProjects, eq(projects.id, orgProjects.projectId))
+        .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
         .orderBy(projects.name)
         .limit(n)
         .all();
       return res;
     },
 
-    projectByTeamAndProjectSlugs: async function (
-      teamSlug: string,
+    projectByOrgAndProjectSlugs: async function (
+      orgSlug: string,
       projectSlug: string,
     ) {
       const res = await db
-        .select({ team: teams, project: projects })
+        .select({ org: orgs, project: projects })
         .from(projects)
-        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
-        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
-        .where(and(eq(teams.slug, teamSlug), eq(projects.slug, projectSlug)))
+        .innerJoin(orgProjects, eq(projects.id, orgProjects.projectId))
+        .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
+        .where(and(eq(orgs.slug, orgSlug), eq(projects.slug, projectSlug)))
         .get();
       return res;
     },
 
     latestProjects: async function (offset: number, count: number) {
       const res = await db
-        .select({ projects, teams })
+        .select({ projects, orgs })
         .from(projects)
-        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
-        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .innerJoin(orgProjects, eq(projects.id, orgProjects.projectId))
+        .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
         .where(isNotNull(projects.createdAt))
         .orderBy(desc(projects.createdAt))
         .offset(offset)
         .limit(count)
         .all();
-      return res.map((r) => ({ team: r.teams, project: r.projects }));
+      return res.map((r) => ({ org: r.orgs, project: r.projects }));
     },
 
-    projectsByTeamId: async function (teamId: string) {
+    projectsByOrgId: async function (orgId: string) {
       const res = await db
         .select({ project: projects }) // TODO: Figure out why if we don't specify select key, projects key ends up as actual table name.
-        .from(teamProjects)
-        .innerJoin(projects, eq(teamProjects.projectId, projects.id))
-        .where(
-          and(eq(teamProjects.teamId, teamId), eq(teamProjects.isOwner, 1)),
-        )
+        .from(orgProjects)
+        .innerJoin(projects, eq(orgProjects.projectId, projects.id))
+        .where(and(eq(orgProjects.orgId, orgId), eq(orgProjects.isOwner, 1)))
         .orderBy(projects.slug)
         .all();
       const mapped = res.map((r) => r.project);
       return mapped;
     },
 
-    projectByTeamIdAndSlug: async function (teamId: string, slug: string) {
+    projectByOrgIdAndSlug: async function (orgId: string, slug: string) {
       const res = await db
         .select({ projects })
-        .from(teamProjects)
-        .innerJoin(projects, eq(teamProjects.projectId, projects.id))
-        .where(and(eq(teamProjects.teamId, teamId), eq(projects.slug, slug)))
+        .from(orgProjects)
+        .innerJoin(projects, eq(orgProjects.projectId, projects.id))
+        .where(and(eq(orgProjects.orgId, orgId), eq(projects.slug, slug)))
         .get();
       return res?.projects;
     },
 
     // TODO: Where does this belong?
-    projectTeamByProjectId: async function (projectId: string) {
+    projectOrgByProjectId: async function (projectId: string) {
       const res = await db
-        .select({ teams })
-        .from(teamProjects)
-        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
-        .where(eq(teamProjects.projectId, projectId))
-        .orderBy(teams.name)
+        .select({ orgs })
+        .from(orgProjects)
+        .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
+        .where(eq(orgProjects.projectId, projectId))
+        .orderBy(orgs.name)
         .get();
-      return res?.teams;
+      return res?.orgs;
     },
 
-    isAuthorizedForProject: async function (teamId: string, projectId: string) {
+    isAuthorizedForProject: async function (orgId: string, projectId: string) {
       const authorized = await db
         .select()
-        .from(teamProjects)
+        .from(orgProjects)
         .where(
           and(
-            eq(teamProjects.teamId, teamId),
-            eq(teamProjects.projectId, projectId),
+            eq(orgProjects.orgId, orgId),
+            eq(orgProjects.projectId, projectId),
           ),
         )
         .get();
       return !!authorized;
     },
 
-    projectTeamByEnvironmentId: async function (environmentId: string) {
-      const projectTeam = await db
-        .select({ teams })
+    projectOrgByEnvironmentId: async function (environmentId: string) {
+      const projectOrg = await db
+        .select({ orgs })
         .from(environments)
         .innerJoin(projects, eq(environments.projectId, projects.id))
-        .innerJoin(teamProjects, eq(projects.id, teamProjects.projectId))
-        .innerJoin(teams, eq(teamProjects.teamId, teams.id))
+        .innerJoin(orgProjects, eq(projects.id, orgProjects.projectId))
+        .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
         .where(eq(environments.id, environmentId))
         .get();
 
-      return projectTeam?.teams;
+      return projectOrg?.orgs;
     },
   };
 }

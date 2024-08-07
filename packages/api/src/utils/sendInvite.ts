@@ -9,14 +9,14 @@ export function createSendInvite(
   createInviteLink: (seal: string) => string,
   mailApi: MailApi,
 ) {
-  return async function (invite: schema.TeamInvite) {
-    const inviterTeam = await store.teams.teamById(invite.inviterTeamId);
-    if (!inviterTeam) {
-      throw new Error("Inviter team not found");
+  return async function (invite: schema.OrgInvite) {
+    const inviterOrg = await store.orgs.orgById(invite.inviterOrgId);
+    if (!inviterOrg) {
+      throw new Error("Inviter org not found");
     }
-    const team = await store.teams.teamById(invite.teamId);
-    if (!team) {
-      throw new Error("Team not found");
+    const org = await store.orgs.orgById(invite.orgId);
+    if (!org) {
+      throw new Error("Org not found");
     }
     const seal = await sealData(
       { inviteId: invite.id },
@@ -30,8 +30,8 @@ export function createSendInvite(
     return await mailApi.sendInvite(
       invite.email,
       inviteImageLink,
-      inviterTeam.name,
-      team.name,
+      inviterOrg.name,
+      org.name,
       link,
     );
   };

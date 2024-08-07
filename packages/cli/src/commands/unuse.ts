@@ -20,8 +20,8 @@ export const handler = async (
     const fileStore = new FileStore(store);
 
     switch (context) {
-      case "team":
-        fileStore.remove("teamId");
+      case "org":
+        fileStore.remove("orgId");
         fileStore.save();
         break;
       case "project":

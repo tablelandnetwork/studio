@@ -1,14 +1,14 @@
 import { z } from "zod";
 import { helpers } from "@tableland/sdk";
 import { slugify } from "@tableland/studio-store";
-import { restrictedTeamSlugs, restrictedDefSlugs } from "./restricted-slugs.js";
+import { restrictedOrgSlugs, restrictedDefSlugs } from "./restricted-slugs.js";
 
-export const teamNameSchema = z
+export const orgNameSchema = z
   .string()
   .trim()
   .min(3)
-  .refine((name) => !restrictedTeamSlugs.includes(slugify(name)), {
-    message: "You can't use a restricted word as a team name.",
+  .refine((name) => !restrictedOrgSlugs.includes(slugify(name)), {
+    message: "You can't use a restricted word as a org name.",
   });
 
 export const defNameSchema = z

@@ -28,18 +28,18 @@ export interface TableMenuProps {
   schema: Schema;
   chainId?: number;
   tableId?: string;
-  team?: schema.Team;
+  org?: schema.Org;
   project?: schema.Project;
   env?: schema.Environment;
   def?: { id: string; name: string; description: string; slug: string };
-  isAuthorized?: RouterOutputs["teams"]["isAuthorized"];
+  isAuthorized?: RouterOutputs["orgs"]["isAuthorized"];
 }
 
 export default function TableMenu({
   schema,
   chainId,
   tableId,
-  team,
+  org,
   project,
   env,
   def,
@@ -67,7 +67,7 @@ export default function TableMenu({
   const onEditDefSuccess = (updatedDef: schema.Def) => {
     if (def?.slug !== updatedDef.slug) {
       router.replace(
-        `/${team!.slug}/${project!.slug}/${env!.slug}/${updatedDef.slug}`,
+        `/${org!.slug}/${project!.slug}/${env!.slug}/${updatedDef.slug}`,
       );
     }
     router.refresh();
@@ -88,9 +88,9 @@ export default function TableMenu({
   const onDeleteTableSuccess = () => {
     setDeleteTableOpen(false);
     void defsQuery.refetch();
-    if (!team || !project || !env) return;
+    if (!org || !project || !env) return;
     router.refresh();
-    router.replace(`/${team.slug}/${project.slug}/${env.slug}`);
+    router.replace(`/${org.slug}/${project.slug}/${env.slug}`);
   };
 
   const onUndeployTableSuccess = () => {
@@ -100,7 +100,7 @@ export default function TableMenu({
   };
 
   const displaySettings =
-    !!isAuthorized && !!def && !!team && !!project && !!env;
+    !!isAuthorized && !!def && !!org && !!project && !!env;
   const displayDeploy =
     !!isAuthorized && !chainId && !tableId && !!def && !!env;
   const displayImportToStudio =
@@ -153,9 +153,9 @@ export default function TableMenu({
         {...importTableFormProps}
         open={!!importTableFormProps}
         onOpenChange={(open) => !open && setImportTableFormProps(undefined)}
-        onSuccess={(team, project, def, env) => {
+        onSuccess={(org, project, def, env) => {
           router.refresh();
-          const newPathname = `/${team.slug}/${project.slug}/${env.slug}/${def.slug}`;
+          const newPathname = `/${org.slug}/${project.slug}/${env.slug}/${def.slug}`;
           if (pathname !== newPathname) {
             router.push(newPathname);
           } else {
@@ -167,10 +167,10 @@ export default function TableMenu({
         schemaPreset={schema}
         open={newDefFormOpen}
         onOpenChange={setNewDefFormOpen}
-        onSuccess={(selectedTeam, selectedProject, def) => {
+        onSuccess={(selectedOrg, selectedProject, def) => {
           router.refresh();
           router.push(
-            `/${selectedTeam.slug}/${selectedProject.slug}${env ? `/${env.slug}/${def.slug}` : `?table=${def.slug}`}`,
+            `/${selectedOrg.slug}/${selectedProject.slug}${env ? `/${env.slug}/${def.slug}` : `?table=${def.slug}`}`,
           );
           if (selectedProject.id === project?.id) {
             void defsQuery.refetch();
@@ -211,7 +211,7 @@ export default function TableMenu({
             <DropdownMenuItem
               onSelect={() =>
                 setImportTableFormProps({
-                  teamPreset: team,
+                  orgPreset: org,
                   projectPreset: project,
                   envPreset: env,
                   defId: def?.id,

@@ -12,7 +12,7 @@ import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_REGISTRY_PORT,
-  TEST_TEAM_ID,
+  TEST_ORG_ID,
 } from "./utils";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -55,8 +55,8 @@ describe("commands/project", function () {
       "create",
       projectName,
       description,
-      "--teamId",
-      TEST_TEAM_ID,
+      "--orgId",
+      TEST_ORG_ID,
       ...defaultArgs,
     ])
       .command<CommandOptions>(mod)
@@ -81,7 +81,7 @@ describe("commands/project", function () {
 
   test("can list projects", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["project", "ls", TEST_TEAM_ID, ...defaultArgs])
+    await yargs(["project", "ls", TEST_ORG_ID, ...defaultArgs])
       .command<CommandOptions>(mod)
       .parse();
 

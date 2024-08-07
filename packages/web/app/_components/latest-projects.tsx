@@ -6,7 +6,7 @@ import { TimeSince } from "@/components/time";
 import { Paginator } from "@/components/paginator";
 import { TypographyH3 } from "@/components/typography-h3";
 import { type store } from "@/lib/store";
-import TeamAvatar from "@/components/team-avatar";
+import OrgAvatar from "@/components/org-avatar";
 
 export type Projects = Awaited<
   ReturnType<typeof store.projects.latestProjects>
@@ -25,15 +25,15 @@ export function LatestProjects({ projects }: { projects: Projects }) {
         {projects.slice(offset, offset + pageSize).map((item) => (
           <Link
             key={item.project.id}
-            href={`/${item.team.slug}/${item.project.slug}`}
+            href={`/${item.org.slug}/${item.project.slug}`}
             className="flex flex-col items-start gap-2 rounded-md border p-4 text-left text-sm transition-all hover:bg-accent"
           >
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center gap-2">
-                <TeamAvatar team={item.team} />
+                <OrgAvatar org={item.org} />
                 <div className="flex items-center gap-2">
                   <div className="text-sm font-semibold">
-                    {item.team.name}/{item.project.name}
+                    {item.org.name}/{item.project.name}
                   </div>
                 </div>
                 {item.project.createdAt && (
