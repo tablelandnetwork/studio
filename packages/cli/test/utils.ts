@@ -15,7 +15,7 @@ export const TEST_API_BASE_URL = `http://localhost:${TEST_API_PORT}`;
 export const TEST_REGISTRY_PORT = 8546;
 export const TEST_VALIDATOR_URL = "http://localhost:8081/api/v1";
 
-export const TEST_TEAM_ID = "a3cd7fac-4528-4765-9ae1-304460555429";
+export const TEST_ORG_ID = "a3cd7fac-4528-4765-9ae1-304460555429";
 export const TEST_PROJECT_ID = "2f403473-de7b-41ba-8d97-12a0344aeccb";
 
 export const isUUID = function (value: string) {

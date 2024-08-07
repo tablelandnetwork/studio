@@ -15,13 +15,13 @@ import {
 
 type Yargs = typeof yargs;
 
-export const command = "team <sub>";
-export const desc = "manage studio teams";
+export const command = "org <sub>";
+export const desc = "manage studio orgs";
 
 export interface CommandOptions extends GlobalOptions {
   name?: string;
   address?: string;
-  teamId?: string;
+  orgId?: string;
   invites?: string;
 }
 
@@ -29,7 +29,7 @@ export const builder = function (args: Yargs) {
   return args
     .command(
       "ls [public key]",
-      "Get a list of your teams, or the teams for a public key address",
+      "Get a list of your orgs, or the orgs for a public key address",
       function (args) {
         return args.positional("address", {
           type: "string",
@@ -54,16 +54,16 @@ export const builder = function (args: Yargs) {
 
           if (typeof address === "string" && address.trim() !== "") {
             // if address exists we will query based on address
-            const teams = await api.teams.userTeamsFromAddress.query({
+            const orgs = await api.orgs.userOrgsFromAddress.query({
               userAddress: address.trim(),
             });
 
-            const pretty = JSON.stringify(teams, null, 4);
+            const pretty = JSON.stringify(orgs, null, 4);
             return logger.log(pretty);
           }
 
-          const teams = await api.teams.userTeams.query();
-          const pretty = JSON.stringify(teams, null, 4);
+          const orgs = await api.orgs.userOrgs.query();
+          const pretty = JSON.stringify(orgs, null, 4);
 
           logger.log(pretty);
         } catch (err) {
@@ -73,27 +73,24 @@ export const builder = function (args: Yargs) {
     )
     .command(
       "create <name>",
-      "create a team with the given name",
+      "create a org with the given name",
       function (args) {
         return args
           .positional("name", {
             type: "string",
             description:
-              "optional team name, if not provided all teams are returned",
+              "optional org name, if not provided all orgs are returned",
           })
           .option("invites", {
             type: "string",
             default: "",
             description:
-              "comma separated list of emails to be invited to the team",
+              "comma separated list of emails to be invited to the org",
           }) as yargs.Argv<CommandOptions>;
       },
       async function (argv: CommandOptions) {
         const { invites } = argv;
-        const name = helpers.getStringValue(
-          argv.name,
-          "must provide team name",
-        );
+        const name = helpers.getStringValue(argv.name, "must provide org name");
         const store = helpers.getStringValue(
           argv.store,
           ERROR_INVALID_STORE_PATH,
@@ -106,7 +103,7 @@ export const builder = function (args: Yargs) {
         });
         const api = helpers.getApi(fileStore, apiUrl);
 
-        const result = await api.teams.newTeam.mutate({
+        const result = await api.orgs.newOrg.mutate({
           name,
           emailInvites: (invites ?? "")
             .split(",")
@@ -119,16 +116,16 @@ export const builder = function (args: Yargs) {
     )
     .command(
       "invite <emails>",
-      "invite a list of emails to a team. team id must either be a command option or available in the context.",
+      "invite a list of emails to a org. org id must either be a command option or available in the context.",
       function (args) {
         return args
           .positional("emails", {
             type: "string",
-            description: "comma separated list of emails to be invited to team",
+            description: "comma separated list of emails to be invited to org",
           })
-          .option("teamId", {
+          .option("orgId", {
             type: "string",
-            description: "id of team to add to",
+            description: "id of org to add to",
           });
       },
       async function (argv) {
@@ -151,9 +148,9 @@ export const builder = function (args: Yargs) {
         }
 
         const fileStore = new FileStore(store);
-        const team = helpers.getStringValue(
-          helpers.getTeam({ teamId: argv.teamId, store: fileStore }),
-          "must provide teamId as arg or context",
+        const org = helpers.getStringValue(
+          helpers.getOrg({ orgId: argv.orgId, store: fileStore }),
+          "must provide orgId as arg or context",
         );
 
         const apiUrl = helpers.getApiUrl({
@@ -164,8 +161,8 @@ export const builder = function (args: Yargs) {
 
         // check if the email address is already invited and resend; else,
         // invite the email address (to avoid SQLite constraint error)
-        const { invites } = await api.invites.invitesForTeam.query({
-          teamId: team,
+        const { invites } = await api.invites.invitesForOrg.query({
+          orgId: org,
         });
         const pendingEmails = invites
           .filter((i) => i.invite.claimedAt == null)
@@ -173,7 +170,7 @@ export const builder = function (args: Yargs) {
         if (pendingEmails.length > 0) {
           for (const i of invites) {
             await api.invites.resendInvite.mutate({
-              teamId: team,
+              orgId: org,
               inviteId: i.invite.id,
             });
           }
@@ -183,12 +180,12 @@ export const builder = function (args: Yargs) {
         );
         if (newEmails.length > 0) {
           await api.invites.inviteEmails.mutate({
-            teamId: team,
+            orgId: org,
             emails: newEmails,
           });
         }
 
-        logger.log(JSON.stringify({ emails: emailInvites, teamId: team }));
+        logger.log(JSON.stringify({ emails: emailInvites, orgId: org }));
       },
     );
 };
@@ -197,6 +194,6 @@ export const builder = function (args: Yargs) {
 export const handler = async (
   argv: Arguments<CommandOptions>,
 ): Promise<void> => {
-  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalTeamId: string; } & { invites: string; } & { team: string | undefined; } & { user: string | undefined; }>) => void
+  // (args: ArgumentsCamelCase<Omit<{ name: string; }, "name"> & { name: string | undefined; } & { personalOrgId: string; } & { invites: string; } & { org: string | undefined; } & { user: string | undefined; }>) => void
   // noop
 };

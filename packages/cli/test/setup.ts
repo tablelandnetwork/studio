@@ -92,7 +92,7 @@ async function deployStudioTables(db: Database) {
 }
 
 async function populateStudioTestData(db: Database) {
-  // TODO: setup an account, a project, a team, and some tables
+  // TODO: setup an account, a project, a org, and some tables
   console.log("inserting test data into studio tables");
 
   const tableSetupFilepath = path.join(

@@ -6,8 +6,8 @@ import { afterEach, before, describe, test } from "mocha";
 import { restore, spy } from "sinon";
 import yargs from "yargs/yargs";
 import { type GlobalOptions } from "../src/cli.js";
-import * as mod from "../src/commands/team.js";
-import type { CommandOptions } from "../src/commands/team.js";
+import * as mod from "../src/commands/org.js";
+import type { CommandOptions } from "../src/commands/org.js";
 import * as modLogin from "../src/commands/login.js";
 import * as modLogout from "../src/commands/logout.js";
 import { logger, wait } from "../src/utils.js";
@@ -15,7 +15,7 @@ import {
   TEST_TIMEOUT_FACTOR,
   TEST_API_BASE_URL,
   TEST_REGISTRY_PORT,
-} from "./utils";
+} from "./utils.js";
 
 const _dirname = path.dirname(fileURLToPath(import.meta.url));
 const accounts = getAccounts();
@@ -33,7 +33,7 @@ const defaultArgs = [
   TEST_API_BASE_URL,
 ];
 
-describe("commands/team", function () {
+describe("commands/org", function () {
   this.timeout(15000 * TEST_TIMEOUT_FACTOR);
 
   before(async function () {
@@ -59,13 +59,13 @@ describe("commands/team", function () {
   });
 
   // TODO: all the tests depend on previous tests, need to fix this
-  const teamName = "testuser";
+  const orgName = "testuser";
   const projectDescription = "testing project create";
   const projectName = "projectfoo";
 
-  test("can list authenticated user's teams", async function () {
+  test("can list authenticated user's orgs", async function () {
     const consoleLog = spy(logger, "log");
-    await yargs(["team", "ls", ...defaultArgs])
+    await yargs(["org", "ls", ...defaultArgs])
       .command<CommandOptions>(mod)
       .parse();
 
@@ -73,8 +73,8 @@ describe("commands/team", function () {
     const data = JSON.parse(output);
 
     equal(data.length, 1);
-    const team = data[0];
-    const idParts = team.id.split("-");
+    const org = data[0];
+    const idParts = org.id.split("-");
     equal(idParts.length, 5);
     equal(idParts[0].length, 8);
     equal(idParts[1].length, 4);
@@ -82,19 +82,19 @@ describe("commands/team", function () {
     equal(idParts[3].length, 4);
     equal(idParts[4].length, 12);
 
-    equal(team.name, teamName);
-    equal(team.slug, teamName);
+    equal(org.name, orgName);
+    equal(org.slug, orgName);
 
-    equal(team.projects.length, 2);
-    const project = team.projects[0];
+    equal(org.projects.length, 2);
+    const project = org.projects[0];
     equal(project.name, projectName);
     equal(project.description, projectDescription);
   });
 
-  test("can list teams for a specific user", async function () {
+  test("can list orgs for a specific user", async function () {
     const consoleLog = spy(logger, "log");
     const userAddress = "0xBcd4042DE499D14e55001CcbB24a551F3b954096";
-    await yargs(["team", "ls", userAddress, ...defaultArgs])
+    await yargs(["org", "ls", userAddress, ...defaultArgs])
       .command<CommandOptions>(mod)
       .parse();
 
@@ -102,8 +102,8 @@ describe("commands/team", function () {
     const data = JSON.parse(output);
 
     equal(data.length, 1);
-    const team = data[0];
-    const idParts = team.id.split("-");
+    const org = data[0];
+    const idParts = org.id.split("-");
     equal(idParts.length, 5);
     equal(idParts[0].length, 8);
     equal(idParts[1].length, 4);
@@ -111,26 +111,26 @@ describe("commands/team", function () {
     equal(idParts[3].length, 4);
     equal(idParts[4].length, 12);
 
-    equal(team.name, teamName);
-    equal(team.slug, teamName);
+    equal(org.name, orgName);
+    equal(org.slug, orgName);
 
-    equal(team.projects.length, 2);
-    const project = team.projects[0];
+    equal(org.projects.length, 2);
+    const project = org.projects[0];
     equal(project.name, projectName);
     equal(project.description, projectDescription);
   });
 
-  test("can create a team", async function () {
+  test("can create a org", async function () {
     const consoleLog = spy(logger, "log");
-    const teamName = "mynewteam";
-    await yargs(["team", "create", teamName, ...defaultArgs])
+    const orgName = "myneworg";
+    await yargs(["org", "create", orgName, ...defaultArgs])
       .command<CommandOptions>(mod)
       .parse();
 
     const output = consoleLog.getCall(0).firstArg;
-    const team = JSON.parse(output);
+    const org = JSON.parse(output);
 
-    const idParts = team.id.split("-");
+    const idParts = org.id.split("-");
     equal(idParts.length, 5);
     equal(idParts[0].length, 8);
     equal(idParts[1].length, 4);
@@ -138,8 +138,8 @@ describe("commands/team", function () {
     equal(idParts[3].length, 4);
     equal(idParts[4].length, 12);
 
-    equal(team.name, teamName);
-    equal(team.slug, teamName);
+    equal(org.name, orgName);
+    equal(org.slug, orgName);
   });
 
   // TODO: fix this test
@@ -154,7 +154,7 @@ describe("commands/team", function () {
   // ```
   // But, if you comment out the stub, the test still fails due to an error with
   // the `mail` package——see `mail/index.ts` for more details.
-  // test("can invite a user to a team", async function () {
+  // test("can invite a user to a org", async function () {
   //   const consoleLog = spy(logger, "log");
   //   // const mutateStub = stub().returns({ message: "spy success" });
   //   // stub(helpers, "getApi").callsFake(function (
@@ -171,11 +171,11 @@ describe("commands/team", function () {
   //   // });
 
   //   await yargs([
-  //     "team",
+  //     "org",
   //     "invite",
   //     "test@textile.io,test2@textile.io",
-  //     "--teamId",
-  //     TEST_TEAM_ID,
+  //     "--orgId",
+  //     TEST_ORG_ID,
   //     ...defaultArgs,
   //   ])
   //     .command<CommandOptions>(mod)
@@ -187,7 +187,7 @@ describe("commands/team", function () {
   //   equal(response.message, "spy success");
   //   // deepStrictEqual(mutateStub.firstCall.args[0], {
   //   //   emails: ["test@textile.io", "test2@textile.io"],
-  //   //   teamId: TEST_TEAM_ID,
+  //   //   orgId: TEST_ORG_ID,
   //   // });
   // });
 });
