@@ -101,11 +101,11 @@ export default function Profile({
 
   const onSignInSuccess = ({ auth }: { auth: Auth | undefined }) => {
     if (auth) {
-      router.refresh();
       setAuth(auth);
       if (!dontRedirect) {
         router.push(`/${auth.personalOrg.slug}`);
       }
+      router.refresh();
     } else {
       setShowRegisterDialog(true);
     }
@@ -116,12 +116,12 @@ export default function Profile({
   };
 
   const onRegisterSuccess = (auth: Auth) => {
-    router.refresh();
     setAuth(auth);
     setShowRegisterDialog(false);
     if (!dontRedirect) {
       router.push(`/${auth.personalOrg.slug}`);
     }
+    router.refresh();
   };
 
   return (

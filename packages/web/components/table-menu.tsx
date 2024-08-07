@@ -89,8 +89,8 @@ export default function TableMenu({
     setDeleteTableOpen(false);
     void defsQuery.refetch();
     if (!org || !project || !env) return;
-    router.refresh();
     router.replace(`/${org.slug}/${project.slug}/${env.slug}`);
+    router.refresh();
   };
 
   const onUndeployTableSuccess = () => {
@@ -154,13 +154,13 @@ export default function TableMenu({
         open={!!importTableFormProps}
         onOpenChange={(open) => !open && setImportTableFormProps(undefined)}
         onSuccess={(org, project, def, env) => {
-          router.refresh();
           const newPathname = `/${org.slug}/${project.slug}/${env.slug}/${def.slug}`;
           if (pathname !== newPathname) {
             router.push(newPathname);
           } else {
             void deploymentsQuery.refetch();
           }
+          router.refresh();
         }}
       />
       <NewDefForm
@@ -168,13 +168,13 @@ export default function TableMenu({
         open={newDefFormOpen}
         onOpenChange={setNewDefFormOpen}
         onSuccess={(selectedOrg, selectedProject, def) => {
-          router.refresh();
           router.push(
             `/${selectedOrg.slug}/${selectedProject.slug}${env ? `/${env.slug}/${def.slug}` : `?table=${def.slug}`}`,
           );
           if (selectedProject.id === project?.id) {
             void defsQuery.refetch();
           }
+          router.refresh();
         }}
       />
       <DropdownMenu>

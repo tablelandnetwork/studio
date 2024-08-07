@@ -77,8 +77,8 @@ export default function PrimaryHeaderItem({
   }
 
   function onNewOrgSuccess(org: schema.Org) {
-    router.refresh();
     router.push(`/${org.slug}`);
+    router.refresh();
   }
 
   function onProjectSelected(project: schema.Project) {
@@ -92,8 +92,8 @@ export default function PrimaryHeaderItem({
 
   function onNewProjectSuccess(project: schema.Project) {
     if (!org) return;
-    router.refresh();
     router.push(`/${org.slug}/${project.slug}`);
+    router.refresh();
   }
 
   function onEnvironmentSelected(selectedEnv: schema.Environment) {
@@ -108,8 +108,8 @@ export default function PrimaryHeaderItem({
 
   function onNewEnvSuccess(newEnv: schema.Environment) {
     if (!org || !project) return;
-    router.refresh();
     navToEnv(newEnv);
+    router.refresh();
     // TODO: Set session record of this change.
   }
 

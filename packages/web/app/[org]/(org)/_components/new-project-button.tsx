@@ -22,8 +22,8 @@ export default function NewProjectButton({
         </Button>
       }
       onSuccess={(project) => {
-        router.refresh();
         router.push(`/${org.slug}/${project.slug}`);
+        router.refresh();
       }}
     ></NewProjectForm>
   );
