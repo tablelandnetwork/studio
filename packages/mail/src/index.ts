@@ -9,10 +9,10 @@ export function initMailApi(apiKey?: string) {
       to: string,
       imageLink: string,
       inviterUsername: string,
-      teamName: string,
+      orgName: string,
       link: string,
     ) => {
-      // TODO: error occurs in `render` or `Invite` function via `team.test.ts`:
+      // TODO: error occurs in `render` or `Invite` function via `org.test.ts`:
       // ```
       //  Element type is invalid: expected a string (for built-in components)
       //  or a class/function (for composite components) but got: undefined. You
@@ -20,12 +20,12 @@ export function initMailApi(apiKey?: string) {
       //  or you might have mixed up default and named imports.
       // ```
       const emailHtml = render(
-        Invite({ imageLink, inviterUsername, teamName, link }),
+        Invite({ imageLink, inviterUsername, orgName, link }),
       );
       const res = await client.sendEmail({
         From: "noreply@tableland.xyz",
         To: to,
-        Subject: "You've been invited to a team on Tableland Studio",
+        Subject: "You've been invited to an org on Tableland Studio",
         HtmlBody: emailHtml,
       });
       return res;
