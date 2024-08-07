@@ -54,8 +54,8 @@ export default function EditProject({
   );
   const updateProject = api.projects.updateProject.useMutation({
     onSuccess: (project) => {
-      router.refresh();
       router.replace(`/${org.slug}/${project.slug}/settings`);
+      router.refresh();
     },
   });
 
