@@ -12,7 +12,7 @@ import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
 import { newDefFormSchema } from "@tableland/studio-validators";
 import Columns from "./columns";
-import { FormRootMessage } from "./form-root";
+import { FormRootMessage, FormMessage } from "./form";
 import InputWithCheck from "./input-with-check";
 import { Button } from "./ui/button";
 import DefConstraints from "./def-constraints";
@@ -30,7 +30,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";

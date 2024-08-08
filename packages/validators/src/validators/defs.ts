@@ -13,6 +13,12 @@ const columnNameSchema = z
     "Column name can't start with a number and can contain any combination of letters, numbers, and underscores.",
   );
 
+function columnsNameUnique<T extends { name: string }>(columns: T[]) {
+  const columnNames = columns.map((column) => column.name);
+  const uniqueColumnNames = new Set(columnNames);
+  return columnNames.length === uniqueColumnNames.size;
+}
+
 const columnsSchema = z
   .array(
     z.object({
@@ -25,7 +31,8 @@ const columnsSchema = z
     }),
   )
   .min(1, "At least one column is required.")
-  .max(24, "A definition can have at most 24 columns.");
+  .max(24, "A definition can have at most 24 columns.")
+  .refine(columnsNameUnique, { message: "Column names must be unique." });
 
 const schemaSchema: z.ZodType<Schema> = z.object({
   columns: z
@@ -37,7 +44,8 @@ const schemaSchema: z.ZodType<Schema> = z.object({
       }),
     )
     .min(1, "At least one column is required.")
-    .max(24, "A definition can have at most 24 columns."),
+    .max(24, "A definition can have at most 24 columns.")
+    .refine(columnsNameUnique, { message: "Column names must be unique." }),
   defConstraints: z.array(z.string().trim().min(1)).optional(),
 });
 

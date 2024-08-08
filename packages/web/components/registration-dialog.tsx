@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
-import { FormRootMessage } from "./form-root";
+import { FormRootMessage } from "./form";
 import {
   Form,
   FormControl,
