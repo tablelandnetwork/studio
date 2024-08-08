@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import InputWithCheck from "@/components/input-with-check";
-import { FormRootMessage } from "@/components/form-root";
+import { FormRootMessage } from "@/components/form";
 import { cn } from "@/lib/utils";
 
 export interface NewProjectFormProps {
