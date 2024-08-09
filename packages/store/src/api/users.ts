@@ -30,5 +30,18 @@ export function initUsers(db: DrizzleD1Database<typeof schema>) {
         .all();
       return res;
     },
+
+    userForAddress: async function (address: string) {
+      const res = await db
+        .select({
+          user: users,
+          team: teams,
+        })
+        .from(users)
+        .innerJoin(teams, eq(users.teamId, teams.id))
+        .where(eq(users.address, address))
+        .get();
+      return res;
+    },
   };
 }
