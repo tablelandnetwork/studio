@@ -105,6 +105,7 @@ export function Console({
     const aliases = studioAliases({
       environmentId,
       apiUrl: getBaseUrl(),
+      nativeMode,
     });
     const nameMapping = await aliases.read();
     const aliasMap = new Map(Object.entries(nameMapping));
