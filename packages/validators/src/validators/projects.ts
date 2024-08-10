@@ -22,6 +22,7 @@ export const projectNameAvailableSchema = z.object({
 export const newProjectSchema = z.object({
   name: projectNameSchema,
   description: projectDescriptionSchema,
+  nativeMode: z.boolean(),
   envNames: z
     .array(envNameSchema)
     .min(1)
@@ -33,4 +34,5 @@ export const newProjectSchema = z.object({
 export const updateProjectSchema = z.object({
   name: projectNameSchema.optional(),
   description: projectDescriptionSchema.optional(),
+  nativeMode: z.boolean().optional(),
 });

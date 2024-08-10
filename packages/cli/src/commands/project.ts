@@ -127,6 +127,7 @@ export const builder = function (args: Yargs) {
             orgId,
             name,
             description,
+            nativeMode: false,
             // TODO: Allow user to specify env names
             envNames: [{ name: "default" }],
           });

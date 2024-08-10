@@ -22,6 +22,7 @@ import {
 import InputWithCheck from "@/components/input-with-check";
 import { api } from "@/trpc/react";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 
 export default function EditProject({
   org,
@@ -39,6 +40,7 @@ export default function EditProject({
     defaultValues: {
       name: project.name,
       description: project.description,
+      nativeMode: !!project.nativeMode,
     },
   });
 
@@ -52,12 +54,19 @@ export default function EditProject({
       : skipToken,
     { retry: false },
   );
+
   const updateProject = api.projects.updateProject.useMutation({
     onSuccess: (project) => {
-      router.refresh();
       router.replace(`/${org.slug}/${project.slug}/settings`);
+      router.refresh();
     },
   });
+
+  api.projects.projectBySlug.useQuery(
+    updateProject.data
+      ? { slug: updateProject.data.slug, orgId: org.id }
+      : skipToken,
+  );
 
   const onSubmit = (values: z.infer<typeof updateProjectSchema>) => {
     updateProject.mutate({
@@ -65,6 +74,9 @@ export default function EditProject({
       name: form.formState.dirtyFields.name ? values.name : undefined,
       description: form.formState.dirtyFields.description
         ? values.description
+        : undefined,
+      nativeMode: form.formState.dirtyFields.nativeMode
+        ? values.nativeMode
         : undefined,
     });
   };
@@ -119,6 +131,31 @@ export default function EditProject({
               </FormControl>
               <FormDescription>
                 A short description of your project.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="nativeMode"
+          render={({ field: { value, onChange, ...field } }) => (
+            <FormItem className="">
+              <FormLabel>Native Mode</FormLabel>
+              <FormControl>
+                <Switch
+                  className="block"
+                  disabled={disabled || updateProject.isPending}
+                  checked={value}
+                  onCheckedChange={onChange}
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Native mode will display native Tableland table names in your
+                project&apos;s left hand panel for any definitions that have
+                been deployed, and allow you to use those table names in your
+                Console queries.
               </FormDescription>
               <FormMessage />
             </FormItem>
