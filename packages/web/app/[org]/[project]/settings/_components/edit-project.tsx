@@ -55,18 +55,18 @@ export default function EditProject({
     { retry: false },
   );
 
+  const utils = api.useUtils();
+
   const updateProject = api.projects.updateProject.useMutation({
     onSuccess: (project) => {
       router.replace(`/${org.slug}/${project.slug}/settings`);
       router.refresh();
+      void utils.projects.projectBySlug.invalidate({
+        slug: project.slug,
+        orgId: org.id,
+      });
     },
   });
-
-  api.projects.projectBySlug.useQuery(
-    updateProject.data
-      ? { slug: updateProject.data.slug, orgId: org.id }
-      : skipToken,
-  );
 
   const onSubmit = (values: z.infer<typeof updateProjectSchema>) => {
     updateProject.mutate({
