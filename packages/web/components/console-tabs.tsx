@@ -1,11 +1,10 @@
 "use client";
 
-import { type schema } from "@tableland/studio-store";
 import { Plus, X } from "lucide-react";
 import { type Result } from "@tableland/sdk";
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { type Auth } from "@tableland/studio-api";
+import { type RouterOutputs, type Auth } from "@tableland/studio-api";
 import { useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Console } from "./console";
@@ -19,7 +18,10 @@ interface Tab {
   name: string;
   selected: boolean;
   query: string;
-  result?: Result<Record<string, unknown>>;
+  // This is optional because a previous version stored
+  // a single result for all environments under the key
+  // "result". This update stores results per environment.
+  results?: Record<string, Result<Record<string, unknown>> | undefined>;
   editingName: boolean;
   newName: string;
 }
@@ -27,26 +29,32 @@ interface Tab {
 export default function ConsoleTabs({
   auth,
   projectId,
+  nativeMode,
   environmentId,
-  defs,
+  deployments,
 }: {
   auth?: Auth;
   projectId: string;
+  nativeMode: boolean;
   environmentId: string;
-  defs: schema.Def[];
+  deployments: RouterOutputs["deployments"]["deploymentsByEnvironmentId"];
 }) {
   const address = useAccount();
 
+  const tabsStorageKey = nativeMode
+    ? `env_tabs_${environmentId}`
+    : `project_tabs_${projectId}`;
+
   const tabsAtom = useRef(
     atomWithStorage<Tab[]>(
-      `env_tabs_${projectId}`,
+      tabsStorageKey,
       [
         {
           id: window.self.crypto.randomUUID(),
           name: "New Query",
           selected: true,
           query: "",
-          result: undefined,
+          results: {},
           editingName: false,
           newName: "",
         },
@@ -67,7 +75,7 @@ export default function ConsoleTabs({
         name: "New Query",
         selected: true,
         query: "",
-        result: undefined,
+        results: {},
         editingName: false,
         newName: "",
       },
@@ -138,7 +146,11 @@ export default function ConsoleTabs({
     result: Result<Record<string, unknown>> | undefined,
   ) => {
     setTabs((tabs) =>
-      tabs.map((t) => (t.id === tab.id ? { ...t, result } : t)),
+      tabs.map((t) =>
+        t.id === tab.id
+          ? { ...t, results: { ...t.results, [environmentId]: result } }
+          : t,
+      ),
     );
   };
 
@@ -223,10 +235,11 @@ export default function ConsoleTabs({
           <Console
             key={tab.id}
             environmentId={environmentId}
-            defs={defs}
+            deployments={deployments}
+            nativeMode={nativeMode}
             query={tab.query}
             setQuery={(q) => setQuery(tab, q)}
-            res={tab.result}
+            res={tab.results ? tab.results[environmentId] : undefined}
             setRes={(r) => setRes(tab, r)}
           />
         </TabsContent>

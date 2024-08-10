@@ -10,9 +10,9 @@ import { Database, type Result, helpers } from "@tableland/sdk";
 import CodeMirror from "@uiw/react-codemirror";
 import { SQLite, sql } from "@codemirror/lang-sql";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
-import { type schema } from "@tableland/studio-store";
 import { Loader2 } from "lucide-react";
 import { getNetwork, switchNetwork } from "wagmi/actions";
+import { type RouterOutputs } from "@tableland/studio-api";
 import { DataTable } from "./data-table";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
@@ -28,14 +28,16 @@ init().catch((err: any) => {
 
 export function Console({
   environmentId,
-  defs,
+  deployments,
+  nativeMode,
   query,
   setQuery,
   res,
   setRes,
 }: {
   environmentId: string;
-  defs: schema.Def[];
+  deployments: RouterOutputs["deployments"]["deploymentsByEnvironmentId"];
+  nativeMode: boolean;
   query: string;
   setQuery: (query: string) => void;
   res: Result<Record<string, unknown>> | undefined;
@@ -45,9 +47,21 @@ export function Console({
 
   const [pending, setPending] = useState(false);
 
-  const schema = defs.reduce<Record<string, string[]>>((acc, def) => {
-    return { ...acc, [def.name]: def.schema.columns.map((col) => col.name) };
-  }, {});
+  const schema = deployments.reduce<Record<string, string[]>>(
+    (acc, deployment) => {
+      const cols = deployment.def.schema.columns.map((col) => col.name);
+      const aliased = { [deployment.def.name]: cols };
+      const native = nativeMode
+        ? { [deployment.deployment.tableName]: cols }
+        : {};
+      return {
+        ...acc,
+        ...aliased,
+        ...native,
+      };
+    },
+    {},
+  );
 
   const columns: Array<ColumnDef<unknown>> = useMemo(
     () =>

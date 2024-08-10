@@ -34,8 +34,9 @@ export default async function ConsolePage({
       <ConsoleTabs
         auth={session.auth}
         projectId={project.id}
+        nativeMode={!!project.nativeMode}
         environmentId={environment.id}
-        defs={deployments.map((d) => d.def)}
+        deployments={deployments}
       />
     </main>
   );

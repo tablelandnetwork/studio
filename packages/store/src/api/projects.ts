@@ -43,6 +43,7 @@ export function initProjects(
       teamId: string,
       name: string,
       description: string,
+      nativeMode: boolean,
       envNames: string[],
     ) {
       const projectId = randomUUID();
@@ -53,6 +54,7 @@ export function initProjects(
         name,
         description,
         slug,
+        nativeMode: nativeMode ? 1 : 0,
         createdAt: now,
         updatedAt: now,
       };
@@ -88,6 +90,7 @@ export function initProjects(
       projectId: string,
       name?: string,
       description?: string,
+      nativeMode?: boolean,
     ) {
       const now = new Date().toISOString();
       const slug = name ? slugify(name) : undefined;
@@ -97,6 +100,7 @@ export function initProjects(
           name,
           slug,
           description,
+          nativeMode: nativeMode === undefined ? undefined : nativeMode ? 1 : 0,
           updatedAt: now,
         })
         .where(eq(projects.id, projectId))
