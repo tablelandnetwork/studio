@@ -6,7 +6,7 @@ import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
 import { type schema } from "@tableland/studio-store";
 import { newOrgSchema } from "@tableland/studio-validators";
-import { FormRootMessage } from "@/components/form-root";
+import { FormRootMessage } from "@/components/form";
 import InputWithCheck from "@/components/input-with-check";
 import TagInput from "@/components/tag-input";
 import { Button } from "@/components/ui/button";
