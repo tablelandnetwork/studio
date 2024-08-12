@@ -18,7 +18,7 @@ import TeamSwitcher from "./team-switcher";
 import ProjectSwitcher from "./project-switcher";
 import EnvSwitcher from "./env-switcher";
 import ChainSelector from "@/components/chain-selector";
-import { FormRootMessage } from "@/components/form-root";
+import { FormRootMessage } from "@/components/form";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
 import {
