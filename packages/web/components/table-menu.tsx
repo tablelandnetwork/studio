@@ -4,7 +4,6 @@ import { Ellipsis } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { type Schema, type schema } from "@tableland/studio-store";
-import { skipToken } from "@tanstack/react-query";
 import { type RouterOutputs } from "@tableland/studio-api";
 import { Button } from "./ui/button";
 import NewDefForm from "./new-def-form";
@@ -56,22 +55,17 @@ export default function TableMenu({
   const router = useRouter();
   const pathname = usePathname();
 
-  const deploymentsQuery = api.deployments.deploymentsByEnvironmentId.useQuery(
-    env ? { environmentId: env.id } : skipToken,
-  );
-
-  const defsQuery = api.defs.projectDefs.useQuery(
-    project ? { projectId: project.id } : skipToken,
-  );
+  const utils = api.useUtils();
 
   const onEditDefSuccess = (updatedDef: schema.Def) => {
+    if (!project) return;
     if (def?.slug !== updatedDef.slug) {
       router.replace(
-        `/${org!.slug}/${project!.slug}/${env!.slug}/${updatedDef.slug}`,
+        `/${org!.slug}/${project.slug}/${env!.slug}/${updatedDef.slug}`,
       );
     }
     router.refresh();
-    void defsQuery.refetch();
+    void utils.defs.projectDefs.invalidate({ projectId: project.id });
   };
 
   const onDeleteTable = () => {
@@ -80,22 +74,26 @@ export default function TableMenu({
   };
 
   const onUndeployTable = () => {
-    void deploymentsQuery.refetch();
+    void utils.deployments.deploymentsByEnvironmentId.invalidate({
+      environmentId: env?.id,
+    });
     setTableSettingsOpen(false);
     setUndeployTableOpen(true);
   };
 
   const onDeleteTableSuccess = () => {
-    setDeleteTableOpen(false);
-    void defsQuery.refetch();
     if (!org || !project || !env) return;
+    setDeleteTableOpen(false);
+    void utils.defs.projectDefs.invalidate({ projectId: project.id });
     router.replace(`/${org.slug}/${project.slug}/${env.slug}`);
     router.refresh();
   };
 
   const onUndeployTableSuccess = () => {
     setUndeployTableOpen(false);
-    void deploymentsQuery.refetch();
+    void utils.deployments.deploymentsByEnvironmentId.invalidate({
+      environmentId: env?.id,
+    });
     router.refresh();
   };
 
@@ -145,7 +143,9 @@ export default function TableMenu({
           def={{ ...def, schema }}
           onSuccess={() => {
             router.refresh();
-            void deploymentsQuery.refetch();
+            void utils.deployments.deploymentsByEnvironmentId.invalidate({
+              environmentId: env?.id,
+            });
           }}
         />
       )}
@@ -158,7 +158,9 @@ export default function TableMenu({
           if (pathname !== newPathname) {
             router.push(newPathname);
           } else {
-            void deploymentsQuery.refetch();
+            void utils.deployments.deploymentsByEnvironmentId.invalidate({
+              environmentId: env.id,
+            });
           }
           router.refresh();
         }}
@@ -173,7 +175,7 @@ export default function TableMenu({
           );
           router.refresh();
           if (selectedProject.id === project?.id) {
-            void defsQuery.refetch();
+            void utils.defs.projectDefs.invalidate({ projectId: project.id });
           }
         }}
       />

@@ -31,20 +31,17 @@ export default function Envs({
     schema.Environment | undefined
   >();
 
-  const projectsEnvs = api.environments.projectEnvironments.useQuery({
-    projectId: project.id,
-  });
-
-  const envPreference =
-    api.environments.environmentPreferenceForProject.useQuery({
-      projectId: project.id,
-    });
+  const utils = api.useUtils();
 
   const deleteEnv = api.environments.deleteEnvironment.useMutation({
     onSuccess: () => {
       router.refresh();
-      void projectsEnvs.refetch();
-      void envPreference.refetch();
+      void utils.environments.projectEnvironments.invalidate({
+        projectId: project.id,
+      });
+      void utils.environments.environmentPreferenceForProject.invalidate({
+        projectId: project.id,
+      });
       setEnvToDelete(undefined);
     },
   });
