@@ -8,7 +8,7 @@ import { type Store } from "@tableland/studio-store";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod";
-import { getIronSession } from "iron-session";
+import { type IronSession, getIronSession } from "iron-session";
 import { type SessionData, sessionOptions } from "./session-data";
 
 // TODO: the types and interfaces below are from iron-session, but they aren't exported.
@@ -88,17 +88,26 @@ export const getSession = async function ({
   req,
   res,
 }: GetSessionArgs) {
+  let session: IronSession<SessionData> | undefined;
   if (typeof cookies !== "undefined") {
-    return await getIronSession<SessionData>(cookies, sessionOptions);
+    session = await getIronSession<SessionData>(cookies, sessionOptions);
   }
-
   if (typeof req !== "undefined" && typeof res !== "undefined") {
-    return await getIronSession<SessionData>(req, res, sessionOptions);
+    session = await getIronSession<SessionData>(req, res, sessionOptions);
+  }
+  if (!session) {
+    throw new Error(
+      "cannot get session from context must supply cookies or req and res",
+    );
   }
 
-  throw new Error(
-    "cannot get session from context must supply cookies or req and res",
-  );
+  if (session.auth?.personalTeam) {
+    session.auth.personalOrg = session.auth.personalTeam;
+    session.auth.personalTeam = undefined;
+    await session.save();
+  }
+
+  return session;
 };
 
 // get a header from either of the accepted header types
