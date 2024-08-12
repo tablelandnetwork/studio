@@ -68,6 +68,7 @@ export default function NewProjectForm({
     defaultValues: {
       name: "",
       description: "",
+      nativeMode: false,
       envNames: [{ name: "default" }],
     },
   });
