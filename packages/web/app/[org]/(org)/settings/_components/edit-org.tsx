@@ -48,8 +48,8 @@ export default function EditOrg({
   );
   const updateOrg = api.orgs.updateOrg.useMutation({
     onSuccess: (org) => {
-      router.refresh();
       router.replace(`/${org.slug}/settings`);
+      router.refresh();
     },
   });
 
