@@ -22,16 +22,16 @@ export default function DeployButton({
   const [openExecDeployModal, setOpenExecDeployModal] = useState(false);
   const router = useRouter();
 
-  const deploymentsQuery = api.deployments.deploymentsByEnvironmentId.useQuery({
-    environmentId: env.id,
-  });
+  const utils = api.useUtils();
 
   const handleDeploy = () => {
     setOpenExecDeployModal(true);
   };
 
   const onSuccessfulDeploy = (deployment: schema.Deployment) => {
-    void deploymentsQuery.refetch();
+    void utils.deployments.deploymentsByEnvironmentId.invalidate({
+      environmentId: env.id,
+    });
     router.refresh();
   };
 

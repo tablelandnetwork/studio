@@ -35,18 +35,22 @@ export default function Env({
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [query, setQuery] = useState(env.name);
+
+  const utils = api.useUtils();
+
   const nameAvailable = api.environments.nameAvailable.useQuery(
     query !== env.name
       ? { projectId: env.projectId, name: query, envId: env.id }
       : skipToken,
     { retry: false },
   );
-  const envPreference =
-    api.environments.environmentPreferenceForProject.useQuery({ projectId });
+
   const updateEnv = api.environments.updateEnvironment.useMutation({
     onSuccess: () => {
       router.refresh();
-      void envPreference.refetch();
+      void utils.environments.environmentPreferenceForProject.invalidate({
+        projectId,
+      });
       setShowForm(false);
       form.reset();
     },
