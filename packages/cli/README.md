@@ -8,7 +8,7 @@
 
 ## Background
 
-The Studio command line lets you interact with your Studio teams, projects, and tables. The full, up-to-date docs can be found: [here](https://docs.tableland.xyz/studio/cli).
+The Studio command line lets you interact with your Studio orgs, projects, and tables. The full, up-to-date docs can be found: [here](https://docs.tableland.xyz/studio/cli).
 
 ## Install
 
@@ -32,7 +32,7 @@ Commands:
   studio login                              create a login session via private
                                             key
   studio logout                             logout current session
-  studio team <sub>                         manage studio teams
+  studio org <sub>                         manage studio orgs
   studio init                               create a tablelandrc config file
   studio project <sub>                      manage studio projects
   studio deployment <sub>                   manage studio deployments
@@ -45,7 +45,7 @@ Commands:
                                             optionally with a new name
   studio use [context] [id]                 use the given context id for all
                                             ensuing commands. context can be one
-                                             of (team, project, or api).
+                                             of (org, project, or api).
   studio unuse [context]                    remove any existing id from the
                                             given context
 

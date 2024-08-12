@@ -14,7 +14,7 @@ const projectNameSchema = z
 const projectDescriptionSchema = z.string().trim().min(1).max(1024);
 
 export const projectNameAvailableSchema = z.object({
-  teamId: z.string().trim().optional(),
+  orgId: z.string().trim().optional(),
   projectId: z.string().trim().optional(),
   name: projectNameSchema,
 });

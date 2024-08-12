@@ -27,14 +27,14 @@ export default async function Invite({
   // TODO: Return not found if invite is expired
   // TODO: consider removing this lint rule. We want to check for null, undefined, false, and ""
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-  if (invite.claimedByTeamId || invite.claimedAt) {
+  if (invite.claimedByOrgId || invite.claimedAt) {
     notFound();
   }
-  const targetTeam = await cache(api.teams.getTeam)({
-    teamId: invite.teamId,
+  const targetOrg = await cache(api.orgs.getOrg)({
+    orgId: invite.orgId,
   });
-  const inviterTeam = await cache(api.teams.getTeam)({
-    teamId: invite.inviterTeamId,
+  const inviterOrg = await cache(api.orgs.getOrg)({
+    orgId: invite.inviterOrgId,
   });
 
   const session = await getSession({ cookies: cookies(), headers: headers() });
@@ -47,11 +47,11 @@ export default async function Invite({
           <CardDescription>
             User{" "}
             <span className="font-semibold text-foreground">
-              {inviterTeam.name}
+              {inviterOrg.name}
             </span>{" "}
-            invited you to join the team{" "}
+            invited you to join the org{" "}
             <span className="font-semibold text-foreground">
-              {targetTeam.name}
+              {targetOrg.name}
             </span>
           </CardDescription>
         </CardHeader>
@@ -66,14 +66,14 @@ export default async function Invite({
             <p className="text-center">
               You are signed in as{" "}
               <span className="font-semibold text-foreground">
-                {session.auth.personalTeam.name}
+                {session.auth.personalOrg.name}
               </span>{" "}
               and you can accept or ignore your invitation now.
             </p>
           )}
         </CardContent>
         <CardFooter>
-          <InviteHandler seal={searchParams.seal} targetTeam={targetTeam} />
+          <InviteHandler seal={searchParams.seal} targetOrg={targetOrg} />
         </CardFooter>
       </Card>
     </div>

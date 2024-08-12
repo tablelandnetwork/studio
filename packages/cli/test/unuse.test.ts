@@ -94,12 +94,12 @@ describe("commands/unuse", function () {
     equal(getSession().projectId, undefined);
   });
 
-  test("unuse command can clear team id", async function () {
-    const teamId = "01a2d24d-3805-4a14-8059-7041f8b69aac";
+  test("unuse command can clear org id", async function () {
+    const orgId = "01a2d24d-3805-4a14-8059-7041f8b69aac";
     await yargs([
       "use",
-      "team",
-      teamId,
+      "org",
+      orgId,
       ...defaultArgs,
       "--privateKey",
       accounts[10].privateKey.slice(2),
@@ -107,11 +107,11 @@ describe("commands/unuse", function () {
       .command<GlobalOptions>(modUse)
       .parse();
 
-    equal(getSession().teamId, teamId);
+    equal(getSession().orgId, orgId);
 
     await yargs([
       "unuse",
-      "team",
+      "org",
       ...defaultArgs,
       "--privateKey",
       accounts[10].privateKey.slice(2),
@@ -119,7 +119,7 @@ describe("commands/unuse", function () {
       .command<GlobalOptions>(modUnuse)
       .parse();
 
-    equal(getSession().teamId, undefined);
+    equal(getSession().orgId, undefined);
   });
 
   test("unuse command can clear api url", async function () {

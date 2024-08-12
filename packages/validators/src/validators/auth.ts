@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { teamNameSchema } from "../common.js";
+import { orgNameSchema } from "../common.js";
 
 export const registerSchema = z.object({
-  username: teamNameSchema,
+  username: orgNameSchema,
   email: z.string().trim().email().or(z.literal("")),
 });

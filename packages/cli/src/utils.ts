@@ -472,12 +472,12 @@ export const helpers = {
   getTableIdFromTableName: function (tableName: string) {
     return getIdFromTableName(tableName, 1);
   },
-  getTeam: function (argv: { store: FileStore; teamId?: unknown }) {
-    if (typeof argv.teamId === "string" && argv.teamId.trim() !== "") {
-      return argv.teamId.trim();
+  getOrg: function (argv: { store: FileStore; orgId?: unknown }) {
+    if (typeof argv.orgId === "string" && argv.orgId.trim() !== "") {
+      return argv.orgId.trim();
     }
 
-    return argv.store.get<string>("teamId");
+    return argv.store.get<string>("orgId");
   },
   getUUID: function (arg: unknown, errorMessage: string) {
     if (!this.isUUID(arg)) {

@@ -8,44 +8,44 @@ import { useState } from "react";
 import { skipToken } from "@tanstack/react-query";
 import Image from "next/image";
 import { Database, Folder, User, Users } from "lucide-react";
-import NewTeamForm from "./new-team-form";
+import NewOrgForm from "./new-org-form";
 import NewEnvForm from "./new-env-form";
 import NewProjectForm from "@/components/new-project-form";
-import TeamSwitcher from "@/components/team-switcher";
+import OrgSwitcher from "@/components/org-switcher";
 import ProjectSwitcher from "@/components/project-switcher";
 import { api } from "@/trpc/react";
 import logo from "@/public/logo.svg";
 import EnvSwitcher from "@/components/env-switcher";
 
 export default function PrimaryHeaderItem({
-  userTeams,
+  userOrgs,
 }: {
-  userTeams?: RouterOutputs["teams"]["userTeams"];
+  userOrgs?: RouterOutputs["orgs"]["userOrgs"];
 }) {
   const {
-    team: teamSlug,
+    org: orgSlug,
     project: projectSlug,
     env: envSlug,
   } = useParams<{
-    team?: string;
+    org?: string;
     project?: string;
     env?: string;
   }>();
-  const [openNewTeamSheet, setOpenNewTeamSheet] = useState(false);
+  const [openNewOrgSheet, setOpenNewOrgSheet] = useState(false);
   const [openNewProjectSheet, setOpenNewProjectSheet] = useState(false);
   const [openNewEnvSheet, setOpenNewEnvSheet] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const foundTeam = userTeams?.find((team) => team.slug === teamSlug);
-  const teamQuery = api.teams.teamBySlug.useQuery(
-    teamSlug && !foundTeam ? { slug: teamSlug } : skipToken,
+  const foundOrg = userOrgs?.find((org) => org.slug === orgSlug);
+  const orgQuery = api.orgs.orgBySlug.useQuery(
+    orgSlug && !foundOrg ? { slug: orgSlug } : skipToken,
   );
-  const team = foundTeam ?? teamQuery.data;
+  const org = foundOrg ?? orgQuery.data;
 
-  const foundProjects = foundTeam?.projects;
-  const projectsQuery = api.projects.teamProjects.useQuery(
-    !foundTeam && team ? { teamId: team.id } : skipToken,
+  const foundProjects = foundOrg?.projects;
+  const projectsQuery = api.projects.orgProjects.useQuery(
+    !foundOrg && org ? { orgId: org.id } : skipToken,
   );
   const projects = foundProjects ?? projectsQuery.data;
 
@@ -53,8 +53,8 @@ export default function PrimaryHeaderItem({
     (project) => project.slug === projectSlug,
   );
   const projectQuery = api.projects.projectBySlug.useQuery(
-    !foundProject && team && projectSlug
-      ? { teamId: team.id, slug: projectSlug }
+    !foundProject && org && projectSlug
+      ? { orgId: org.id, slug: projectSlug }
       : skipToken,
   );
   const project = foundProject ?? projectQuery.data;
@@ -68,22 +68,22 @@ export default function PrimaryHeaderItem({
   const setEnvPreference =
     api.environments.setEnvironmentPreferenceForProject.useMutation();
 
-  function onTeamSelected(team: schema.Team) {
-    router.push(`/${team.slug}`);
+  function onOrgSelected(org: schema.Org) {
+    router.push(`/${org.slug}`);
   }
 
-  function onNewTeamSelected() {
-    setOpenNewTeamSheet(true);
+  function onNewOrgSelected() {
+    setOpenNewOrgSheet(true);
   }
 
-  function onNewTeamSuccess(team: schema.Team) {
+  function onNewOrgSuccess(org: schema.Org) {
     router.refresh();
-    router.push(`/${team.slug}`);
+    router.push(`/${org.slug}`);
   }
 
   function onProjectSelected(project: schema.Project) {
-    if (!team) return;
-    router.push(`/${team.slug}/${project.slug}`);
+    if (!org) return;
+    router.push(`/${org.slug}/${project.slug}`);
   }
 
   function onNewProjectSelected() {
@@ -91,9 +91,9 @@ export default function PrimaryHeaderItem({
   }
 
   function onNewProjectSuccess(project: schema.Project) {
-    if (!team) return;
+    if (!org) return;
     router.refresh();
-    router.push(`/${team.slug}/${project.slug}`);
+    router.push(`/${org.slug}/${project.slug}`);
   }
 
   function onEnvironmentSelected(selectedEnv: schema.Environment) {
@@ -107,20 +107,20 @@ export default function PrimaryHeaderItem({
   }
 
   function onNewEnvSuccess(newEnv: schema.Environment) {
-    if (!team || !project) return;
+    if (!org || !project) return;
     router.refresh();
     navToEnv(newEnv);
     // TODO: Set session record of this change.
   }
 
   function navToEnv(nextEnv: schema.Environment) {
-    if (!team || !project) return;
+    if (!org || !project) return;
     const nextPath = env
       ? pathname.replace(
           `/${project.slug}/${env.slug}`,
           `/${project.slug}/${nextEnv.slug}`,
         )
-      : `/${team.slug}/${project.slug}/${nextEnv.slug}`;
+      : `/${org.slug}/${project.slug}/${nextEnv.slug}`;
     router.push(nextPath);
   }
 
@@ -135,30 +135,30 @@ export default function PrimaryHeaderItem({
     </Link>,
   ];
 
-  if (team) {
+  if (org) {
     items.push(
       <p className="text-base" key="divider-1">
         /
       </p>,
-      <div key="team-switcher" className="flex items-center gap-x-2">
-        {team.personal ? (
+      <div key="org-switcher" className="flex items-center gap-x-2">
+        {org.personal ? (
           <User className="size-5" />
         ) : (
           <Users className="size-5" />
         )}
-        <TeamSwitcher
-          selectedTeam={team}
-          teams={userTeams}
-          onTeamSelected={onTeamSelected}
-          onNewTeamSelected={onNewTeamSelected}
+        <OrgSwitcher
+          selectedOrg={org}
+          orgs={userOrgs}
+          onOrgSelected={onOrgSelected}
+          onNewOrgSelected={onNewOrgSelected}
           className="font-medium"
         />
       </div>,
-      <NewTeamForm
-        onSuccess={onNewTeamSuccess}
-        open={openNewTeamSheet}
-        onOpenChange={setOpenNewTeamSheet}
-        key="new-team-form"
+      <NewOrgForm
+        onSuccess={onNewOrgSuccess}
+        open={openNewOrgSheet}
+        onOpenChange={setOpenNewOrgSheet}
+        key="new-org-form"
       />,
     );
     if (project) {
@@ -169,16 +169,16 @@ export default function PrimaryHeaderItem({
         <div key="project-switcher" className="flex items-center gap-x-2">
           <Folder className="size-5" />
           <ProjectSwitcher
-            team={team}
+            org={org}
             selectedProject={project}
             projects={projects}
             onProjectSelected={onProjectSelected}
-            onNewProjectSelected={foundTeam ? onNewProjectSelected : undefined}
+            onNewProjectSelected={foundOrg ? onNewProjectSelected : undefined}
             className="font-medium"
           />
         </div>,
         <NewProjectForm
-          team={team}
+          org={org}
           open={openNewProjectSheet}
           onOpenChange={setOpenNewProjectSheet}
           onSuccess={onNewProjectSuccess}
@@ -194,12 +194,12 @@ export default function PrimaryHeaderItem({
         <div key="environment-switcher" className="flex items-center gap-x-2">
           <Database className="size-5" />
           <EnvSwitcher
-            team={team}
+            org={org}
             project={project}
             selectedEnv={env}
             envs={envsQuery.data}
             onEnvSelected={onEnvironmentSelected}
-            onNewEnvSelected={foundTeam ? onNewEnvironmentSelected : undefined}
+            onNewEnvSelected={foundOrg ? onNewEnvironmentSelected : undefined}
             className="font-medium"
           />
         </div>,

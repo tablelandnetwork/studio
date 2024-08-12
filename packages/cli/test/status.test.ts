@@ -15,7 +15,7 @@ import {
   TEST_API_BASE_URL,
   TEST_PROJECT_ID,
   TEST_REGISTRY_PORT,
-  TEST_TEAM_ID,
+  TEST_ORG_ID,
   TEST_TIMEOUT_FACTOR,
 } from "./utils";
 
@@ -75,7 +75,7 @@ describe("commands/status", function () {
   });
 
   test("status command can list session status", async function () {
-    await yargs(["use", "team", TEST_TEAM_ID, ...defaultArgs])
+    await yargs(["use", "org", TEST_ORG_ID, ...defaultArgs])
       .command<GlobalOptions>(modUse)
       .parse();
 
@@ -100,18 +100,18 @@ describe("commands/status", function () {
     );
 
     equal(user.user.address, "0xBcd4042DE499D14e55001CcbB24a551F3b954096");
-    equal(user.user.teamId, TEST_TEAM_ID);
-    equal(user.personalTeam.id, TEST_TEAM_ID);
-    equal(user.personalTeam.name, "testuser");
-    equal(user.personalTeam.slug, "testuser");
-    equal(user.personalTeam.personal, 1);
+    equal(user.user.orgId, TEST_ORG_ID);
+    equal(user.personalOrg.id, TEST_ORG_ID);
+    equal(user.personalOrg.name, "testuser");
+    equal(user.personalOrg.slug, "testuser");
+    equal(user.personalOrg.personal, 1);
 
     const context = JSON.parse(
       // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
       res.slice(res.indexOf("context: ") + 9).replace(/\n/g, ""),
     );
 
-    equal(context.team, "a3cd7fac-4528-4765-9ae1-304460555429");
+    equal(context.org, "a3cd7fac-4528-4765-9ae1-304460555429");
     equal(context.project, "2f403473-de7b-41ba-8d97-12a0344aeccb");
     equal(context.api, "http://localhost:2999");
     equal(context.chain, "undefined");

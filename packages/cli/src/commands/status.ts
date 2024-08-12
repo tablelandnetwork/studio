@@ -26,7 +26,7 @@ export const handler = async (
       `logged in as: ${JSON.stringify(user, null, 4)}
 context: ${JSON.stringify(
         {
-          team: fileStore.get("teamId") ?? notSet,
+          org: fileStore.get("orgId") ?? notSet,
           project: fileStore.get("projectId") ?? notSet,
           api: fileStore.get("apiUrl") ?? notSet,
           chain: fileStore.get("chain") ?? notSet,

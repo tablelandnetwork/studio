@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 
 type EnvSwitcherProps = {
   variant?: "navigation" | "select";
-  team?: schema.Team;
+  org?: schema.Org;
   project?: schema.Project;
   selectedEnv?: schema.Environment;
   envs?: schema.Environment[];
@@ -34,7 +34,7 @@ type EnvSwitcherProps = {
 export default function EnvSwitcher({
   className,
   variant = "navigation",
-  team,
+  org,
   project,
   selectedEnv,
   envs,
@@ -47,9 +47,9 @@ export default function EnvSwitcher({
 
   return (
     <div className={cn("flex items-center gap-1", className)} {...rest}>
-      {variant === "navigation" && team && project && selectedEnv && (
+      {variant === "navigation" && org && project && selectedEnv && (
         <Link
-          href={`/${team.slug}/${project.slug}/${selectedEnv.slug}`}
+          href={`/${org.slug}/${project.slug}/${selectedEnv.slug}`}
           className="text-sm underline-offset-2 hover:underline"
         >
           {selectedEnv.name}
