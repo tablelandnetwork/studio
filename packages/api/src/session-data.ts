@@ -12,6 +12,7 @@ export type SiweFields = Omit<
 export interface Auth {
   user: schema.User;
   personalOrg: schema.Org;
+  personalTeam?: schema.Org;
 }
 
 export interface SessionData {
