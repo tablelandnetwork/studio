@@ -49,9 +49,11 @@ type API = ReturnType<typeof api>;
 // TODO: there is currently no concept of an environment for a user
 function studioAliases({
   environmentId,
+  nativeMode,
   apiUrl,
 }: {
   environmentId: string;
+  nativeMode?: boolean;
   apiUrl?: string;
 }): helpers.AliasesNameMap {
   const studioApi = api({
@@ -65,6 +67,9 @@ function studioAliases({
     _map = {};
     res.forEach(function (dep) {
       _map[dep.def.name] = dep.deployment.tableName;
+      if (nativeMode) {
+        _map[dep.deployment.tableName] = dep.deployment.tableName;
+      }
     });
   };
 

@@ -31,6 +31,7 @@ CREATE TABLE `projects` (
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
 	`description` text NOT NULL,
+	`native_mode` integer,
 	`created_at` text,
 	`updated_at` text
 );

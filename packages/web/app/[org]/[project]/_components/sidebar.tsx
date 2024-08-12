@@ -184,6 +184,11 @@ export function Sidebar() {
               key={def.id}
               icon={Table2}
               title={def.name}
+              subtitle={
+                projectQuery.data.nativeMode && deployment
+                  ? deployment.tableName
+                  : undefined
+              }
               href={`/${orgQuery.data.slug}/${projectQuery.data.slug}/${linkEnv.slug}/${def.slug}`}
               selected={def.id === defQuery.data?.id}
               showIndicator={!!env && !deployment && !!isAuthorizedQuery.data}

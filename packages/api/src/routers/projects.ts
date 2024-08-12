@@ -85,6 +85,7 @@ export function projectsRouter(store: Store) {
             ctx.orgId,
             input.name,
             input.description,
+            input.nativeMode,
             input.envNames.map((env) => env.name),
           );
           return project;
@@ -101,6 +102,7 @@ export function projectsRouter(store: Store) {
             input.projectId,
             input.name,
             input.description,
+            input.nativeMode,
           );
         } catch (err) {
           throw internalError("Error updating project", err);
