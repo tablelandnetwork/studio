@@ -90,7 +90,7 @@ function configuredChains(isLocalDev = false, apiKeys?: ApiKeys) {
           slug = "nova-mainnet";
         }
         return {
-          http: `https://neat-dark-dust.${slug}.quiknode.pro/${quickNodeKey}/`,
+          http: `https://skilled-yolo-mountain.${slug}.quiknode.pro/${quickNodeKey}/`,
         };
       },
     }),
