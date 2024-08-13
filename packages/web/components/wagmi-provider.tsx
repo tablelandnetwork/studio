@@ -9,8 +9,7 @@ const { chains, publicClient, webSocketPublicClient } = configuredChains(
     (window.location?.hostname === "localhost" ||
       window.location?.hostname === "127.0.0.1"),
   {
-    infura: process.env.NEXT_PUBLIC_API_ROUTER_INFURA_KEY ?? "",
-    quickNode: process.env.NEXT_PUBLIC_API_ROUTER_QUICK_NODE_KEY ?? "",
+    alchemy: process.env.NEXT_PUBLIC_API_ROUTER_ALCHEMY_KEY ?? "",
   },
 );
 

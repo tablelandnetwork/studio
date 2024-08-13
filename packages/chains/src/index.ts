@@ -1,6 +1,5 @@
 import { configureChains } from "@wagmi/core";
-import { infuraProvider } from "@wagmi/core/providers/infura";
-import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc";
+import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 import { publicProvider } from "@wagmi/core/providers/public";
 import { defineChain } from "viem";
 import {
@@ -21,8 +20,7 @@ import {
 } from "viem/chains";
 
 export interface ApiKeys {
-  infura?: string;
-  quickNode?: string;
+  alchemy?: string;
 }
 
 // Note: copied from viem@2.9.22
@@ -78,22 +76,10 @@ function supportedChains(isLocalDev = false) {
 }
 
 function configuredChains(isLocalDev = false, apiKeys?: ApiKeys) {
-  const infuraKey = apiKeys?.infura ?? "";
-  const quickNodeKey = apiKeys?.quickNode ?? "";
+  const alchemyKey = apiKeys?.alchemy ?? "";
 
   return configureChains(supportedChains(isLocalDev), [
-    infuraProvider({ apiKey: infuraKey }),
-    jsonRpcProvider({
-      rpc: (chain) => {
-        let slug = "breakit";
-        if (chain.id === arbitrumNova.id) {
-          slug = "nova-mainnet";
-        }
-        return {
-          http: `https://skilled-yolo-mountain.${slug}.quiknode.pro/${quickNodeKey}/`,
-        };
-      },
-    }),
+    alchemyProvider({ apiKey: alchemyKey }),
     publicProvider(),
   ]);
 }

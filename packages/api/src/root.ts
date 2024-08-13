@@ -20,8 +20,7 @@ export function appRouter(
   createInviteLink: (seal: string) => string,
   dataSealPass: string,
   isLocalDev: boolean,
-  infuraKey: string,
-  quickNodeKey: string,
+  alchemyKey: string,
 ) {
   const mailApi = initMailApi(mailApiKey);
   const sendInvite = createSendInvite(
@@ -41,8 +40,7 @@ export function appRouter(
     environments: environmentsRouter(store),
     deployments: deploymentsRouter(store),
     providers: providersRouter(isLocalDev, {
-      infura: infuraKey,
-      quickNode: quickNodeKey,
+      alchemy: alchemyKey,
     }),
     users: usersRouter(store),
   });
