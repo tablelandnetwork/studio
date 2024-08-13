@@ -178,7 +178,10 @@ export type NewDef = InferInsertModel<typeof defs>;
 export type UserSealed = InferSelectModel<typeof users>;
 export type NewUserSealed = InferInsertModel<typeof users>;
 
-export type User = Omit<UserSealed, "sealed"> & { email?: string };
+export type User = Omit<UserSealed, "sealed"> & {
+  email?: string;
+  teamId?: string; // TODO: remove this after running the migration for a while.
+};
 export type NewUser = Omit<NewUserSealed, "sealed"> & {
   email?: string;
 };

@@ -77,11 +77,20 @@ export interface GetSessionArgs {
 export const createTRPCContext = async (args: GetSessionArgs) => {
   const session = await getSession(args);
 
-  // Migrate personalTeam to personalOrg.
+  // Migrate personalTeam to personalOrg and teamId to orgId.
   // TODO: Remove this after it runs for a while.
+  let dirty = false;
   if (session.auth?.personalTeam) {
     session.auth.personalOrg = session.auth.personalTeam;
     session.auth.personalTeam = undefined;
+    dirty = true;
+  }
+  if (session.auth?.user.teamId) {
+    session.auth.user.orgId = session.auth.user.teamId;
+    session.auth.user.teamId = undefined;
+    dirty = true;
+  }
+  if (dirty) {
     await session.save();
   }
 
