@@ -171,7 +171,6 @@ async function startStudioApi({ store }: { store: Store }) {
     process.env.DATA_SEAL_PASS!,
     true,
     "",
-    "",
   );
 
   // Create a local server to receive data from
