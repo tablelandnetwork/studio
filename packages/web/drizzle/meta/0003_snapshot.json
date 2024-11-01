@@ -1,8 +1,6 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "sqlite",
-  "id": "cf087701-6b7b-4dc1-ac4e-7ad7951b05bb",
-  "prevId": "fcae76bd-9a52-4383-a6bb-a1c3f361a815",
   "tables": {
     "tables": {
       "name": "tables",
@@ -60,7 +58,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "deployments": {
       "name": "deployments",
@@ -133,7 +132,8 @@
           "name": "deployments_table_id_environment_id_pk"
         }
       },
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "environments": {
       "name": "environments",
@@ -193,7 +193,8 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "project_tables": {
       "name": "project_tables",
@@ -225,7 +226,8 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "projects": {
       "name": "projects",
@@ -283,7 +285,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "team_invites": {
       "name": "team_invites",
@@ -341,7 +344,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "team_memberships": {
       "name": "team_memberships",
@@ -387,7 +391,8 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "team_projects": {
       "name": "team_projects",
@@ -426,7 +431,8 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "teams": {
       "name": "teams",
@@ -492,7 +498,8 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "users": {
       "name": "users",
@@ -530,13 +537,16 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "_meta": {
-    "schemas": {},
     "tables": {},
     "columns": {}
-  }
+  },
+  "id": "cf087701-6b7b-4dc1-ac4e-7ad7951b05bb",
+  "prevId": "fcae76bd-9a52-4383-a6bb-a1c3f361a815",
+  "views": {}
 }

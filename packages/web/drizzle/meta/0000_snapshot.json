@@ -1,8 +1,6 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "sqlite",
-  "id": "40654131-953f-4a1c-bc0e-c2485b88d11f",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "deployments": {
       "name": "deployments",
@@ -68,10 +66,14 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "deployments_table_id_environment_id_pk": {
-          "columns": ["environment_id", "table_id"]
+          "columns": [
+            "environment_id",
+            "table_id"
+          ]
         }
       },
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "environments": {
       "name": "environments",
@@ -108,13 +110,17 @@
       "indexes": {
         "projectEnvIdx": {
           "name": "projectEnvIdx",
-          "columns": ["project_id", "slug"],
+          "columns": [
+            "project_id",
+            "slug"
+          ],
           "isUnique": true
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "project_tables": {
       "name": "project_tables",
@@ -137,13 +143,17 @@
       "indexes": {
         "projectTablesIdx": {
           "name": "projectTablesIdx",
-          "columns": ["project_id", "table_id"],
+          "columns": [
+            "project_id",
+            "table_id"
+          ],
           "isUnique": true
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "projects": {
       "name": "projects",
@@ -180,7 +190,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "tables": {
       "name": "tables",
@@ -224,7 +235,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "team_invites": {
       "name": "team_invites",
@@ -282,7 +294,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "team_memberships": {
       "name": "team_memberships",
@@ -319,13 +332,17 @@
       "indexes": {
         "memberTeamIdx": {
           "name": "memberTeamIdx",
-          "columns": ["member_team_id", "team_id"],
+          "columns": [
+            "member_team_id",
+            "team_id"
+          ],
           "isUnique": true
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "team_projects": {
       "name": "team_projects",
@@ -355,13 +372,17 @@
       "indexes": {
         "teamProjectIdx": {
           "name": "teamProjectIdx",
-          "columns": ["team_id", "project_id"],
+          "columns": [
+            "team_id",
+            "project_id"
+          ],
           "isUnique": true
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "teams": {
       "name": "teams",
@@ -398,18 +419,23 @@
       "indexes": {
         "nameIdx": {
           "name": "nameIdx",
-          "columns": ["name"],
+          "columns": [
+            "name"
+          ],
           "isUnique": true
         },
         "slugIdx": {
           "name": "slugIdx",
-          "columns": ["slug"],
+          "columns": [
+            "slug"
+          ],
           "isUnique": true
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "users": {
       "name": "users",
@@ -439,19 +465,24 @@
       "indexes": {
         "teamIdIdx": {
           "name": "teamIdIdx",
-          "columns": ["team_id"],
+          "columns": [
+            "team_id"
+          ],
           "isUnique": true
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "_meta": {
-    "schemas": {},
     "tables": {},
     "columns": {}
-  }
+  },
+  "id": "40654131-953f-4a1c-bc0e-c2485b88d11f",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "views": {}
 }

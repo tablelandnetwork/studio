@@ -13,7 +13,7 @@
     "build": "next build",
     "start": "next start",
     "clean": "rm -rf .next/",
-    "gen-migrate": "drizzle-kit generate:sqlite",
+    "gen-migrate": "drizzle-kit generate",
     "exec-migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
