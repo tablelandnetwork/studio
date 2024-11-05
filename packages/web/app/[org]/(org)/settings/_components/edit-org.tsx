@@ -30,20 +30,20 @@ export default function EditOrg({
   disabled?: boolean;
 }) {
   const router = useRouter();
-  const [query, setQuery] = useState(org.name);
+  const [query, setQuery] = useState(org.slug);
   const form = useForm<z.infer<typeof updateOrgSchema>>({
     resolver: zodResolver(updateOrgSchema),
     defaultValues: {
-      name: org.name,
+      name: org.slug,
     },
   });
 
   useEffect(() => {
-    form.reset({ name: org.name });
+    form.reset({ name: org.slug });
   }, [org, form]);
 
   const nameAvailable = api.orgs.nameAvailable.useQuery(
-    query !== org.name ? { orgId: org.id, name: query } : skipToken,
+    query !== org.slug ? { orgId: org.id, name: query } : skipToken,
     { retry: false },
   );
   const updateOrg = api.orgs.updateOrg.useMutation({
@@ -58,7 +58,7 @@ export default function EditOrg({
   };
 
   const onReset = () => {
-    setQuery(org.name);
+    setQuery(org.slug);
     form.reset();
   };
 

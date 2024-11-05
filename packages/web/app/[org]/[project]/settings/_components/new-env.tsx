@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
-import { envNameSchema } from "@tableland/studio-validators";
+import { newEnvSchema } from "@tableland/studio-validators";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -42,8 +42,8 @@ export default function NewEnv({
     },
   });
 
-  const form = useForm<z.infer<typeof envNameSchema>>({
-    resolver: zodResolver(envNameSchema),
+  const form = useForm<z.infer<typeof newEnvSchema>>({
+    resolver: zodResolver(newEnvSchema),
     defaultValues: {
       name: "",
     },
@@ -53,7 +53,7 @@ export default function NewEnv({
     setShowForm(true);
   }
 
-  function onSubmit(values: z.infer<typeof envNameSchema>) {
+  function onSubmit(values: z.infer<typeof newEnvSchema>) {
     newEnv.mutate({ projectId: project.id, ...values });
   }
 

@@ -30,8 +30,8 @@ export function createSendInvite(
     return await mailApi.sendInvite(
       invite.email,
       inviteImageLink,
-      inviterOrg.name,
-      org.name,
+      inviterOrg.slug,
+      org.slug,
       link,
     );
   };

@@ -66,7 +66,7 @@ export default function OrgSwitcher({
           href={`/${selectedOrg.slug}`}
           className="text-sm underline-offset-2 hover:underline"
         >
-          {selectedOrg.name}
+          {selectedOrg.slug}
         </Link>
       )}
       {orgs && (
@@ -83,7 +83,7 @@ export default function OrgSwitcher({
                 variant === "navigation" && "px-0",
               )}
             >
-              {variant === "select" && (selectedOrg?.name ?? "Select a org...")}
+              {variant === "select" && (selectedOrg?.slug ?? "Select a org...")}
               <ChevronsUpDown className="m-1 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -107,7 +107,7 @@ export default function OrgSwitcher({
                           }}
                           className="text-sm"
                         >
-                          {groupOrg.name}
+                          {groupOrg.slug}
                           <Check
                             className={cn(
                               "ml-auto h-4 w-4",

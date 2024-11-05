@@ -66,7 +66,7 @@ function studioAliases({
 
     _map = {};
     res.forEach(function (dep) {
-      _map[dep.def.name] = dep.deployment.tableName;
+      _map[dep.def.slug] = dep.deployment.tableName;
       if (nativeMode) {
         _map[dep.deployment.tableName] = dep.deployment.tableName;
       }

@@ -5,6 +5,7 @@ import EditProject from "./_components/edit-project";
 import DeleteButton from "./_components/delete-button";
 import NewEnv from "./_components/new-env";
 import Envs from "./_components/envs";
+import TransferButton from "./_components/transfer-button";
 import { projectBySlug, orgBySlug } from "@/lib/api-helpers";
 import {
   Card,
@@ -53,7 +54,7 @@ export default async function ProjectSettings({
         <CardHeader>
           <CardTitle>Project info</CardTitle>
           <CardDescription>
-            Update general information about the {project.name} project.
+            Update general information about the {project.slug} project.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -89,10 +90,16 @@ export default async function ProjectSettings({
             Think twice before doing anything here.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <div className="space-y-2">
             <p className="text-sm font-medium">
-              You can delete the {project.name} project if you choose:
+              You can transfer the {project.slug} project to another org:
+            </p>
+            <TransferButton org={org} project={project} disabled={!isAdmin} />
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">
+              You can delete the {project.slug} project if you choose:
             </p>
             <DeleteButton org={org} project={project} disabled={!isAdmin} />
           </div>

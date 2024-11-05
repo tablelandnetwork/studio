@@ -33,7 +33,7 @@ export function LatestProjects({ projects }: { projects: Projects }) {
                 <OrgAvatar org={item.org} />
                 <div className="flex items-center gap-2">
                   <div className="text-sm font-semibold">
-                    {item.org.name}/{item.project.name}
+                    {item.org.slug}/{item.project.slug}
                   </div>
                 </div>
                 {item.project.createdAt && (

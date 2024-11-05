@@ -3,7 +3,6 @@ import { type Database } from "@tableland/sdk";
 import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
-import { slugify } from "../helpers.js";
 
 type Project = schema.Project;
 const environments = schema.environments;
@@ -31,7 +30,7 @@ export function initProjects(
         .where(
           and(
             eq(orgProjects.orgId, orgId),
-            eq(projects.slug, slugify(name)),
+            eq(projects.slug, name),
             projectId ? ne(projects.id, projectId) : undefined,
           ),
         )
@@ -47,13 +46,12 @@ export function initProjects(
       envNames: string[],
     ) {
       const projectId = randomUUID();
-      const slug = slugify(name);
       const now = new Date().toISOString();
       const project: Project = {
         id: projectId,
-        name,
         description,
-        slug,
+        name,
+        slug: name,
         nativeMode: nativeMode ? 1 : 0,
         createdAt: now,
         updatedAt: now,
@@ -70,7 +68,7 @@ export function initProjects(
         id: randomUUID(),
         projectId,
         name,
-        slug: slugify(name),
+        slug: name,
         createdAt: now,
         updatedAt: now,
       }));
@@ -93,12 +91,10 @@ export function initProjects(
       nativeMode?: boolean,
     ) {
       const now = new Date().toISOString();
-      const slug = name ? slugify(name) : undefined;
       await db
         .update(projects)
         .set({
-          name,
-          slug,
+          slug: name,
           description,
           nativeMode: nativeMode === undefined ? undefined : nativeMode ? 1 : 0,
           updatedAt: now,
@@ -110,6 +106,16 @@ export function initProjects(
         .from(projects)
         .where(eq(projects.id, projectId))
         .get();
+    },
+
+    transferProject: async function (projectId: string, orgId: string) {
+      await db
+        .update(orgProjects)
+        .set({
+          orgId,
+        })
+        .where(eq(orgProjects.projectId, projectId))
+        .execute();
     },
 
     deleteProject: async function (projectId: string) {
@@ -180,7 +186,7 @@ export function initProjects(
         .from(projects)
         .innerJoin(orgProjects, eq(projects.id, orgProjects.projectId))
         .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
-        .orderBy(projects.name)
+        .orderBy(projects.slug)
         .limit(n)
         .all();
       return res;
@@ -243,7 +249,7 @@ export function initProjects(
         .from(orgProjects)
         .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
         .where(eq(orgProjects.projectId, projectId))
-        .orderBy(orgs.name)
+        .orderBy(orgs.slug)
         .get();
       return res?.orgs;
     },

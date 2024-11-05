@@ -6,9 +6,9 @@ export default function OrgAvatar({ org }: { org: schema.Org }) {
     <Avatar>
       <AvatarImage
         src={`https://avatar.vercel.sh/${org.slug}.png`}
-        alt={org.name}
+        alt={org.slug}
       />
-      <AvatarFallback>{org.name.charAt(0)}</AvatarFallback>
+      <AvatarFallback>{org.slug.charAt(0)}</AvatarFallback>
     </Avatar>
   );
 }

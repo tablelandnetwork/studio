@@ -30,7 +30,7 @@ export interface TableMenuProps {
   org?: schema.Org;
   project?: schema.Project;
   env?: schema.Environment;
-  def?: { id: string; name: string; description: string; slug: string };
+  def?: { id: string; description: string; slug: string };
   isAuthorized?: RouterOutputs["orgs"]["isAuthorized"];
 }
 

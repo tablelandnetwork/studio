@@ -26,7 +26,7 @@ export interface EditDefProps {
   projectId: string;
   def: {
     id: string;
-    name: string;
+    slug: string;
     description: string;
     schema: Schema;
   };
@@ -42,24 +42,24 @@ export default function EditDef({
   onEditDefSuccess,
   disabled = false,
 }: EditDefProps) {
-  const [query, setQuery] = useState(def.name);
+  const [query, setQuery] = useState(def.slug);
 
   const form = useForm<z.infer<typeof updateDefFormSchema>>({
     resolver: zodResolver(updateDefFormSchema),
     defaultValues: {
-      name: def.name,
+      name: def.slug,
       description: def.description,
     },
   });
 
   useEffect(() => {
-    form.reset({ name: def.name, description: def.description });
+    form.reset({ name: def.slug, description: def.description });
   }, [def, form]);
 
   const { handleSubmit, control, setError } = form;
 
   const nameAvailableQuery = api.defs.nameAvailable.useQuery(
-    query !== def.name ? { projectId, name: query, defId: def.id } : skipToken,
+    query !== def.slug ? { projectId, name: query, defId: def.id } : skipToken,
     { retry: false },
   );
 
@@ -90,7 +90,7 @@ export default function EditDef({
   }
 
   const onReset = () => {
-    setQuery(def.name);
+    setQuery(def.slug);
     form.reset();
   };
 

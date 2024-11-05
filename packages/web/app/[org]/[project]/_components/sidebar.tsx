@@ -183,7 +183,7 @@ export function Sidebar() {
             <SidebarLink
               key={def.id}
               icon={Table2}
-              title={def.name}
+              title={def.slug}
               subtitle={
                 projectQuery.data.nativeMode && deployment
                   ? deployment.tableName

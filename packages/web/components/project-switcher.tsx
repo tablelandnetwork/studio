@@ -50,7 +50,7 @@ export default function ProjectSwitcher({
           href={`/${org.slug}/${selectedProject.slug}`}
           className="text-sm underline-offset-2 hover:underline"
         >
-          {selectedProject.name}
+          {selectedProject.slug}
         </Link>
       )}
       <Popover open={open} onOpenChange={setOpen}>
@@ -67,7 +67,7 @@ export default function ProjectSwitcher({
             )}
           >
             {variant === "select" &&
-              (selectedProject?.name ?? "Select a project...")}
+              (selectedProject?.slug ?? "Select a project...")}
             <ChevronsUpDown className="m-1 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -88,7 +88,7 @@ export default function ProjectSwitcher({
                     }}
                     className="text-sm"
                   >
-                    {project.name}
+                    {project.slug}
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",

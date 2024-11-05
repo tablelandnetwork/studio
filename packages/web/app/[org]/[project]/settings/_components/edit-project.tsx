@@ -34,22 +34,22 @@ export default function EditProject({
   disabled?: boolean;
 }) {
   const router = useRouter();
-  const [query, setQuery] = useState(project.name);
+  const [query, setQuery] = useState(project.slug);
   const form = useForm<z.infer<typeof updateProjectSchema>>({
     resolver: zodResolver(updateProjectSchema),
     defaultValues: {
-      name: project.name,
+      name: project.slug,
       description: project.description,
       nativeMode: !!project.nativeMode,
     },
   });
 
   useEffect(() => {
-    form.reset({ name: project.name, description: project.description });
+    form.reset({ name: project.slug, description: project.description });
   }, [project, form]);
 
   const nameAvailable = api.projects.nameAvailable.useQuery(
-    query !== project.name
+    query !== project.slug
       ? { orgId: org.id, projectId: project.id, name: query }
       : skipToken,
     { retry: false },
@@ -82,7 +82,7 @@ export default function EditProject({
   };
 
   const onReset = () => {
-    setQuery(project.name);
+    setQuery(project.slug);
     form.reset();
   };
 

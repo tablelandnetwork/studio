@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
-import { envNameSchema } from "@tableland/studio-validators";
+import { newEnvSchema } from "@tableland/studio-validators";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -34,12 +34,12 @@ export default function Env({
 }) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
-  const [query, setQuery] = useState(env.name);
+  const [query, setQuery] = useState(env.slug);
 
   const utils = api.useUtils();
 
   const nameAvailable = api.environments.nameAvailable.useQuery(
-    query !== env.name
+    query !== env.slug
       ? { projectId: env.projectId, name: query, envId: env.id }
       : skipToken,
     { retry: false },
@@ -56,22 +56,22 @@ export default function Env({
     },
   });
 
-  const form = useForm<z.infer<typeof envNameSchema>>({
-    resolver: zodResolver(envNameSchema),
+  const form = useForm<z.infer<typeof newEnvSchema>>({
+    resolver: zodResolver(newEnvSchema),
     defaultValues: {
-      name: env.name,
+      name: env.slug,
     },
   });
 
   useEffect(() => {
-    form.reset({ name: env.name });
+    form.reset({ name: env.slug });
   }, [env, form]);
 
   function onEdit() {
     setShowForm(true);
   }
 
-  function onSubmit(values: z.infer<typeof envNameSchema>) {
+  function onSubmit(values: z.infer<typeof newEnvSchema>) {
     updateEnv.mutate({ envId: env.id, ...values });
   }
 
@@ -134,7 +134,7 @@ export default function Env({
         </Form>
       ) : (
         <div className="flex items-center">
-          <p className="text-sm">{env.name}</p>
+          <p className="text-sm">{env.slug}</p>
           {showDelete && (
             <Button
               variant="ghost"

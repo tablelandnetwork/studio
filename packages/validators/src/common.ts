@@ -1,21 +1,25 @@
 import { z } from "zod";
 import { helpers } from "@tableland/sdk";
-import { slugify } from "@tableland/studio-store";
 import { restrictedOrgSlugs, restrictedDefSlugs } from "./restricted-slugs.js";
 
-export const orgNameSchema = z
-  .string()
-  .trim()
+export const makeSlugString = () =>
+  z
+    .string()
+    .trim()
+    .regex(
+      /^[a-z0-9-_]+$/,
+      "Only lowercase letters, numbers, dashes, and underscores are allowed.",
+    );
+
+export const orgNameSchema = makeSlugString()
   .min(3)
-  .refine((name) => !restrictedOrgSlugs.includes(slugify(name)), {
+  .refine((name) => !restrictedOrgSlugs.includes(name), {
     message: "You can't use a restricted word as a org name.",
   });
 
-export const defNameSchema = z
-  .string()
-  .trim()
+export const defNameSchema = makeSlugString()
   .min(1)
-  .refine((val) => !restrictedDefSlugs.includes(slugify(val)), {
+  .refine((val) => !restrictedDefSlugs.includes(val), {
     message: "You can't use a restricted word as a definition name.",
   })
   .refine(
@@ -30,12 +34,12 @@ export const defNameSchema = z
     { message: "Definition name is invalid." },
   );
 
-export const envNameSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1)
-    .refine((val) => !restrictedDefSlugs.includes(slugify(val)), {
-      message: "You can't use a restricted word as an environment name.",
-    }),
+export const envNameSchema = makeSlugString()
+  .min(1)
+  .refine((val) => !restrictedDefSlugs.includes(val), {
+    message: "You can't use a restricted word as an environment name.",
+  });
+
+export const newEnvSchema = z.object({
+  name: envNameSchema,
 });

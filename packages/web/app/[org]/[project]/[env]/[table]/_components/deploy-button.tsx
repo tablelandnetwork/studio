@@ -15,7 +15,7 @@ export default function DeployButton({
   env: schema.Environment;
   def: {
     id: string;
-    name: string;
+    slug: string;
     schema: Schema;
   };
 }) {

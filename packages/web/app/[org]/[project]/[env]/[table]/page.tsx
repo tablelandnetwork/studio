@@ -58,7 +58,7 @@ export default async function Deployments({
         project={project}
         env={env}
         def={def}
-        displayName={def.name}
+        displayName={def.slug}
         description={def.description}
         chainId={deployment?.chainId}
         tableId={deployment?.tableId}
@@ -82,7 +82,7 @@ export default async function Deployments({
         ) : (
           <div className="container max-w-2xl space-y-5">
             <NeedsDeploy def={def} env={env} isAuthorized={isAuthorized} />
-            <DefDetails name={def.name} schema={def.schema} />
+            <DefDetails name={def.slug} schema={def.schema} />
           </div>
         )}
       </TableWrapper>

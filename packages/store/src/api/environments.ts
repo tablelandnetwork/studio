@@ -3,7 +3,6 @@ import { type Database } from "@tableland/sdk";
 import { eq, and, ne } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema/index.js";
-import { slugify } from "../helpers.js";
 
 type Environment = schema.Environment;
 const environments = schema.environments;
@@ -28,7 +27,7 @@ export function initEnvironments(
         .where(
           and(
             eq(environments.projectId, projectId),
-            eq(environments.slug, slugify(name)),
+            eq(environments.slug, name),
             envId ? ne(environments.id, envId) : undefined,
           ),
         )
@@ -49,7 +48,7 @@ export function initEnvironments(
         id,
         projectId,
         name,
-        slug: slugify(name),
+        slug: name,
         createdAt: now,
         updatedAt: now,
       };
@@ -59,7 +58,7 @@ export function initEnvironments(
 
     updateEnvironment: async function ({
       id,
-      name,
+      name: slug,
     }: {
       id: string;
       name: string;
@@ -67,7 +66,7 @@ export function initEnvironments(
       const updatedAt = new Date().toISOString();
       await db
         .update(environments)
-        .set({ name, slug: slugify(name), updatedAt })
+        .set({ slug, updatedAt })
         .where(eq(environments.id, id))
         .run();
       return await db

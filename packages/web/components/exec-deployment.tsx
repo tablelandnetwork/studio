@@ -46,7 +46,7 @@ export default function ExecDeployment({
   environment: schema.Environment;
   def: {
     id: string;
-    name: string;
+    slug: string;
     schema: Schema;
   };
   onSuccess: (deployment: schema.Deployment) => void;
@@ -111,7 +111,7 @@ export default function ExecDeployment({
           autoWait: false,
         });
 
-        const stmt = generateCreateTableStatement(def.name, def.schema);
+        const stmt = generateCreateTableStatement(def.slug, def.schema);
         const res = await tbl.prepare(stmt).all();
         if (res.error) {
           throw new Error(res.error);
@@ -185,7 +185,7 @@ export default function ExecDeployment({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-auto flex-col gap-y-4 overflow-auto">
         <DialogHeader>
-          <DialogTitle>Deploy table definition: {def.name}</DialogTitle>
+          <DialogTitle>Deploy table definition: {def.slug}</DialogTitle>
           <DialogDescription>
             Deploying a definition to Tableland will require you to sign and
             send a transaction, as well as pay any transaction fees. Once the

@@ -4,7 +4,6 @@ import { and, asc, eq, ne, inArray } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData } from "iron-session";
 import * as schema from "../schema/index.js";
-import { slugify } from "../helpers.js";
 
 type NewOrgInviteSealed = schema.NewOrgInviteSealed;
 type Org = schema.Org;
@@ -30,12 +29,7 @@ export function initOrgs(
       const res = await db
         .select()
         .from(orgs)
-        .where(
-          and(
-            eq(orgs.slug, slugify(name)),
-            orgId ? ne(orgs.id, orgId) : undefined,
-          ),
-        )
+        .where(and(eq(orgs.slug, name), orgId ? ne(orgs.id, orgId) : undefined))
         .get();
       return !res;
     },
@@ -46,13 +40,12 @@ export function initOrgs(
       inviteEmails: string[],
     ) {
       const orgId = randomUUID();
-      const slug = slugify(name);
       const now = new Date().toISOString();
       const org: Org = {
         id: orgId,
         personal: 0,
         name,
-        slug,
+        slug: name,
         createdAt: now,
         updatedAt: now,
       };
@@ -106,10 +99,9 @@ export function initOrgs(
     },
 
     updateOrg: async function (orgId: string, name: string) {
-      const slug = slugify(name);
       await db
         .update(orgs)
-        .set({ name, slug, updatedAt: new Date().toISOString() })
+        .set({ slug: name, updatedAt: new Date().toISOString() })
         .where(eq(orgs.id, orgId))
         .run();
       return await db.select().from(orgs).where(eq(orgs.id, orgId)).get();
@@ -297,7 +289,7 @@ export function initOrgs(
         .innerJoin(orgMemberships, eq(users.orgId, orgMemberships.memberOrgId))
         .innerJoin(orgs, eq(users.orgId, orgs.id))
         .where(eq(orgMemberships.orgId, orgId))
-        .orderBy(orgs.name)
+        .orderBy(orgs.slug)
         .all();
       return res.map((r) => ({
         address: r.users.address,

@@ -71,15 +71,15 @@ export default async function People({ params }: { params: { org: string } }) {
               <Avatar className="-z-10">
                 <AvatarImage
                   src={`https://avatar.vercel.sh/${person.personalOrg.slug}.png`}
-                  alt={person.personalOrg.name}
+                  alt={person.personalOrg.slug}
                 />
                 <AvatarFallback>
-                  {person.personalOrg.name.charAt(0)}
+                  {person.personalOrg.slug.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="ml-4">
                 <p className="text-sm font-medium leading-none">
-                  {person.personalOrg.name}
+                  {person.personalOrg.slug}
                   {person.personalOrg.id === auth?.personalOrg.id && " (You)"}
                 </p>
                 <HashDisplay

@@ -40,7 +40,6 @@ import {
 
 interface DefData {
   id: string;
-  name: string;
   slug: string;
   description: string;
 }
@@ -113,7 +112,7 @@ export default async function Table({
 
   const ownerStudioUser = owner ? authorizedStudioUsers?.get(owner) : undefined;
 
-  const displayName = defData?.name ?? tableName;
+  const displayName = defData?.slug ?? tableName;
 
   return (
     <div className="flex-1 space-y-4">
@@ -197,7 +196,7 @@ export default async function Table({
             </MetricCardContent>
             {ownerStudioUser && (
               <MetricCardFooter>
-                Studio user {ownerStudioUser.org.name}
+                Studio user {ownerStudioUser.org.slug}
                 {ownerStudioUser.user.orgId === session.auth?.user.orgId
                   ? " (you)"
                   : ""}

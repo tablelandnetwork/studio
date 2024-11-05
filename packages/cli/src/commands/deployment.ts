@@ -124,7 +124,7 @@ export const builder = function (args: Yargs) {
             slug: name,
           });
 
-          if (!(def?.name && def?.schema)) {
+          if (!(def?.slug && def?.schema)) {
             throw new Error(
               "could not get definition to deploy within project",
             );
@@ -133,7 +133,7 @@ export const builder = function (args: Yargs) {
           // TODO: setup a "ping" endpoint in the api so we can be sure the api is responding before
           //       the deployment is created
 
-          const stmt = generateCreateTableStatement(def.name, def.schema);
+          const stmt = generateCreateTableStatement(def.slug, def.schema);
 
           const cost = await helpers.estimateCost({
             signer: wallet,

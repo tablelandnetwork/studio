@@ -142,10 +142,10 @@ export default function Profile({
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src={`https://avatar.vercel.sh/${auth.personalOrg.slug}.png`}
-                      alt={auth.personalOrg.name}
+                      alt={auth.personalOrg.slug}
                     />
                     <AvatarFallback>
-                      {auth.personalOrg.name.charAt(0)}
+                      {auth.personalOrg.slug.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -154,7 +154,7 @@ export default function Profile({
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {auth.personalOrg.name}
+                      {auth.personalOrg.slug}
                     </p>
                   </div>
                 </DropdownMenuLabel>

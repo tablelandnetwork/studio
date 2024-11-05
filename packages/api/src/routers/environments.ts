@@ -1,6 +1,7 @@
 import { type schema, type Store } from "@tableland/studio-store";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { envNameAvailableSchema } from "@tableland/studio-validators";
 import {
   publicProcedure,
   createTRPCRouter,
@@ -11,13 +12,7 @@ import {
 export function environmentsRouter(store: Store) {
   return createTRPCRouter({
     nameAvailable: publicProcedure
-      .input(
-        z.object({
-          projectId: z.string().trim().min(1),
-          name: z.string().trim().min(1),
-          envId: z.string().optional(),
-        }),
-      )
+      .input(envNameAvailableSchema)
       .query(async ({ input }) => {
         return await store.environments.nameAvailable(
           input.projectId,

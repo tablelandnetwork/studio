@@ -81,7 +81,7 @@ export default function TableSettings({
             <CardHeader>
               <CardTitle>Table definition</CardTitle>
               <CardDescription>
-                Update general information about the {props.def.name} table
+                Update general information about the {props.def.slug} table
                 definition.
               </CardDescription>
             </CardHeader>
@@ -103,7 +103,7 @@ export default function TableSettings({
             <CardContent className="space-y-8">
               <div className="space-y-2">
                 <p className="text-sm font-medium">
-                  Delete the {props.def.name} table from your project:
+                  Delete the {props.def.slug} table from your project:
                 </p>
                 <Button variant="secondary" onClick={onDeleteTable}>
                   Delete table
@@ -112,7 +112,7 @@ export default function TableSettings({
               {showUndeploy && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium">
-                    Undeploy the {props.def.name} table:
+                    Undeploy the {props.def.slug} table:
                   </p>
                   <Button variant="secondary" onClick={onUndeployTable}>
                     Undeploy table

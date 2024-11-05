@@ -115,6 +115,15 @@ export function projectsRouter(store: Store) {
         }
         return project;
       }),
+    transferProject: projectAdminProcedure(store)
+      .input(z.object({ orgId: z.string().trim() }))
+      .mutation(async ({ input }) => {
+        try {
+          await store.projects.transferProject(input.projectId, input.orgId);
+        } catch (err) {
+          throw internalError("Error transferring project", err);
+        }
+      }),
     deleteProject: projectAdminProcedure(store)
       .input(z.object({ projectId: z.string().trim() }))
       .mutation(async ({ input }) => {
