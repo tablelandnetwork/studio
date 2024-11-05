@@ -126,8 +126,8 @@
       "compositePrimaryKeys": {
         "deployments_table_id_environment_id_pk": {
           "columns": [
-            "environment_id",
-            "table_id"
+            "table_id",
+            "environment_id"
           ],
           "name": "deployments_table_id_environment_id_pk"
         }
