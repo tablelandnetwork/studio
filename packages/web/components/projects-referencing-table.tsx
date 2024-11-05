@@ -22,7 +22,7 @@ export default function ProjectsReferencingTable({
               href={`/${p.org.slug}/${p.project.slug}/${p.environment.slug}/${p.def.slug}`}
               className="text-foreground"
             >
-              {p.org.name}/{p.project.name}
+              {p.org.slug}/{p.project.slug}
             </Link>
           </li>
         ))}

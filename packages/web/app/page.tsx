@@ -135,7 +135,7 @@ export default async function Page() {
                   <div className="flex items-center gap-2">
                     <OrgAvatar org={org} />
                     <div className="flex items-center gap-2">
-                      <div className="text-sm font-semibold">{org.name}</div>
+                      <div className="text-sm font-semibold">{org.slug}</div>
                     </div>
                   </div>
                 </div>
@@ -171,7 +171,7 @@ export default async function Page() {
                         <OrgAvatar org={item.org} />
                         <div className="flex items-center gap-2">
                           <div className="text-sm font-semibold">
-                            {item.org.name}/{item.project.name}
+                            {item.org.slug}/{item.project.slug}
                           </div>
                         </div>
                       </div>

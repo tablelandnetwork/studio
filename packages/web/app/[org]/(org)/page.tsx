@@ -36,7 +36,7 @@ export default async function Projects({
   return (
     <main className="container flex max-w-5xl flex-col items-stretch gap-4 p-4">
       <div className="flex items-end">
-        <h1 className="text-3xl font-medium">{org.name} projects</h1>
+        <h1 className="text-3xl font-medium">{org.slug} projects</h1>
         {authorized && <NewProjectButton org={org} className="ml-auto" />}
       </div>
 
@@ -44,7 +44,7 @@ export default async function Projects({
         <div className="flex flex-1 items-center justify-center gap-x-4 text-muted-foreground">
           <Folders className="size-8 flex-shrink-0" />
           <h1 className="text-2xl">
-            Org <b>{org.name}</b> doesn&apos;t have any projects yet.
+            Org <b>{org.slug}</b> doesn&apos;t have any projects yet.
           </h1>
         </div>
       )}
@@ -61,7 +61,7 @@ export default async function Projects({
               >
                 <div className="flex items-center gap-x-4">
                   <Folder className="shrink-0" />
-                  <h3 className="text-xl font-medium">{project.name}</h3>
+                  <h3 className="text-xl font-medium">{project.slug}</h3>
                 </div>
                 <div className="flex">
                   <TooltipProvider>

@@ -55,7 +55,7 @@ export default function Info({
             <div>
               <p className="text-xs text-muted-foreground">Invited by</p>
               <p className="text-sm">
-                {inviter.name}
+                {inviter.slug}
                 {inviter.id === user?.id && " (You)"}
               </p>
             </div>
@@ -100,7 +100,7 @@ export default function Info({
             <div>
               <p className="text-xs text-muted-foreground">Invited by</p>
               <p className="text-sm">
-                {inviter.name}
+                {inviter.slug}
                 {inviter.id === user?.id && " (You)"}
               </p>
             </div>

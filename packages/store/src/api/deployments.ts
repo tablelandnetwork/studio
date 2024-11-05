@@ -57,7 +57,7 @@ export function initDeployments(db: DrizzleD1Database<typeof schema>) {
         .from(deployments)
         .innerJoin(environments, eq(deployments.environmentId, environments.id))
         .where(eq(deployments.defId, defId))
-        .orderBy(environments.name)
+        .orderBy(environments.slug)
         .all();
       const mapped = res.map((r) => ({
         deployment: r.deployments,

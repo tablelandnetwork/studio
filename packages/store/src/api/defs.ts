@@ -4,7 +4,6 @@ import { and, eq, ne } from "drizzle-orm";
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { type Schema } from "../custom-types/index.js";
 import * as schema from "../schema/index.js";
-import { slugify } from "../helpers.js";
 
 type Def = schema.Def;
 const projectDefs = schema.projectDefs;
@@ -27,7 +26,7 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
         .where(
           and(
             eq(projectDefs.projectId, projectId),
-            eq(defs.name, slugify(name)),
+            eq(defs.slug, name),
             defId ? ne(defs.id, defId) : undefined,
           ),
         )
@@ -41,14 +40,13 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
       schema: Schema,
     ) {
       const defId = randomUUID();
-      const slug = slugify(name);
       const now = new Date().toISOString();
       const def: Def = {
         id: defId,
-        name,
         description,
         schema,
-        slug,
+        name,
+        slug: name,
         createdAt: now,
         updatedAt: now,
       };
@@ -74,12 +72,10 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
       schema?: Schema,
     ) {
       const now = new Date().toISOString();
-      const slug = name ? slugify(name) : undefined;
       await db
         .update(defs)
         .set({
-          name,
-          slug,
+          slug: name,
           description,
           schema,
           updatedAt: now,
@@ -132,7 +128,7 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
         .from(projectDefs)
         .innerJoin(defs, eq(projectDefs.defId, defs.id))
         .where(eq(projectDefs.projectId, projectId))
-        .orderBy(defs.name)
+        .orderBy(defs.slug)
         .all();
       const mapped = res.map((r) => r.defs);
       return mapped;
@@ -159,7 +155,7 @@ export function initDefs(db: DrizzleD1Database<typeof schema>, tbl: Database) {
         )
         .innerJoin(orgs, eq(orgProjects.orgId, orgs.id))
         .where(eq(defs.id, defId))
-        .orderBy(defs.name)
+        .orderBy(defs.slug)
         .get();
       return res?.orgs;
     },

@@ -47,11 +47,11 @@ export default async function Invite({
           <CardDescription>
             User{" "}
             <span className="font-semibold text-foreground">
-              {inviterOrg.name}
+              {inviterOrg.slug}
             </span>{" "}
             invited you to join the org{" "}
             <span className="font-semibold text-foreground">
-              {targetOrg.name}
+              {targetOrg.slug}
             </span>
           </CardDescription>
         </CardHeader>
@@ -66,7 +66,7 @@ export default async function Invite({
             <p className="text-center">
               You are signed in as{" "}
               <span className="font-semibold text-foreground">
-                {session.auth.personalOrg.name}
+                {session.auth.personalOrg.slug}
               </span>{" "}
               and you can accept or ignore your invitation now.
             </p>

@@ -46,7 +46,7 @@ export default function UserActions({
         title: "Success!",
         description: (
           <p>
-            <span className="font-semibold text-black">{member.name}</span> is{" "}
+            <span className="font-semibold text-black">{member.slug}</span> is{" "}
             {memberMembership.isOwner ? "no longer" : "now"} an admin.
           </p>
         ),
@@ -61,9 +61,9 @@ export default function UserActions({
         title: "Success!",
         description: (
           <p>
-            <span className="font-semibold text-black">{member.name}</span> has
+            <span className="font-semibold text-black">{member.slug}</span> has
             been removed from{" "}
-            <span className="font-semibold text-black">{org.name}</span>.
+            <span className="font-semibold text-black">{org.slug}</span>.
           </p>
         ),
       });
@@ -87,7 +87,7 @@ export default function UserActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>
-          {member.name}
+          {member.slug}
           {user.id === member.id && " (You)"}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

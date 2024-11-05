@@ -78,7 +78,7 @@ export default function Envs({
           }
         >
           <DialogHeader>
-            <DialogTitle>Delete environment {envToDelete?.name}?</DialogTitle>
+            <DialogTitle>Delete environment {envToDelete?.slug}?</DialogTitle>
             <DialogDescription>
               This action cannot be undone. All data related to this environment
               will be deleted from Studio&apos;s database. This includes all

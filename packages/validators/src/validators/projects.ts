@@ -1,13 +1,10 @@
 import { z } from "zod";
-import { slugify } from "@tableland/studio-store";
 import { restrictedProjectSlugs } from "../restricted-slugs.js";
-import { envNameSchema } from "../common.js";
+import { newEnvSchema, makeSlugString } from "../common.js";
 
-const projectNameSchema = z
-  .string()
-  .trim()
+const projectNameSchema = makeSlugString()
   .min(3)
-  .refine((name) => !restrictedProjectSlugs.includes(slugify(name)), {
+  .refine((name) => !restrictedProjectSlugs.includes(name), {
     message: "You can't use a restricted word as a project name.",
   });
 
@@ -24,7 +21,7 @@ export const newProjectSchema = z.object({
   description: projectDescriptionSchema,
   nativeMode: z.boolean(),
   envNames: z
-    .array(envNameSchema)
+    .array(newEnvSchema)
     .min(1)
     .refine((names) => {
       return new Set(names.map((val) => val.name)).size === names.length;

@@ -53,7 +53,7 @@ export default async function ProjectSettings({
         <CardHeader>
           <CardTitle>Project info</CardTitle>
           <CardDescription>
-            Update general information about the {project.name} project.
+            Update general information about the {project.slug} project.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -92,7 +92,7 @@ export default async function ProjectSettings({
         <CardContent>
           <div className="space-y-2">
             <p className="text-sm font-medium">
-              You can delete the {project.name} project if you choose:
+              You can delete the {project.slug} project if you choose:
             </p>
             <DeleteButton org={org} project={project} disabled={!isAdmin} />
           </div>

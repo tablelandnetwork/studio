@@ -45,7 +45,7 @@ export default function Share({
       .then(function () {
         toast({
           title: "Done!",
-          description: `The ${project.name} Project link has been copied to your clipboard.`,
+          description: `The ${project.slug} Project link has been copied to your clipboard.`,
           duration: 2000,
         });
       })
@@ -53,7 +53,7 @@ export default function Share({
         toast({
           title: "Error!",
           description: [
-            `The ${project.name} Project link could not be copied to your clipboard.`,
+            `The ${project.slug} Project link could not be copied to your clipboard.`,
             typeof err?.message === "string" ? err.message : undefined,
           ]
             .filter((s) => s)

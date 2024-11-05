@@ -15,7 +15,7 @@ export default async function NeedsDeploy({
   env,
   isAuthorized,
 }: {
-  def: Pick<schema.Def, "id" | "name" | "schema">;
+  def: Pick<schema.Def, "id" | "slug" | "schema">;
   env: schema.Environment;
   isAuthorized?: RouterOutputs["orgs"]["isAuthorized"];
 }) {
@@ -27,7 +27,7 @@ export default async function NeedsDeploy({
           <CardTitle>Table undeployed</CardTitle>
         </div>
         <CardDescription>
-          Table definition {def.name} has has not yet been deployed to
+          Table definition {def.slug} has has not yet been deployed to
           Tableland.
         </CardDescription>
       </CardHeader>

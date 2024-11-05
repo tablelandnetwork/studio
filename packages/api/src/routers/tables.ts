@@ -79,7 +79,7 @@ export function tablesRouter(store: Store) {
           if (err instanceof AssertionError) {
             throw new TRPCError({
               code: "CONFLICT",
-              message: `Schema of table ${input.tableId} on chain ${input.chainId} does not match the ${def?.name ?? "<unknown>"} definition.`,
+              message: `Schema of table ${input.tableId} on chain ${input.chainId} does not match the ${def?.slug ?? "<unknown>"} definition.`,
             });
           } else {
             throw internalError(

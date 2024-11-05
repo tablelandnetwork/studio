@@ -52,7 +52,7 @@ export default function EnvSwitcher({
           href={`/${org.slug}/${project.slug}/${selectedEnv.slug}`}
           className="text-sm underline-offset-2 hover:underline"
         >
-          {selectedEnv.name}
+          {selectedEnv.slug}
         </Link>
       )}
       <Popover open={open} onOpenChange={setOpen}>
@@ -69,7 +69,7 @@ export default function EnvSwitcher({
             )}
           >
             {variant === "select" &&
-              (selectedEnv?.name ?? "Select an environment...")}
+              (selectedEnv?.slug ?? "Select an environment...")}
             <ChevronsUpDown className="m-1 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -90,7 +90,7 @@ export default function EnvSwitcher({
                     }}
                     className="text-sm"
                   >
-                    {env.name}
+                    {env.slug}
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",

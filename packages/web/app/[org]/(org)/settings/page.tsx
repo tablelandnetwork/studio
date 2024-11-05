@@ -47,7 +47,7 @@ export default async function OrgSettings({
         <CardHeader>
           <CardTitle>Org info</CardTitle>
           <CardDescription>
-            Update general information about the {org.name} org.
+            Update general information about the {org.slug} org.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,8 +65,8 @@ export default async function OrgSettings({
           <div className="space-y-2">
             <p className="text-sm font-medium">
               {org.personal
-                ? `You can delete your personal org, ${org.name}, if you choose. This effectively deletes your Studio account:`
-                : `You can delete the ${org.name} org if you choose:`}
+                ? `You can delete your personal org, ${org.slug}, if you choose. This effectively deletes your Studio account:`
+                : `You can delete the ${org.slug} org if you choose:`}
             </p>
             <DeleteButton org={org} disabled={!isAdmin} />
           </div>

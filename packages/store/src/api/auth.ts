@@ -5,7 +5,6 @@ import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { sealData, unsealData } from "iron-session";
 import type * as schema from "../schema/index.js";
 import { orgMemberships, orgs, users } from "../schema/index.js";
-import { slugify } from "../helpers.js";
 
 export function auth(
   db: DrizzleD1Database<typeof schema>,
@@ -60,7 +59,7 @@ export function auth(
           id: orgId,
           personal: 1,
           name: orgName,
-          slug: slugify(orgName),
+          slug: orgName,
           createdAt: now,
           updatedAt: now,
         })

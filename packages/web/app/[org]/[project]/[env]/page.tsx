@@ -52,7 +52,7 @@ export default async function Deployments({
   return (
     <main className="m-4 flex flex-1 flex-col justify-center gap-y-4">
       <div>
-        <h1 className="text-3xl font-medium">{project.name}</h1>
+        <h1 className="text-3xl font-medium">{project.slug}</h1>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -112,7 +112,7 @@ export default async function Deployments({
                 <CardTitle>Share project</CardTitle>
               </div>
               <CardDescription>
-                Share the {project.name} project to let everyone know what
+                Share the {project.slug} project to let everyone know what
                 you&apos;re working on.
               </CardDescription>
             </CardHeader>

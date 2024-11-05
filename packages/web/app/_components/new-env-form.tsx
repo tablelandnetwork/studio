@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { type z } from "zod";
 import { skipToken } from "@tanstack/react-query";
 import { type schema } from "@tableland/studio-store";
-import { envNameSchema } from "@tableland/studio-validators";
+import { newEnvSchema } from "@tableland/studio-validators";
 import { FormRootMessage } from "@/components/form";
 import InputWithCheck from "@/components/input-with-check";
 import { Button } from "@/components/ui/button";
@@ -45,8 +45,8 @@ export default function NewEnvForm({
   const [openSheet, setOpenSheet] = useState(open ?? false);
   const [envName, setEnvName] = useState("");
 
-  const form = useForm<z.infer<typeof envNameSchema>>({
-    resolver: zodResolver(envNameSchema),
+  const form = useForm<z.infer<typeof newEnvSchema>>({
+    resolver: zodResolver(newEnvSchema),
     defaultValues: {
       name: "",
     },
@@ -81,7 +81,7 @@ export default function NewEnvForm({
 
   const { setError } = form;
 
-  function onSubmit(values: z.infer<typeof envNameSchema>) {
+  function onSubmit(values: z.infer<typeof newEnvSchema>) {
     newEnv.mutate({ projectId, ...values });
   }
 

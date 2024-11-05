@@ -50,7 +50,7 @@ export function Console({
   const schema = deployments.reduce<Record<string, string[]>>(
     (acc, deployment) => {
       const cols = deployment.def.schema.columns.map((col) => col.name);
-      const aliased = { [deployment.def.name]: cols };
+      const aliased = { [deployment.def.slug]: cols };
       const native = nativeMode
         ? { [deployment.deployment.tableName]: cols }
         : {};
