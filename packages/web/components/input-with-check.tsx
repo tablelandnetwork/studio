@@ -5,7 +5,7 @@ import { type TRPCClientErrorBase } from "@trpc/client";
 import { Input, type InputProps } from "@/components/ui/input";
 
 export interface QueryStatus {
-  data: boolean | undefined;
+  data: any;
   isError: boolean;
   isFetching: boolean;
   isSuccess: boolean;

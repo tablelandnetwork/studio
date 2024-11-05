@@ -108,6 +108,16 @@ export function initProjects(
         .get();
     },
 
+    transferProject: async function (projectId: string, orgId: string) {
+      await db
+        .update(orgProjects)
+        .set({
+          orgId,
+        })
+        .where(eq(orgProjects.projectId, projectId))
+        .execute();
+    },
+
     deleteProject: async function (projectId: string) {
       // orgProjects
       const { sql: orgProjectsSql, params: orgProjectsParams } = db
